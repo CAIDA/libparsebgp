@@ -126,7 +126,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size) {
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleDownEvent(u_char *data, size_t size, MsgBusInterface::obj_peer_down_event &down_event) {
+bool parseBGP::handleDownEvent(u_char *data, size_t size) {
     bool        rval;
 
     // Process the BGP message normally
@@ -142,9 +142,9 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size, MsgBusInterface::obj_p
             data += 2;                                                 // Move pointer past notification message
             data_bytes_remaining -= 2;
 
-            down_event.bgp_err_code = parsed_msg.error_code;
-            down_event.bgp_err_subcode = parsed_msg.error_subcode;
-            strncpy(down_event.error_text, parsed_msg.error_text, sizeof(down_event.error_text));
+            //down_event.bgp_err_code = parsed_msg.error_code;
+            //down_event.bgp_err_subcode = parsed_msg.error_subcode;
+            //strncpy(down_event.error_text, parsed_msg.error_text, sizeof(down_event.error_text));
         }
     }
     else {

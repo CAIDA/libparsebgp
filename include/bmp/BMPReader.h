@@ -96,8 +96,8 @@ public:
 
 private:
 //    Config      *cfg;                       ///< Config pointer
-//    bool        debug;                      ///< debug flag to indicate debugging
-//    u_char      router_hash_id[16];         ///< Router hash ID
+    bool        debug;                      ///< debug flag to indicate debugging
+    u_char      router_hash_id[16];         ///< Router hash ID
 
 
     /**

@@ -8,7 +8,7 @@
  */
 
 #include "parseBMP.h"
-#include "MsgBusInterface.hpp"
+//#include "MsgBusInterface.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -32,7 +32,8 @@
  * \param [in]     logPtr      Pointer to existing Logger for app logging
  * \param [in,out] peer_entry  Pointer to the peer entry
  */
-parseBMP::parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry) {
+//parseBMP::parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry) {
+parseBMP::parseBMP() {
     debug = false;
     bmp_type = -1; // Initially set to error
     bmp_len = 0;
@@ -44,8 +45,8 @@ parseBMP::parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry) {
     bzero(bmp_packet, sizeof(bmp_packet));
 
     // Set the passed storage for the router entry items.
-    p_entry = peer_entry;
-    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));
+//    p_entry = peer_entry;
+//    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));
 }
 
 parseBMP::~parseBMP() {
@@ -148,18 +149,18 @@ void parseBMP::parseBMPv2(int sock) {
                 bmp_len = len;
 
             } else {
-                LOG_ERR("sock=%d: Failed to read BGP message to get length of BMP message", sock);
+//                LOG_ERR("sock=%d: Failed to read BGP message to get length of BMP message", sock);
                 throw "Failed to read BGP message for BMP length";
             }
             break;
 
         case 1: // Statistics Report
             SELF_DEBUG("sock=%d : BMP MSG : stats report", sock);
-            LOG_INFO("sock=%d : BMP MSG : stats report", sock);
+//            LOG_INFO("sock=%d : BMP MSG : stats report", sock);
             break;
 
         case 2: // Peer down notification
-            LOG_INFO("sock=%d: BMP MSG: Peer down", sock);
+//            LOG_INFO("sock=%d: BMP MSG: Peer down", sock);
 
             // Get the length of the remaining message by reading the BGP length
             if ((i=Recv(sock, buf, 1, MSG_PEEK)) != 1) {
@@ -171,12 +172,12 @@ void parseBMP::parseBMPv2(int sock) {
                         bgp::SWAP_BYTES(&bmp_len);
 
                     } else {
-                        LOG_ERR("sock=%d: Failed to read peer down BGP message to get length of BMP message", sock);
+//                        LOG_ERR("sock=%d: Failed to read peer down BGP message to get length of BMP message", sock);
                         throw "Failed to read BGP message for BMP length";
                     }
                 }
             } else {
-                LOG_ERR("sock=%d: Failed to read peer down reason", sock);
+//                LOG_ERR("sock=%d: Failed to read peer down reason", sock);
                 throw "Failed to read BMP peer down reason";
             }
 
@@ -184,7 +185,7 @@ void parseBMP::parseBMPv2(int sock) {
             break;
 
         case 3: // Peer Up notification
-            LOG_ERR("sock=%d: Peer UP not supported with older BMP version since no one has implemented it", sock);
+//            LOG_ERR("sock=%d: Peer UP not supported with older BMP version since no one has implemented it", sock);
 
             SELF_DEBUG("sock=%d : BMP MSG : peer up", sock);
             throw "ERROR: Will need to add support for peer up if it's really used.";
@@ -194,13 +195,13 @@ void parseBMP::parseBMPv2(int sock) {
     SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr.peer_type);
 
     if (c_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
-        p_entry->isIPv4 = false;
+//        p_entry->isIPv4 = false;
         inet_ntop(AF_INET6, c_hdr.peer_addr, peer_addr, sizeof(peer_addr));
 
         SELF_DEBUG("sock=%d : Peer address is IPv6", sock);
 
     } else {
-        p_entry->isIPv4 = true;
+//        p_entry->isIPv4 = true;
         snprintf(peer_addr, sizeof(peer_addr), "%d.%d.%d.%d",
                 c_hdr.peer_addr[12], c_hdr.peer_addr[13], c_hdr.peer_addr[14],
                 c_hdr.peer_addr[15]);
@@ -248,14 +249,16 @@ void parseBMP::parseBMPv2(int sock) {
     }
 
     // Update the MySQL peer entry struct
-    strncpy(p_entry->peer_addr, peer_addr, sizeof(peer_addr));
-    p_entry->peer_as = strtoll(peer_as, NULL, 16);
-    strncpy(p_entry->peer_bgp_id, peer_bgp_id, sizeof(peer_bgp_id));
-    strncpy(p_entry->peer_rd, peer_rd, sizeof(peer_rd));
+    //strncpy(p_entry->peer_addr, peer_addr, sizeof(peer_addr));
+    //p_entry->peer_as = strtoll(peer_as, NULL, 16);
+    //strncpy(p_entry->peer_bgp_id, peer_bgp_id, sizeof(peer_bgp_id));
+    //strncpy(p_entry->peer_rd, peer_rd, sizeof(peer_rd));
 
     // Save the advertised timestamp
     uint32_t ts = c_hdr.ts_secs;
     bgp::SWAP_BYTES(&ts);
+   
+/*
     if (ts != 0)
         p_entry->timestamp_secs = ts;
     else
@@ -267,7 +270,7 @@ void parseBMP::parseBMPv2(int sock) {
     else
         // Global Instance
         p_entry->isL3VPN = 0;
-
+*/
     SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
     SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
             c_hdr.peer_as[0], c_hdr.peer_as[1], c_hdr.peer_as[2],
@@ -366,7 +369,7 @@ void parseBMP::parsePeerHdr(int sock) {
                p_hdr.peer_type);
 
     if (p_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
-        p_entry->isIPv4 = false;
+//        p_entry->isIPv4 = false;
 
         inet_ntop(AF_INET6, p_hdr.peer_addr, peer_addr, sizeof(peer_addr));
 
@@ -374,7 +377,7 @@ void parseBMP::parsePeerHdr(int sock) {
                    peer_addr);
 
     } else {
-        p_entry->isIPv4 = true;
+//        p_entry->isIPv4 = true;
 
         snprintf(peer_addr, sizeof(peer_addr), "%d.%d.%d.%d",
                  p_hdr.peer_addr[12], p_hdr.peer_addr[13], p_hdr.peer_addr[14],
@@ -385,16 +388,16 @@ void parseBMP::parsePeerHdr(int sock) {
 
     if (p_hdr.peer_flags & 0x10) { // O flag of 1 means this is Adj-Rib-Out
         SELF_DEBUG("sock=%d : Msg is for Adj-RIB-Out", sock);
-        p_entry->isPrePolicy = false;
-        p_entry->isAdjIn = false;
+  //      p_entry->isPrePolicy = false;
+  //      p_entry->isAdjIn = false;
     } else if (p_hdr.peer_flags & 0x40) { // L flag of 1 means this is post-policy of Adj-RIB-In
         SELF_DEBUG("sock=%d : Msg is for POST-POLICY Adj-RIB-In", sock);
-        p_entry->isPrePolicy = false;
-        p_entry->isAdjIn = true;
+    //    p_entry->isPrePolicy = false;
+     //   p_entry->isAdjIn = true;
     } else {
         SELF_DEBUG("sock=%d : Msg is for PRE-POLICY Adj-RIB-In", sock);
-        p_entry->isPrePolicy = true;
-        p_entry->isAdjIn = true;
+    //    p_entry->isPrePolicy = true;
+    //    p_entry->isAdjIn = true;
     }
 
     // convert the BMP byte messages to human readable strings
@@ -431,17 +434,18 @@ void parseBMP::parsePeerHdr(int sock) {
                                       | p_hdr.peer_dist_id[6] << 8 | p_hdr.peer_dist_id[7]));
             break;
     }
-
+/*
     // Update the DB peer entry struct
     strncpy(p_entry->peer_addr, peer_addr, sizeof(p_entry->peer_addr));
     p_entry->peer_as = strtoll(peer_as, NULL, 16);
     strncpy(p_entry->peer_bgp_id, peer_bgp_id, sizeof(p_entry->peer_bgp_id));
     strncpy(p_entry->peer_rd, peer_rd, sizeof(p_entry->peer_rd));
+*/
 
     // Save the advertised timestamp
     bgp::SWAP_BYTES(&p_hdr.ts_secs);
     bgp::SWAP_BYTES(&p_hdr.ts_usecs);
-
+/*
     if (p_hdr.ts_secs != 0) {
         p_entry->timestamp_secs = p_hdr.ts_secs;
         p_entry->timestamp_us = p_hdr.ts_usecs;
@@ -462,7 +466,7 @@ void parseBMP::parsePeerHdr(int sock) {
     else
         // Global Instance
         p_entry->isL3VPN = 0;
-
+*/
     SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
     SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
                 p_hdr.peer_as[0], p_hdr.peer_as[1], p_hdr.peer_as[2],
@@ -480,18 +484,16 @@ void parseBMP::parsePeerHdr(int sock) {
  *
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
-bool parseBMP::parsePeerDownEventHdr(int sock, MsgBusInterface::obj_peer_down_event &down_event) {
-    char reason;
+bool parseBMP::parsePeerDownEventHdr(int sock, u_char& bmp_reason) {
 
-    if (Recv(sock, &reason, 1, 0) == 1) {
-        LOG_NOTICE("sock=%d : %s: BGP peer down notification with reason code: %d",
-                    sock, p_entry->peer_addr, reason);
+    if (Recv(sock, &bmp_reason, 1, 0) == 1) {
+      //  LOG_NOTICE("sock=%d : %s: BGP peer down notification with reason code: %d", sock, p_entry->peer_addr, reason);
 
         // Indicate that data has been read
         bmp_len--;
 
         // Initialize the down_event struct
-        down_event.bmp_reason = reason;
+        //down_event.bmp_reason = reason;
 
     } else {
         return false;

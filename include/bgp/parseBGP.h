@@ -110,7 +110,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleDownEvent(u_char *data, size_t size, MsgBusInterface::obj_peer_down_event &down_event);
+    bool handleDownEvent(u_char *data, size_t size);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated

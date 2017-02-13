@@ -241,7 +241,7 @@ public:
      *
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
-    bool parsePeerDownEventHdr(int sock, MsgBusInterface::obj_peer_down_event &down_event);
+    bool parsePeerDownEventHdr(int sock, u_char& bmp_reason);
 
     /**
      * Parse the v3 peer up BMP header

@@ -1,1 +1,0 @@
-/home/limbo/parse_lib/bmp/build/CMakeFiles/parser.dir
