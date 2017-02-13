@@ -44,6 +44,15 @@ parseBMP::parseBMP() {
     bmp_packet_len = 0;
     bzero(bmp_packet, sizeof(bmp_packet));
 
+    obj_router r_entry;
+	
+    obj_bgp_peer p_entry;
+
+    obj_peer_down_event down_event;
+
+    obj_peer_up_event up_event;
+
+    obj_stats_report stats;
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
 //    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));
@@ -388,16 +397,16 @@ void parseBMP::parsePeerHdr(int sock) {
 
     if (p_hdr.peer_flags & 0x10) { // O flag of 1 means this is Adj-Rib-Out
         SELF_DEBUG("sock=%d : Msg is for Adj-RIB-Out", sock);
-  //      p_entry->isPrePolicy = false;
-  //      p_entry->isAdjIn = false;
+        p_entry->isPrePolicy = false;
+        p_entry->isAdjIn = false;
     } else if (p_hdr.peer_flags & 0x40) { // L flag of 1 means this is post-policy of Adj-RIB-In
         SELF_DEBUG("sock=%d : Msg is for POST-POLICY Adj-RIB-In", sock);
-    //    p_entry->isPrePolicy = false;
-     //   p_entry->isAdjIn = true;
+        p_entry->isPrePolicy = false;
+        p_entry->isAdjIn = true;
     } else {
         SELF_DEBUG("sock=%d : Msg is for PRE-POLICY Adj-RIB-In", sock);
-    //    p_entry->isPrePolicy = true;
-    //    p_entry->isAdjIn = true;
+        p_entry->isPrePolicy = true;
+        p_entry->isAdjIn = true;
     }
 
     // convert the BMP byte messages to human readable strings
@@ -434,18 +443,18 @@ void parseBMP::parsePeerHdr(int sock) {
                                       | p_hdr.peer_dist_id[6] << 8 | p_hdr.peer_dist_id[7]));
             break;
     }
-/*
-    // Update the DB peer entry struct
+
+    // Update the peer entry struct in parse bmp
     strncpy(p_entry->peer_addr, peer_addr, sizeof(p_entry->peer_addr));
     p_entry->peer_as = strtoll(peer_as, NULL, 16);
     strncpy(p_entry->peer_bgp_id, peer_bgp_id, sizeof(p_entry->peer_bgp_id));
     strncpy(p_entry->peer_rd, peer_rd, sizeof(p_entry->peer_rd));
-*/
+
 
     // Save the advertised timestamp
     bgp::SWAP_BYTES(&p_hdr.ts_secs);
     bgp::SWAP_BYTES(&p_hdr.ts_usecs);
-/*
+
     if (p_hdr.ts_secs != 0) {
         p_entry->timestamp_secs = p_hdr.ts_secs;
         p_entry->timestamp_us = p_hdr.ts_usecs;
@@ -466,7 +475,7 @@ void parseBMP::parsePeerHdr(int sock) {
     else
         // Global Instance
         p_entry->isL3VPN = 0;
-*/
+
     SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
     SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
                 p_hdr.peer_as[0], p_hdr.peer_as[1], p_hdr.peer_as[2],
@@ -493,7 +502,7 @@ bool parseBMP::parsePeerDownEventHdr(int sock, u_char& bmp_reason) {
         bmp_len--;
 
         // Initialize the down_event struct
-        //down_event.bmp_reason = reason;
+        down_event->bmp_reason = reason;
 
     } else {
         return false;
@@ -547,7 +556,7 @@ void parseBMP::bufferBMPMessage(int sock) {
  *
  * \returns true if successfully parsed the bmp peer up header, false otherwise
  */
-bool parseBMP::parsePeerUpEventHdr(int sock, MsgBusInterface::obj_peer_up_event &up_event) {
+bool parseBMP::parsePeerUpEventHdr(int sock) {
     unsigned char local_addr[16];
     bool isParseGood = true;
     int bytes_read = 0;
@@ -611,7 +620,7 @@ bool parseBMP::parsePeerUpEventHdr(int sock, MsgBusInterface::obj_peer_up_event 
  *
  * \return true if error, false if no error
  */
-bool parseBMP::handleStatsReport(int sock, MsgBusInterface::obj_stats_report &stats) {
+bool parseBMP::handleStatsReport(int sock) {
     unsigned long stats_cnt = 0; // Number of counter stat objects to follow
     unsigned char b[8];
 
@@ -729,7 +738,7 @@ bool parseBMP::handleStatsReport(int sock, MsgBusInterface::obj_stats_report &st
  * \param [in]     sock        Socket to read the init message from
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
-void parseBMP::handleInitMsg(int sock, MsgBusInterface::obj_router &r_entry) {
+void parseBMP::handleInitMsg(int sock) {
     init_msg_v3 initMsg;
     char infoBuf[sizeof(r_entry.initiate_data)];
     int infoLen;
@@ -808,7 +817,7 @@ void parseBMP::handleInitMsg(int sock, MsgBusInterface::obj_router &r_entry) {
  * \param [in]     sock        Socket to read the term message from
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
-void parseBMP::handleTermMsg(int sock, MsgBusInterface::obj_router &r_entry) {
+void parseBMP::handleTermMsg(int sock) {
     term_msg_v3 termMsg;
     char infoBuf[sizeof(r_entry.term_data)];
     int infoLen;
