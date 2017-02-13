@@ -204,13 +204,13 @@ void parseBMP::parseBMPv2(int sock) {
     SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr.peer_type);
 
     if (c_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
-//        p_entry->isIPv4 = false;
+        p_entry.isIPv4 = false;
         inet_ntop(AF_INET6, c_hdr.peer_addr, peer_addr, sizeof(peer_addr));
 
         SELF_DEBUG("sock=%d : Peer address is IPv6", sock);
 
     } else {
-//        p_entry->isIPv4 = true;
+        p_entry.isIPv4 = true;
         snprintf(peer_addr, sizeof(peer_addr), "%d.%d.%d.%d",
                 c_hdr.peer_addr[12], c_hdr.peer_addr[13], c_hdr.peer_addr[14],
                 c_hdr.peer_addr[15]);
@@ -258,28 +258,28 @@ void parseBMP::parseBMPv2(int sock) {
     }
 
     // Update the MySQL peer entry struct
-    //strncpy(p_entry->peer_addr, peer_addr, sizeof(peer_addr));
-    //p_entry->peer_as = strtoll(peer_as, NULL, 16);
-    //strncpy(p_entry->peer_bgp_id, peer_bgp_id, sizeof(peer_bgp_id));
-    //strncpy(p_entry->peer_rd, peer_rd, sizeof(peer_rd));
+    strncpy(p_entry.peer_addr, peer_addr, sizeof(peer_addr));
+    p_entry.peer_as = strtoll(peer_as, NULL, 16);
+    strncpy(p_entry.peer_bgp_id, peer_bgp_id, sizeof(peer_bgp_id));
+    strncpy(p_entry.peer_rd, peer_rd, sizeof(peer_rd));
 
     // Save the advertised timestamp
     uint32_t ts = c_hdr.ts_secs;
     bgp::SWAP_BYTES(&ts);
    
-/*
+
     if (ts != 0)
-        p_entry->timestamp_secs = ts;
+        p_entry.timestamp_secs = ts;
     else
-        p_entry->timestamp_secs = time(NULL);
+        p_entry.timestamp_secs = time(NULL);
 
     // Is peer type L3VPN peer or global instance
     if (c_hdr.type == 1) // L3VPN
-        p_entry->isL3VPN = 1;
+        p_entry.isL3VPN = 1;
     else
         // Global Instance
-        p_entry->isL3VPN = 0;
-*/
+        p_entry.isL3VPN = 0;
+
     SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
     SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
             c_hdr.peer_as[0], c_hdr.peer_as[1], c_hdr.peer_as[2],
@@ -378,7 +378,7 @@ void parseBMP::parsePeerHdr(int sock) {
                p_hdr.peer_type);
 
     if (p_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
-//        p_entry->isIPv4 = false;
+        p_entry.isIPv4 = false;
 
         inet_ntop(AF_INET6, p_hdr.peer_addr, peer_addr, sizeof(peer_addr));
 
@@ -386,7 +386,7 @@ void parseBMP::parsePeerHdr(int sock) {
                    peer_addr);
 
     } else {
-//        p_entry->isIPv4 = true;
+        p_entry.isIPv4 = true;
 
         snprintf(peer_addr, sizeof(peer_addr), "%d.%d.%d.%d",
                  p_hdr.peer_addr[12], p_hdr.peer_addr[13], p_hdr.peer_addr[14],
@@ -397,16 +397,16 @@ void parseBMP::parsePeerHdr(int sock) {
 
     if (p_hdr.peer_flags & 0x10) { // O flag of 1 means this is Adj-Rib-Out
         SELF_DEBUG("sock=%d : Msg is for Adj-RIB-Out", sock);
-        p_entry->isPrePolicy = false;
-        p_entry->isAdjIn = false;
+        p_entry.isPrePolicy = false;
+        p_entry.isAdjIn = false;
     } else if (p_hdr.peer_flags & 0x40) { // L flag of 1 means this is post-policy of Adj-RIB-In
         SELF_DEBUG("sock=%d : Msg is for POST-POLICY Adj-RIB-In", sock);
-        p_entry->isPrePolicy = false;
-        p_entry->isAdjIn = true;
+        p_entry.isPrePolicy = false;
+        p_entry.isAdjIn = true;
     } else {
         SELF_DEBUG("sock=%d : Msg is for PRE-POLICY Adj-RIB-In", sock);
-        p_entry->isPrePolicy = true;
-        p_entry->isAdjIn = true;
+        p_entry.isPrePolicy = true;
+        p_entry.isAdjIn = true;
     }
 
     // convert the BMP byte messages to human readable strings
@@ -445,10 +445,10 @@ void parseBMP::parsePeerHdr(int sock) {
     }
 
     // Update the peer entry struct in parse bmp
-    strncpy(p_entry->peer_addr, peer_addr, sizeof(p_entry->peer_addr));
-    p_entry->peer_as = strtoll(peer_as, NULL, 16);
-    strncpy(p_entry->peer_bgp_id, peer_bgp_id, sizeof(p_entry->peer_bgp_id));
-    strncpy(p_entry->peer_rd, peer_rd, sizeof(p_entry->peer_rd));
+    strncpy(p_entry.peer_addr, peer_addr, sizeof(p_entry.peer_addr));
+    p_entry.peer_as = strtoll(peer_as, NULL, 16);
+    strncpy(p_entry.peer_bgp_id, peer_bgp_id, sizeof(p_entry.peer_bgp_id));
+    strncpy(p_entry.peer_rd, peer_rd, sizeof(p_entry.peer_rd));
 
 
     // Save the advertised timestamp
@@ -456,25 +456,25 @@ void parseBMP::parsePeerHdr(int sock) {
     bgp::SWAP_BYTES(&p_hdr.ts_usecs);
 
     if (p_hdr.ts_secs != 0) {
-        p_entry->timestamp_secs = p_hdr.ts_secs;
-        p_entry->timestamp_us = p_hdr.ts_usecs;
+        p_entry.timestamp_secs = p_hdr.ts_secs;
+        p_entry.timestamp_us = p_hdr.ts_usecs;
 
     } else {
         timeval tv;
 
         gettimeofday(&tv, NULL);
-        p_entry->timestamp_secs = tv.tv_sec;
-        p_entry->timestamp_us = tv.tv_usec;
+        p_entry.timestamp_secs = tv.tv_sec;
+        p_entry.timestamp_us = tv.tv_usec;
     }
 
 
     // Is peer type L3VPN peer or global instance
     if (p_hdr.peer_type == 1) // L3VPN
-        p_entry->isL3VPN = 1;
+        p_entry.isL3VPN = 1;
 
     else
         // Global Instance
-        p_entry->isL3VPN = 0;
+        p_entry.isL3VPN = 0;
 
     SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
     SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
@@ -493,7 +493,7 @@ void parseBMP::parsePeerHdr(int sock) {
  *
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
-bool parseBMP::parsePeerDownEventHdr(int sock, u_char& bmp_reason) {
+bool parseBMP::parsePeerDownEventHdr(int sock) {
 
     if (Recv(sock, &bmp_reason, 1, 0) == 1) {
       //  LOG_NOTICE("sock=%d : %s: BGP peer down notification with reason code: %d", sock, p_entry->peer_addr, reason);
@@ -502,7 +502,7 @@ bool parseBMP::parsePeerDownEventHdr(int sock, u_char& bmp_reason) {
         bmp_len--;
 
         // Initialize the down_event struct
-        down_event->bmp_reason = reason;
+        down_event.bmp_reason = reason;
 
     } else {
         return false;
@@ -567,7 +567,7 @@ bool parseBMP::parsePeerUpEventHdr(int sock) {
     else
         bytes_read += 16;
 
-    if (isParseGood and p_entry->isIPv4) {
+    if (isParseGood and p_entry.isIPv4) {
         snprintf(up_event.local_ip, sizeof(up_event.local_ip), "%d.%d.%d.%d",
                     local_addr[12], local_addr[13], local_addr[14],
                     local_addr[15]);
@@ -706,12 +706,12 @@ bool parseBMP::handleStatsReport(int sock) {
                             memcpy((void*)&value64bit, (void *)b, 8);
 
                             SELF_DEBUG("%s: sock=%d: stat type %d length of %d value of %lu is not yet implemented",
-                                    p_entry->peer_addr, sock, stat_type, stat_len, value64bit);
+                                    p_entry.peer_addr, sock, stat_type, stat_len, value64bit);
                         } else {
                             memcpy((void*)&value32bit, (void *)b, 4);
 
                             SELF_DEBUG("%s: sock=%d: stat type %d length of %d value of %lu is not yet implemented",
-                                     p_entry->peer_addr, sock, stat_type, stat_len, value32bit);
+                                     p_entry.peer_addr, sock, stat_type, stat_len, value32bit);
                         }
                     }
                 }
