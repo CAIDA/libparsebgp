@@ -11,7 +11,7 @@
 #ifndef PARSEBMP_H_
 #define PARSEBMP_H_
 
-#include "MsgBusInterface.hpp"
+//#include "MsgBusInterface.hpp"
 
 
 /*
@@ -64,6 +64,107 @@ public:
      enum BMP_TERM_TYPE1_REASON { TERM_REASON_ADMIN_CLOSE=0, TERM_REASON_UNSPECIFIED, TERM_REASON_OUT_OF_RESOURCES,
                      TERM_REASON_REDUNDANT_CONN,
                      TERM_REASON_OPENBMP_CONN_CLOSED=65533, TERM_REASON_OPENBMP_CONN_ERR=65534 };
+
+     
+/**
+     * OBJECT: routers
+     *
+     * Router table schema
+     */
+    struct obj_router {
+        u_char      hash_id[16];            ///< Router hash ID of name and src_addr
+        uint16_t    hash_type;              ///< Router hash type  0:IP, 1:router_name, 2:bgp_id
+        u_char      name[255];              ///< BMP router sysName (initiation Type=2)
+        u_char      descr[255];             ///< BMP router sysDescr (initiation Type=1)
+        u_char      ip_addr[46];            ///< BMP router source IP address in printed form
+        char        bgp_id[16];             ///< BMP Router bgp-id
+        uint32_t    asn;                    ///< BMP router ASN
+        uint16_t    term_reason_code;       ///< BMP termination reason code
+        char        term_reason_text[255];  ///< BMP termination reason text decode string
+
+        char        term_data[4096];        ///< Type=0 String termination info data
+        char        initiate_data[4096];    ///< Type=0 String initiation info data
+        uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
+        uint32_t    timestamp_us;           ///< Timestamp microseconds
+    }__attribute__ ((__packed__));
+	
+
+/**
+     * OBJECT: bgp_peers
+     *
+     * BGP peer table schema
+     */
+    struct obj_bgp_peer {
+        u_char      hash_id[16];            ///< hash of router hash_id, peer_rd, peer_addr, and peer_bgp_id
+        u_char      router_hash_id[16];     ///< Router hash ID
+
+        char        peer_rd[32];            ///< Peer distinguisher ID (string/printed format)
+        char        peer_addr[46];          ///< Peer IP address in printed form
+        char        peer_bgp_id[16];        ///< Peer BGP ID in printed form
+        uint32_t    peer_as;                ///< Peer ASN
+        bool        isL3VPN;                ///< true if peer is L3VPN, otherwise it is Global
+        bool        isPrePolicy;            ///< True if the routes are pre-policy, false if not
+        bool        isAdjIn;                ///< True if the routes are Adj-Rib-In, false if not
+        bool        isIPv4;                 ///< true if peer is IPv4 or false if IPv6
+        uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
+        uint32_t    timestamp_us;           ///< Timestamp microseconds
+    }__attribute__ ((__packed__));
+
+/**
+     * OBJECT: peer_down_events
+     *
+     * Peer Down Events schema
+     */
+    struct obj_peer_down_event {
+        u_char          bmp_reason;         ///< BMP notify reason
+        u_char          bgp_err_code;       ///< BGP notify error code
+        u_char          bgp_err_subcode;    ///< BGP notify error sub code
+        char            error_text[255];    ///< BGP error text string
+    }__attribute__ ((__packed__));
+
+    /**
+     * OBJECT: peer_up_events
+     *
+     * Peer Up Events schema
+     *
+     * \note    open_params are the decoded values in string/text format; e.g. "attr=value ..."
+     *          Numeric values are converted to printed form.   The buffer itself is
+     *          allocated by the caller and freed by the caller.
+     */
+    struct obj_peer_up_event {
+        char        info_data[4096];        ///< Inforamtional data for peer
+        char        local_ip[40];           ///< IPv4 or IPv6 printed IP address
+        uint16_t    local_port;             ///< Local port number
+        uint32_t    local_asn;              ///< Local ASN for peer
+        uint16_t    local_hold_time;        ///< BGP hold time
+        char        local_bgp_id[16];       ///< Local BGP ID in printed form
+        uint32_t    remote_asn;             ///< Remote ASN for peer
+        uint16_t    remote_port;            ///< Remote port number
+        uint16_t    remote_hold_time;       ///< BGP hold time
+        char        remote_bgp_id[16];      ///< Remote Peer BGP ID in printed form
+
+        char        sent_cap[4096];         ///< Received Open param capabilities
+        char        recv_cap[4096];         ///< Received Open param capabilities
+    }__attribute__ ((__packed__));
+
+
+
+/**
+     * OBJECT: stats_reports
+     *
+     * Stats Report schema
+     */
+    struct obj_stats_report {
+        uint32_t        prefixes_rej;           ///< type=0 Prefixes rejected
+        uint32_t        known_dup_prefixes;     ///< type=1 known duplicate prefixes
+        uint32_t        known_dup_withdraws;    ///< type=2 known duplicate withdraws
+        uint32_t        invalid_cluster_list;   ///< type=3 Updates invalid by cluster lists
+        uint32_t        invalid_as_path_loop;   ///< type=4 Updates invalid by as_path loop
+        uint32_t        invalid_originator_id;  ///< type=5 Invalid due to originator_id
+        uint32_t        invalid_as_confed_loop; ///< type=6 Invalid due to as_confed loop
+        uint64_t        routes_adj_rib_in;      ///< type=7 Number of routes in adj-rib-in
+        uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
+    }__attribute__ ((__packed__));
 
 
      /**
@@ -171,7 +272,7 @@ public:
      * \param [in]     logPtr      Pointer to existing Logger for app logging
      * \param [in,out] peer_entry  Pointer to the peer entry
      */
-    parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry);
+    parseBMP();
 
     // destructor
     virtual ~parseBMP();
@@ -210,7 +311,7 @@ public:
      * \param [in]     sock        Socket to read the init message from
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
-    void handleInitMsg(int sock, MsgBusInterface::obj_router &r_entry);
+    void handleInitMsg(int sock);
 
     /**
      * handle the termination message, router entry will be updated
@@ -218,7 +319,7 @@ public:
      * \param [in]     sock        Socket to read the term message from
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
-    void handleTermMsg(int sock, MsgBusInterface::obj_router &r_entry);
+    void handleTermMsg(int sock);
     /**
      * Buffer remaining BMP message
      *
@@ -275,7 +376,7 @@ private:
     bool            debug;                      ///< debug flag to indicate debugging
    // Logger          *logger;                    ///< Logging class pointer
 
-    MsgBusInterface::obj_bgp_peer *p_entry;         ///< peer table entry - will be updated with BMP info
+//    MsgBusInterface::obj_bgp_peer *p_entry;         ///< peer table entry - will be updated with BMP info
     char            bmp_type;                   ///< The BMP message type
     uint32_t        bmp_len;                    ///< Length of the BMP message - does not include the common header size
 
