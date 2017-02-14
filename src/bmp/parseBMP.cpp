@@ -44,15 +44,6 @@ parseBMP::parseBMP() {
     bmp_packet_len = 0;
     bzero(bmp_packet, sizeof(bmp_packet));
 
-    obj_router r_entry;
-	
-    obj_bgp_peer p_entry;
-
-    obj_peer_down_event down_event;
-
-    obj_peer_up_event up_event;
-
-    obj_stats_report stats;
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
 //    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));

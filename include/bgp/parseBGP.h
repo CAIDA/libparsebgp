@@ -13,8 +13,6 @@
 #include <vector>
 #include <list>
 #include <BMPReader.h>
-#include "MsgBusInterface.hpp"
-#include "Logger.h"
 #include "bgp_common.h"
 #include "UpdateMsg.h"
 
@@ -79,8 +77,9 @@ public:
      * \param [in]     routerAddr  The router IP address - used for logging
      * \param [in,out] peer_info   Persistent peer information
      */
-    parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
-             BMPReader::peer_info *peer_info);
+    //parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
+    //         BMPReader::peer_info *peer_info);
+    parseBGP(string routerAddr, BMPReader::peer_info *peer_info);
 
     virtual ~parseBGP();
 
@@ -158,7 +157,7 @@ private:
     unsigned char path_hash_id[16];                  ///< current path hash ID
 
     bool            debug;                           ///< debug flag to indicate debugging
-    Logger          *logger;                         ///< Logging class pointer
+    //Logger          *logger;                         ///< Logging class pointer
 
     /**
      * Parses the BGP common header

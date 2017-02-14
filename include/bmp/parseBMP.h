@@ -372,11 +372,16 @@ public:
     void enableDebug();
     void disableDebug();
 
+    obj_bgp_peer p_entry;         ///< peer table entry - will be updated with BMP info
+    obj_router r_entry;
+    obj_peer_down_event down_event;
+    obj_peer_up_event up_event;
+    obj_stats_report stats;
+
 private:
     bool            debug;                      ///< debug flag to indicate debugging
    // Logger          *logger;                    ///< Logging class pointer
 
-//    MsgBusInterface::obj_bgp_peer *p_entry;         ///< peer table entry - will be updated with BMP info
     char            bmp_type;                   ///< The BMP message type
     uint32_t        bmp_len;                    ///< Length of the BMP message - does not include the common header size
 

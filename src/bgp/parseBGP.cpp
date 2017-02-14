@@ -24,7 +24,6 @@
 #include <sstream>
 #include <algorithm>
 
-#include "MsgBusInterface.hpp"
 #include "NotificationMsg.h"
 #include "OpenMsg.h"
 #include "UpdateMsg.h"
@@ -47,11 +46,12 @@ using namespace std;
  * \param [in]     routerAddr  The router IP address - used for logging
  * \param [in,out] peer_info   Persistent peer information
  */
-parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
-                   BMPReader::peer_info *peer_info) {
+//parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
+//                   BMPReader::peer_info *peer_info) {
+parseBGP::parseBGP(MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr, BMPReader::peer_info *peer_info) {
     debug = false;
 
-    logger = logPtr;
+    //logger = logPtr;
 
     data_bytes_remaining = 0;
     data = NULL;
@@ -59,7 +59,7 @@ parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::o
     bzero(&common_hdr, sizeof(common_hdr));
 
     // Set our mysql pointer
-    this->mbus_ptr = mbus_ptr;
+    //this->mbus_ptr = mbus_ptr;
 
     // Set our peer entry
     p_entry = peer_entry;
@@ -107,7 +107,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size) {
         /*
          * Update the DB with the update data
          */
-        UpdateDB(parsed_data);
+        //UpdateDB(parsed_data);
     }
 
     return false;
@@ -340,21 +340,21 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  *
  * \param  parsed_data          Reference to the parsed update data
  */
-void parseBGP::UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
+/*void parseBGP::UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
     /*
      * Update the path attributes
-     */
+     *
     UpdateDBAttrs(parsed_data.attrs);
 
     /*
      * Update the bgp-ls data
-     */
+     *
     UpdateDbBgpLs(false, parsed_data.ls, parsed_data.ls_attrs);
     UpdateDbBgpLs(true, parsed_data.ls_withdrawn, parsed_data.ls_attrs);
 
     /*
      * Update the advertised prefixes (both ipv4 and ipv6)
-     */
+     *
     UpdateDBAdvPrefixes(parsed_data.advertised, parsed_data.attrs);
 
     UpdateDBL3Vpn(false,parsed_data.vpn, parsed_data.attrs);
@@ -365,10 +365,10 @@ void parseBGP::UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
 
     /*
      * Update withdraws (both ipv4 and ipv6)
-     */
+     *
     UpdateDBWdrawnPrefixes(parsed_data.withdrawn);
 
-}
+}*/
 
 /**
  * Update the Database path attributes
@@ -377,11 +377,11 @@ void parseBGP::UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
  *
  * \param  attrs            Reference to the parsed attributes map
  */
-void parseBGP::UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
+/*void parseBGP::UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
 
     /*
      * Setup the record
-     */
+     *
     base_attr.as_path                  = (string)attrs[bgp_msg::ATTR_TYPE_AS_PATH];
     base_attr.cluster_list             = (string)attrs[bgp_msg::ATTR_TYPE_CLUSTER_LIST];
     base_attr.community_list           = (string)attrs[bgp_msg::ATTR_TYPE_COMMUNITIES];
@@ -447,7 +447,7 @@ void parseBGP::UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
 
     // Update the class instance variable path_hash_id
     memcpy(path_hash_id, base_attr.hash_id, sizeof(path_hash_id));
-}
+}*/
 
 /**
  * Update the Database advertised l3vpn 
@@ -458,7 +458,7 @@ void parseBGP::UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
  * \param [in] prefixes        Reference to the list<vpn_tuple> of advertised vpns
  * \param [in] attrs           Reference to the parsed attributes map
  */
-void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
+/*void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
                              bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
     vector<MsgBusInterface::obj_vpn> rib_list;
     MsgBusInterface::obj_vpn         rib_entry;
@@ -467,7 +467,7 @@ void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
 
     /*
      * Loop through all vpn and add/update them in the DB
-     */
+     *
     for (std::list<bgp::vpn_tuple>::iterator it = prefixes.begin();
                                                 it != prefixes.end();
                                                 it++) {
@@ -551,7 +551,7 @@ void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
 
     rib_list.clear();
     prefixes.clear();
-}
+}*/
 
 /**
  * Updates for either advertised or withdrawn Evpn NLRI's
@@ -560,7 +560,7 @@ void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
  * \param [in] nlris           Reference to the list<evpn_tuple>
  * \param [in] attrs           Reference to the parsed attributes map
  */
-void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
+/*void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
                            bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
 
     vector<MsgBusInterface::obj_evpn> rib_list;
@@ -568,7 +568,7 @@ void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
 
     /*
      * Loop through all vpn and add/update them in the DB
-     */
+     *
     for (std::list<bgp::evpn_tuple>::iterator it = nlris.begin();
          it != nlris.end();
          it++) {
@@ -609,7 +609,7 @@ void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
 
     rib_list.clear();
     nlris.clear();
-}
+}*/
 
 
 /**
@@ -620,7 +620,7 @@ void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
  * \param  adv_prefixes         Reference to the list<prefix_tuple> of advertised prefixes
  * \param  attrs            Reference to the parsed attributes map
  */
-void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
+/*void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
                                    bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
     vector<MsgBusInterface::obj_rib> rib_list;
     MsgBusInterface::obj_rib         rib_entry;
@@ -629,7 +629,7 @@ void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
 
     /*
      * Loop through all prefixes and add/update them in the DB
-     */
+     *
     for (std::list<bgp::prefix_tuple>::iterator it = adv_prefixes.begin();
                                                 it != adv_prefixes.end();
                                                 it++) {
@@ -705,7 +705,7 @@ void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
 
     rib_list.clear();
     adv_prefixes.clear();
-}
+}*/
 
 /**
  * Update the Database withdrawn prefixes
@@ -714,13 +714,13 @@ void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
  *
  * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
  */
-void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes) {
+/*void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes) {
     vector<MsgBusInterface::obj_rib> rib_list;
     MsgBusInterface::obj_rib         rib_entry;
 
     /*
      * Loop through all prefixes and add/update them in the DB
-     */
+     *
     for (std::list<bgp::prefix_tuple>::iterator it = wdrawn_prefixes.begin();
                                                 it != wdrawn_prefixes.end();
                                                 it++) {
@@ -751,7 +751,7 @@ void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefi
 
     rib_list.clear();
     wdrawn_prefixes.clear();
-}
+}*/
 
 /**
  * Update the Database for bgp-ls
@@ -764,11 +764,11 @@ void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefi
  * \param [in] ls_data     Reference to the parsed link state nlri information
  * \param [in] ls_attrs    Reference to the parsed link state attribute information
  */
-void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_data,
+/*void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_data,
                              bgp_msg::UpdateMsg::parsed_ls_attrs_map &ls_attrs) {
     /*
      * Update table entry with attributes based on NLRI
-     */
+     *
     if (ls_data.nodes.size() > 0) {
         SELF_DEBUG("%s: Updating BGP-LS: Nodes %d", p_entry->peer_addr, ls_data.nodes.size());
 
@@ -928,7 +928,7 @@ void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_
     ls_data.prefixes.clear();
     ls_data.links.clear();
     ls_data.nodes.clear();
-}
+}*/
 
 
 void parseBGP::enableDebug() {
