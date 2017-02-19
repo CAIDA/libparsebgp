@@ -7,9 +7,9 @@
  *
  */
 
-#include "parseBMP.h"
+#include "include/parseBMP.h"
 //#include "MsgBusInterface.hpp"
-
+#include "include/parseBGP.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -18,7 +18,8 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include "bgp_common.h"
+#include "include/bgp_common.h"
+#include "include/parseBMP.h"
 
 /**
  * Constructor for class
@@ -54,7 +55,9 @@ parseBMP::~parseBMP() {
 }
 
 
-bool parseBMP::parseMsg(int read_fd) {
+bool parseBMP::parseMsg(int read_fd)
+{
+    parseBGP *pBGP;
     bool rval = true;
     string peer_info_key;
 
@@ -63,13 +66,12 @@ bool parseBMP::parseMsg(int read_fd) {
     char bmp_type = 0;
 
     try {
-        bmp_type = pBMP->handleMessage(read_fd);
+        bmp_type = handleMessage(read_fd);
 
         if (bmp_type < 4) {
-            // Update p_entry hash_id now that add_Router updated it.
-            memcpy(pBMP->p_entry.router_hash_id, pBMP->r_entry.hash_id, sizeof(pBMP->r_entry.hash_id));
-            peer_info_key =  pBMP->p_entry.peer_addr;
-            peer_info_key += pBMP->p_entry.peer_rd;
+            memcpy(p_entry.router_hash_id, r_entry.hash_id, sizeof(r_entry.hash_id));
+            peer_info_key =  p_entry.peer_addr;
+            peer_info_key += p_entry.peer_rd;
 
         }
 
@@ -82,44 +84,43 @@ bool parseBMP::parseMsg(int read_fd) {
 
                 //MsgBusInterface::obj_peer_down_event down_event = {};
 
-                if (pBMP->parsePeerDownEventHdr(read_fd)) {
-                    pBMP->bufferBMPMessage(read_fd);
+                if (parsePeerDownEventHdr(read_fd)) {
+                    bufferBMPMessage(read_fd);
 
 
                     // Prepare the BGP parser
-                    pBGP = new parseBGP(&pBMP->p_entry, (char *)pBMP->r_entry.ip_addr,
-                                        &peer_info_map[peer_info_key]);
+                    pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
 
       //              if (cfg->debug_bgp)
       //                 pBGP->enableDebug();
 
                     // Check if the reason indicates we have a BGP message that follows
-                    switch (pBMP->down_event.bmp_reason) {
+                    switch (down_event.bmp_reason) {
                         case 1 : { // Local system close with BGP notify
-                            snprintf(pBMP->down_event.error_text, sizeof(pBMP->down_event.error_text),
-                                    "Local close by (%s) for peer (%s) : ", pBMP->r_entry.ip_addr,
-                                    pBMP->p_entry.peer_addr);
-                            pBGP->handleDownEvent(pBMP->bmp_data, pBMP->bmp_data_len);
+                            snprintf(down_event.error_text, sizeof(down_event.error_text),
+                                    "Local close by (%s) for peer (%s) : ", r_entry.ip_addr,
+                                    p_entry.peer_addr);
+                            pBGP->handleDownEvent(bmp_data, bmp_data_len);
                             break;
                         }
                         case 2 : // Local system close, no bgp notify
                         {
 // Read two byte code corresponding to the FSM event
                             uint16_t fsm_event = 0 ;
-                            memcpy(&fsm_event, pBMP->bmp_data, 2);
+                            memcpy(&fsm_event, bmp_data, 2);
                             bgp::SWAP_BYTES(&fsm_event);
 
-                            snprintf(pBMP->down_event.error_text, sizeof(pBMP->down_event.error_text),
+                            snprintf(down_event.error_text, sizeof(down_event.error_text),
                                     "Local (%s) closed peer (%s) session: fsm_event=%d, No BGP notify message.",
-                                    pBMP->r_entry.ip_addr,pBMP->p_entry.peer_addr, fsm_event);
+                                    r_entry.ip_addr,p_entry.peer_addr, fsm_event);
                             break;
                         }
                         case 3 : { // remote system close with bgp notify
                             snprintf(down_event.error_text, sizeof(down_event.error_text),
-                                    "Remote peer (%s) closed local (%s) session: ", pBMP->r_entry.ip_addr,
-                                    pBMP->p_entry.peer_addr);
+                                    "Remote peer (%s) closed local (%s) session: ", r_entry.ip_addr,
+                                    p_entry.peer_addr);
 
-                            pBGP->handleDownEvent(pBMP->bmp_data, pBMP->bmp_data_len);
+                            pBGP->handleDownEvent(bmp_data, bmp_data_len);
                             break;
                         }
                     }
@@ -141,20 +142,20 @@ bool parseBMP::parseMsg(int read_fd) {
             {
             //    MsgBusInterface::obj_peer_up_event up_event = {};
 
-                if (pBMP->parsePeerUpEventHdr(read_fd)) {
+                if (parsePeerUpEventHdr(read_fd)) {
                //     LOG_INFO("%s: PEER UP Received, local addr=%s:%hu remote addr=%s:%hu", client->c_ip,up_event.local_ip, up_event.local_port, p_entry.peer_addr, up_event.remote_port);
 
-                    pBMP->bufferBMPMessage(read_fd);
+                    bufferBMPMessage(read_fd);
 
                     // Prepare the BGP parser
-                    pBGP = new parseBGP(pBMP->p_entry, (char *)pBMP->r_entry.ip_addr,
+                    pBGP = new parseBGP(p_entry, (char *)r_entry.ip_addr,
                                         &peer_info_map[peer_info_key]);
 
         //            if (cfg->debug_bgp)
         //               pBGP->enableDebug();
 
 // Parse the BGP sent/received open messages
-                    pBGP->handleUpEvent(pBMP->bmp_data, pBMP->bmp_data_len, &pBMP->up_event);
+                    pBGP->handleUpEvent(bmp_data, bmp_data_len, &up_event);
 
                     // Free the bgp parser
                     //delete pBGP;
@@ -169,19 +170,19 @@ bool parseBMP::parseMsg(int read_fd) {
             }
 
             case parseBMP::TYPE_ROUTE_MON : { // Route monitoring type
-                pBMP->bufferBMPMessage(read_fd);
+                bufferBMPMessage(read_fd);
 
                 /*
                  * Read and parse the the BGP message from the client.
                  *     parseBGP will update mysql directly
                  */
-                pBGP = new parseBGP(&pBMP->p_entry, (char *)pBMP->r_entry.ip_addr,
+                pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr,
                                     &peer_info_map[peer_info_key]);
 
                // if (cfg->debug_bgp)
                //     pBGP->enableDebug();
 
-                pBGP->handleUpdate(pBMP->bmp_data, pBMP->bmp_data_len);
+                pBGP->handleUpdate(bmp_data, bmp_data_len);
                 //delete pBGP;
 
                 break;
@@ -190,7 +191,7 @@ bool parseBMP::parseMsg(int read_fd) {
             case parseBMP::TYPE_STATS_REPORT : { // Stats Report
        //         MsgBusInterface::obj_stats_report stats = {};
                 //if (! pBMP->handleStatsReport(read_fd))
-                pBMP->handleStatsReport(read_fd);
+                handleStatsReport(read_fd);
                     // Add to mysql
                     //mbus_ptr->add_StatReport(p_entry, stats);
 
@@ -199,7 +200,7 @@ bool parseBMP::parseMsg(int read_fd) {
 
             case parseBMP::TYPE_INIT_MSG : { // Initiation Message
                // LOG_INFO("%s: Init message received with length of %u", client->c_ip, pBMP->getBMPLength());
-                pBMP->handleInitMsg(read_fd);
+                handleInitMsg(read_fd);
 
 // Update the router entry with the details
                 //mbus_ptr->update_Router(r_object, mbus_ptr->ROUTER_ACTION_INIT);
@@ -210,7 +211,7 @@ bool parseBMP::parseMsg(int read_fd) {
                // LOG_INFO("%s: Term message received with length of %u", client->c_ip, pBMP->getBMPLength());
 
 
-                pBMP->handleTermMsg(read_fd);
+                handleTermMsg(read_fd);
 
                // LOG_INFO("Proceeding to disconnect router");
                 //mbus_ptr->update_Router(r_object, mbus_ptr->ROUTER_ACTION_TERM);
@@ -676,7 +677,8 @@ void parseBMP::parsePeerHdr(int sock) {
  */
 bool parseBMP::parsePeerDownEventHdr(int sock) {
 
-    if (Recv(sock, &bmp_reason, 1, 0) == 1) {
+    char reason;
+    if (Recv(sock, &reason, 1, 0) == 1) {
       //  LOG_NOTICE("sock=%d : %s: BGP peer down notification with reason code: %d", sock, p_entry->peer_addr, reason);
 
         // Indicate that data has been read
