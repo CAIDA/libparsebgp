@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <list>
-//#include <BMPReader.h>
 #include <parseBMP.h>
 #include "bgp_common.h"
 #include "UpdateMsg.h"

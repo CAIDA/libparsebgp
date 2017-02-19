@@ -11,8 +11,8 @@
 #ifndef PARSEBMP_H_
 #define PARSEBMP_H_
 
-//#include "MsgBusInterface.hpp"
-
+#include <string>
+#include "AddPathDataContainer.h"
 
 /*
  * BMP Header lengths, not counting the version in the common hdr
@@ -32,6 +32,9 @@
  * \details This class can be used as needed to parse BMP messages. This
  *          class will read directly from the socket to read the BMP message.
  */
+
+using namespace std:
+
 class parseBMP {
 public:
     /**
