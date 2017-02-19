@@ -1,4 +1,4 @@
-# Install script for directory: /home/limbo/parse_lib
+# Install script for directory: /home/limbo/parse_lib/src
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

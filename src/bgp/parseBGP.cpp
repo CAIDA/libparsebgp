@@ -94,7 +94,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size) {
         /*
          * Parse the update message - stored results will be in parsed_data
          */
-        bgp_msg::UpdateMsg uMsg(logger, p_entry->peer_addr, router_addr, p_info, debug);
+        bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info, debug);
 
         if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, parsed_data)) != (size - BGP_MSG_HDR_LEN)) {
             LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr,
@@ -167,8 +167,8 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size) {
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleUpEvent(u_char *data, size_t size, MsgBusInterface::obj_peer_up_event *up_event) {
-    bgp_msg::OpenMsg    oMsg(logger, p_entry->peer_addr, this->p_info, debug);
+bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event) {
+    bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info, debug);
     list <string>       cap_list;
     string              local_bgp_id, remote_bgp_id;
     size_t              read_size;

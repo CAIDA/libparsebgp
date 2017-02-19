@@ -8,7 +8,6 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/parser.dir/bgp/MPUnReachAttr.cpp.o"
   "CMakeFiles/parser.dir/bgp/NotificationMsg.cpp.o"
   "CMakeFiles/parser.dir/bgp/AddPathDataContainer.cpp.o"
-  "CMakeFiles/parser.dir/bmp/BMPListener.cpp.o"
   "CMakeFiles/parser.dir/bmp/BMPReader.cpp.o"
   "CMakeFiles/parser.dir/bmp/parseBMP.cpp.o"
   "libparser.pdb"

@@ -6,9 +6,9 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "OpenMsg.h"
-#include "AddPathDataContainer.h"
-#include "BMPReader.h"
+#include "../include/bgp/OpenMsg.h"
+#include "../include/bgp/AddPathDataContainer.h"
+#include "../include/bmp/BMPReader.h"
 
 #include <string>
 #include <list>

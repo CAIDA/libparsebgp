@@ -31,10 +31,14 @@ namespace bgp_msg {
  * \param [in,out] peer_info   Persistent peer information
  * \param [in]     enable_debug     Debug true to enable, false to disable
  */
-UpdateMsg::UpdateMsg(Logger *logPtr, std::string peerAddr, std::string routerAddr, BMPReader::peer_info *peer_info,
+/*UpdateMsg::UpdateMsg(Logger *logPtr, std::string peerAddr, std::string routerAddr, BMPReader::peer_info *peer_info,
                      bool enable_debug)
         : logger(logPtr),
           debug(enable_debug),
+          peer_info(peer_info) {*/
+UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, BMPReader::peer_info *peer_info,
+                     bool enable_debug)
+        : debug(enable_debug),
           peer_info(peer_info) {
 
     this->peer_addr = peerAddr;

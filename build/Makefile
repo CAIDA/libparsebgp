@@ -39,7 +39,7 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/limbo/parse_lib
+CMAKE_SOURCE_DIR = /home/limbo/parse_lib/src
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/limbo/parse_lib/build
@@ -368,30 +368,6 @@ bgp/parseBGP.cpp.s:
 	$(MAKE) -f CMakeFiles/parser.dir/build.make CMakeFiles/parser.dir/bgp/parseBGP.cpp.s
 .PHONY : bgp/parseBGP.cpp.s
 
-bmp/BMPListener.o: bmp/BMPListener.cpp.o
-.PHONY : bmp/BMPListener.o
-
-# target to build an object file
-bmp/BMPListener.cpp.o:
-	$(MAKE) -f CMakeFiles/parser.dir/build.make CMakeFiles/parser.dir/bmp/BMPListener.cpp.o
-.PHONY : bmp/BMPListener.cpp.o
-
-bmp/BMPListener.i: bmp/BMPListener.cpp.i
-.PHONY : bmp/BMPListener.i
-
-# target to preprocess a source file
-bmp/BMPListener.cpp.i:
-	$(MAKE) -f CMakeFiles/parser.dir/build.make CMakeFiles/parser.dir/bmp/BMPListener.cpp.i
-.PHONY : bmp/BMPListener.cpp.i
-
-bmp/BMPListener.s: bmp/BMPListener.cpp.s
-.PHONY : bmp/BMPListener.s
-
-# target to generate assembly for a file
-bmp/BMPListener.cpp.s:
-	$(MAKE) -f CMakeFiles/parser.dir/build.make CMakeFiles/parser.dir/bmp/BMPListener.cpp.s
-.PHONY : bmp/BMPListener.cpp.s
-
 bmp/BMPReader.o: bmp/BMPReader.cpp.o
 .PHONY : bmp/BMPReader.o
 
@@ -480,9 +456,6 @@ help:
 	@echo "... bgp/parseBGP.o"
 	@echo "... bgp/parseBGP.i"
 	@echo "... bgp/parseBGP.s"
-	@echo "... bmp/BMPListener.o"
-	@echo "... bmp/BMPListener.i"
-	@echo "... bmp/BMPListener.s"
 	@echo "... bmp/BMPReader.o"
 	@echo "... bmp/BMPReader.i"
 	@echo "... bmp/BMPReader.s"
