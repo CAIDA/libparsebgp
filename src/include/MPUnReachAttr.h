@@ -10,13 +10,13 @@
 #define MPUNREACHATTR_H_
 
 #include "bgp_common.h"
-#include "Logger.h"
+//#include "Logger.h"
 #include <list>
 #include <string>
 
 #include "AddPathDataContainer.h"
 #include "MPReachAttr.h"
-#include "BMPReader.h"
+#include "../include/parseBMP.h"
 
 namespace bgp_msg {
 
@@ -50,7 +50,7 @@ public:
      * \param [in]     peer_info                Persistent Peer info pointer
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
-    MPUnReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info,
+    MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info,
                   bool enable_debug=false);
 
     virtual ~MPUnReachAttr();
@@ -71,9 +71,9 @@ public:
 
 private:
     bool                    debug;              ///< debug flag to indicate debugging
-    Logger                  *logger;            ///< Logging class pointer
+    //Logger                  *logger;            ///< Logging class pointer
     std::string             peer_addr;          ///< Printed form of the peer address for logging
-    BMPReader::peer_info    *peer_info;         ///< Persistent Peer info pointer
+    parseBMP::peer_info    *peer_info;         ///< Persistent Peer info pointer
 
     /**
      * MP UnReach NLRI parse based on AFI

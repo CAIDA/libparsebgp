@@ -10,7 +10,7 @@
 #ifndef NOTIFICATIONMSG_H_
 #define NOTIFICATIONMSG_H_
 
-#include "Logger.h"
+//#include "Logger.h"
 #include "bgp_common.h"
 
 namespace bgp_msg {
@@ -115,7 +115,7 @@ public:
      * \details Handles bgp notification messages
      *
      */
-    NotificationMsg(Logger *logPtr,bool enable_debug=false);
+    NotificationMsg(bool enable_debug=false);
     virtual ~NotificationMsg();
 
     /**
@@ -135,7 +135,7 @@ public:
 
 private:
     bool             debug;                           ///< debug flag to indicate debugging
-    Logger           *logger;                         ///< Logging class pointer
+    //Logger           *logger;                         ///< Logging class pointer
 
 };
 

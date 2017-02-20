@@ -12,7 +12,7 @@
 #define __EXTCOMMUNITY_H__
 
 #include "bgp_common.h"
-#include "Logger.h"
+//#include "Logger.h"
 #include <list>
 #include <map>
 #include <string>
@@ -159,7 +159,7 @@ public:
      * \param [in]     pperAddr     Printed form of peer address used for logging
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    ExtCommunity(Logger *logPtr, std::string peerAddr, bool enable_debug=false);
+    ExtCommunity(std::string peerAddr, bool enable_debug=false);
     virtual ~ExtCommunity();
 		 
     /**
@@ -192,7 +192,7 @@ public:
 
 private:
     bool             debug;                           ///< debug flag to indicate debugging
-    Logger           *logger;                         ///< Logging class pointer
+    //Logger           *logger;                         ///< Logging class pointer
     std::string      peer_addr;                       ///< Printed form of the peer address for logging
 
     /**

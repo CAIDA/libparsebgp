@@ -7,7 +7,7 @@
  *
  */
 
-#include "NotificationMsg.h"
+#include "../include/NotificationMsg.h"
 #include <cstring>
 
 namespace bgp_msg {
@@ -20,8 +20,8 @@ namespace bgp_msg {
  * \param [in]     logPtr       Pointer to existing Logger for app logging
  * \param [in]     enable_debug Debug true to enable, false to disable
  */
-NotificationMsg::NotificationMsg(Logger *logPtr, bool enable_debug) {
-    logger = logPtr;
+NotificationMsg::NotificationMsg(bool enable_debug) {
+    //logger = logPtr;
     debug = enable_debug;
 }
 
@@ -52,14 +52,14 @@ bool NotificationMsg::parseNotify(u_char *data, size_t size, parsed_notify_msg &
     if (read_size < size)
         parsed_msg.error_code = *dataPtr++, size++;
     else {
-        LOG_ERR("Could not read the BGP error code from notify message");
+        //LOG_ERR("Could not read the BGP error code from notify message");
         return true;
     }
 
     if (read_size < size)
         parsed_msg.error_subcode = *dataPtr++,size++;
     else {
-        LOG_ERR("Could not read the BGP sub code from notify message");
+        //LOG_ERR("Could not read the BGP sub code from notify message");
         return true;
     }
 

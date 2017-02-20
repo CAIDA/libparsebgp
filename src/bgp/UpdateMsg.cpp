@@ -6,17 +6,17 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "UpdateMsg.h"
+#include "../include/UpdateMsg.h"
 
 #include <string>
 #include <cstring>
 #include <sstream>
 #include <arpa/inet.h>
 
-#include "ExtCommunity.h"
-#include "MPReachAttr.h"
-#include "MPUnReachAttr.h"
-#include "MPLinkStateAttr.h"
+#include "../include/ExtCommunity.h"
+#include "../include/MPReachAttr.h"
+#include "../include/MPUnReachAttr.h"
+#include "../include/MPLinkStateAttr.h"
 
 namespace bgp_msg {
 
@@ -78,10 +78,10 @@ size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parsed_update_data &
      */
     update_bgp_hdr uHdr;
 
-    SELF_DEBUG("%s: rtr=%s: Parsing update message of size %d", peer_addr.c_str(), router_addr.c_str(), size);
+    //SELF_DEBUG("%s: rtr=%s: Parsing update message of size %d", peer_addr.c_str(), router_addr.c_str(), size);
 
     if (size < 2) {
-        LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
+        //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
         return 0;
     }
 
@@ -92,24 +92,24 @@ size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parsed_update_data &
 
     // Set the withdrawn data pointer
     if ((size - read_size) < uHdr.withdrawn_len) {
-        LOG_WARN("%s: rtr=%s: Update message is too short to parse withdrawn data", peer_addr.c_str(), router_addr.c_str());
+        //LOG_WARN("%s: rtr=%s: Update message is too short to parse withdrawn data", peer_addr.c_str(), router_addr.c_str());
         return 0;
     }
 
     uHdr.withdrawnPtr = bufPtr;
     bufPtr += uHdr.withdrawn_len; read_size += uHdr.withdrawn_len;
 
-    SELF_DEBUG("%s: rtr=%s: Withdrawn len = %hu", peer_addr.c_str(), router_addr.c_str(), uHdr.withdrawn_len );
+    //SELF_DEBUG("%s: rtr=%s: Withdrawn len = %hu", peer_addr.c_str(), router_addr.c_str(), uHdr.withdrawn_len );
 
     // Get the attributes length
     memcpy(&uHdr.attr_len, bufPtr, sizeof(uHdr.attr_len));
     bufPtr += sizeof(uHdr.attr_len); read_size += sizeof(uHdr.attr_len);
     bgp::SWAP_BYTES(&uHdr.attr_len);
-    SELF_DEBUG("%s: rtr=%s: Attribute len = %hu", peer_addr.c_str(), router_addr.c_str(), uHdr.attr_len);
+    //SELF_DEBUG("%s: rtr=%s: Attribute len = %hu", peer_addr.c_str(), router_addr.c_str(), uHdr.attr_len);
 
     // Set the attributes data pointer
     if ((size - read_size) < uHdr.attr_len) {
-        LOG_WARN("%s: rtr=%s: Update message is too short to parse attr data", peer_addr.c_str(), router_addr.c_str());
+        //LOG_WARN("%s: rtr=%s: Update message is too short to parse attr data", peer_addr.c_str(), router_addr.c_str());
         return 0;
     }
     uHdr.attrPtr = bufPtr;
@@ -123,14 +123,14 @@ size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parsed_update_data &
      */
     if (not uHdr.withdrawn_len and (size - read_size) <= 0 and not uHdr.attr_len) {
 
-        LOG_INFO("%s: rtr=%s: End-Of-RIB marker", peer_addr.c_str(), router_addr.c_str());
+        //LOG_INFO("%s: rtr=%s: End-Of-RIB marker", peer_addr.c_str(), router_addr.c_str());
 
     } else {
 
         /* ---------------------------------------------------------
          * Parse the withdrawn prefixes
          */
-        SELF_DEBUG("%s: rtr=%s: Getting the IPv4 withdrawn data", peer_addr.c_str(), router_addr.c_str());
+        //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 withdrawn data", peer_addr.c_str(), router_addr.c_str());
         if (uHdr.withdrawn_len > 0)
             parseNlriData_v4(uHdr.withdrawnPtr, uHdr.withdrawn_len, parsed_data.withdrawn);
 
@@ -146,7 +146,7 @@ size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parsed_update_data &
         /* ---------------------------------------------------------
          * Parse the NLRI data
          */
-        SELF_DEBUG("%s: rtr=%s: Getting the IPv4 NLRI data, size = %d", peer_addr.c_str(), router_addr.c_str(), (size - read_size));
+        //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 NLRI data, size = %d", peer_addr.c_str(), router_addr.c_str(), (size - read_size));
         if ((size - read_size) > 0) {
             parseNlriData_v4(uHdr.nlriPtr, (size - read_size), parsed_data.advertised);
             read_size = size;
@@ -205,8 +205,8 @@ void UpdateMsg::parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::pref
         if (tuple.len % 8)
             ++addr_bytes;
 
-        SELF_DEBUG("%s: rtr=%s: Reading NLRI data prefix bits=%d bytes=%d", peer_addr.c_str(),
-                    router_addr.c_str(), tuple.len, addr_bytes);
+        //SELF_DEBUG("%s: rtr=%s: Reading NLRI data prefix bits=%d bytes=%d", peer_addr.c_str(),
+         //           router_addr.c_str(), tuple.len, addr_bytes);
 
         if (addr_bytes <= 4) {
             memcpy(ipv4_raw, data, addr_bytes);
@@ -216,8 +216,8 @@ void UpdateMsg::parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::pref
             // Convert the IP to string printed format
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
             tuple.prefix.assign(ipv4_char);
-            SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
-                        router_addr.c_str(), ipv4_char, tuple.len);
+            //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
+             //           router_addr.c_str(), ipv4_char, tuple.len);
 
             // set the raw/binary address
             memcpy(tuple.prefix_bin, ipv4_raw, sizeof(ipv4_raw));
@@ -226,8 +226,8 @@ void UpdateMsg::parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::pref
             prefixes.push_back(tuple);
 
         } else if (addr_bytes > 4) {
-            LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",
-                       peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
+            //LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",
+            //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
         }
     }
 }
@@ -254,8 +254,8 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parsed_update_data &
         return;
 
     else if (len < 3) {
-        LOG_WARN("%s: rtr=%s: Cannot parse the attributes due to the data being too short, error in update message. len=%d",
-                peer_addr.c_str(), router_addr.c_str(), len);
+        //LOG_WARN("%s: rtr=%s: Cannot parse the attributes due to the data being too short, error in update message. len=%d",
+        //        peer_addr.c_str(), router_addr.c_str(), len);
         return;
     }
 
@@ -268,7 +268,7 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parsed_update_data &
 
         // Check if the length field is 1 or two bytes
         if (ATTR_FLAG_EXTENDED(attr_flags)) {
-            SELF_DEBUG("%s: rtr=%s: extended length path attribute bit set for an entry", peer_addr.c_str(), router_addr.c_str());
+            //SELF_DEBUG("%s: rtr=%s: extended length path attribute bit set for an entry", peer_addr.c_str(), router_addr.c_str());
 
             memcpy(&attr_len, data, 2); data += 2; read_size += 2;
             bgp::SWAP_BYTES(&attr_len);
@@ -276,8 +276,8 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parsed_update_data &
         } else
             attr_len = *data++; read_size++;
 
-        SELF_DEBUG("%s: rtr=%s: attribute type = %d len_sz = %d",
-                peer_addr.c_str(), router_addr.c_str(), attr_type, attr_len);
+        //SELF_DEBUG("%s: rtr=%s: attribute type = %d len_sz = %d",
+         //       peer_addr.c_str(), router_addr.c_str(), attr_type, attr_len);
 
         // Get the attribute data, if we have any; making sure to not overrun buffer
         if (attr_len > 0 and (read_size + attr_len) <= len ) {
@@ -290,12 +290,12 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parsed_update_data &
             data        += attr_len;
             read_size   += attr_len;
 
-            SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
-                        attr_type, attr_len);
+            //SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
+            //            attr_type, attr_len);
 
         } else if (attr_len) {
-            LOG_NOTICE("%s: rtr=%s: Attribute data len of %hu is larger than available data in update message of %hu",
-                    peer_addr.c_str(), router_addr.c_str(), attr_len, (len - read_size));
+            //LOG_NOTICE("%s: rtr=%s: Attribute data len of %hu is larger than available data in update message of %hu",
+            //        peer_addr.c_str(), router_addr.c_str(), attr_len, (len - read_size));
             return;
         }
     }
@@ -420,28 +420,28 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
         }
         case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
         {
-            ExtCommunity ec(logger, peer_addr, debug);
+            ExtCommunity ec(peer_addr, debug);
             ec.parseExtCommunities(attr_len, data, parsed_data);
             break;
         }
 
         case ATTR_TYPE_IPV6_EXT_COMMUNITY : // IPv6 specific extended community list (RFC 5701)
         {
-            ExtCommunity ec6(logger, peer_addr, debug);
+            ExtCommunity ec6(peer_addr, debug);
             ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
             break;
         }
 
         case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
         {
-            MPReachAttr mp(logger, peer_addr, peer_info, debug);
+            MPReachAttr mp(peer_addr, peer_info, debug);
             mp.parseReachNlriAttr(attr_len, data, parsed_data);
             break;
         }
 
         case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
         {
-            MPUnReachAttr mp(logger, peer_addr, peer_info, debug);
+            MPUnReachAttr mp(peer_addr, peer_info, debug);
             mp.parseUnReachNlriAttr(attr_len, data, parsed_data);
             break;
         }
@@ -453,28 +453,28 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
 
         case ATTR_TYPE_BGP_LS:
         {
-            MPLinkStateAttr ls(logger, peer_addr, &parsed_data, debug);
+            MPLinkStateAttr ls(peer_addr, &parsed_data, debug);
             ls.parseAttrLinkState(attr_len, data);
             break;
         }
 
         case ATTR_TYPE_AS4_PATH:
         {
-            SELF_DEBUG("%s: rtr=%s: attribute type AS4_PATH is not yet implemented, skipping for now.",
-                     peer_addr.c_str(), router_addr.c_str());
+            //SELF_DEBUG("%s: rtr=%s: attribute type AS4_PATH is not yet implemented, skipping for now.",
+            //         peer_addr.c_str(), router_addr.c_str());
             break;
         }
 
         case ATTR_TYPE_AS4_AGGREGATOR:
         {
-            SELF_DEBUG("%s: rtr=%s: attribute type AS4_AGGREGATOR is not yet implemented, skipping for now.",
-                       peer_addr.c_str(), router_addr.c_str());
+            //SELF_DEBUG("%s: rtr=%s: attribute type AS4_AGGREGATOR is not yet implemented, skipping for now.",
+            //           peer_addr.c_str(), router_addr.c_str());
             break;
         }
 
         default:
-            LOG_INFO("%s: rtr=%s: attribute type %d is not yet implemented or intentionally ignored, skipping for now.",
-                    peer_addr.c_str(), router_addr.c_str(), attr_type);
+            //LOG_INFO("%s: rtr=%s: attribute type %d is not yet implemented or intentionally ignored, skipping for now.",
+            //        peer_addr.c_str(), router_addr.c_str(), attr_type);
             break;
 
     } // END OF SWITCH ATTR TYPE
@@ -510,7 +510,7 @@ void UpdateMsg::parseAttr_Aggegator(uint16_t attr_len, u_char *data, parsed_attr
          decodeStr.assign(numString.str());
 
      } else {
-         LOG_ERR("%s: rtr=%s: path attribute is not the correct size of 6 or 8 octets.", peer_addr.c_str(), router_addr.c_str());
+         //LOG_ERR("%s: rtr=%s: path attribute is not the correct size of 6 or 8 octets.", peer_addr.c_str(), router_addr.c_str());
          return;
      }
 
@@ -572,7 +572,7 @@ void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parsed_attrs_m
         }
 
         if (path_len != 0) {
-            LOG_INFO("%s: rtr=%s: Using 2-octet ASN path parsing", peer_addr.c_str(), router_addr.c_str());
+            //LOG_INFO("%s: rtr=%s: Using 2-octet ASN path parsing", peer_addr.c_str(), router_addr.c_str());
             peer_info->using_2_octet_asn = true;
         }
 
@@ -596,16 +596,16 @@ void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parsed_attrs_m
             decoded_path.append(" {");
         }
 
-        SELF_DEBUG("%s: rtr=%s: as_path seg_len = %d seg_type = %d, path_len = %d total_len = %d as_octet_size = %d",
-                   peer_addr.c_str(), router_addr.c_str(),
-                   seg_len, seg_type, path_len, attr_len, asn_octet_size);
+        //SELF_DEBUG("%s: rtr=%s: as_path seg_len = %d seg_type = %d, path_len = %d total_len = %d as_octet_size = %d",
+        //           peer_addr.c_str(), router_addr.c_str(),
+        //           seg_len, seg_type, path_len, attr_len, asn_octet_size);
 
         if ((seg_len * asn_octet_size) > path_len){
 
-            LOG_NOTICE("%s: rtr=%s: Could not parse the AS PATH due to update message buffer being too short when using ASN octet size %d",
-                       peer_addr.c_str(), router_addr.c_str(), asn_octet_size);
-            LOG_NOTICE("%s: rtr=%s: switching encoding size to 2-octet due to parsing failure",
-                       peer_addr.c_str(), router_addr.c_str());
+            //LOG_NOTICE("%s: rtr=%s: Could not parse the AS PATH due to update message buffer being too short when using ASN octet size %d",
+            //           peer_addr.c_str(), router_addr.c_str(), asn_octet_size);
+            //LOG_NOTICE("%s: rtr=%s: switching encoding size to 2-octet due to parsing failure",
+            //           peer_addr.c_str(), router_addr.c_str());
 
             peer_info->using_2_octet_asn = true;
         }
@@ -631,7 +631,7 @@ void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parsed_attrs_m
         }
     }
 
-    SELF_DEBUG("%s: rtr=%s: Parsed AS_PATH count %hu : %s", peer_addr.c_str(), router_addr.c_str(), as_path_cnt, decoded_path.c_str());
+    //SELF_DEBUG("%s: rtr=%s: Parsed AS_PATH count %hu : %s", peer_addr.c_str(), router_addr.c_str(), as_path_cnt, decoded_path.c_str());
 
     /*
      * Update the attributes map

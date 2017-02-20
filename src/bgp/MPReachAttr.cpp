@@ -7,10 +7,10 @@
  *
  */
 
-#include "MPReachAttr.h"
-#include "MPLinkState.h"
-#include "BMPReader.h"
-#include "EVPN.h"
+#include "../include/MPReachAttr.h"
+#include "../include/MPLinkState.h"
+#include "../include/parseBMP.h"
+#include "../include/EVPN.h"
 #include <typeinfo>
 
 #include <arpa/inet.h>
@@ -27,9 +27,13 @@ namespace bgp_msg {
  * \param [in]     peer_info                Persistent Peer info pointer
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
-MPReachAttr::MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
+/*MPReachAttr::MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
     : logger{logPtr}, peer_info{peer_info}, debug{enable_debug} {
         this->peer_addr = peerAddr;
+}*/
+MPReachAttr::MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug)
+        : peer_info{peer_info}, debug{enable_debug} {
+    this->peer_addr = peerAddr;
 }
 
 MPReachAttr::~MPReachAttr() {
@@ -68,12 +72,12 @@ void MPReachAttr::parseReachNlriAttr(int attr_len, u_char *data, UpdateMsg::pars
      * Make sure the parsing doesn't exceed buffer
      */
     if (attr_len < 0) {
-        LOG_NOTICE("%s: MP_REACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
+        //LOG_NOTICE("%s: MP_REACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
         return;
     }
 
-    SELF_DEBUG("%s: afi=%d safi=%d nh_len=%d reserved=%d", peer_addr.c_str(),
-                nlri.afi, nlri.safi, nlri.nh_len, nlri.reserved);
+    //SELF_DEBUG("%s: afi=%d safi=%d nh_len=%d reserved=%d", peer_addr.c_str(),
+    //            nlri.afi, nlri.safi, nlri.nh_len, nlri.reserved);
 
     /*
      * Next-hop and NLRI data depends on the AFI & SAFI
@@ -104,7 +108,7 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &p
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            MPLinkState ls(logger, peer_addr, &parsed_data, debug);
+            MPLinkState ls(peer_addr, &parsed_data, debug);
             ls.parseReachLinkState(nlri);
 
             break;
@@ -131,21 +135,21 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &p
             switch (nlri.safi) {
                 case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    EVPN evpn(logger, peer_addr, false, &parsed_data, debug);
+                    EVPN evpn(peer_addr, false, &parsed_data, debug);
                     evpn.parseNlriData(nlri.nlri_data, nlri.nlri_len);
                     break;
                 }
 
                 default :
-                    LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
-                             peer_addr.c_str(), nlri.safi);
+                    //LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
+                    //         peer_addr.c_str(), nlri.safi);
             }
 
             break;
         }
 
         default : // Unknown
-            LOG_INFO("%s: MP_REACH AFI=%d is not implemented yet, skipping", peer_addr.c_str(), nlri.afi);
+            //LOG_INFO("%s: MP_REACH AFI=%d is not implemented yet, skipping", peer_addr.c_str(), nlri.afi);
             return;
     }
 }
@@ -224,8 +228,8 @@ void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg:
         }
 
         default :
-            LOG_INFO("%s: MP_REACH AFI=ipv4/ipv6 (%d) SAFI=%d is not implemented yet, skipping for now",
-                     peer_addr.c_str(), isIPv4, nlri.safi);
+            //LOG_INFO("%s: MP_REACH AFI=ipv4/ipv6 (%d) SAFI=%d is not implemented yet, skipping for now",
+            //         peer_addr.c_str(), isIPv4, nlri.safi);
             return;
     }
 }
@@ -243,7 +247,7 @@ void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg:
  * \param [out]  prefixes               Reference to a list<prefix_tuple> to be updated with entries
  */
 void MPReachAttr::parseNlriData_IPv4IPv6(bool isIPv4, u_char *data, uint16_t len,
-                                         BMPReader::peer_info * peer_info,
+                                         parseBMP::peer_info * peer_info,
                                          std::list<bgp::prefix_tuple> &prefixes) {
     u_char            ip_raw[16];
     char              ip_char[40];
@@ -313,7 +317,7 @@ void MPReachAttr::parseNlriData_IPv4IPv6(bool isIPv4, u_char *data, uint16_t len
  */
 template <typename PREFIX_TUPLE>
 void MPReachAttr::parseNlriData_LabelIPv4IPv6(bool isIPv4, u_char *data, uint16_t len,
-                                              BMPReader::peer_info * peer_info,
+                                              parseBMP::peer_info * peer_info,
                                               std::list<PREFIX_TUPLE> &prefixes) {
     u_char            ip_raw[16];
     char              ip_char[40];

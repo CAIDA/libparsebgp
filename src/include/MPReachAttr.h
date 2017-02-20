@@ -10,7 +10,7 @@
 #define MPREACHATTR_H_
 
 #include "bgp_common.h"
-#include "Logger.h"
+//#include "Logger.h"
 #include <list>
 #include <string>
 
@@ -51,7 +51,8 @@ public:
      * \param [in]     peer_info                Persistent Peer info pointer
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
-    MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
+    //MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
+    MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug=false);
 
     virtual ~MPReachAttr();
 
@@ -82,7 +83,7 @@ public:
      * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
      */
     static void parseNlriData_IPv4IPv6(bool isIPv4, u_char *data, uint16_t len,
-                                       BMPReader::peer_info *peer_info,
+                                       parseBMP::peer_info *peer_info,
                                        std::list<bgp::prefix_tuple> &prefixes);
 
     /**
@@ -99,7 +100,7 @@ public:
      */
     template <typename PREFIX_TUPLE>
     static void parseNlriData_LabelIPv4IPv6(bool isIPv4, u_char *data, uint16_t len,
-                                            BMPReader::peer_info *peer_info,
+                                            parseBMP::peer_info *peer_info,
                                             std::list<PREFIX_TUPLE> &prefixes);
 
     /**
@@ -119,9 +120,9 @@ public:
 
 private:
     bool                    debug;                  ///< debug flag to indicate debugging
-    Logger                   *logger;               ///< Logging class pointer
+    //Logger                   *logger;               ///< Logging class pointer
     std::string             peer_addr;              ///< Printed form of the peer address for logging
-    BMPReader::peer_info    *peer_info;
+    parseBMP::peer_info    *peer_info;
 
     /**
      * MP Reach NLRI parse based on AFI

@@ -19,7 +19,7 @@
 #include <list>
 #include <memory>
 #include <arpa/inet.h>
-#include <linkstate/MPLinkStateAttr.h>
+#include <../include/MPLinkStateAttr.h>
 
 #include <sstream>
 #include <algorithm>
@@ -48,7 +48,7 @@ using namespace std;
  */
 //parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
 //                   BMPReader::peer_info *peer_info) {
-parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, BMPReader::peer_info *peer_info) {
+parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info) {
     debug = false;
 
     //logger = logPtr;
@@ -133,7 +133,7 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size) {
         data += BGP_MSG_HDR_LEN;
 
         bgp_msg::parsed_notify_msg parsed_msg;
-        //bgp_msg::NotificationMsg nMsg(logger, debug);
+        bgp_msg::NotificationMsg nMsg(debug);
         if ( (rval=nMsg.parseNotify(data, data_bytes_remaining, parsed_msg)))
            // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
 
@@ -147,8 +147,8 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size) {
         }
     }
     else {
-        LOG_ERR("%s: rtr=%s: BGP message type is not a BGP notification, cannot parse the notification",
-                p_entry->peer_addr, router_addr.c_str());
+        //LOG_ERR("%s: rtr=%s: BGP message type is not a BGP notification, cannot parse the notification",
+         //       p_entry->peer_addr, router_addr.c_str());
         throw "ERROR: Invalid BGP MSG for BMP down event, expected NOTIFICATION message.";
     }
 

@@ -17,16 +17,16 @@ set(SOURCE_FILES
         src/bgp/OpenMsg.cpp
         src/bgp/parseBGP.cpp
         src/bgp/UpdateMsg.cpp
-        src/include/bgp/AddPathDataContainer.h
-        src/include/bgp/bgp_common.h
-        src/include/bgp/EVPN.h
-        src/include/bgp/ExtCommunity.h
-        src/include/bgp/MPReachAttr.h
-        src/include/bgp/MPUnReachAttr.h
-        src/include/bgp/NotificationMsg.h
-        src/include/bgp/OpenMsg.h
-        src/include/bgp/parseBGP.h
-        src/include/bgp/UpdateMsg.h
+        src/include/AddPathDataContainer.h
+        src/include/bgp_common.h
+        src/include/EVPN.h
+        src/include/ExtCommunity.h
+        src/include/MPReachAttr.h
+        src/include/MPUnReachAttr.h
+        src/include/NotificationMsg.h
+        src/include/OpenMsg.h
+        src/include/parseBGP.h
+        src/include/UpdateMsg.h
         src/include/parseBMP.h
         src/parseBMP.cpp)
 

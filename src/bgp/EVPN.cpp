@@ -1,4 +1,4 @@
-#include "EVPN.h"
+#include "../include/EVPN.h"
 
 namespace bgp_msg {
 
@@ -14,9 +14,9 @@ namespace bgp_msg {
 
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    EVPN::EVPN(Logger *logPtr, std::string peerAddr, bool isUnreach,
+    EVPN::EVPN(std::string peerAddr, bool isUnreach,
                UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
-        logger = logPtr;
+        //logger = logPtr;
         debug = enable_debug;
         peer_addr = peerAddr;
         this->parsed_data = parsed_data;
@@ -138,7 +138,7 @@ namespace bgp_msg {
                 break;
             }
             default:
-                LOG_WARN("%s: MP_REACH Cannot parse ethernet segment identifyer type: %d", type);
+                //LOG_WARN("%s: MP_REACH Cannot parse ethernet segment identifyer type: %d", type);
                 break;
         }
 
@@ -395,7 +395,7 @@ namespace bgp_msg {
 
                         // Parse second label if present
                         if (len == 3) {
-                            SELF_DEBUG("%s: parsing second evpn label\n", peer_addr.c_str());
+                            //SELF_DEBUG("%s: parsing second evpn label\n", peer_addr.c_str());
 
                             memcpy(&tuple.mpls_label_2, data_pointer, 3);
                             bgp::SWAP_BYTES(&tuple.mpls_label_2);
@@ -490,8 +490,8 @@ namespace bgp_msg {
                     break;
                 }
                 default: {
-                    LOG_INFO("%s: EVPN ROUTE TYPE %d is not implemented yet, skipping",
-                             peer_addr.c_str(), route_type);
+                    //LOG_INFO("%s: EVPN ROUTE TYPE %d is not implemented yet, skipping",
+                    //         peer_addr.c_str(), route_type);
                     break;
                 }
             }
@@ -501,8 +501,8 @@ namespace bgp_msg {
             else
                 parsed_data->evpn.push_back(tuple);
 
-            SELF_DEBUG("%s: Processed evpn NLRI read %d of %d, nlri len %d", peer_addr.c_str(),
-                       data_read, data_len, len);
+            //SELF_DEBUG("%s: Processed evpn NLRI read %d of %d, nlri len %d", peer_addr.c_str(),
+            //           data_read, data_len, len);
         }
     }
 } /* namespace bgp_msg */

@@ -77,9 +77,9 @@ public:
      * \param [in]     routerAddr  The router IP address - used for logging
      * \param [in,out] peer_info   Persistent peer information
      */
-    //parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
+    //parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::c, string routerAddr,
     //         BMPReader::peer_info *peer_info);
-    parseBGP(string routerAddr, parseBMP::peer_info *peer_info);
+    parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info);
 
     virtual ~parseBGP();
 

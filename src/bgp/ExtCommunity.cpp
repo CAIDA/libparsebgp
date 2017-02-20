@@ -13,8 +13,8 @@
 #include <iostream>
 #include <arpa/inet.h>
 
-#include "UpdateMsg.h"
-#include "ExtCommunity.h"
+#include "../include/UpdateMsg.h"
+#include "../include/ExtCommunity.h"
 
 namespace bgp_msg {
     /**
@@ -26,8 +26,8 @@ namespace bgp_msg {
      * \param [in]     pperAddr     Printed form of peer address used for logging
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    ExtCommunity::ExtCommunity(Logger *logPtr, std::string peerAddr, bool enable_debug) {
-        logger = logPtr;
+    ExtCommunity::ExtCommunity(std::string peerAddr, bool enable_debug) {
+        //logger = logPtr;
         debug = enable_debug;
         peer_addr = peerAddr;
     }
@@ -54,7 +54,7 @@ namespace bgp_msg {
         extcomm_hdr ec_hdr;
 
         if ( (attr_len % 8) ) {
-            LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
+            //LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
             return;
         }
 
@@ -107,8 +107,8 @@ namespace bgp_msg {
                 case EXT_TYPE_FLOW_SPEC : // TODO: Implement
                 case EXT_TYPE_COS_CAP   : // TODO: Implement
                 default:
-                    LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),
-                            ec_hdr.high_type, ec_hdr.low_type);
+                    //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),
+                    //        ec_hdr.high_type, ec_hdr.low_type);
             }
 
             // Move data pointer to next entry
@@ -282,8 +282,8 @@ namespace bgp_msg {
                 break;
 
             default :
-                LOG_INFO("%s: Extended community common type %d subtype = %d is not yet supported", peer_addr.c_str(),
-                        ec_hdr.high_type, ec_hdr.low_type);
+                //LOG_INFO("%s: Extended community common type %d subtype = %d is not yet supported", peer_addr.c_str(),
+                //        ec_hdr.high_type, ec_hdr.low_type);
                 break;
         }
 
@@ -341,7 +341,7 @@ namespace bgp_msg {
                 break;
             }
             default: {
-                LOG_INFO("Extended community eVPN subtype is not implemented %d", ec_hdr.low_type);
+                //LOG_INFO("Extended community eVPN subtype is not implemented %d", ec_hdr.low_type);
                 break;
             }
         }
@@ -498,8 +498,8 @@ namespace bgp_msg {
             case EXT_GENERIC_OSPF_ROUTE_TYPE :  // deprecated
             case EXT_GENERIC_OSPF_ROUTER_ID :   // deprecated
             case EXT_GENERIC_OSPF_DOM_ID :      // deprecated
-                LOG_INFO("%s: Ignoring deprecated extended community %d/%d", peer_addr.c_str(),
-                        ec_hdr.high_type, ec_hdr.low_type);
+                //LOG_INFO("%s: Ignoring deprecated extended community %d/%d", peer_addr.c_str(),
+                //        ec_hdr.high_type, ec_hdr.low_type);
                 break;
 
             case EXT_GENERIC_LAYER2_INFO : {    // rfc4761
@@ -583,10 +583,10 @@ namespace bgp_msg {
         std::string decodeStr = "";
         extcomm_hdr ec_hdr;
 
-        LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
+        //LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
 
         if ( (attr_len % 20) ) {
-            LOG_NOTICE("%s: Parsing IPv6 extended community len=%d is invalid, expecting divisible by 20", peer_addr.c_str(), attr_len);
+            //LOG_NOTICE("%s: Parsing IPv6 extended community len=%d is invalid, expecting divisible by 20", peer_addr.c_str(), attr_len);
             return;
         }
 
@@ -608,8 +608,8 @@ namespace bgp_msg {
                     break;
 
                 default :
-                    LOG_NOTICE("%s: Unexpected type for IPv6 %d,%d", peer_addr.c_str(),
-                            ec_hdr.high_type, ec_hdr.low_type);
+                    //LOG_NOTICE("%s: Unexpected type for IPv6 %d,%d", peer_addr.c_str(),
+                    //        ec_hdr.high_type, ec_hdr.low_type);
                     break;
             }
         }
@@ -666,8 +666,8 @@ namespace bgp_msg {
                 break;
 
             default :
-                LOG_INFO("%s: Extended community ipv6 specific type %d subtype = %d is not yet supported", peer_addr.c_str(),
-                        ec_hdr.high_type, ec_hdr.low_type);
+                //LOG_INFO("%s: Extended community ipv6 specific type %d subtype = %d is not yet supported", peer_addr.c_str(),
+                //        ec_hdr.high_type, ec_hdr.low_type);
                 break;
         }
 

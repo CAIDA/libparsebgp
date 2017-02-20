@@ -5,10 +5,10 @@
 #include <cinttypes>
 #include <sys/types.h>
 
-#include "MPReachAttr.h"
-#include "MPUnReachAttr.h"
-#include "Logger.h"
-#include "MsgBusInterface.hpp"
+#include "../include/MPReachAttr.h"
+#include "../include/MPUnReachAttr.h"
+//#include "Logger.h"
+//#include "MsgBusInterface.hpp"
 
 namespace bgp_msg {
 
@@ -34,7 +34,9 @@ namespace bgp_msg {
          * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
-        EVPN(Logger *logPtr, std::string peerAddr, bool isUnreach,
+        //EVPN(Logger *logPtr, std::string peerAddr, bool isUnreach,
+        //     UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
+        EVPN(std::string peerAddr, bool isUnreach,
                    UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
         virtual ~EVPN();
 
@@ -80,7 +82,7 @@ namespace bgp_msg {
 
     private:
         bool             debug;                           ///< debug flag to indicate debugging
-        Logger           *logger;                         ///< Logging class pointer
+        //Logger           *logger;                         ///< Logging class pointer
         std::string      peer_addr;                       ///< Printed form of the peer address for logging
         bool             isUnreach;                       ///< True if MP UNREACH, false if MP REACH
 

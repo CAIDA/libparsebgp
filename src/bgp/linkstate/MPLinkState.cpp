@@ -8,8 +8,8 @@
  */
 #include <arpa/inet.h>
 
-#include "MPLinkState.h"
-#include "md5.h"
+#include "../../include/MPLinkState.h"
+#include "../../include/md5.h"
 
 namespace bgp_msg {
     /**
@@ -63,13 +63,13 @@ namespace bgp_msg {
          */
         switch (nlri.safi) {
             case bgp::BGP_SAFI_BGPLS: // Unicast BGP-LS
-                SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
+                //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
                 parseLinkStateNlriData(nlri.nlri_data, nlri.nlri_len);
                 break;
 
             default :
-                LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
-                        peer_addr.c_str(), nlri.afi, nlri.safi);
+                //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
+                //        peer_addr.c_str(), nlri.afi, nlri.safi);
                 return;
         }
     }
@@ -90,12 +90,12 @@ namespace bgp_msg {
          */
         switch (nlri.safi) {
             case bgp::BGP_SAFI_BGPLS: // Unicast BGP-LS
-                SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
+                //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
                 parseLinkStateNlriData(nlri.nlri_data, nlri.nlri_len);
                 break;
 
             default :
-                LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
+                //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
                         peer_addr.c_str(), nlri.afi, nlri.safi);
                 return;
         }
@@ -117,7 +117,7 @@ namespace bgp_msg {
         // Process the NLRI data
         while (nlri_len_read < len) {
 
-            SELF_DEBUG("NLRI read=%d total = %d", nlri_len_read, len);
+            //SELF_DEBUG("NLRI read=%d total = %d", nlri_len_read, len);
 
             /*
              * Parse the NLRI TLV
@@ -247,18 +247,18 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     void MPLinkState::parseNlriNode(u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        MsgBusInterface::obj_ls_node node_tbl;
+        parseBMP::obj_ls_node node_tbl;
         bzero(&node_tbl, sizeof(node_tbl));
 
         if (data_len < 4) {
-            LOG_WARN("%s: bgp-ls: Unable to parse node NLRI since it's too short (invalid)", peer_addr.c_str());
+            //LOG_WARN("%s: bgp-ls: Unable to parse node NLRI since it's too short (invalid)", peer_addr.c_str());
             return;
         }
 
         node_tbl.id       = id;
         snprintf(node_tbl.protocol, sizeof(node_tbl.protocol), "%s", decodeNlriProtocolId(proto_id).c_str());
 
-        SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, node_tbl.protocol);
+        //SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, node_tbl.protocol);
 
         /*
          * Parse the local node descriptor sub-tlv

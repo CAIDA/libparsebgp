@@ -7,9 +7,9 @@
  *
  */
 
-#include "MPUnReachAttr.h"
-#include "MPLinkState.h"
-#include "EVPN.h"
+#include "../include/MPUnReachAttr.h"
+#include "../include/MPLinkState.h"
+#include "../include/EVPN.h"
 
 
 #include <arpa/inet.h>
@@ -26,8 +26,10 @@ namespace bgp_msg {
  * \param [in]     peer_info                Persistent Peer info pointer
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
-MPUnReachAttr::MPUnReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
-        : logger{logPtr}, debug{enable_debug}{
+//MPUnReachAttr::MPUnReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
+//        : logger{logPtr}, debug{enable_debug}{
+MPUnReachAttr::MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug)
+        : debug{enable_debug}{
     this->peer_addr = peerAddr;
     this->peer_info = peer_info;
 }
@@ -65,14 +67,14 @@ void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, bgp_msg::Up
      * Make sure the parsing doesn't exceed buffer
      */
     if (attr_len < 0) {
-        LOG_NOTICE("%s: MP_UNREACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
+        //LOG_NOTICE("%s: MP_UNREACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
         return;
     }
 
-    SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), nlri.afi, nlri.safi);
+    //SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), nlri.afi, nlri.safi);
 
     if (nlri.nlri_len == 0) {
-        LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
+        //LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
 
     } else {
         /*
@@ -106,7 +108,7 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, UpdateMsg::parsed_update_dat
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            MPLinkState ls(logger, peer_addr, &parsed_data, debug);
+            MPLinkState ls(peer_addr, &parsed_data, debug);
             ls.parseUnReachLinkState(nlri);
             break;
         }
@@ -117,13 +119,13 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, UpdateMsg::parsed_update_dat
             switch (nlri.safi) {
                 case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    EVPN evpn(logger, peer_addr, true, &parsed_data, debug);
+                    EVPN evpn(peer_addr, true, &parsed_data, debug);
                     evpn.parseNlriData(nlri.nlri_data, nlri.nlri_len);
                     break;
                 }
 
                 default :
-                    LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
+                    //LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
                              peer_addr.c_str(), nlri.safi);
             }
 
@@ -131,7 +133,7 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, UpdateMsg::parsed_update_dat
         }
 
         default : // Unknown
-            LOG_INFO("%s: MP_UNREACH AFI=%d is not implemented yet, skipping", peer_addr.c_str(), nlri.afi);
+            //LOG_INFO("%s: MP_UNREACH AFI=%d is not implemented yet, skipping", peer_addr.c_str(), nlri.afi);
             return;
     }
 }
@@ -170,8 +172,8 @@ void MPUnReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_unreach_nlri &nlri, Update
             break;
 
         default :
-            LOG_INFO("%s: MP_UNREACH AFI=ipv4/ipv6 (%d) SAFI=%d is not implemented yet, skipping for now",
-                     peer_addr.c_str(), isIPv4, nlri.safi);
+            //LOG_INFO("%s: MP_UNREACH AFI=ipv4/ipv6 (%d) SAFI=%d is not implemented yet, skipping for now",
+            //         peer_addr.c_str(), isIPv4, nlri.safi);
             return;
     }
 }
