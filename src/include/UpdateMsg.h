@@ -10,16 +10,16 @@
 #ifndef UPDATEMSG_H_
 #define UPDATEMSG_H_
 
-#include "Logger.h"
-#include "bgp_common.h"
-#include "MsgBusInterface.hpp"
-#include "AddPathDataContainer.h"
+//#include "Logger.h"
+#include "../include/bgp_common.h"
+#include "../include/AddPathDataContainer.h"
+#include "../include/parseBMP.h"
 
 #include <string>
 #include <list>
 #include <array>
 #include <map>
-#include <bmp/BMPReader.h>
+//#include <bmp/BMPReader.h>
 
 namespace bgp_msg {
 /**
@@ -124,9 +124,111 @@ public:
      * Parsed data structure for BGP-LS
      */
     struct parsed_data_ls {
-        std::list<MsgBusInterface::obj_ls_node>   nodes;        ///< List of Link state nodes
-        std::list<MsgBusInterface::obj_ls_link>   links;        ///< List of link state links
-        std::list<MsgBusInterface::obj_ls_prefix> prefixes;     ///< List of link state prefixes
+        std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
+        std::list<obj_ls_link>   links;        ///< List of link state links
+        std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+    };
+
+    /**
+     * OBJECT: ls_node
+     *
+     * BGP-LS Node table schema
+     */
+    struct obj_ls_node {
+        u_char      hash_id[16];                ///< hash id for the entry
+        uint64_t    id;                         ///< Routing universe identifier
+        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        uint32_t    asn;                        ///< BGP ASN
+        uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
+        uint8_t     igp_router_id[8];           ///< IGP router ID
+        uint8_t     ospf_area_Id[4];            ///< OSPF area ID
+        char        protocol[32];               ///< String representation of the protocol name
+        uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID
+        uint8_t     isis_area_id[9];            ///< IS-IS area ID
+        char        flags[32];                  ///< String representation of the flag bits
+        char        name[255];                  ///< Name of router
+        char        mt_id[255];                 ///< Multi-Topology ID
+        char        sr_capabilities_tlv[255];   ///< SR Capabilities TLV
+    };
+
+    /**
+    * OBJECT: ls_link
+    *
+    * BGP-LS Link table schema
+    */
+    struct obj_ls_link {
+        u_char      hash_id[16];                ///< hash id for the entry
+        uint64_t    id;                         ///< Routing universe identifier
+        uint32_t    mt_id;                      ///< Multi-Topology ID
+
+        uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
+        uint8_t     igp_router_id[8];           ///< IGP router ID (local)
+        uint8_t     remote_igp_router_id[8];    ///< IGP router ID (remote)
+        uint8_t     ospf_area_Id[4];            ///< OSPF area ID
+        uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID (local)
+        uint8_t     remote_router_id[16];       ///< IPv4 or IPv6 router ID (remote)
+
+        uint32_t    local_node_asn;             ///< Local node asn
+        uint32_t    remote_node_asn;            ///< Remote node asn
+        uint32_t    local_bgp_router_id;        ///< Local BGP router id (draft-ietf-idr-bgpls-segment-routing-epe)
+        uint32_t    remote_bgp_router_id;       ///< Remote BGP router id (draft-ietf-idr-bgpls-segment-routing-epe)
+
+        uint8_t     isis_area_id[9];            ///< IS-IS area ID
+
+        char        protocol[32];               ///< String representation of the protocol name
+        uint8_t     intf_addr[16];              ///< Interface binary address
+        uint8_t     nei_addr[16];               ///< Neighbor binary address
+        uint32_t    local_link_id;              ///< Local Link ID (IS-IS)
+        uint32_t    remote_link_id;             ///< Remote Link ID (IS-IS)
+        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        u_char      local_node_hash_id[16];     ///< Local node hash ID
+        u_char      remote_node_hash_id[16];    ///< Remove node hash ID
+        uint32_t    admin_group;                ///< Admin group
+        uint32_t    max_link_bw;                ///< Maximum link bandwidth
+        uint32_t    max_resv_bw;                ///< Maximum reserved bandwidth
+        char        unreserved_bw[100];         ///< string for unreserved bandwidth, a set of 8 uint32_t values
+
+        uint32_t    te_def_metric;              ///< Default TE metric
+        char        protection_type[60];        ///< String representation for the protection types
+        char        mpls_proto_mask[32];        ///< Either LDP or RSVP-TE
+        uint32_t    igp_metric;                 ///< IGP metric
+        char        srlg[128];                  ///< String representation of the shared risk link group values
+        char        name[255];                  ///< Name of router
+        char        peer_node_sid[128];         ///< Peer node side (draft-ietf-idr-bgpls-segment-routing-epe)
+        char        peer_adj_sid[128];          ///< Peer Adjency Segment Identifier
+    };
+
+    /**
+     * OBJECT: ls_prefix
+     *
+     * BGP-LS Prefix table schema
+     */
+    struct obj_ls_prefix {
+        u_char      hash_id[16];            ///< hash for the entry
+        uint64_t    id;                     ///< Routing universe identifier
+        char        protocol[32];           ///< String representation of the protocol name
+
+        uint32_t    bgp_ls_id;              ///< BGP-LS Identifier
+        uint8_t     igp_router_id[8];       ///< IGP router ID
+        uint8_t     ospf_area_Id[4];        ///< OSPF area ID
+        uint8_t     router_id[16];          ///< IPv4 or IPv6 router ID
+        uint8_t     isis_area_id[9];        ///< IS-IS area ID
+        uint8_t     intf_addr[16];          ///< Interface binary address
+        uint8_t     nei_addr[16];           ///< Neighbor binary address
+
+        u_char      local_node_hash_id[16]; ///< Local node hash ID
+        uint32_t    mt_id;                  ///< Multi-Topology ID
+        uint32_t    metric;                 ///< Prefix metric
+        bool        isIPv4;                 ///< True if interface/neighbor is IPv4, false otherwise
+        u_char      prefix_len;             ///< Length of prefix in bits
+        char        ospf_route_type[32];    ///< String representation of the OSPF route type
+        uint8_t     prefix_bin[16];         ///< Prefix in binary form
+        uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
+        char        igp_flags[32];          ///< String representation of the IGP flags
+        uint32_t    route_tag;              ///< Route tag
+        uint64_t    ext_route_tag;          ///< Extended route tag
+        uint8_t     ospf_fwd_addr[16];      ///< IPv4/IPv6 OSPF forwarding address
+        char        sid_tlv[128];           ///< Prefix-SID TLV
     };
 
     /**
@@ -157,7 +259,7 @@ public:
      * \param [in,out] peer_info   Persistent peer information
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-     UpdateMsg(std::string peerAddr, std::string routerAddr, BMPReader::peer_info *peer_info,
+     UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info,
                 bool enable_debug=false);
      virtual ~UpdateMsg();
 
@@ -179,11 +281,11 @@ public:
 
 private:
     bool                    debug;                           ///< debug flag to indicate debugging
-    Logger                  *logger;                         ///< Logging class pointer
+    //Logger                  *logger;                         ///< Logging class pointer
     std::string             peer_addr;                       ///< Printed form of the peer address for logging
     std::string             router_addr;                     ///< Router IP address - used for logging
     bool                    four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
-    BMPReader::peer_info    *peer_info;                      ///< Persistent Peer info pointer
+    parseBMP::peer_info    *peer_info;                      ///< Persistent Peer info pointer
 
 
     /**

@@ -36,7 +36,7 @@ namespace bgp_msg {
         : logger(logPtr),
           debug(enable_debug),
           peer_info(peer_info) {*/
-UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, BMPReader::peer_info *peer_info,
+UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info,
                      bool enable_debug)
         : debug(enable_debug),
           peer_info(peer_info) {

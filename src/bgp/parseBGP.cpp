@@ -48,7 +48,7 @@ using namespace std;
  */
 //parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
 //                   BMPReader::peer_info *peer_info) {
-parseBGP::parseBGP(MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr, BMPReader::peer_info *peer_info) {
+parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, BMPReader::peer_info *peer_info) {
     debug = false;
 
     //logger = logPtr;
