@@ -28,6 +28,7 @@
 #include "../include/OpenMsg.h"
 #include "../include/UpdateMsg.h"
 #include "../include/bgp_common.h"
+#include "../include/MPLinkStateAttr.h"
 
 using namespace std;
 
@@ -135,8 +136,9 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size) {
         bgp_msg::parsed_notify_msg parsed_msg;
         bgp_msg::NotificationMsg nMsg(debug);
         if ( (rval=nMsg.parseNotify(data, data_bytes_remaining, parsed_msg)))
-           // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
-
+        {
+            // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
+        }
         else {
             data += 2;                                                 // Move pointer past notification message
             data_bytes_remaining -= 2;
@@ -187,7 +189,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
                                       local_bgp_id, cap_list);
 
         if (!read_size) {
-            LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
+     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
             throw "Failed to read open message";
         }
 
@@ -214,7 +216,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
         strncpy(up_event->sent_cap, cap_str.c_str(), sizeof(up_event->sent_cap));
 
     } else {
-        LOG_ERR("%s: rtr=%s: BGP message type is not BGP OPEN, cannot parse the open message",  p_entry->peer_addr, router_addr.c_str());
+  //      LOG_ERR("%s: rtr=%s: BGP message type is not BGP OPEN, cannot parse the open message",  p_entry->peer_addr, router_addr.c_str());
         throw "ERROR: Invalid BGP MSG for BMP Sent OPEN message, expected OPEN message.";
     }
 
@@ -230,7 +232,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
                                       up_event->remote_hold_time, remote_bgp_id, cap_list);
 
         if (!read_size) {
-            LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
+     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
             throw "Failed to read open message";
         }
 
@@ -257,8 +259,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
         strncpy(up_event->recv_cap, cap_str.c_str(), sizeof(up_event->recv_cap));
 
     } else {
-        LOG_ERR("%s: rtr=%s: BGP message type is not BGP OPEN, cannot parse the open message",
-                p_entry->peer_addr, router_addr.c_str());
+  //      LOG_ERR("%s: rtr=%s: BGP message type is not BGP OPEN, cannot parse the open message",p_entry->peer_addr, router_addr.c_str());
         throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
     }
 
@@ -285,8 +286,7 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
      * Error out if data size is not large enough for common header
      */
     if (size < BGP_MSG_HDR_LEN) {
-        LOG_WARN("%s: rtr=%s: BGP message is being parsed is %d but expected at least %d in size",
-                p_entry->peer_addr, router_addr.c_str(), size, BGP_MSG_HDR_LEN);
+ //       LOG_WARN("%s: rtr=%s: BGP message is being parsed is %d but expected at least %d in size",p_entry->peer_addr, router_addr.c_str(), size, BGP_MSG_HDR_LEN);
         return 0;
     }
 
@@ -303,11 +303,10 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
      *      It is expected that the passed bgp message buffer holds the complete BGP message to be parsed
      */
     if (common_hdr.len > size) {
-        LOG_WARN("%s: rtr=%s: BGP message size of %hu is greater than passed data buffer, cannot parse the BGP message",
-                p_entry->peer_addr, router_addr.c_str(), common_hdr.len, size);
+//        LOG_WARN("%s: rtr=%s: BGP message size of %hu is greater than passed data buffer, cannot parse the BGP message",p_entry->peer_addr, router_addr.c_str(), common_hdr.len, size);
     }
 
-    SELF_DEBUG("%s: rtr=%s: BGP hdr len = %u, type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.len, common_hdr.type);
+ //   SELF_DEBUG("%s: rtr=%s: BGP hdr len = %u, type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.len, common_hdr.type);
 
     /*
      * Validate the message type as being allowed/accepted
@@ -320,12 +319,11 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
             break;
 
         case BGP_MSG_ROUTE_REFRESH: // Route Refresh message
-            LOG_NOTICE("%s: rtr=%s: Received route refresh, nothing to do with this message currently.",
-                        p_entry->peer_addr, router_addr.c_str());
+ //           LOG_NOTICE("%s: rtr=%s: Received route refresh, nothing to do with this message currently.",p_entry->peer_addr, router_addr.c_str());
             break;
 
         default :
-            LOG_WARN("%s: rtr=%s: Unsupported BGP message type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.type);
+ //           LOG_WARN("%s: rtr=%s: Unsupported BGP message type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.type);
             break;
     }
 
@@ -339,21 +337,21 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  *
  * \param  parsed_data          Reference to the parsed update data
  */
-/*void parseBGP::UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
+void parseBGP::UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
     /*
      * Update the path attributes
-     *
+     */
     UpdateDBAttrs(parsed_data.attrs);
 
     /*
      * Update the bgp-ls data
-     *
+     */
     UpdateDbBgpLs(false, parsed_data.ls, parsed_data.ls_attrs);
     UpdateDbBgpLs(true, parsed_data.ls_withdrawn, parsed_data.ls_attrs);
 
     /*
      * Update the advertised prefixes (both ipv4 and ipv6)
-     *
+     */
     UpdateDBAdvPrefixes(parsed_data.advertised, parsed_data.attrs);
 
     UpdateDBL3Vpn(false,parsed_data.vpn, parsed_data.attrs);
@@ -364,10 +362,10 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
 
     /*
      * Update withdraws (both ipv4 and ipv6)
-     *
+     */
     UpdateDBWdrawnPrefixes(parsed_data.withdrawn);
 
-}*/
+}
 
 /**
  * Update the Database path attributes
@@ -376,11 +374,11 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  *
  * \param  attrs            Reference to the parsed attributes map
  */
-/*void parseBGP::UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
+void parseBGP::UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
 
     /*
      * Setup the record
-     *
+     */
     base_attr.as_path                  = (string)attrs[bgp_msg::ATTR_TYPE_AS_PATH];
     base_attr.cluster_list             = (string)attrs[bgp_msg::ATTR_TYPE_CLUSTER_LIST];
     base_attr.community_list           = (string)attrs[bgp_msg::ATTR_TYPE_COMMUNITIES];
@@ -433,20 +431,20 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
 
     else {
         // Skip adding path attributes if next hop is missing
-        SELF_DEBUG("%s: no next-hop, must be unreach; not sending attributes to message bus", p_entry->peer_addr);
+    //    SELF_DEBUG("%s: no next-hop, must be unreach; not sending attributes to message bus", p_entry->peer_addr);
         bzero(base_attr.next_hop, sizeof(base_attr.next_hop));
         bzero(path_hash_id, sizeof(path_hash_id));
         return;
     }
 
-    SELF_DEBUG("%s: adding attributes to message bus", p_entry->peer_addr);
+  //  SELF_DEBUG("%s: adding attributes to message bus", p_entry->peer_addr);
 
     // Update the DB entry
-    mbus_ptr->update_baseAttribute(*p_entry, base_attr, mbus_ptr->BASE_ATTR_ACTION_ADD);
+   // mbus_ptr->update_baseAttribute(*p_entry, base_attr, mbus_ptr->BASE_ATTR_ACTION_ADD);
 
     // Update the class instance variable path_hash_id
     memcpy(path_hash_id, base_attr.hash_id, sizeof(path_hash_id));
-}*/
+}
 
 /**
  * Update the Database advertised l3vpn 
@@ -457,16 +455,16 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  * \param [in] prefixes        Reference to the list<vpn_tuple> of advertised vpns
  * \param [in] attrs           Reference to the parsed attributes map
  */
-/*void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
+void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
                              bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
-    vector<MsgBusInterface::obj_vpn> rib_list;
-    MsgBusInterface::obj_vpn         rib_entry;
+    vector<parseBMP::obj_vpn> rib_list;
+    parseBMP::obj_vpn         rib_entry;
     uint32_t                         value_32bit;
     uint64_t                         value_64bit;
 
     /*
      * Loop through all vpn and add/update them in the DB
-     *
+     */
     for (std::list<bgp::vpn_tuple>::iterator it = prefixes.begin();
                                                 it != prefixes.end();
                                                 it++) {
@@ -536,21 +534,19 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
         rib_entry.path_id = tuple.path_id;
         snprintf(rib_entry.labels, sizeof(rib_entry.labels), "%s", tuple.labels.c_str());
 
-        SELF_DEBUG("%s: %s vpn=%s len=%d", p_entry->peer_addr, remove ? "removing" : "adding",
-                   rib_entry.prefix, rib_entry.prefix_len);
+//        SELF_DEBUG("%s: %s vpn=%s len=%d", p_entry->peer_addr, remove ? "removing" : "adding",rib_entry.prefix, rib_entry.prefix_len);
 
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
 
-    if (rib_list.size() > 0) {
-        mbus_ptr->update_L3Vpn(*p_entry, rib_list, &base_attr,
-                             remove ? mbus_ptr->VPN_ACTION_DEL : mbus_ptr->VPN_ACTION_ADD);
-    }
+    //if (rib_list.size() > 0) {
+    //    mbus_ptr->update_L3Vpn(*p_entry, rib_list, &base_attr,remove ? mbus_ptr->VPN_ACTION_DEL : mbus_ptr->VPN_ACTION_ADD);
+    //}
 
-    rib_list.clear();
-    prefixes.clear();
-}*/
+    //rib_list.clear();
+    //prefixes.clear();
+}
 
 /**
  * Updates for either advertised or withdrawn Evpn NLRI's
@@ -559,15 +555,15 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  * \param [in] nlris           Reference to the list<evpn_tuple>
  * \param [in] attrs           Reference to the parsed attributes map
  */
-/*void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
+void parseBGP::UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris,
                            bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
 
-    vector<MsgBusInterface::obj_evpn> rib_list;
-    MsgBusInterface::obj_evpn         rib_entry;
+    vector<parseBMP::obj_evpn> rib_list;
+    parseBMP::obj_evpn         rib_entry;
 
     /*
      * Loop through all vpn and add/update them in the DB
-     *
+     */
     for (std::list<bgp::evpn_tuple>::iterator it = nlris.begin();
          it != nlris.end();
          it++) {
@@ -594,21 +590,19 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
 
         rib_entry.path_id = tuple.path_id;
 
-        SELF_DEBUG("%s: %s evpn mac=%s ip=%s", p_entry->peer_addr,
-                   remove ? "removing" : "adding", rib_entry.mac, rib_entry.ip);
+     //   SELF_DEBUG("%s: %s evpn mac=%s ip=%s", p_entry->peer_addr,remove ? "removing" : "adding", rib_entry.mac, rib_entry.ip);
 
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
 
     // Update the DB
-    if (rib_list.size() > 0)
-        mbus_ptr->update_eVPN(*p_entry, rib_list, &base_attr,
-                              remove ? mbus_ptr->VPN_ACTION_DEL : mbus_ptr->VPN_ACTION_ADD);
+//    if (rib_list.size() > 0)
+//        mbus_ptr->update_eVPN(*p_entry, rib_list, &base_attr,remove ? mbus_ptr->VPN_ACTION_DEL : mbus_ptr->VPN_ACTION_ADD);
 
     rib_list.clear();
     nlris.clear();
-}*/
+}
 
 
 /**
@@ -619,16 +613,16 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  * \param  adv_prefixes         Reference to the list<prefix_tuple> of advertised prefixes
  * \param  attrs            Reference to the parsed attributes map
  */
-/*void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
+void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
                                    bgp_msg::UpdateMsg::parsed_attrs_map &attrs) {
-    vector<MsgBusInterface::obj_rib> rib_list;
-    MsgBusInterface::obj_rib         rib_entry;
+    vector<parseBMP::obj_rib> rib_list;
+    parseBMP::obj_rib         rib_entry;
     uint32_t                         value_32bit;
     uint64_t                         value_64bit;
 
     /*
      * Loop through all prefixes and add/update them in the DB
-     *
+     */
     for (std::list<bgp::prefix_tuple>::iterator it = adv_prefixes.begin();
                                                 it != adv_prefixes.end();
                                                 it++) {
@@ -692,19 +686,19 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
         rib_entry.path_id = tuple.path_id;
         snprintf(rib_entry.labels, sizeof(rib_entry.labels), "%s", tuple.labels.c_str());
 
-        SELF_DEBUG("%s: Adding prefix=%s len=%d", p_entry->peer_addr, rib_entry.prefix, rib_entry.prefix_len);
+     //   SELF_DEBUG("%s: Adding prefix=%s len=%d", p_entry->peer_addr, rib_entry.prefix, rib_entry.prefix_len);
 
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
 
     // Update the DB
-    if (rib_list.size() > 0)
-        mbus_ptr->update_unicastPrefix(*p_entry, rib_list, &base_attr, mbus_ptr->UNICAST_PREFIX_ACTION_ADD);
+   // if (rib_list.size() > 0)
+    //    mbus_ptr->update_unicastPrefix(*p_entry, rib_list, &base_attr, mbus_ptr->UNICAST_PREFIX_ACTION_ADD);
 
-    rib_list.clear();
-    adv_prefixes.clear();
-}*/
+   // rib_list.clear();
+   // adv_prefixes.clear();
+}
 
 /**
  * Update the Database withdrawn prefixes
@@ -713,13 +707,14 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  *
  * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
  */
-/*void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes) {
-    vector<MsgBusInterface::obj_rib> rib_list;
-    MsgBusInterface::obj_rib         rib_entry;
+void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes) {
+    vector<parseBMP::obj_rib> rib_list;
+    parseBMP::obj_rib         rib_entry;
 
     /*
      * Loop through all prefixes and add/update them in the DB
      *
+     */
     for (std::list<bgp::prefix_tuple>::iterator it = wdrawn_prefixes.begin();
                                                 it != wdrawn_prefixes.end();
                                                 it++) {
@@ -738,19 +733,19 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
         rib_entry.path_id = tuple.path_id;
         snprintf(rib_entry.labels, sizeof(rib_entry.labels), "%s", tuple.labels.c_str());
 
-        SELF_DEBUG("%s: Removing prefix=%s len=%d", p_entry->peer_addr, rib_entry.prefix, rib_entry.prefix_len);
+        //SELF_DEBUG("%s: Removing prefix=%s len=%d", p_entry->peer_addr, rib_entry.prefix, rib_entry.prefix_len);
 
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
 
     // Update the DB
-    if (rib_list.size() > 0)
-        mbus_ptr->update_unicastPrefix(*p_entry, rib_list, NULL, mbus_ptr->UNICAST_PREFIX_ACTION_DEL);
+   // if (rib_list.size() > 0)
+    //    mbus_ptr->update_unicastPrefix(*p_entry, rib_list, NULL, mbus_ptr->UNICAST_PREFIX_ACTION_DEL);
 
-    rib_list.clear();
-    wdrawn_prefixes.clear();
-}*/
+   // rib_list.clear();
+    //wdrawn_prefixes.clear();
+}
 
 /**
  * Update the Database for bgp-ls
@@ -763,17 +758,16 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
  * \param [in] ls_data     Reference to the parsed link state nlri information
  * \param [in] ls_attrs    Reference to the parsed link state attribute information
  */
-/*void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_data,
+void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_data,
                              bgp_msg::UpdateMsg::parsed_ls_attrs_map &ls_attrs) {
     /*
      * Update table entry with attributes based on NLRI
-     *
+     */
     if (ls_data.nodes.size() > 0) {
-        SELF_DEBUG("%s: Updating BGP-LS: Nodes %d", p_entry->peer_addr, ls_data.nodes.size());
+        //SELF_DEBUG("%s: Updating BGP-LS: Nodes %d", p_entry->peer_addr, ls_data.nodes.size());
 
         // Merge attributes to each table entry
-        for (list<MsgBusInterface::obj_ls_node>::iterator it = ls_data.nodes.begin();
-                it != ls_data.nodes.end(); it++) {
+        for (list<parseBMP::obj_ls_node>::iterator it = ls_data.nodes.begin();it != ls_data.nodes.end(); it++) {
 
             if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_NAME) != ls_attrs.end())
                 memcpy((*it).name, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_NAME].data(), sizeof((*it).name));
@@ -802,17 +796,17 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
             }
         }
 
-        if (remove)
-            mbus_ptr->update_LsNode(*p_entry, base_attr, ls_data.nodes, mbus_ptr->LS_ACTION_DEL);
-        else
-            mbus_ptr->update_LsNode(*p_entry, base_attr, ls_data.nodes, mbus_ptr->LS_ACTION_ADD);
+//        if (remove)
+//            mbus_ptr->update_LsNode(*p_entry, base_attr, ls_data.nodes, mbus_ptr->LS_ACTION_DEL);
+//        else
+//            mbus_ptr->update_LsNode(*p_entry, base_attr, ls_data.nodes, mbus_ptr->LS_ACTION_ADD);
     }
 
     if (ls_data.links.size() > 0) {
-        SELF_DEBUG("%s: Updating BGP-LS: Links %d ", p_entry->peer_addr, ls_data.links.size());
+        //SELF_DEBUG("%s: Updating BGP-LS: Links %d ", p_entry->peer_addr, ls_data.links.size());
 
         // Merge attributes to each table entry
-        for (list<MsgBusInterface::obj_ls_link>::iterator it = ls_data.links.begin();
+        for (list<parseBMP::obj_ls_link>::iterator it = ls_data.links.begin();
              it != ls_data.links.end(); it++) {
 
             if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
@@ -873,18 +867,17 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
                 memcpy((*it).peer_adj_sid, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_ADJACENCY_SID].data(), sizeof((*it).peer_adj_sid));
         }
 
-        if (remove)
-            mbus_ptr->update_LsLink(*p_entry, base_attr, ls_data.links, mbus_ptr->LS_ACTION_DEL);
-        else
-            mbus_ptr->update_LsLink(*p_entry, base_attr, ls_data.links, mbus_ptr->LS_ACTION_ADD);
+//        if (remove)
+//            mbus_ptr->update_LsLink(*p_entry, base_attr, ls_data.links, mbus_ptr->LS_ACTION_DEL);
+//        else
+//            mbus_ptr->update_LsLink(*p_entry, base_attr, ls_data.links, mbus_ptr->LS_ACTION_ADD);
     }
 
     if (ls_data.prefixes.size() > 0) {
-        SELF_DEBUG("%s: Updating BGP-LS: Prefixes %d ", p_entry->peer_addr, ls_data.prefixes.size());
+        //SELF_DEBUG("%s: Updating BGP-LS: Prefixes %d ", p_entry->peer_addr, ls_data.prefixes.size());
 
         // Merge attributes to each table entry
-        for (list<MsgBusInterface::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();
-             it != ls_data.prefixes.end(); it++) {
+        for (list<parseBMP::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();it != ls_data.prefixes.end(); it++) {
 
             if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
                 memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
@@ -916,18 +909,18 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
                 memcpy((*it).sid_tlv, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_SID].data(), sizeof((*it).sid_tlv));
         }
 
-        if (remove)
-            mbus_ptr->update_LsPrefix(*p_entry, base_attr, ls_data.prefixes, mbus_ptr->LS_ACTION_DEL);
-        else
-            mbus_ptr->update_LsPrefix(*p_entry, base_attr, ls_data.prefixes, mbus_ptr->LS_ACTION_ADD);
+//        if (remove)
+//            mbus_ptr->update_LsPrefix(*p_entry, base_attr, ls_data.prefixes, mbus_ptr->LS_ACTION_DEL);
+//        else
+//            mbus_ptr->update_LsPrefix(*p_entry, base_attr, ls_data.prefixes, mbus_ptr->LS_ACTION_ADD);
     }
 
     // Data stored, no longer needed, purge it
-    ls_attrs.clear();
-    ls_data.prefixes.clear();
-    ls_data.links.clear();
-    ls_data.nodes.clear();
-}*/
+//    ls_attrs.clear();
+//    ls_data.prefixes.clear();
+//    ls_data.links.clear();
+//    ls_data.nodes.clear();
+}
 
 
 void parseBGP::enableDebug() {
