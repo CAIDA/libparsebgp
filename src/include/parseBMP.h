@@ -33,7 +33,7 @@
  *          class will read directly from the socket to read the BMP message.
  */
 
-using namespace std:
+using namespace std;
 
 class parseBMP {
 public:
@@ -117,7 +117,7 @@ public:
         uint32_t    timestamp_us;           ///< Timestamp microseconds
     }__attribute__ ((__packed__));
 	
-
+    obj_router r_entry;
 /**
      * OBJECT: bgp_peers
      *
@@ -138,6 +138,7 @@ public:
         uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
         uint32_t    timestamp_us;           ///< Timestamp microseconds
     }__attribute__ ((__packed__));
+    obj_bgp_peer p_entry;
 
 /**
      * OBJECT: peer_down_events
@@ -151,6 +152,7 @@ public:
         char            error_text[255];    ///< BGP error text string
     }__attribute__ ((__packed__));
 
+    obj_peer_down_event down_event;
     /**
      * OBJECT: peer_up_events
      *
@@ -176,7 +178,7 @@ public:
         char        recv_cap[4096];         ///< Received Open param capabilities
     }__attribute__ ((__packed__));
 
-
+    obj_peer_up_event up_event;
 
 /**
      * OBJECT: stats_reports
@@ -195,7 +197,7 @@ public:
         uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
     }__attribute__ ((__packed__));
 
-
+    obj_stats_report stats;
      /**
       * BMP common header
       */
@@ -320,7 +322,7 @@ public:
      *
      * \param [in] sock     Socket to read the BMP message from
      *
-     * \throws (const char *) on error.   String will detail error message.
+     * throws (const char *) on error.   String will detail error message.
      */
     char handleMessage(int sock);
 
@@ -332,7 +334,7 @@ public:
      *
      * \return true if error, false if no error
      */
-    bool handleStatsReport(int sock, MsgBusInterface::obj_stats_report &stats);
+    bool handleStatsReport(int sock);
 
     /**
      * handle the initiation message and udpate the router entry
@@ -371,7 +373,7 @@ public:
      *
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
-    bool parsePeerDownEventHdr(int sock, u_char& bmp_reason);
+    bool parsePeerDownEventHdr(int sock);
 
     /**
      * Parse the v3 peer up BMP header
@@ -383,7 +385,7 @@ public:
      *
      * \returns true if successfully parsed the bmp peer up header, false otherwise
      */
-    bool parsePeerUpEventHdr(int sock, MsgBusInterface::obj_peer_up_event &up_event);
+    bool parsePeerUpEventHdr(int sock);
 
     /**
      * get current BMP message type

@@ -148,8 +148,7 @@ bool parseBMP::parseMsg(int read_fd)
                     bufferBMPMessage(read_fd);
 
                     // Prepare the BGP parser
-                    pBGP = new parseBGP(p_entry, (char *)r_entry.ip_addr,
-                                        &peer_info_map[peer_info_key]);
+                    pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
 
         //            if (cfg->debug_bgp)
         //               pBGP->enableDebug();
@@ -268,7 +267,7 @@ ssize_t parseBMP::Recv(int sockfd, void *buf, size_t len, int flags) {
  *
  * \param [in] sock     Socket to read the BMP message from
  *
- * \throws (const char *) on error.   String will detail error message.
+ * //throws (const  char *) on error.   String will detail error message.
  */
 char parseBMP::handleMessage(int sock) {
     unsigned char ver;
@@ -292,13 +291,13 @@ char parseBMP::handleMessage(int sock) {
 
     // Handle the older versions
     else if (ver == 1 || ver == 2) {
-        SELF_DEBUG("Older BMP version of %d, consider upgrading the router to support BMPv3", ver);
+        //       SELF_DEBUG("Older BMP version of %d, consider upgrading the router to support BMPv3", ver);
         parseBMPv2(sock);
 
     } else
         throw "ERROR: Unsupported BMP message version";
 
-    SELF_DEBUG("BMP version = %d\n", ver);
+    //   SELF_DEBUG("BMP version = %d\n", ver);
 
     return bmp_type;
 }
@@ -316,21 +315,20 @@ void parseBMP::parseBMPv2(int sock) {
     ssize_t i = 0;
     char buf[256] = {0};
 
-    SELF_DEBUG("parseBMP: sock=%d: Reading %d bytes", sock, BMP_HDRv1v2_LEN);
+//    SELF_DEBUG("parseBMP: sock=%d: Reading %d bytes", sock, BMP_HDRv1v2_LEN);
 
     bmp_len = 0;
 
     if ((i = Recv(sock, &c_hdr, BMP_HDRv1v2_LEN, MSG_WAITALL))
             != BMP_HDRv1v2_LEN) {
-        SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",
-                sock, i);
+        //     SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",sock, i);
         throw "ERROR: Cannot read v1/v2 BMP common header.";
     }
     // Process the message based on type
     bmp_type = c_hdr.type;
     switch (c_hdr.type) {
         case 0: // Route monitoring
-            SELF_DEBUG("sock=%d : BMP MSG : route monitor", sock);
+            //          SELF_DEBUG("sock=%d : BMP MSG : route monitor", sock);
 
             // Get the length of the remaining message by reading the BGP length
             if ((i=Recv(sock, buf, 18, MSG_PEEK | MSG_WAITALL)) == 18) {
@@ -346,7 +344,7 @@ void parseBMP::parseBMPv2(int sock) {
             break;
 
         case 1: // Statistics Report
-            SELF_DEBUG("sock=%d : BMP MSG : stats report", sock);
+            //           SELF_DEBUG("sock=%d : BMP MSG : stats report", sock);
 //            LOG_INFO("sock=%d : BMP MSG : stats report", sock);
             break;
 
@@ -372,24 +370,24 @@ void parseBMP::parseBMPv2(int sock) {
                 throw "Failed to read BMP peer down reason";
             }
 
-            SELF_DEBUG("sock=%d : BMP MSG : peer down", sock);
+            //           SELF_DEBUG("sock=%d : BMP MSG : peer down", sock);
             break;
 
         case 3: // Peer Up notification
 //            LOG_ERR("sock=%d: Peer UP not supported with older BMP version since no one has implemented it", sock);
 
-            SELF_DEBUG("sock=%d : BMP MSG : peer up", sock);
+            //           SELF_DEBUG("sock=%d : BMP MSG : peer up", sock);
             throw "ERROR: Will need to add support for peer up if it's really used.";
             break;
     }
 
-    SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr.peer_type);
+    //   SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr.peer_type);
 
     if (c_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
         p_entry.isIPv4 = false;
         inet_ntop(AF_INET6, c_hdr.peer_addr, peer_addr, sizeof(peer_addr));
 
-        SELF_DEBUG("sock=%d : Peer address is IPv6", sock);
+        //      SELF_DEBUG("sock=%d : Peer address is IPv6", sock);
 
     } else {
         p_entry.isIPv4 = true;
@@ -397,13 +395,13 @@ void parseBMP::parseBMPv2(int sock) {
                 c_hdr.peer_addr[12], c_hdr.peer_addr[13], c_hdr.peer_addr[14],
                 c_hdr.peer_addr[15]);
 
-        SELF_DEBUG("sock=%d : Peer address is IPv4", sock);
+        //       SELF_DEBUG("sock=%d : Peer address is IPv4", sock);
     }
 
     if (c_hdr.peer_flags & 0x40) { // L flag of 1 means this is Loc-RIP and not Adj-RIB-In
-        SELF_DEBUG("sock=%d : Msg is for Loc-RIB", sock);
+        //       SELF_DEBUG("sock=%d : Msg is for Loc-RIB", sock);
     } else {
-        SELF_DEBUG("sock=%d : Msg is for Adj-RIB-In", sock);
+        //      SELF_DEBUG("sock=%d : Msg is for Adj-RIB-In", sock);
     }
 
     // convert the BMP byte messages to human readable strings
@@ -462,11 +460,9 @@ void parseBMP::parseBMPv2(int sock) {
         // Global Instance
         p_entry.isL3VPN = 0;
 
-    SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
-    SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
-            c_hdr.peer_as[0], c_hdr.peer_as[1], c_hdr.peer_as[2],
-            c_hdr.peer_as[3]);
-    SELF_DEBUG("sock=%d : Peer RD = %s", sock, peer_rd);
+    //   SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
+//    SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock, c_hdr.peer_as[0], c_hdr.peer_as[1], c_hdr.peer_as[2], c_hdr.peer_as[3]);
+    //   SELF_DEBUG("sock=%d : Peer RD = %s", sock, peer_rd);
 }
 
 /**
@@ -481,7 +477,7 @@ void parseBMP::parseBMPv2(int sock) {
 void parseBMP::parseBMPv3(int sock) {
     struct common_hdr_v3 c_hdr = { 0 };
 
-    SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
+    //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
     if ((Recv(sock, &c_hdr, BMP_HDRv3_LEN, MSG_WAITALL)) != BMP_HDRv3_LEN) {
         throw "ERROR: Cannot read v3 BMP common header.";
     }
@@ -489,7 +485,7 @@ void parseBMP::parseBMPv3(int sock) {
     // Change to host order
     bgp::SWAP_BYTES(&c_hdr.len);
 
-    SELF_DEBUG("BMP v3: type = %x len=%d", c_hdr.type, c_hdr.len);
+    //   SELF_DEBUG("BMP v3: type = %x len=%d", c_hdr.type, c_hdr.len);
 
     // Adjust length to remove common header size
     c_hdr.len -= 1 + BMP_HDRv3_LEN;
@@ -503,24 +499,24 @@ void parseBMP::parseBMPv3(int sock) {
 
     switch (c_hdr.type) {
         case TYPE_ROUTE_MON: // Route monitoring
-            SELF_DEBUG("BMP MSG : route monitor");
+            //          SELF_DEBUG("BMP MSG : route monitor");
             parsePeerHdr(sock);
             break;
 
         case TYPE_STATS_REPORT: // Statistics Report
-            SELF_DEBUG("BMP MSG : stats report");
+            //          SELF_DEBUG("BMP MSG : stats report");
             parsePeerHdr(sock);
             break;
 
         case TYPE_PEER_UP: // Peer Up notification
         {
-            SELF_DEBUG("BMP MSG : peer up");
+            //           SELF_DEBUG("BMP MSG : peer up");
             parsePeerHdr(sock);
 
             break;
         }
         case TYPE_PEER_DOWN: // Peer down notification
-            SELF_DEBUG("BMP MSG : peer down");
+            //           SELF_DEBUG("BMP MSG : peer down");
             parsePeerHdr(sock);
             break;
 
@@ -530,7 +526,7 @@ void parseBMP::parseBMPv3(int sock) {
             break;
 
         default:
-            LOG_ERR("ERROR: Unknown BMP message type of %d", c_hdr.type);
+            //         LOG_ERR("ERROR: Unknown BMP message type of %d", c_hdr.type);
             throw "ERROR: BMP message type is not supported";
             break;
     }
@@ -549,23 +545,20 @@ void parseBMP::parsePeerHdr(int sock) {
 
     if ((i = Recv(sock, &p_hdr, BMP_PEER_HDR_LEN, MSG_WAITALL))
         != BMP_PEER_HDR_LEN) {
-        LOG_ERR("sock=%d: Couldn't read all bytes, read %d bytes",
-                sock, i);
+        //       LOG_ERR("sock=%d: Couldn't read all bytes, read %d bytes",sock, i);
     }
 
     // Adjust the common header length to remove the peer header (as it's been read)
     bmp_len -= BMP_PEER_HDR_LEN;
 
-    SELF_DEBUG("parsePeerHdr: sock=%d : Peer Type is %d", sock,
-               p_hdr.peer_type);
+    //   SELF_DEBUG("parsePeerHdr: sock=%d : Peer Type is %d", sock,p_hdr.peer_type);
 
     if (p_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
         p_entry.isIPv4 = false;
 
         inet_ntop(AF_INET6, p_hdr.peer_addr, peer_addr, sizeof(peer_addr));
 
-        SELF_DEBUG("sock=%d : Peer address is IPv6 %s", sock,
-                   peer_addr);
+        //       SELF_DEBUG("sock=%d : Peer address is IPv6 %s", sock,peer_addr);
 
     } else {
         p_entry.isIPv4 = true;
@@ -573,20 +566,19 @@ void parseBMP::parsePeerHdr(int sock) {
         snprintf(peer_addr, sizeof(peer_addr), "%d.%d.%d.%d",
                  p_hdr.peer_addr[12], p_hdr.peer_addr[13], p_hdr.peer_addr[14],
                  p_hdr.peer_addr[15]);
-        SELF_DEBUG("sock=%d : Peer address is IPv4 %s", sock,
-                   peer_addr);
+        //       SELF_DEBUG("sock=%d : Peer address is IPv4 %s", sock,peer_addr);
     }
 
     if (p_hdr.peer_flags & 0x10) { // O flag of 1 means this is Adj-Rib-Out
-        SELF_DEBUG("sock=%d : Msg is for Adj-RIB-Out", sock);
+//        SELF_DEBUG("sock=%d : Msg is for Adj-RIB-Out", sock);
         p_entry.isPrePolicy = false;
         p_entry.isAdjIn = false;
     } else if (p_hdr.peer_flags & 0x40) { // L flag of 1 means this is post-policy of Adj-RIB-In
-        SELF_DEBUG("sock=%d : Msg is for POST-POLICY Adj-RIB-In", sock);
+//        SELF_DEBUG("sock=%d : Msg is for POST-POLICY Adj-RIB-In", sock);
         p_entry.isPrePolicy = false;
         p_entry.isAdjIn = true;
     } else {
-        SELF_DEBUG("sock=%d : Msg is for PRE-POLICY Adj-RIB-In", sock);
+        //       SELF_DEBUG("sock=%d : Msg is for PRE-POLICY Adj-RIB-In", sock);
         p_entry.isPrePolicy = true;
         p_entry.isAdjIn = true;
     }
@@ -597,11 +589,10 @@ void parseBMP::parsePeerHdr(int sock) {
              p_hdr.peer_as[2] << 8 | p_hdr.peer_as[3]);
 
     inet_ntop(AF_INET, p_hdr.peer_bgp_id, peer_bgp_id, sizeof(peer_bgp_id));
-    SELF_DEBUG("sock=%d : Peer BGP-ID %x.%x.%x.%x (%s)", sock, p_hdr.peer_bgp_id[0],
-               p_hdr.peer_bgp_id[1],p_hdr.peer_bgp_id[2],p_hdr.peer_bgp_id[3], peer_bgp_id);
+//    SELF_DEBUG("sock=%d : Peer BGP-ID %x.%x.%x.%x (%s)", sock, p_hdr.peer_bgp_id[0],p_hdr.peer_bgp_id[1],p_hdr.peer_bgp_id[2],p_hdr.peer_bgp_id[3], peer_bgp_id);
 
     // Format based on the type of RD
-    SELF_DEBUG("sock=%d : Peer RD type = %d %d", sock, p_hdr.peer_dist_id[0], p_hdr.peer_dist_id[1]);
+//    SELF_DEBUG("sock=%d : Peer RD type = %d %d", sock, p_hdr.peer_dist_id[0], p_hdr.peer_dist_id[1]);
     switch (p_hdr.peer_dist_id[1]) {
         case 1: // admin = 4bytes (IP address), assign number = 2bytes
             snprintf(peer_rd, sizeof(peer_rd), "%d.%d.%d.%d:%d",
@@ -658,11 +649,11 @@ void parseBMP::parsePeerHdr(int sock) {
         // Global Instance
         p_entry.isL3VPN = 0;
 
-    SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
-    SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
-                p_hdr.peer_as[0], p_hdr.peer_as[1], p_hdr.peer_as[2],
-                p_hdr.peer_as[3]);
-    SELF_DEBUG("sock=%d : Peer RD = %s", sock, peer_rd);
+//    SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
+    //   SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock,
+    //               p_hdr.peer_as[0], p_hdr.peer_as[1], p_hdr.peer_as[2],
+    //               p_hdr.peer_as[3]);
+//    SELF_DEBUG("sock=%d : Peer RD = %s", sock, peer_rd);
 }
 
 /**
@@ -711,15 +702,13 @@ void parseBMP::bufferBMPMessage(int sock) {
         return;
 
     if (bmp_len > sizeof(bmp_data)) {
-        LOG_WARN("sock=%d: BMP message is invalid, length of %d is larger than max buffer size of %d",
-                sock, bmp_len, sizeof(bmp_data));
+ //       LOG_WARN("sock=%d: BMP message is invalid, length of %d is larger than max buffer size of %d",sock, bmp_len, sizeof(bmp_data));
         throw "BMP message length is too large for buffer, invalid BMP sender";
     }
 
-    SELF_DEBUG("sock=%d: Buffering %d from socket", sock, bmp_len);
+//    SELF_DEBUG("sock=%d: Buffering %d from socket", sock, bmp_len);
     if ((bmp_data_len=Recv(sock, bmp_data, bmp_len, MSG_WAITALL)) != bmp_len) {
-         LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",
-                 sock, bmp_len);
+ //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
          throw "Error while reading BMP data into buffer";
     }
 
@@ -754,11 +743,11 @@ bool parseBMP::parsePeerUpEventHdr(int sock) {
         snprintf(up_event.local_ip, sizeof(up_event.local_ip), "%d.%d.%d.%d",
                     local_addr[12], local_addr[13], local_addr[14],
                     local_addr[15]);
-        SELF_DEBUG("%s : Peer UP local address is IPv4 %s", peer_addr, up_event.local_ip);
+ //       SELF_DEBUG("%s : Peer UP local address is IPv4 %s", peer_addr, up_event.local_ip);
 
     } else if (isParseGood) {
         inet_ntop(AF_INET6, local_addr, up_event.local_ip, sizeof(up_event.local_ip));
-        SELF_DEBUG("%s : Peer UP local address is IPv6 %s", peer_addr, up_event.local_ip);
+ //       SELF_DEBUG("%s : Peer UP local address is IPv6 %s", peer_addr, up_event.local_ip);
     }
 
     // Get the local port
@@ -783,9 +772,9 @@ bool parseBMP::parsePeerUpEventHdr(int sock) {
     bmp_len -= bytes_read;
 
     // Validate parse is still good, if not read the remaining bytes of the message so that the next msg will work
-    if (isParseGood == false) {
-        LOG_NOTICE("%s: PEER UP header failed to be parsed, read only %d bytes of the header",
-                peer_addr, bytes_read);
+    if (!isParseGood) {
+ //       LOG_NOTICE("%s: PEER UP header failed to be parsed, read only %d bytes of the header",
+  //              peer_addr, bytes_read);
 
         // Msg is invalid - Buffer and ignore
         bufferBMPMessage(sock);
@@ -816,8 +805,8 @@ bool parseBMP::handleStatsReport(int sock) {
     bgp::SWAP_BYTES(b, 4);
     memcpy((void*) &stats_cnt, (void*) b, 4);
 
-    SELF_DEBUG("sock = %d : STATS REPORT Count: %u (%d %d %d %d)",
-                sock, stats_cnt, b[0], b[1], b[2], b[3]);
+ //   SELF_DEBUG("sock = %d : STATS REPORT Count: %u (%d %d %d %d)",
+ //               sock, stats_cnt, b[0], b[1], b[2], b[3]);
 
     // Vars used per counter object
     unsigned short stat_type = 0;
@@ -837,8 +826,8 @@ bool parseBMP::handleStatsReport(int sock) {
         bgp::SWAP_BYTES(&stat_type);
         bgp::SWAP_BYTES(&stat_len);
 
-        SELF_DEBUG("sock=%d STATS: %lu : TYPE = %u LEN = %u", sock,
-                    i, stat_type, stat_len);
+ //       SELF_DEBUG("sock=%d STATS: %lu : TYPE = %u LEN = %u", sock,
+ //                   i, stat_type, stat_len);
 
         // check if this is a 32 bit number  (default)
         if (stat_len == 4 or stat_len == 8) {
@@ -888,24 +877,24 @@ bool parseBMP::handleStatsReport(int sock) {
                         if (stat_len == 8) {
                             memcpy((void*)&value64bit, (void *)b, 8);
 
-                            SELF_DEBUG("%s: sock=%d: stat type %d length of %d value of %lu is not yet implemented",
-                                    p_entry.peer_addr, sock, stat_type, stat_len, value64bit);
+   //                         SELF_DEBUG("%s: sock=%d: stat type %d length of %d value of %lu is not yet implemented",
+   //                                 p_entry.peer_addr, sock, stat_type, stat_len, value64bit);
                         } else {
                             memcpy((void*)&value32bit, (void *)b, 4);
 
-                            SELF_DEBUG("%s: sock=%d: stat type %d length of %d value of %lu is not yet implemented",
-                                     p_entry.peer_addr, sock, stat_type, stat_len, value32bit);
+   //                         SELF_DEBUG("%s: sock=%d: stat type %d length of %d value of %lu is not yet implemented",
+   //                                  p_entry.peer_addr, sock, stat_type, stat_len, value32bit);
                         }
                     }
                 }
 
-                SELF_DEBUG("VALUE is %u",
-                            b[3] << 24 | b[2] << 16 | b[1] << 8 | b[0]);
+   //             SELF_DEBUG("VALUE is %u",
+   //                         b[3] << 24 | b[2] << 16 | b[1] << 8 | b[0]);
             }
 
         } else { // stats len not expected, we need to skip it.
-            SELF_DEBUG("sock=%d : skipping stats report '%u' because length of '%u' is not expected.",
-                        sock, stat_type, stat_len);
+   //         SELF_DEBUG("sock=%d : skipping stats report '%u' because length of '%u' is not expected.",
+   //                     sock, stat_type, stat_len);
 
             while (stat_len-- > 0)
                 Recv(sock, &b[0], 1, 0);
@@ -943,7 +932,7 @@ void parseBMP::handleInitMsg(int sock) {
         bufPtr += BMP_INIT_MSG_LEN;                // Move pointer past the info header
 
         // TODO: Change to SELF_DEBUG after IOS supports INIT messages correctly
-        LOG_INFO("Init message type %hu and length %hu parsed", initMsg.type, initMsg.len);
+ //       LOG_INFO("Init message type %hu and length %hu parsed", initMsg.type, initMsg.len);
 
         if (initMsg.len > 0) {
             infoLen = sizeof(infoBuf) < initMsg.len ? sizeof(infoBuf) : initMsg.len;
@@ -963,33 +952,34 @@ void parseBMP::handleInitMsg(int sock) {
             case INIT_TYPE_FREE_FORM_STRING :
                 infoLen = sizeof(r_entry.initiate_data) < (initMsg.len - 1) ? (sizeof(r_entry.initiate_data) - 1) : initMsg.len;
                 memcpy(r_entry.initiate_data, initMsg.info, infoLen);
-                LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.initiate_data);
+ //               LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.initiate_data);
 
                 break;
 
             case INIT_TYPE_SYSNAME :
                 infoLen = sizeof(r_entry.name) < (initMsg.len - 1) ? (sizeof(r_entry.name) - 1) : initMsg.len;
                 strncpy((char *)r_entry.name, initMsg.info, infoLen);
-                LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.name);
+ //               LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.name);
                 break;
 
             case INIT_TYPE_SYSDESCR :
                 infoLen = sizeof(r_entry.descr) < (initMsg.len - 1) ? (sizeof(r_entry.descr) - 1) : initMsg.len;
                 strncpy((char *)r_entry.descr, initMsg.info, infoLen);
-                LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.descr);
+ //               LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.descr);
                 break;
 
             case INIT_TYPE_ROUTER_BGP_ID:
                 if (initMsg.len != sizeof(in_addr_t)) {
-                    LOG_NOTICE("Init message type BGP ID not of IPv4 addr length");
+ //                   LOG_NOTICE("Init message type BGP ID not of IPv4 addr length");
                     break;
                 }
                 inet_ntop(AF_INET, initMsg.info, r_entry.bgp_id, sizeof(r_entry.bgp_id));
-                LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.bgp_id);
+//                LOG_INFO("Init message type %hu = %s", initMsg.type, r_entry.bgp_id);
                 break;
 
-            default:
-                LOG_NOTICE("Init message type %hu is unexpected per rfc7854", initMsg.type);
+//            default:
+
+//                LOG_NOTICE("Init message type %hu is unexpected per rfc7854", initMsg.type);
         }
     }
 }
@@ -1021,7 +1011,7 @@ void parseBMP::handleTermMsg(int sock) {
 
         bufPtr += BMP_TERM_MSG_LEN;                // Move pointer past the info header
 
-        LOG_INFO("Term message type %hu and length %hu parsed", termMsg.type, termMsg.len);
+ //       LOG_INFO("Term message type %hu and length %hu parsed", termMsg.type, termMsg.len);
 
         if (termMsg.len > 0) {
             infoLen = sizeof(infoBuf) < termMsg.len ? sizeof(infoBuf) : termMsg.len;
@@ -1032,7 +1022,7 @@ void parseBMP::handleTermMsg(int sock) {
 
             termMsg.info = infoBuf;
 
-            LOG_INFO("Term message type %hu = %s", termMsg.type, termMsg.info);
+ //           LOG_INFO("Term message type %hu = %s", termMsg.type, termMsg.info);
         }
 
         /*
@@ -1053,31 +1043,31 @@ void parseBMP::handleTermMsg(int sock) {
 
                 switch (term_reason) {
                     case TERM_REASON_ADMIN_CLOSE :
-                        LOG_INFO("%s BMP session closed by remote administratively", r_entry.ip_addr);
+ //                       LOG_INFO("%s BMP session closed by remote administratively", r_entry.ip_addr);
                         snprintf(r_entry.term_reason_text, sizeof(r_entry.term_reason_text),
                                "Remote session administratively closed");
                         break;
 
                     case TERM_REASON_OUT_OF_RESOURCES:
-                        LOG_INFO("%s BMP session closed by remote due to out of resources", r_entry.ip_addr);
+ //                       LOG_INFO("%s BMP session closed by remote due to out of resources", r_entry.ip_addr);
                         snprintf(r_entry.term_reason_text, sizeof(r_entry.term_reason_text),
                                 "Remote out of resources");
                         break;
 
                     case TERM_REASON_REDUNDANT_CONN:
-                        LOG_INFO("%s BMP session closed by remote due to connection being redundant", r_entry.ip_addr);
+//                        LOG_INFO("%s BMP session closed by remote due to connection being redundant", r_entry.ip_addr);
                         snprintf(r_entry.term_reason_text, sizeof(r_entry.term_reason_text),
                                 "Remote considers connection redundant");
                         break;
 
                     case TERM_REASON_UNSPECIFIED:
-                        LOG_INFO("%s BMP session closed by remote as unspecified", r_entry.ip_addr);
+ ///                       LOG_INFO("%s BMP session closed by remote as unspecified", r_entry.ip_addr);
                         snprintf(r_entry.term_reason_text, sizeof(r_entry.term_reason_text),
                                 "Remote closed with unspecified reason");
                         break;
 
                     default:
-                        LOG_INFO("%s closed with undefined reason code of %d", r_entry.ip_addr, term_reason);
+//                        LOG_INFO("%s closed with undefined reason code of %d", r_entry.ip_addr, term_reason);
                         snprintf(r_entry.term_reason_text, sizeof(r_entry.term_reason_text),
                                "Unknown %d termination reason, which is not part of draft.", term_reason);
                 }
@@ -1085,8 +1075,8 @@ void parseBMP::handleTermMsg(int sock) {
                 break;
             }
 
-            default:
-                LOG_NOTICE("Term message type %hu is unexpected per draft", termMsg.type);
+//            default:
+//                LOG_NOTICE("Term message type %hu is unexpected per draft", termMsg.type);
         }
     }
 }
