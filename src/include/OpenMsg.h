@@ -158,7 +158,7 @@ public:
 private:
     bool                    debug;          ///< debug flag to indicate debugging
     std::string             peer_addr;      ///< Printed form of the peer address for logging
-    BMPReader::peer_info    *peer_info;     ///< Persistent Peer info pointer
+    parseBMP::peer_info    *peer_info;     ///< Persistent Peer info pointer
 
     /**
      * Parses capabilities from buffer

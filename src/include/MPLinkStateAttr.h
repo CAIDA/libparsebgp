@@ -113,8 +113,7 @@ namespace bgp_msg {
          * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
-        MPLinkStateAttr(Logger *logPtr, std::string peerAddr,
-                UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
+        MPLinkStateAttr(std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
         virtual ~MPLinkStateAttr();
 
 
