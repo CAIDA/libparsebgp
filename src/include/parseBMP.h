@@ -198,6 +198,190 @@ public:
     }__attribute__ ((__packed__));
 
     obj_stats_report stats;
+
+
+    /**
+     * OBJECT: rib
+     *
+     * Prefix rib table schema
+     */
+    struct obj_rib {
+        u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
+        u_char      path_attr_hash_id[16];  ///< path attrs hash_id
+        u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
+        u_char      isIPv4;                 ///< 0 if IPv6, 1 if IPv4
+        char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
+        u_char      prefix_len;             ///< Length of prefix in bits
+        uint8_t     prefix_bin[16];         ///< Prefix in binary form
+        uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
+        uint32_t    path_id;                ///< Add path ID - zero if not used
+        char        labels[255];            ///< Labels delimited by comma
+    };
+
+    /// Rib extended with Route Distinguisher
+    struct obj_route_distinguisher {
+        std::string     rd_administrator_subfield;
+        std::string     rd_assigned_number;
+        uint8_t         rd_type;
+    };
+
+    /// Rib extended with vpn specific fields
+    struct obj_vpn: obj_rib, obj_route_distinguisher {
+        // inherit
+    };
+
+    /// Rib extended with evpn specific fields
+    struct obj_evpn: obj_rib, obj_route_distinguisher {
+        uint8_t     originating_router_ip_len;
+        char        originating_router_ip[46];
+        char        ethernet_segment_identifier[255];
+        char        ethernet_tag_id_hex[16];
+        uint8_t     mac_len;
+        char        mac[255];
+        uint8_t     ip_len;
+        char        ip[46];
+        int         mpls_label_1;
+        int         mpls_label_2;
+    };
+
+    /// Unicast prefix action codes
+    enum unicast_prefix_action_code {
+        UNICAST_PREFIX_ACTION_ADD=0,
+        UNICAST_PREFIX_ACTION_DEL,
+    };
+
+    /// Vpn action codes
+    enum vpn_action_code {
+        VPN_ACTION_ADD=0,
+        VPN_ACTION_DEL,
+    };
+
+    /**
+     * OBJECT: stats_reports
+     *
+     * Stats Report schema
+     */
+    struct obj_stats_report {
+        uint32_t        prefixes_rej;           ///< type=0 Prefixes rejected
+        uint32_t        known_dup_prefixes;     ///< type=1 known duplicate prefixes
+        uint32_t        known_dup_withdraws;    ///< type=2 known duplicate withdraws
+        uint32_t        invalid_cluster_list;   ///< type=3 Updates invalid by cluster lists
+        uint32_t        invalid_as_path_loop;   ///< type=4 Updates invalid by as_path loop
+        uint32_t        invalid_originator_id;  ///< type=5 Invalid due to originator_id
+        uint32_t        invalid_as_confed_loop; ///< type=6 Invalid due to as_confed loop
+        uint64_t        routes_adj_rib_in;      ///< type=7 Number of routes in adj-rib-in
+        uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
+    };
+
+    /**
+     * OBJECT: ls_node
+     *
+     * BGP-LS Node table schema
+     */
+    struct obj_ls_node {
+        u_char      hash_id[16];                ///< hash id for the entry
+        uint64_t    id;                         ///< Routing universe identifier
+        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        uint32_t    asn;                        ///< BGP ASN
+        uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
+        uint8_t     igp_router_id[8];           ///< IGP router ID
+        uint8_t     ospf_area_Id[4];            ///< OSPF area ID
+        char        protocol[32];               ///< String representation of the protocol name
+        uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID
+        uint8_t     isis_area_id[9];            ///< IS-IS area ID
+        char        flags[32];                  ///< String representation of the flag bits
+        char        name[255];                  ///< Name of router
+        char        mt_id[255];                 ///< Multi-Topology ID
+        char        sr_capabilities_tlv[255];   ///< SR Capabilities TLV
+    };
+
+    /// LS action code (node, link, and prefix)
+    enum ls_action_code {
+        LS_ACTION_ADD=0,
+        LS_ACTION_DEL
+    };
+
+    /**
+     * OBJECT: ls_link
+     *
+     * BGP-LS Link table schema
+     */
+    struct obj_ls_link {
+        u_char      hash_id[16];                ///< hash id for the entry
+        uint64_t    id;                         ///< Routing universe identifier
+        uint32_t    mt_id;                      ///< Multi-Topology ID
+
+        uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
+        uint8_t     igp_router_id[8];           ///< IGP router ID (local)
+        uint8_t     remote_igp_router_id[8];    ///< IGP router ID (remote)
+        uint8_t     ospf_area_Id[4];            ///< OSPF area ID
+        uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID (local)
+        uint8_t     remote_router_id[16];       ///< IPv4 or IPv6 router ID (remote)
+
+        uint32_t    local_node_asn;             ///< Local node asn
+        uint32_t    remote_node_asn;            ///< Remote node asn
+        uint32_t    local_bgp_router_id;        ///< Local BGP router id (draft-ietf-idr-bgpls-segment-routing-epe)
+        uint32_t    remote_bgp_router_id;       ///< Remote BGP router id (draft-ietf-idr-bgpls-segment-routing-epe)
+
+        uint8_t     isis_area_id[9];            ///< IS-IS area ID
+
+        char        protocol[32];               ///< String representation of the protocol name
+        uint8_t     intf_addr[16];              ///< Interface binary address
+        uint8_t     nei_addr[16];               ///< Neighbor binary address
+        uint32_t    local_link_id;              ///< Local Link ID (IS-IS)
+        uint32_t    remote_link_id;             ///< Remote Link ID (IS-IS)
+        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        u_char      local_node_hash_id[16];     ///< Local node hash ID
+        u_char      remote_node_hash_id[16];    ///< Remove node hash ID
+        uint32_t    admin_group;                ///< Admin group
+        uint32_t    max_link_bw;                ///< Maximum link bandwidth
+        uint32_t    max_resv_bw;                ///< Maximum reserved bandwidth
+        char        unreserved_bw[100];         ///< string for unreserved bandwidth, a set of 8 uint32_t values
+
+        uint32_t    te_def_metric;              ///< Default TE metric
+        char        protection_type[60];        ///< String representation for the protection types
+        char        mpls_proto_mask[32];        ///< Either LDP or RSVP-TE
+        uint32_t    igp_metric;                 ///< IGP metric
+        char        srlg[128];                  ///< String representation of the shared risk link group values
+        char        name[255];                  ///< Name of router
+        char        peer_node_sid[128];         ///< Peer node side (draft-ietf-idr-bgpls-segment-routing-epe)
+        char        peer_adj_sid[128];          ///< Peer Adjency Segment Identifier
+    };
+
+    /**
+     * OBJECT: ls_prefix
+     *
+     * BGP-LS Prefix table schema
+     */
+    struct obj_ls_prefix {
+        u_char      hash_id[16];            ///< hash for the entry
+        uint64_t    id;                     ///< Routing universe identifier
+        char        protocol[32];           ///< String representation of the protocol name
+
+        uint32_t    bgp_ls_id;              ///< BGP-LS Identifier
+        uint8_t     igp_router_id[8];       ///< IGP router ID
+        uint8_t     ospf_area_Id[4];        ///< OSPF area ID
+        uint8_t     router_id[16];          ///< IPv4 or IPv6 router ID
+        uint8_t     isis_area_id[9];        ///< IS-IS area ID
+        uint8_t     intf_addr[16];          ///< Interface binary address
+        uint8_t     nei_addr[16];           ///< Neighbor binary address
+
+        u_char      local_node_hash_id[16]; ///< Local node hash ID
+        uint32_t    mt_id;                  ///< Multi-Topology ID
+        uint32_t    metric;                 ///< Prefix metric
+        bool        isIPv4;                 ///< True if interface/neighbor is IPv4, false otherwise
+        u_char      prefix_len;             ///< Length of prefix in bits
+        char        ospf_route_type[32];    ///< String representation of the OSPF route type
+        uint8_t     prefix_bin[16];         ///< Prefix in binary form
+        uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
+        char        igp_flags[32];          ///< String representation of the IGP flags
+        uint32_t    route_tag;              ///< Route tag
+        uint64_t    ext_route_tag;          ///< Extended route tag
+        uint8_t     ospf_fwd_addr[16];      ///< IPv4/IPv6 OSPF forwarding address
+        char        sid_tlv[128];           ///< Prefix-SID TLV
+    };
+
+
      /**
       * BMP common header
       */

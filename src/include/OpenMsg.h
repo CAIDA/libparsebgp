@@ -131,7 +131,7 @@ public:
       * \param [in]     peer_info       Persistent peer information
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
-    OpenMsg(std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
+    OpenMsg(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug=false);
     virtual ~OpenMsg();
 
     /**
