@@ -6,10 +6,9 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "../include/bgp/OpenMsg.h"
-#include "../include/bgp/AddPathDataContainer.h"
-#include "../include/bmp/BMPReader.h"
-
+#include "../include/OpenMsg.h"
+#include "../include/AddPathDataContainer.h"
+#include "../include/parseBMP.h"
 #include <string>
 #include <list>
 #include <cstring>
@@ -27,7 +26,7 @@ namespace bgp_msg {
  * \param [in]     peer_info       Persistent peer information
  * \param [in]     enable_debug    Debug true to enable, false to disable
  */
-OpenMsg::OpenMsg(std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug) {
+OpenMsg::OpenMsg(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug) {
         debug = enable_debug;
         this->peer_info = peer_info;
         peer_addr = peerAddr;
@@ -65,7 +64,7 @@ size_t OpenMsg::parseOpenMsg(u_char *data, size_t size, bool openMessageIsSent, 
      * Make sure available size is large enough for an open message
      */
     if (size < sizeof(open_hdr)) {
-        LOG_WARN("%s: Cloud not read open message due to buffer having less bytes than open message size", peer_addr.c_str());
+    //    LOG_WARN("%s: Cloud not read open message due to buffer having less bytes than open message size", peer_addr.c_str());
         return 0;
     }
 
@@ -84,21 +83,20 @@ size_t OpenMsg::parseOpenMsg(u_char *data, size_t size, bool openMessageIsSent, 
     inet_ntop(AF_INET, &open_hdr.bgp_id, bgp_id_char, sizeof(bgp_id_char));
     bgp_id.assign(bgp_id_char);
 
-    SELF_DEBUG("%s: Open message:ver=%d hold=%u asn=%hu bgp_id=%s params_len=%d", peer_addr.c_str(),
-                open_hdr.ver, open_hdr.hold, open_hdr.asn, bgp_id.c_str(), open_hdr.param_len);
+//    SELF_DEBUG("%s: Open message:ver=%d hold=%u asn=%hu bgp_id=%s params_len=%d", peer_addr.c_str(),open_hdr.ver, open_hdr.hold, open_hdr.asn, bgp_id.c_str(), open_hdr.param_len);
 
     /*
      * Make sure the buffer contains the rest of the open message, but allow a zero length in case the
      *  data is missing on purpose (router implementation)
      */
     if (open_hdr.param_len == 0) {
-        LOG_WARN("%s: Capabilities in open message is ZERO/empty, this is abnormal and likely a router implementation issue.", peer_addr.c_str());
+ //       LOG_WARN("%s: Capabilities in open message is ZERO/empty, this is abnormal and likely a router implementation issue.", peer_addr.c_str());
         return read_size;
     }
 
     else if (open_hdr.param_len > (size - read_size)) {
-        LOG_WARN("%s: Capabilities in open message are truncated, attempting parse what's there; param_len %d > bgp msg bytes remaining of %d",
-                 peer_addr.c_str(), open_hdr.param_len, (size - read_size));
+ //       LOG_WARN("%s: Capabilities in open message are truncated, attempting parse what's there; param_len %d > bgp msg bytes remaining of %d",
+ //                peer_addr.c_str(), open_hdr.param_len, (size - read_size));
 
         // Parse as many capabilities as possible
         parseCapabilities(bufPtr, (size - read_size), openMessageIsSent, asn, capabilities);
@@ -108,7 +106,7 @@ size_t OpenMsg::parseOpenMsg(u_char *data, size_t size, bool openMessageIsSent, 
     } else {
 
         if (!parseCapabilities(bufPtr, open_hdr.param_len, openMessageIsSent, asn, capabilities)) {
-            LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
+  //          LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
             return 0;
         }
 
@@ -150,11 +148,9 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
 
     for (int i=0; i < size; ) {
         param = (open_param *)bufPtr;
-        SELF_DEBUG("%s: Open param type=%d len=%d", peer_addr.c_str(), param->type, param->len);
-
+//        SELF_DEBUG("%s: Open param type=%d len=%d", peer_addr.c_str(), param->type, param->len);
         if (param->type != BGP_CAP_PARAM_TYPE) {
-            LOG_NOTICE("%s: Open param type %d is not supported, expected type %d", peer_addr.c_str(),
-                        param->type, BGP_CAP_PARAM_TYPE);
+//            LOG_NOTICE("%s: Open param type %d is not supported, expected type %d", peer_addr.c_str(),param->type, BGP_CAP_PARAM_TYPE);
         }
 
         /*
@@ -165,7 +161,7 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
 
             for (int c=0; c < param->len; ) {
                 cap = (cap_param *)cap_ptr;
-                SELF_DEBUG("%s: Capability code=%d len=%d", peer_addr.c_str(), cap->code, cap->len);
+//                SELF_DEBUG("%s: Capability code=%d len=%d", peer_addr.c_str(), cap->code, cap->len);
 
                 /*
                  * Handle the capability
@@ -178,24 +174,24 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
                             snprintf(capStr, sizeof(capStr), "4 Octet ASN (%d)", BGP_CAP_4OCTET_ASN);
                             capabilities.push_back(capStr);
                         } else {
-                            LOG_NOTICE("%s: 4 octet ASN capability length is invalid %d expected 4", peer_addr.c_str(), cap->len);
+//                            LOG_NOTICE("%s: 4 octet ASN capability length is invalid %d expected 4", peer_addr.c_str(), cap->len);
                         }
                         break;
 
                     case BGP_CAP_ROUTE_REFRESH:
-                        SELF_DEBUG("%s: supports route-refresh", peer_addr.c_str());
+ //                       SELF_DEBUG("%s: supports route-refresh", peer_addr.c_str());
                         snprintf(capStr, sizeof(capStr), "Route Refresh (%d)", BGP_CAP_ROUTE_REFRESH);
                         capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_ROUTE_REFRESH_ENHANCED:
-                        SELF_DEBUG("%s: supports route-refresh enhanced", peer_addr.c_str());
+ //                       SELF_DEBUG("%s: supports route-refresh enhanced", peer_addr.c_str());
                         snprintf(capStr, sizeof(capStr), "Route Refresh Enhanced (%d)", BGP_CAP_ROUTE_REFRESH_ENHANCED);
                         capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_ROUTE_REFRESH_OLD:
-                        SELF_DEBUG("%s: supports OLD route-refresh", peer_addr.c_str());
+ //                       SELF_DEBUG("%s: supports OLD route-refresh", peer_addr.c_str());
                         snprintf(capStr, sizeof(capStr), "Route Refresh Old (%d)", BGP_CAP_ROUTE_REFRESH_OLD);
                         capabilities.push_back(capStr);
                         break;
@@ -218,8 +214,7 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
                                 snprintf(capStr, sizeof(capStr), "ADD Path (%d) : afi=%d safi=%d send/receive=%d",
                                          BGP_CAP_ADD_PATH, data.afi, data.safi, data.send_recieve);
 
-                                SELF_DEBUG("%s: supports Add Path afi = %d safi = %d send/receive = %d",
-                                           peer_addr.c_str(), data.afi, data.safi, data.send_recieve);
+ //                               SELF_DEBUG("%s: supports Add Path afi = %d safi = %d send/receive = %d",peer_addr.c_str(), data.afi, data.safi, data.send_recieve);
 
                                 std::string decodeStr(capStr);
                                 decodeStr.append(" : ");
@@ -259,19 +254,19 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
                     }
 
                     case BGP_CAP_GRACEFUL_RESTART:
-                        SELF_DEBUG("%s: supports graceful restart", peer_addr.c_str());
+   //                     SELF_DEBUG("%s: supports graceful restart", peer_addr.c_str());
                         snprintf(capStr, sizeof(capStr), "Graceful Restart (%d)", BGP_CAP_GRACEFUL_RESTART);
                         capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_OUTBOUND_FILTER:
-                        SELF_DEBUG("%s: supports outbound filter", peer_addr.c_str());
+    //                    SELF_DEBUG("%s: supports outbound filter", peer_addr.c_str());
                         snprintf(capStr, sizeof(capStr), "Outbound Filter (%d)", BGP_CAP_OUTBOUND_FILTER);
                         capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_MULTI_SESSION:
-                        SELF_DEBUG("%s: supports multi-session", peer_addr.c_str());
+    //                    SELF_DEBUG("%s: supports multi-session", peer_addr.c_str());
                         snprintf(capStr, sizeof(capStr), "Multi-session (%d)", BGP_CAP_MULTI_SESSION);
                         capabilities.push_back(capStr);
                         break;
@@ -283,8 +278,7 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
                             memcpy(&data, (cap_ptr + 2), sizeof(data));
                             bgp::SWAP_BYTES(&data.afi);
 
-                            SELF_DEBUG("%s: supports MPBGP afi = %d safi=%d",
-                                    peer_addr.c_str(), data.afi, data.safi);
+    //                        SELF_DEBUG("%s: supports MPBGP afi = %d safi=%d",peer_addr.c_str(), data.afi, data.safi);
 
                             snprintf(capStr, sizeof(capStr), "MPBGP (%d) : afi=%d safi=%d",
                                      BGP_CAP_MPBGP, data.afi, data.safi);
@@ -301,8 +295,7 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
 
                         }
                         else {
-                            LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",
-                                    peer_addr.c_str(), cap->len, sizeof(data));
+       //                     LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
                             return 0;
                         }
 
@@ -313,7 +306,7 @@ size_t OpenMsg::parseCapabilities(u_char *data, size_t size, bool openMessageIsS
                         snprintf(capStr, sizeof(capStr), "%d", cap->code);
                         capabilities.push_back(capStr);
 
-                        SELF_DEBUG("%s: Ignoring capability %d, not implemented", peer_addr.c_str(), cap->code);
+     //                   SELF_DEBUG("%s: Ignoring capability %d, not implemented", peer_addr.c_str(), cap->code);
                         break;
                 }
 

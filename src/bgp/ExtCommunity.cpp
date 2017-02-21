@@ -103,12 +103,11 @@ namespace bgp_msg {
                     decodeStr.append(decodeType_EVPN(ec_hdr));
                     break;
 
-                case EXT_TYPE_QOS_MARK  : // TODO: Implement
-                case EXT_TYPE_FLOW_SPEC : // TODO: Implement
-                case EXT_TYPE_COS_CAP   : // TODO: Implement
-                default:
-                    //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),
-                    //        ec_hdr.high_type, ec_hdr.low_type);
+                case EXT_TYPE_QOS_MARK  : break;// TODO: Implement
+                case EXT_TYPE_FLOW_SPEC : break;// TODO: Implement
+                case EXT_TYPE_COS_CAP   : break;// TODO: Implement
+                default: break;
+                    //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),ec_hdr.high_type, ec_hdr.low_type);
             }
 
             // Move data pointer to next entry
@@ -333,11 +332,13 @@ namespace bgp_msg {
                 break;
             }
             case EXT_EVPN_ES_IMPORT: {
-                val_ss << "es_import=" << bgp::parse_mac(ec_hdr.value);
+                val_ss << "es_import=";
+                val_ss << bgp::parse_mac(ec_hdr.value);
                 break;
             }
             case EXT_EVPN_ROUTER_MAC: {
-                val_ss << "router_mac=" << bgp::parse_mac(ec_hdr.value);
+                val_ss << "router_mac=";
+                val_ss << bgp::parse_mac(ec_hdr.value);
                 break;
             }
             default: {

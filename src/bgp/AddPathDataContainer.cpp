@@ -7,8 +7,8 @@
  *
  */
 
-#include "AddPathDataContainer.h"
-#include "OpenMsg.h"
+#include "../include/AddPathDataContainer.h"
+#include "../include/OpenMsg.h"
 
 #include <memory>
 

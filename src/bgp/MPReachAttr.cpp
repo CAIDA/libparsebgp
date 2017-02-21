@@ -140,7 +140,7 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &p
                     break;
                 }
 
-                default :
+                default : break;
                     //LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
                     //         peer_addr.c_str(), nlri.safi);
             }

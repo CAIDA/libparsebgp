@@ -124,9 +124,8 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, UpdateMsg::parsed_update_dat
                     break;
                 }
 
-                default :
-                    //LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
-                             peer_addr.c_str(), nlri.safi);
+                default : break;
+                    //LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",peer_addr.c_str(), nlri.safi);
             }
 
             break;
