@@ -8,7 +8,6 @@
  */
 
 #include "../include/parseBGP.h"
-
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
@@ -19,7 +18,7 @@
 #include <list>
 #include <memory>
 #include <arpa/inet.h>
-#include <../include/MPLinkStateAttr.h>
+#include "../include/MPLinkStateAttr.h"
 
 #include <sstream>
 #include <algorithm>
@@ -185,8 +184,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
     if (parseBgpHeader(data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,
-                                      local_bgp_id, cap_list);
+     //   read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
@@ -228,8 +226,8 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
     if (parseBgpHeader(data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, up_event->remote_asn,
-                                      up_event->remote_hold_time, remote_bgp_id, cap_list);
+//        read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, up_event->remote_asn,
+ //                                     up_event->remote_hold_time, remote_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
@@ -767,7 +765,7 @@ void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_
         //SELF_DEBUG("%s: Updating BGP-LS: Nodes %d", p_entry->peer_addr, ls_data.nodes.size());
 
         // Merge attributes to each table entry
-        for (list<parseBMP::obj_ls_node>::iterator it = ls_data.nodes.begin();it != ls_data.nodes.end(); it++) {
+        for (list<bgp_msg::UpdateMsg::obj_ls_node>::iterator it = ls_data.nodes.begin();it != ls_data.nodes.end(); it++) {
 
             if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_NAME) != ls_attrs.end())
                 memcpy((*it).name, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_NAME].data(), sizeof((*it).name));
@@ -806,7 +804,7 @@ void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_
         //SELF_DEBUG("%s: Updating BGP-LS: Links %d ", p_entry->peer_addr, ls_data.links.size());
 
         // Merge attributes to each table entry
-        for (list<parseBMP::obj_ls_link>::iterator it = ls_data.links.begin();
+        for (list<bgp_msg::UpdateMsg::obj_ls_link>::iterator it = ls_data.links.begin();
              it != ls_data.links.end(); it++) {
 
             if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
@@ -877,7 +875,7 @@ void parseBGP::UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_
         //SELF_DEBUG("%s: Updating BGP-LS: Prefixes %d ", p_entry->peer_addr, ls_data.prefixes.size());
 
         // Merge attributes to each table entry
-        for (list<parseBMP::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();it != ls_data.prefixes.end(); it++) {
+        for (list<bgp_msg::UpdateMsg::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();it != ls_data.prefixes.end(); it++) {
 
             if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
                 memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);

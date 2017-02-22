@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 
 #include "../../include/MPLinkState.h"
-//#include "../../include/md5.h"
+#include <list>
 
 namespace bgp_msg {
     /**
@@ -245,7 +245,7 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     void MPLinkState::parseNlriNode(u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        parseBMP::obj_ls_node node_tbl;
+        UpdateMsg::obj_ls_node node_tbl;
         bzero(&node_tbl, sizeof(node_tbl));
 
         if (data_len < 4) {
@@ -295,7 +295,7 @@ namespace bgp_msg {
             data_len -= data_read;
         }
 
-        genNodeHashId(info);
+//        genNodeHashId(info);
 
 
         // Update node table entry and add to parsed data list
@@ -321,7 +321,7 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     void MPLinkState::parseNlriLink(u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        parseBMP::obj_ls_link link_tbl;
+        UpdateMsg::obj_ls_link link_tbl;
         bzero(&link_tbl, sizeof(link_tbl));
 
         if (data_len < 4) {
@@ -430,7 +430,7 @@ namespace bgp_msg {
      * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
      */
     void MPLinkState::parseNlriPrefix(u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
-        parseBMP::obj_ls_prefix prefix_tbl;
+        UpdateMsg::obj_ls_prefix prefix_tbl;
         bzero(&prefix_tbl, sizeof(prefix_tbl));
 
         if (data_len < 4) {
@@ -481,7 +481,7 @@ namespace bgp_msg {
         }
 
         // Update the node hash
-        genNodeHashId(local_node);
+//        genNodeHashId(local_node);
 
         /*
          * Remaining data is the link descriptor sub-tlv's
