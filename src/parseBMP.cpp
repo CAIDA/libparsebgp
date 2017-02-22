@@ -9,7 +9,7 @@
 
 #include "include/parseBMP.h"
 #include "include/parseBGP.h"
-#include <cstdio>
+#include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -1103,5 +1103,11 @@ void parseBMP::enableDebug() {
 }
 void parseBMP::disableDebug() {
     debug = false;
+}
+
+int main()
+{
+    std::cout<<"hello ojas";
+    return 1;
 }
 

@@ -16,8 +16,8 @@
 
 #include "MPReachAttr.h"
 #include "MPUnReachAttr.h"
-#include "Logger.h"
-#include "MsgBusInterface.hpp"
+//#include "Logger.h"
+//#include "MsgBusInterface.hpp"
 
 namespace bgp_msg {
 
@@ -168,7 +168,7 @@ namespace bgp_msg {
 
     private:
         bool             debug;                           ///< debug flag to indicate debugging
-        Logger           *logger;                         ///< Logging class pointer
+        //Logger           *logger;                         ///< Logging class pointer
         std::string      peer_addr;                       ///< Printed form of the peer address for logging
 
         UpdateMsg::parsed_update_data *parsed_data;       ///< Parsed data structure

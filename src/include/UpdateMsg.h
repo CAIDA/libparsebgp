@@ -121,15 +121,6 @@ public:
     typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
     /**
-     * Parsed data structure for BGP-LS
-     */
-    struct parsed_data_ls {
-        std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
-        std::list<obj_ls_link>   links;        ///< List of link state links
-        std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
-    };
-
-    /**
      * OBJECT: ls_node
      *
      * BGP-LS Node table schema
@@ -229,6 +220,15 @@ public:
         uint64_t    ext_route_tag;          ///< Extended route tag
         uint8_t     ospf_fwd_addr[16];      ///< IPv4/IPv6 OSPF forwarding address
         char        sid_tlv[128];           ///< Prefix-SID TLV
+    };
+
+    /**
+     * Parsed data structure for BGP-LS
+     */
+    struct parsed_data_ls {
+        std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
+        std::list<obj_ls_link>   links;        ///< List of link state links
+        std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
     };
 
     /**

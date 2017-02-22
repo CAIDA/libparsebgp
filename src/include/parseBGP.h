@@ -152,7 +152,7 @@ private:
 
     //MsgBusInterface *mbus_ptr;                       ///< Pointer to open DB implementation
     string                           router_addr;    ///< Router IP address - used for logging
-    parseBMP::peer_info             *p_info;        ///< Persistent Peer information
+    parseBMP::peer_info              *p_info;        ///< Persistent Peer information
 
     unsigned char path_hash_id[16];                  ///< current path hash ID
 
