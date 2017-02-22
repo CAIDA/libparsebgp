@@ -8,7 +8,6 @@
  */
 
 #include "include/parseBMP.h"
-//#include "MsgBusInterface.hpp"
 #include "include/parseBGP.h"
 #include <cstdio>
 #include <cstdlib>
@@ -19,7 +18,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "include/bgp_common.h"
-#include "include/parseBMP.h"
 
 /**
  * Constructor for class

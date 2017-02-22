@@ -116,8 +116,7 @@ public:
         uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
         uint32_t    timestamp_us;           ///< Timestamp microseconds
     }__attribute__ ((__packed__));
-	
-    obj_router r_entry;
+
 /**
      * OBJECT: bgp_peers
      *
@@ -138,9 +137,11 @@ public:
         uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
         uint32_t    timestamp_us;           ///< Timestamp microseconds
     }__attribute__ ((__packed__));
-    obj_bgp_peer p_entry;
 
-/**
+
+
+
+    /**
      * OBJECT: peer_down_events
      *
      * Peer Down Events schema
@@ -152,7 +153,53 @@ public:
         char            error_text[255];    ///< BGP error text string
     }__attribute__ ((__packed__));
 
-    obj_peer_down_event down_event;
+   /**
+    * OBJECT: path_attrs
+    *
+    * Prefix Path attributes table schema
+    */
+    struct obj_path_attr {
+
+        /**
+         * Path hash
+         */
+        u_char      hash_id[16];
+        char        origin[16];             ///< bgp origin as string name
+
+        /**
+         * as_path.
+         */
+        std::string as_path;
+
+        uint16_t    as_path_count;          ///< Count of AS PATH's in the path (includes all in AS-SET)
+
+        uint32_t    origin_as;              ///< Origin ASN
+        bool        nexthop_isIPv4;         ///< True if IPv4, false if IPv6
+        char        next_hop[40];           ///< Next-hop IP in printed form
+        char        aggregator[40];         ///< Aggregator IP in printed form
+        bool        atomic_agg;             ///< 0=false, 1=true for atomic_aggregate
+
+        uint32_t    med;                    ///< bgp MED
+        uint32_t    local_pref;             ///< bgp local pref
+
+        /**
+         * standard community list.
+         */
+        std::string community_list;
+
+        /**
+         * extended community list.
+         */
+        std::string  ext_community_list;
+
+        /**
+         * cluster list.
+         */
+        std::string cluster_list;
+
+        char        originator_id[16];      ///< Originator ID in printed form
+    };
+
     /**
      * OBJECT: peer_up_events
      *
@@ -178,7 +225,6 @@ public:
         char        recv_cap[4096];         ///< Received Open param capabilities
     }__attribute__ ((__packed__));
 
-    obj_peer_up_event up_event;
 
 /**
      * OBJECT: stats_reports
@@ -196,8 +242,6 @@ public:
         uint64_t        routes_adj_rib_in;      ///< type=7 Number of routes in adj-rib-in
         uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
     }__attribute__ ((__packed__));
-
-    obj_stats_report stats;
 
 
     /**
@@ -254,23 +298,6 @@ public:
     enum vpn_action_code {
         VPN_ACTION_ADD=0,
         VPN_ACTION_DEL,
-    };
-
-    /**
-     * OBJECT: stats_reports
-     *
-     * Stats Report schema
-     */
-    struct obj_stats_report {
-        uint32_t        prefixes_rej;           ///< type=0 Prefixes rejected
-        uint32_t        known_dup_prefixes;     ///< type=1 known duplicate prefixes
-        uint32_t        known_dup_withdraws;    ///< type=2 known duplicate withdraws
-        uint32_t        invalid_cluster_list;   ///< type=3 Updates invalid by cluster lists
-        uint32_t        invalid_as_path_loop;   ///< type=4 Updates invalid by as_path loop
-        uint32_t        invalid_originator_id;  ///< type=5 Invalid due to originator_id
-        uint32_t        invalid_as_confed_loop; ///< type=6 Invalid due to as_confed loop
-        uint64_t        routes_adj_rib_in;      ///< type=7 Number of routes in adj-rib-in
-        uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
     };
 
     /**

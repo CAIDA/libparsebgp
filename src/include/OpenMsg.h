@@ -13,8 +13,8 @@
 #include "bgp_common.h"
 
 #include <list>
-#include "../include/bmp/BMPReader.h"
-#include "../include/bgp/AddPathDataContainer.h"
+#include "../include/parseBMP.h"
+#include "../include/AddPathDataContainer.h"
 
 namespace bgp_msg {
 
