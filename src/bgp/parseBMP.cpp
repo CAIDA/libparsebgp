@@ -7,8 +7,8 @@
  *
  */
 
-#include "include/parseBMP.h"
-#include "include/parseBGP.h"
+#include "../include/parseBMP.h"
+#include "../include/parseBGP.h"
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include "include/bgp_common.h"
+#include "../include/bgp_common.h"
 
 /**
  * Constructor for class
@@ -1167,4 +1167,9 @@ void parseBMP::enableDebug() {
 }
 void parseBMP::disableDebug() {
     debug = false;
+}
+int main()
+{
+    cout<<"Hello Ojas";
+    return 1;
 }

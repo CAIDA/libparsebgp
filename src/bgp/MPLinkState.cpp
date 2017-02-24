@@ -8,8 +8,7 @@
  */
 #include <arpa/inet.h>
 
-#include "../../include/MPLinkState.h"
-#include <list>
+#include "../include/MPLinkState.h"
 
 namespace bgp_msg {
     /**

@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <string>
 
-#include "../../include/MPLinkStateAttr.h"
+#include "../include/MPLinkStateAttr.h"
 
 namespace bgp_msg {
     /* BGP-LS Node flags : https://tools.ietf.org/html/rfc7752#section-3.3.1.1
