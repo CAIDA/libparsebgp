@@ -1168,10 +1168,3 @@ void parseBMP::enableDebug() {
 void parseBMP::disableDebug() {
     debug = false;
 }
-
-int main()
-{
-    std::cout<<"hello ojas";
-    return 1;
-}
-
