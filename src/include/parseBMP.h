@@ -92,8 +92,8 @@ public:
      * \param [in]  mbus_ptr     The database pointer referencer - DB should be already initialized
      * \return true if more to read, false if the connection is done/closed
      */
-    bool parseMsg(int read_fd);
-
+    //bool parseMsg(int read_fd);
+    bool parseMsg(char *buffer, int bufLen);
  
 /**
      * OBJECT: routers
@@ -525,6 +525,16 @@ public:
     ssize_t Recv(int sockfd, void *buf, size_t len, int flags);
 
     /**
+     * function to extract message from buffer
+     * @param buffer
+     * @param bufLen
+     * @param outputbuf
+     * @param outputLen
+     * @return
+     */
+    ssize_t  extractFromBuffer (char *buffer, int bufLen, void *outputbuf, int outputLen);
+
+    /**
      * Process the incoming BMP message
      *
      * \returns
@@ -535,7 +545,8 @@ public:
      *
      * throws (const char *) on error.   String will detail error message.
      */
-    char handleMessage(int sock);
+    //char handleMessage(int sock);
+    char handleMessage(char *buffer, int bufLen);
 
     /**
      * Parse and return back the stats report
@@ -545,7 +556,8 @@ public:
      *
      * \return true if error, false if no error
      */
-    bool handleStatsReport(int sock);
+    //bool handleStatsReport(int sock);
+    bool handleStatsReport(char *buffer, int bufLen);
 
     /**
      * handle the initiation message and udpate the router entry
@@ -553,7 +565,8 @@ public:
      * \param [in]     sock        Socket to read the init message from
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
-    void handleInitMsg(int sock);
+    //void handleInitMsg(int sock);
+    void handleInitMsg(char *buffer, int bufLen);
 
     /**
      * handle the termination message, router entry will be updated
@@ -561,7 +574,8 @@ public:
      * \param [in]     sock        Socket to read the term message from
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
-    void handleTermMsg(int sock);
+    //void handleTermMsg(int sock);
+    void handleTermMsg(char *buffer, int bufLen);
     /**
      * Buffer remaining BMP message
      *
@@ -572,7 +586,8 @@ public:
      *
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
-    void bufferBMPMessage(int sock);
+    //void bufferBMPMessage(int sock);
+    void bufferBMPMessage(char *buffer, int bufLen);
 
     /**
      * Parse the v3 peer down BMP header
@@ -584,7 +599,8 @@ public:
      *
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
-    bool parsePeerDownEventHdr(int sock);
+    //bool parsePeerDownEventHdr(int sock);
+    bool parsePeerDownEventHdr(char *buffer, int bufLen);
 
     /**
      * Parse the v3 peer up BMP header
@@ -596,7 +612,8 @@ public:
      *
      * \returns true if successfully parsed the bmp peer up header, false otherwise
      */
-    bool parsePeerUpEventHdr(int sock);
+    //bool parsePeerUpEventHdr(int sock);
+    bool parsePeerUpEventHdr(char *buffer, int bufLen);
 
     /**
      * get current BMP message type
@@ -643,7 +660,8 @@ private:
      *
      * \param [in]  sock        Socket to read the message from
      */
-    void parseBMPv2(int sock);
+    //void parseBMPv2(int sock);
+    void parseBMPv2(char *buffer, int bufLen);
 
     /**
      * Parse v3 BMP header
@@ -654,15 +672,16 @@ private:
      *
      * \param [in]  sock        Socket to read the message from
      */
-    void parseBMPv3(int sock);
-
+    //void parseBMPv3(int sock);
+    void parseBMPv3(char *buffer, int bufLen);
 
     /**
      * Parse the v3 peer header
      *
      * \param [in]  sock        Socket to read the message from
      */
-    void parsePeerHdr(int sock);
+    //void parsePeerHdr(int sock);
+    void parsePeerHdr(char *buffer, int bufLen);
 
 };
 
