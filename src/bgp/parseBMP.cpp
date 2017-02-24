@@ -32,18 +32,17 @@
  * \param [in,out] peer_entry  Pointer to the peer entry
  */
 //parseBMP::parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry) {
-parseBMP::parseBMP(char *buffer, int bufLen) {
+parseBMP::parseBMP() {
     debug = false;
     bmp_type = -1; // Initially set to error
     bmp_len = 0;
-
     bmp_data_len = 0;
     bzero(bmp_data, sizeof(bmp_data));
 
     bmp_packet_len = 0;
     bzero(bmp_packet, sizeof(bmp_packet));
 
-    parseMsg(buffer, bufLen);
+    //parseMsg(buffer, bufLen);
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
 //    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));
@@ -60,7 +59,7 @@ bool parseBMP::parseMsg(char *buffer, int bufLen)
     parseBGP *pBGP;
     bool rval = true;
     string peer_info_key;
-
+    cout<<"level1"<<endl;
    // MsgBusInterface::obj_bgp_peer p_entry;
 
     char bmp_type = 0;
@@ -74,7 +73,7 @@ bool parseBMP::parseMsg(char *buffer, int bufLen)
             peer_info_key += p_entry.peer_rd;
 
         }
-
+        cout<<"level2"<<endl;
         /*
          * At this point we only have the BMP header message, what happens next depends
          *      on the BMP message type.
@@ -205,6 +204,7 @@ bool parseBMP::parseMsg(char *buffer, int bufLen)
             case parseBMP::TYPE_INIT_MSG : { // Initiation Message
                // LOG_INFO("%s: Init message received with length of %u", client->c_ip, pBMP->getBMPLength());
                 //handleInitMsg(read_fd);
+                cout<<"level3";
                 handleInitMsg(buffer, bufLen);
 
 // Update the router entry with the details
@@ -268,9 +268,9 @@ ssize_t  parseBMP::extractFromBuffer (char *buffer, int bufLen, void *outputbuf,
     if (outputLen > bufLen)
         return (outputLen - bufLen);
     memcpy(outputbuf, buffer, outputLen);
-    *buffer = *buffer + outputLen;
+    *buffer = *(buffer + outputLen);
     bufLen -= outputLen;
-    return (bufLen - outputLen);
+    return outputLen;
 }
 
 /**
@@ -293,7 +293,7 @@ char parseBMP::handleMessage(char *buffer, int bufLen) {
     //    As of Junos 10.4R6.5, it supports version 1
     //bytes_read = Recv(sock, &ver, 1, MSG_WAITALL);
     bytes_read = extractFromBuffer(buffer, bufLen, &ver, 1);
-
+    cout<<"inHandle"<<endl;
     if (bytes_read < 0)
         throw "(1) Failed to read from socket.";
     else if (bytes_read == 0)
@@ -506,7 +506,7 @@ void parseBMP::parseBMPv2(char *buffer, int bufLen) {
 //void parseBMP::parseBMPv3(int sock) {
 void parseBMP::parseBMPv3(char *buffer, int bufLen) {
     struct common_hdr_v3 c_hdr = { 0 };
-
+    cout << "inBMPv3" << endl;
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
     /*if ((Recv(sock, &c_hdr, BMP_HDRv3_LEN, MSG_WAITALL)) != BMP_HDRv3_LEN) {
         throw "ERROR: Cannot read v3 BMP common header.";
@@ -1171,6 +1171,12 @@ void parseBMP::disableDebug() {
 }
 int main()
 {
-    cout<<"Hello Ojas";
+    char temp[] = "030000000004";
+    char *tem = temp;
+    parseBMP *p = new parseBMP();
+    if(p->parseMsg(tem, 12))
+        cout<<"Hello Ojas";
+    else
+        cout<<"not done";
     return 1;
 }
