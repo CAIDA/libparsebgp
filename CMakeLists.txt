@@ -5,9 +5,8 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
         src/bgp/linkstate/MPLinkState.cpp
-        src/bgp/linkstate/MPLinkState.h
+        
         src/bgp/linkstate/MPLinkStateAttr.cpp
-        src/bgp/linkstate/MPLinkStateAttr.h
         src/bgp/AddPathDataContainer.cpp
         src/bgp/EVPN.cpp
         src/bgp/ExtCommunity.cpp
@@ -17,6 +16,8 @@ set(SOURCE_FILES
         src/bgp/OpenMsg.cpp
         src/bgp/parseBGP.cpp
         src/bgp/UpdateMsg.cpp
+        src/include/MPLinkStateAttr.h
+        src/include/MPLinkState.h
         src/include/AddPathDataContainer.h
         src/include/bgp_common.h
         src/include/EVPN.h
