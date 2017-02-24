@@ -514,7 +514,7 @@ public:
      * \param [in]     logPtr      Pointer to existing Logger for app logging
      * \param [in,out] peer_entry  Pointer to the peer entry
      */
-    parseBMP();
+    parseBMP(char *buffer, int bufLen);
 
     // destructor
     virtual ~parseBMP();

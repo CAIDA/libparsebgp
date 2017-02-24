@@ -32,7 +32,7 @@
  * \param [in,out] peer_entry  Pointer to the peer entry
  */
 //parseBMP::parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry) {
-parseBMP::parseBMP() {
+parseBMP::parseBMP(char *buffer, int bufLen) {
     debug = false;
     bmp_type = -1; // Initially set to error
     bmp_len = 0;
@@ -43,6 +43,7 @@ parseBMP::parseBMP() {
     bmp_packet_len = 0;
     bzero(bmp_packet, sizeof(bmp_packet));
 
+    parseMsg(buffer, bufLen);
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
 //    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));
