@@ -204,7 +204,6 @@ bool parseBMP::parseMsg(char *buffer, int bufLen)
             case parseBMP::TYPE_INIT_MSG : { // Initiation Message
                // LOG_INFO("%s: Init message received with length of %u", client->c_ip, pBMP->getBMPLength());
                 //handleInitMsg(read_fd);
-                cout<<"level3";
                 handleInitMsg(buffer, bufLen);
 
 // Update the router entry with the details
@@ -232,7 +231,7 @@ bool parseBMP::parseMsg(char *buffer, int bufLen)
         // Mark the router as disconnected and update the error to be a local disconnect (no term message received)
       //  LOG_INFO("%s: Caught: %s", client->c_ip, str);
        // disconnect(client, mbus_ptr, parseBMP::TERM_REASON_OPENBMP_CONN_ERR, str);
-
+        cout<<str;
         //delete pBMP;                    // Make sure to free the resource
         throw str;
     }
@@ -264,7 +263,7 @@ ssize_t parseBMP::Recv(int sockfd, void *buf, size_t len, int flags) {
     return read;
 }
 
-ssize_t  parseBMP::extractFromBuffer (char *buffer, int bufLen, void *outputbuf, int outputLen) {
+ssize_t  parseBMP::extractFromBuffer (char *&buffer, int &bufLen, void *outputbuf, int outputLen) {
     if (outputLen > bufLen)
         return (outputLen - bufLen);
     memcpy(outputbuf, buffer, outputLen);
@@ -293,7 +292,9 @@ char parseBMP::handleMessage(char *buffer, int bufLen) {
     //    As of Junos 10.4R6.5, it supports version 1
     //bytes_read = Recv(sock, &ver, 1, MSG_WAITALL);
     bytes_read = extractFromBuffer(buffer, bufLen, &ver, 1);
-    cout<<"inHandle"<<endl;
+    //memcpy(&ver,buffer,1);
+    //*buffer++;
+    //bufLen-=1;
     if (bytes_read < 0)
         throw "(1) Failed to read from socket.";
     else if (bytes_read == 0)
@@ -506,7 +507,6 @@ void parseBMP::parseBMPv2(char *buffer, int bufLen) {
 //void parseBMP::parseBMPv3(int sock) {
 void parseBMP::parseBMPv3(char *buffer, int bufLen) {
     struct common_hdr_v3 c_hdr = { 0 };
-    cout << "inBMPv3" << endl;
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
     /*if ((Recv(sock, &c_hdr, BMP_HDRv3_LEN, MSG_WAITALL)) != BMP_HDRv3_LEN) {
         throw "ERROR: Cannot read v3 BMP common header.";
@@ -515,14 +515,16 @@ void parseBMP::parseBMPv3(char *buffer, int bufLen) {
         throw "ERROR: Cannot read v3 BMP common header.";
     }
 
+    memcpy(&c_hdr, buffer, BMP_HDRv3_LEN);
     // Change to host order
     bgp::SWAP_BYTES(&c_hdr.len);
 
     //   SELF_DEBUG("BMP v3: type = %x len=%d", c_hdr.type, c_hdr.len);
 
     // Adjust length to remove common header size
-    c_hdr.len -= 1 + BMP_HDRv3_LEN;
+    //c_hdr.len -= 1 + BMP_HDRv3_LEN;
 
+    cout<<"header length "<<int(c_hdr.len)<<" buffer length "<<bufLen<<" bm_type "<<int(c_hdr.type)<<" end "<<endl;
     if (c_hdr.len > BGP_MAX_MSG_SIZE)
         throw "ERROR: BMP length is larger than max possible BGP size";
 
@@ -1169,14 +1171,10 @@ void parseBMP::enableDebug() {
 void parseBMP::disableDebug() {
     debug = false;
 }
-int main()
-{
-    char temp[] = "030000000004";
-    char *tem = temp;
+int main() {
+    char temp[] = {0x03, 0x00, 0x00, 0x00, 0x00, 0x04};
     parseBMP *p = new parseBMP();
-    if(p->parseMsg(tem, 12))
-        cout<<"Hello Ojas";
-    else
-        cout<<"not done";
+    if (p->parseMsg(&temp, 6))
+        cout << "Hello Ojas";
     return 1;
 }

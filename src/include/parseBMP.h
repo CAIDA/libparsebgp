@@ -532,8 +532,7 @@ public:
      * @param outputLen
      * @return
      */
-    ssize_t  extractFromBuffer (char *buffer, int bufLen, void *outputbuf, int outputLen);
-
+    ssize_t  extractFromBuffer (char *&buffer, int &bufLen, void *outputbuf, int outputLen);
     /**
      * Process the incoming BMP message
      *
