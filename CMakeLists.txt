@@ -1,12 +1,11 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.2)
 project(parse_lib)
 
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-        src/bgp/linkstate/MPLinkState.cpp
-        
-        src/bgp/linkstate/MPLinkStateAttr.cpp
+        src/bgp/MPLinkState.cpp
+        src/bgp/MPLinkStateAttr.cpp
         src/bgp/AddPathDataContainer.cpp
         src/bgp/EVPN.cpp
         src/bgp/ExtCommunity.cpp
@@ -16,6 +15,7 @@ set(SOURCE_FILES
         src/bgp/OpenMsg.cpp
         src/bgp/parseBGP.cpp
         src/bgp/UpdateMsg.cpp
+        src/bgp/parseBMP.cpp
         src/include/MPLinkStateAttr.h
         src/include/MPLinkState.h
         src/include/AddPathDataContainer.h
@@ -28,7 +28,6 @@ set(SOURCE_FILES
         src/include/OpenMsg.h
         src/include/parseBGP.h
         src/include/UpdateMsg.h
-        src/include/parseBMP.h
-        src/parseBMP.cpp)
+        src/include/parseBMP.h)
 
 add_executable(parse_lib ${SOURCE_FILES})

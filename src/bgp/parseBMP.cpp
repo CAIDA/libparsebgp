@@ -54,7 +54,7 @@ parseBMP::~parseBMP() {
 
 
 //bool parseBMP::parseMsg(int read_fd)
-bool parseBMP::parseMsg(char *buffer, int bufLen)
+bool parseBMP::parseMsg(char *&buffer, int bufLen)
 {
     parseBGP *pBGP;
     bool rval = true;
@@ -263,11 +263,11 @@ ssize_t parseBMP::Recv(int sockfd, void *buf, size_t len, int flags) {
     return read;
 }
 
-ssize_t  parseBMP::extractFromBuffer (char *&buffer, int &bufLen, void *outputbuf, int outputLen) {
+ssize_t  parseBMP::extractFromBuffer (char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
     if (outputLen > bufLen)
         return (outputLen - bufLen);
     memcpy(outputbuf, buffer, outputLen);
-    *buffer = *(buffer + outputLen);
+    buffer = (buffer + outputLen);
     bufLen -= outputLen;
     return outputLen;
 }
@@ -284,7 +284,7 @@ ssize_t  parseBMP::extractFromBuffer (char *&buffer, int &bufLen, void *outputbu
  * //throws (const  char *) on error.   String will detail error message.
  */
 //char parseBMP::handleMessage(int sock) {
-char parseBMP::handleMessage(char *buffer, int bufLen) {
+char parseBMP::handleMessage(char*& buffer, int bufLen) {
     unsigned char ver;
     ssize_t bytes_read;
 
@@ -515,7 +515,7 @@ void parseBMP::parseBMPv3(char *buffer, int bufLen) {
         throw "ERROR: Cannot read v3 BMP common header.";
     }
 
-    memcpy(&c_hdr, buffer, BMP_HDRv3_LEN);
+    //memcpy(&c_hdr, buffer, BMP_HDRv3_LEN);
     // Change to host order
     bgp::SWAP_BYTES(&c_hdr.len);
 
@@ -1173,8 +1173,10 @@ void parseBMP::disableDebug() {
 }
 int main() {
     char temp[] = {0x03, 0x00, 0x00, 0x00, 0x00, 0x04};
+    char *tmp;
+    tmp = temp;
     parseBMP *p = new parseBMP();
-    if (p->parseMsg(&temp, 6))
+    if (p->parseMsg(tmp, 6))
         cout << "Hello Ojas";
     return 1;
 }

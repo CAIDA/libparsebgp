@@ -93,7 +93,7 @@ public:
      * \return true if more to read, false if the connection is done/closed
      */
     //bool parseMsg(int read_fd);
-    bool parseMsg(char *buffer, int bufLen);
+    bool parseMsg(char *&buffer, int bufLen);
  
 /**
      * OBJECT: routers
@@ -532,7 +532,7 @@ public:
      * @param outputLen
      * @return
      */
-    ssize_t  extractFromBuffer (char *&buffer, int &bufLen, void *outputbuf, int outputLen);
+    ssize_t  extractFromBuffer (char*& buffer, int &bufLen, void *outputbuf, int outputLen);
     /**
      * Process the incoming BMP message
      *
@@ -545,7 +545,7 @@ public:
      * throws (const char *) on error.   String will detail error message.
      */
     //char handleMessage(int sock);
-    char handleMessage(char *buffer, int bufLen);
+    char handleMessage(char*& buffer, int bufLen);
 
     /**
      * Parse and return back the stats report
