@@ -10,6 +10,7 @@
 #include "../include/parseBMP.h"
 #include "../include/parseBGP.h"
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -54,7 +55,7 @@ parseBMP::~parseBMP() {
 
 
 //bool parseBMP::parseMsg(int read_fd)
-bool parseBMP::parseMsg(char *&buffer, int bufLen)
+bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
 {
     parseBGP *pBGP;
     bool rval = true;
@@ -263,7 +264,7 @@ ssize_t parseBMP::Recv(int sockfd, void *buf, size_t len, int flags) {
     return read;
 }
 
-ssize_t  parseBMP::extractFromBuffer (char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
+ssize_t  parseBMP::extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
     if (outputLen > bufLen)
         return (outputLen - bufLen);
     memcpy(outputbuf, buffer, outputLen);
@@ -284,7 +285,7 @@ ssize_t  parseBMP::extractFromBuffer (char*& buffer, int &bufLen, void *outputbu
  * //throws (const  char *) on error.   String will detail error message.
  */
 //char parseBMP::handleMessage(int sock) {
-char parseBMP::handleMessage(char*& buffer, int bufLen) {
+char parseBMP::handleMessage(unsigned char*& buffer, int& bufLen) {
     unsigned char ver;
     ssize_t bytes_read;
 
@@ -331,7 +332,7 @@ char parseBMP::handleMessage(char*& buffer, int bufLen) {
 * \param [in]  sock        Socket to read the message from
 */
 //void parseBMP::parseBMPv2(int sock) {
-void parseBMP::parseBMPv2(char *buffer, int bufLen) {
+void parseBMP::parseBMPv2(unsigned char *buffer, int& bufLen) {
     struct common_hdr_old c_hdr = { 0 };
     ssize_t i = 0;
     char buf[256] = {0};
@@ -505,7 +506,7 @@ void parseBMP::parseBMPv2(char *buffer, int bufLen) {
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parseBMPv3(int sock) {
-void parseBMP::parseBMPv3(char *buffer, int bufLen) {
+void parseBMP::parseBMPv3(unsigned char *buffer, int& bufLen) {
     struct common_hdr_v3 c_hdr = { 0 };
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
     /*if ((Recv(sock, &c_hdr, BMP_HDRv3_LEN, MSG_WAITALL)) != BMP_HDRv3_LEN) {
@@ -522,7 +523,7 @@ void parseBMP::parseBMPv3(char *buffer, int bufLen) {
     //   SELF_DEBUG("BMP v3: type = %x len=%d", c_hdr.type, c_hdr.len);
 
     // Adjust length to remove common header size
-    //c_hdr.len -= 1 + BMP_HDRv3_LEN;
+    c_hdr.len -= 1 + BMP_HDRv3_LEN;
 
     cout<<"header length "<<int(c_hdr.len)<<" buffer length "<<bufLen<<" bm_type "<<int(c_hdr.type)<<" end "<<endl;
     if (c_hdr.len > BGP_MAX_MSG_SIZE)
@@ -576,7 +577,7 @@ void parseBMP::parseBMPv3(char *buffer, int bufLen) {
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parsePeerHdr(int sock) {
-void parseBMP::parsePeerHdr(char *buffer, int bufLen) {
+void parseBMP::parsePeerHdr(unsigned char *buffer, int& bufLen) {
     peer_hdr_v3 p_hdr = {0};
     int i;
 
@@ -710,7 +711,7 @@ void parseBMP::parsePeerHdr(char *buffer, int bufLen) {
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
 //bool parseBMP::parsePeerDownEventHdr(int sock) {
-bool parseBMP::parsePeerDownEventHdr(char *buffer, int bufLen) {
+bool parseBMP::parsePeerDownEventHdr(unsigned char *buffer, int& bufLen) {
 
     char reason;
     //if (Recv(sock, &reason, 1, 0) == 1) {
@@ -743,7 +744,7 @@ bool parseBMP::parsePeerDownEventHdr(char *buffer, int bufLen) {
  * \throws String error
  */
 // void parseBMP::bufferBMPMessage(int sock) {
-void parseBMP::bufferBMPMessage(char *buffer, int bufLen) {
+void parseBMP::bufferBMPMessage(unsigned char *buffer, int& bufLen) {
     if (bmp_len <= 0)
         return;
 
@@ -779,7 +780,7 @@ void parseBMP::bufferBMPMessage(char *buffer, int bufLen) {
  * \returns true if successfully parsed the bmp peer up header, false otherwise
  */
 //bool parseBMP::parsePeerUpEventHdr(int sock) {
-bool parseBMP::parsePeerUpEventHdr(char *buffer, int bufLen) {
+bool parseBMP::parsePeerUpEventHdr(unsigned char *buffer, int& bufLen) {
     unsigned char local_addr[16];
     bool isParseGood = true;
     int bytes_read = 0;
@@ -848,7 +849,7 @@ bool parseBMP::parsePeerUpEventHdr(char *buffer, int bufLen) {
  * \return true if error, false if no error
  */
 //bool parseBMP::handleStatsReport(int sock) {
-bool parseBMP::handleStatsReport(char *buffer, int bufLen) {
+bool parseBMP::handleStatsReport(unsigned char *buffer, int& bufLen) {
     unsigned long stats_cnt = 0; // Number of counter stat objects to follow
     unsigned char b[8];
 
@@ -972,7 +973,7 @@ bool parseBMP::handleStatsReport(char *buffer, int bufLen) {
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
 //void parseBMP::handleInitMsg(int sock) {
-void parseBMP::handleInitMsg(char *buffer, int bufLen) {
+void parseBMP::handleInitMsg(unsigned char *buffer, int& bufLen) {
     init_msg_v3 initMsg;
     char infoBuf[sizeof(r_entry.initiate_data)];
     int infoLen;
@@ -1054,7 +1055,7 @@ void parseBMP::handleInitMsg(char *buffer, int bufLen) {
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
 //void parseBMP::handleTermMsg(int sock) {
-void parseBMP::handleTermMsg(char *buffer, int bufLen) {
+void parseBMP::handleTermMsg(unsigned char *buffer, int& bufLen) {
     term_msg_v3 termMsg;
     char infoBuf[sizeof(r_entry.term_data)];
     int infoLen;
@@ -1172,11 +1173,30 @@ void parseBMP::disableDebug() {
     debug = false;
 }
 int main() {
-    char temp[] = {0x03, 0x00, 0x00, 0x00, 0x00, 0x04};
-    char *tmp;
+   /* fstream infile;
+    infile.open("C:/Users/Induja/CLionProjects/openbmp-bmpparser/file.txt", fstream::in);
+    if (infile.is_open()) {
+        char b[1] = "";
+        //infile >> std::hex >> a;
+        infile.read(b, 2);
+        cout << b[1] << endl;
+        infile.close();
+    }*/
+    //char temp[] = {0x03, 0x00, 0x00, 0x00, 0x06, 0x04};
+    unsigned char temp[] = {0x03, 0x00, 0x00, 0x00, 0xba, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x45, 0xb8, 0xc1, 0x00, 0x00, 0x0d, 0x1c, 0x04, 0x45, 0xb8, 0xc1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xdf, 0x33, 0x67, 0xd0, 0x40, 0x00, 0xb3, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x41, 0x01, 0x04, 0x19, 0x2f, 0x02, 0x58, 0x80, 0xdf, 0x33, 0x67, 0x24, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x02, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x01, 0x02, 0x02, 0x80, 0x00, 0x02, 0x02, 0x02, 0x00, 0x02, 0x02, 0x46, 0x00, 0x02, 0x06, 0x41, 0x04, 0x00, 0x00, 0x19, 0x2f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x35, 0x01, 0x04, 0x0d, 0x1c, 0x00, 0xb4, 0x04, 0x45, 0xb8, 0xc1, 0x18, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x02, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x01, 0x02, 0x02, 0x02, 0x00, 0x02, 0x02, 0x80, 0x00};
+    unsigned char *tmp;
     tmp = temp;
     parseBMP *p = new parseBMP();
-    if (p->parseMsg(tmp, 6))
-        cout << "Hello Ojas";
+    int len = 186;
+    try {
+        if (p->parseMsg(tmp, len))
+            cout << "Hello Ojas";
+        else
+            cout << "Oh no!";
+    }
+    catch (char const *str) {
+        cout << "Crashed!" << str;
+    }
+    cout<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy;
     return 1;
 }
