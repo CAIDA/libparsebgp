@@ -332,7 +332,7 @@ char parseBMP::handleMessage(unsigned char*& buffer, int& bufLen) {
 * \param [in]  sock        Socket to read the message from
 */
 //void parseBMP::parseBMPv2(int sock) {
-void parseBMP::parseBMPv2(unsigned char *buffer, int& bufLen) {
+void parseBMP::parseBMPv2(unsigned char*& buffer, int& bufLen) {
     struct common_hdr_old c_hdr = { 0 };
     ssize_t i = 0;
     char buf[256] = {0};
@@ -506,7 +506,7 @@ void parseBMP::parseBMPv2(unsigned char *buffer, int& bufLen) {
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parseBMPv3(int sock) {
-void parseBMP::parseBMPv3(unsigned char *buffer, int& bufLen) {
+void parseBMP::parseBMPv3(unsigned char*& buffer, int& bufLen) {
     struct common_hdr_v3 c_hdr = { 0 };
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
     /*if ((Recv(sock, &c_hdr, BMP_HDRv3_LEN, MSG_WAITALL)) != BMP_HDRv3_LEN) {
@@ -577,7 +577,7 @@ void parseBMP::parseBMPv3(unsigned char *buffer, int& bufLen) {
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parsePeerHdr(int sock) {
-void parseBMP::parsePeerHdr(unsigned char *buffer, int& bufLen) {
+void parseBMP::parsePeerHdr(unsigned char*& buffer, int& bufLen) {
     peer_hdr_v3 p_hdr = {0};
     int i;
 
@@ -711,7 +711,7 @@ void parseBMP::parsePeerHdr(unsigned char *buffer, int& bufLen) {
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
 //bool parseBMP::parsePeerDownEventHdr(int sock) {
-bool parseBMP::parsePeerDownEventHdr(unsigned char *buffer, int& bufLen) {
+bool parseBMP::parsePeerDownEventHdr(unsigned char*& buffer, int& bufLen) {
 
     char reason;
     //if (Recv(sock, &reason, 1, 0) == 1) {
@@ -744,7 +744,7 @@ bool parseBMP::parsePeerDownEventHdr(unsigned char *buffer, int& bufLen) {
  * \throws String error
  */
 // void parseBMP::bufferBMPMessage(int sock) {
-void parseBMP::bufferBMPMessage(unsigned char *buffer, int& bufLen) {
+void parseBMP::bufferBMPMessage(unsigned char*& buffer, int& bufLen) {
     if (bmp_len <= 0)
         return;
 
@@ -780,7 +780,7 @@ void parseBMP::bufferBMPMessage(unsigned char *buffer, int& bufLen) {
  * \returns true if successfully parsed the bmp peer up header, false otherwise
  */
 //bool parseBMP::parsePeerUpEventHdr(int sock) {
-bool parseBMP::parsePeerUpEventHdr(unsigned char *buffer, int& bufLen) {
+bool parseBMP::parsePeerUpEventHdr(unsigned char*& buffer, int& bufLen) {
     unsigned char local_addr[16];
     bool isParseGood = true;
     int bytes_read = 0;
@@ -849,7 +849,7 @@ bool parseBMP::parsePeerUpEventHdr(unsigned char *buffer, int& bufLen) {
  * \return true if error, false if no error
  */
 //bool parseBMP::handleStatsReport(int sock) {
-bool parseBMP::handleStatsReport(unsigned char *buffer, int& bufLen) {
+bool parseBMP::handleStatsReport(unsigned char*& buffer, int& bufLen) {
     unsigned long stats_cnt = 0; // Number of counter stat objects to follow
     unsigned char b[8];
 
@@ -973,7 +973,7 @@ bool parseBMP::handleStatsReport(unsigned char *buffer, int& bufLen) {
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
 //void parseBMP::handleInitMsg(int sock) {
-void parseBMP::handleInitMsg(unsigned char *buffer, int& bufLen) {
+void parseBMP::handleInitMsg(unsigned char*& buffer, int& bufLen) {
     init_msg_v3 initMsg;
     char infoBuf[sizeof(r_entry.initiate_data)];
     int infoLen;
@@ -1055,7 +1055,7 @@ void parseBMP::handleInitMsg(unsigned char *buffer, int& bufLen) {
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
 //void parseBMP::handleTermMsg(int sock) {
-void parseBMP::handleTermMsg(unsigned char *buffer, int& bufLen) {
+void parseBMP::handleTermMsg(unsigned char*& buffer, int& bufLen) {
     term_msg_v3 termMsg;
     char infoBuf[sizeof(r_entry.term_data)];
     int infoLen;

@@ -420,7 +420,7 @@ public:
 
         /**
          * Type is defined by enum BMP_TYPE
-         */it f
+         */
         u_char      type;
 
      } __attribute__ ((__packed__));
@@ -556,7 +556,7 @@ public:
      * \return true if error, false if no error
      */
     //bool handleStatsReport(int sock);
-    bool handleStatsReport(unsigned char *buffer, int& bufLen);
+    bool handleStatsReport(unsigned char*& buffer, int& bufLen);
 
     /**
      * handle the initiation message and udpate the router entry
@@ -565,7 +565,7 @@ public:
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
     //void handleInitMsg(int sock);
-    void handleInitMsg(unsigned char *buffer, int& bufLen);
+    void handleInitMsg(unsigned char*& buffer, int& bufLen);
 
     /**
      * handle the termination message, router entry will be updated
@@ -574,7 +574,7 @@ public:
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
     //void handleTermMsg(int sock);
-    void handleTermMsg(unsigned char *buffer, int& bufLen);
+    void handleTermMsg(unsigned char*& buffer, int& bufLen);
     /**
      * Buffer remaining BMP message
      *
@@ -586,7 +586,7 @@ public:
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
     //void bufferBMPMessage(int sock);
-    void bufferBMPMessage(unsigned char *buffer, int& bufLen);
+    void bufferBMPMessage(unsigned char*& buffer, int& bufLen);
 
     /**
      * Parse the v3 peer down BMP header
@@ -599,7 +599,7 @@ public:
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
     //bool parsePeerDownEventHdr(int sock);
-    bool parsePeerDownEventHdr(unsigned char *buffer, int& bufLen);
+    bool parsePeerDownEventHdr(unsigned char*& buffer, int& bufLen);
 
     /**
      * Parse the v3 peer up BMP header
@@ -612,7 +612,7 @@ public:
      * \returns true if successfully parsed the bmp peer up header, false otherwise
      */
     //bool parsePeerUpEventHdr(int sock);
-    bool parsePeerUpEventHdr(unsigned char *buffer, int& bufLen);
+    bool parsePeerUpEventHdr(unsigned char*& buffer, int& bufLen);
 
     /**
      * get current BMP message type
@@ -660,7 +660,7 @@ private:
      * \param [in]  sock        Socket to read the message from
      */
     //void parseBMPv2(int sock);
-    void parseBMPv2(unsigned char *buffer, int& bufLen);
+    void parseBMPv2(unsigned char*& buffer, int& bufLen);
 
     /**
      * Parse v3 BMP header
@@ -672,7 +672,7 @@ private:
      * \param [in]  sock        Socket to read the message from
      */
     //void parseBMPv3(int sock);
-    void parseBMPv3(unsigned char *buffer, int& bufLen);
+    void parseBMPv3(unsigned char*& buffer, int& bufLen);
 
     /**
      * Parse the v3 peer header
@@ -680,7 +680,7 @@ private:
      * \param [in]  sock        Socket to read the message from
      */
     //void parsePeerHdr(int sock);
-    void parsePeerHdr(unsigned char *buffer, int& bufLen);
+    void parsePeerHdr(unsigned char*& buffer, int& bufLen);
 
 };
 
