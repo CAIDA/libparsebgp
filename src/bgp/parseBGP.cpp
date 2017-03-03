@@ -19,7 +19,7 @@
 #include <memory>
 #include <arpa/inet.h>
 #include "../include/MPLinkStateAttr.h"
-
+#include "../include/parseBMP.h"
 #include <sstream>
 #include <algorithm>
 
@@ -226,8 +226,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
     if (parseBgpHeader(data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-//        read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, up_event->remote_asn,
- //                                     up_event->remote_hold_time, remote_bgp_id, cap_list);
+        read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());

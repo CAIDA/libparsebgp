@@ -223,7 +223,7 @@ public:
 
         char        sent_cap[4096];         ///< Received Open param capabilities
         char        recv_cap[4096];         ///< Received Open param capabilities
-    }__attribute__ ((__packed__));
+    };
 
 
 /**
