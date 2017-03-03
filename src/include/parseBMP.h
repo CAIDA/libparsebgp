@@ -115,7 +115,7 @@ public:
         char        initiate_data[4096];    ///< Type=0 String initiation info data
         uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
         uint32_t    timestamp_us;           ///< Timestamp microseconds
-    }__attribute__ ((__packed__));
+    };
 
 /**
      * OBJECT: bgp_peers
@@ -136,7 +136,7 @@ public:
         bool        isIPv4;                 ///< true if peer is IPv4 or false if IPv6
         uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
         uint32_t    timestamp_us;           ///< Timestamp microseconds
-    }__attribute__ ((__packed__));
+    };
 
 
 
@@ -151,7 +151,7 @@ public:
         u_char          bgp_err_code;       ///< BGP notify error code
         u_char          bgp_err_subcode;    ///< BGP notify error sub code
         char            error_text[255];    ///< BGP error text string
-    }__attribute__ ((__packed__));
+    };
 
    /**
     * OBJECT: path_attrs
@@ -241,7 +241,7 @@ public:
         uint32_t        invalid_as_confed_loop; ///< type=6 Invalid due to as_confed loop
         uint64_t        routes_adj_rib_in;      ///< type=7 Number of routes in adj-rib-in
         uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
-    }__attribute__ ((__packed__));
+    };
 
 
     /**
@@ -420,7 +420,7 @@ public:
 
         /**
          * Type is defined by enum BMP_TYPE
-         */
+         */it f
         u_char      type;
 
      } __attribute__ ((__packed__));
