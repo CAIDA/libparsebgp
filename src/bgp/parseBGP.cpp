@@ -106,7 +106,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size) {
         /*
          * Update the DB with the update data
          */
-        //UpdateDB(parsed_data);
+        UpdateDB(parsed_data);
     }
 
     return false;
@@ -125,7 +125,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size) {
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleDownEvent(u_char *data, size_t size) {
+bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down_event *down_event) {
     bool        rval;
 
     // Process the BGP message normally
@@ -142,9 +142,9 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size) {
             data += 2;                                                 // Move pointer past notification message
             data_bytes_remaining -= 2;
 
-            //down_event.bgp_err_code = parsed_msg.error_code;
-            //down_event.bgp_err_subcode = parsed_msg.error_subcode;
-            //strncpy(down_event.error_text, parsed_msg.error_text, sizeof(down_event.error_text));
+            down_event->bgp_err_code = parsed_msg.error_code;
+            down_event->bgp_err_subcode = parsed_msg.error_subcode;
+            strncpy(down_event->error_text, parsed_msg.error_text, sizeof(down_event->error_text));
         }
     }
     else {

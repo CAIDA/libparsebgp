@@ -109,7 +109,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleDownEvent(u_char *data, size_t size);
+    bool handleDownEvent(u_char *data, size_t size, parseBMP::obj_peer_down_event *down_event);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated
