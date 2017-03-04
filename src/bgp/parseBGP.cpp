@@ -56,7 +56,7 @@ parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseB
     data_bytes_remaining = 0;
     data = NULL;
 
-    bzero(&common_hdr, sizeof(common_hdr));
+//    bzero(&common_hdr, sizeof(common_hdr));
 
     // Set our mysql pointer
     //this->mbus_ptr = mbus_ptr;
@@ -84,11 +84,11 @@ parseBGP::~parseBGP() {
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleUpdate(u_char *data, size_t size) {
+bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg) {
     bgp_msg::UpdateMsg::parsed_update_data parsed_data;
     int read_size = 0;
 
-    if (parseBgpHeader(data, size) == BGP_MSG_UPDATE) {
+    if (parseBgpHeader(data, size, &bgpMsg->common_hdr) == BGP_MSG_UPDATE) {
         data += BGP_MSG_HDR_LEN;
 
         /*
@@ -125,11 +125,11 @@ bool parseBGP::handleUpdate(u_char *data, size_t size) {
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down_event *down_event) {
+bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down_event *down_event, parseBMP::BGPMsg *bgpMsg) {
     bool        rval;
 
     // Process the BGP message normally
-    if (parseBgpHeader(data, size) == BGP_MSG_NOTIFICATION) {
+    if (parseBgpHeader(data, size, &bgpMsg->common_hdr) == BGP_MSG_NOTIFICATION) {
         data += BGP_MSG_HDR_LEN;
 
         bgp_msg::parsed_notify_msg parsed_msg;
@@ -167,7 +167,7 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event) {
+bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::BGPMsg *bgpMsg) {
     bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info, debug);
     list <string>       cap_list;
     string              local_bgp_id, remote_bgp_id;
@@ -181,7 +181,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
     /*
      * Process the sent open message
      */
-    if (parseBgpHeader(data, size) == BGP_MSG_OPEN) {
+    if (parseBgpHeader(data, size, &bgpMsg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
         read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
@@ -223,7 +223,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
      */
     cap_list.clear();
 
-    if (parseBgpHeader(data, size) == BGP_MSG_OPEN) {
+    if (parseBgpHeader(data, size, &bgpMsg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
         read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
@@ -276,7 +276,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
  *
  * \returns BGP message type
  */
-u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
+u_char parseBGP::parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_hdr *common_hdr) {
     bzero(&common_hdr, sizeof(common_hdr));
 
     /*
@@ -290,16 +290,16 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
     memcpy(&common_hdr, data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
-    bgp::SWAP_BYTES(&common_hdr.len);
+    bgp::SWAP_BYTES(&(common_hdr->len));
 
     // Update remaining bytes left of the message
-    data_bytes_remaining = common_hdr.len - BGP_MSG_HDR_LEN;
+    data_bytes_remaining = common_hdr->len - BGP_MSG_HDR_LEN;
 
     /*
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer
      *      It is expected that the passed bgp message buffer holds the complete BGP message to be parsed
      */
-    if (common_hdr.len > size) {
+    if (common_hdr->len > size) {
 //        LOG_WARN("%s: rtr=%s: BGP message size of %hu is greater than passed data buffer, cannot parse the BGP message",p_entry->peer_addr, router_addr.c_str(), common_hdr.len, size);
     }
 
@@ -308,7 +308,7 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
     /*
      * Validate the message type as being allowed/accepted
      */
-    switch (common_hdr.type) {
+    switch (common_hdr->type) {
         case BGP_MSG_UPDATE         : // Update Message
         case BGP_MSG_NOTIFICATION   : // Notification message
         case BGP_MSG_OPEN           : // OPEN message
@@ -324,7 +324,7 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size) {
             break;
     }
 
-    return common_hdr.type;
+    return common_hdr->type;
 }
 
 /**

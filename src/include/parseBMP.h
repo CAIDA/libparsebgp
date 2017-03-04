@@ -409,6 +409,36 @@ public:
     };
 
 
+//############################################################################
+    struct common_bgp_hdr {
+        /**
+         * 16-octet field is included for compatibility
+         * All ones (required).
+         */
+        unsigned char    marker[16];
+
+        /**
+         * Total length of the message, including the header in octets
+         *
+         * min length is 19, max is 4096
+         */
+        unsigned short   len;
+        /**
+         * type code of the message
+         *
+         * 1 - OPEN
+         * 2 - UPDATE
+         * 3 - NOTIFICATION
+         * 4 - KEEPALIVE
+         * 5 - ROUTE-REFRESH
+         */
+        unsigned char    type;
+    } __attribute__ ((__packed__));
+
+    struct BGPMsg{
+        common_bgp_hdr common_hdr;
+    };
+//############################################################################
      /**
       * BMP common header
       */
@@ -635,7 +665,7 @@ public:
     obj_peer_down_event down_event;
     obj_peer_up_event up_event;
     obj_stats_report stats;
-
+    BGPMsg bgpMsg;
 private:
     bool            debug;                      ///< debug flag to indicate debugging
    // Logger          *logger;                    ///< Logging class pointer

@@ -53,7 +53,7 @@ parseBMP::~parseBMP() {
     // clean up
 }
 
-
+parseBGP *pBGP;
 //bool parseBMP::parseMsg(int read_fd)
 bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
 {
@@ -100,7 +100,7 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
                             snprintf(down_event.error_text, sizeof(down_event.error_text),
                                     "Local close by (%s) for peer (%s) : ", r_entry.ip_addr,
                                     p_entry.peer_addr);
-                            pBGP->handleDownEvent(bmp_data, bmp_data_len,&down_event);
+                            pBGP->handleDownEvent(bmp_data, bmp_data_len,&down_event,&bgpMsg);
                             break;
                         }
                         case 2 : // Local system close, no bgp notify
@@ -120,7 +120,7 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
                                     "Remote peer (%s) closed local (%s) session: ", r_entry.ip_addr,
                                     p_entry.peer_addr);
 
-                            pBGP->handleDownEvent(bmp_data, bmp_data_len, &down_event);
+                            pBGP->handleDownEvent(bmp_data, bmp_data_len, &down_event,&bgpMsg);
                             break;
                         }
                     }
@@ -155,7 +155,7 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
         //               pBGP->enableDebug();
 
 // Parse the BGP sent/received open messages
-                    pBGP->handleUpEvent(bmp_data, bmp_data_len, &up_event);
+                    pBGP->handleUpEvent(bmp_data, bmp_data_len, &up_event,&bgpMsg);
 
                     // Free the bgp parser
                     //delete pBGP;
@@ -183,7 +183,7 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
                // if (cfg->debug_bgp)
                //     pBGP->enableDebug();
 
-                pBGP->handleUpdate(bmp_data, bmp_data_len);
+                pBGP->handleUpdate(bmp_data, bmp_data_len, &bgpMsg);
                 //delete pBGP;
 
                 break;

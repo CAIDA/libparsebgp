@@ -94,7 +94,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleUpdate(u_char *data, size_t size);
+    bool handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -109,7 +109,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleDownEvent(u_char *data, size_t size, parseBMP::obj_peer_down_event *down_event);
+    bool handleDownEvent(u_char *data, size_t size, parseBMP::obj_peer_down_event *down_event, parseBMP::BGPMsg *bgpMsg);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated
@@ -122,7 +122,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event);
+    bool handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::BGPMsg *bgpMsg);
 
     /*
      * Debug methods
@@ -145,7 +145,7 @@ private:
      */
     unsigned char *data;                             ///< Pointer to the data buffer for the raw BGP message
 
-    common_bgp_hdr common_hdr;                       ///< Current/last pased bgp common header
+    //common_bgp_hdr common_hdr;                       ///< Current/last pased bgp common header
 
     parseBMP::obj_bgp_peer    *p_entry;       ///< peer table entry - will be updated with BMP info
     parseBMP::obj_path_attr   base_attr;      ///< Base attribute object
@@ -172,7 +172,7 @@ private:
      *
      * \returns BGP message type
      */
-    u_char parseBgpHeader(u_char *data, size_t size);
+    u_char parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_hdr *common_hdr);
 
     /**
      * Update the Database with the parsed updated data
