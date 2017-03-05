@@ -436,35 +436,6 @@ public:
         unsigned char    type;
     } __attribute__ ((__packed__));
 
-    struct update_bgp_hdr {
-        /**
-         * indicates the total len of withdrawn routes field in octets.
-         */
-        uint16_t withdrawn_len;
-
-        /**
-         * Withdrawn routes data pointer
-         */
-        u_char *withdrawnPtr;
-
-        /**
-         * Total length of the path attributes field in octets
-         *
-         * A value of 0 indicates NLRI nor path attrs are present
-         */
-        uint16_t attr_len;
-
-        /**
-         * Attribute data pointer
-         */
-        u_char *attrPtr;
-
-        /**
-         * NLRI data pointer
-         */
-        u_char *nlriPtr;
-    };
-
     enum UPDATE_ATTR_TYPES {
         ATTR_TYPE_ORIGIN=1,
         ATTR_TYPE_AS_PATH,
@@ -540,7 +511,6 @@ public:
 
     struct BGPMsg{
         common_bgp_hdr common_hdr;
-        update_bgp_hdr uHdr;
         parsed_update_data parsed_data;
     };
 //############################################################################

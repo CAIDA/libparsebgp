@@ -68,7 +68,7 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parseReachNlriAttr(int attr_len, u_char *data, UpdateMsg::parsed_update_data &parsed_data);
+    void parseReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
 
     /**
      * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -133,7 +133,7 @@ private:
      * \param [in]   nlri           Reference to parsed NLRI struct
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &parsed_data);
+    void parseAfi(mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
 
     /**
      * MP Reach NLRI parse for BGP_AFI_IPv4 & BGP_AFI_IPV6
@@ -144,7 +144,7 @@ private:
      * \param [in]   nlri           Reference to parsed NLRI struct
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &parsed_data);
+    void parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
 };
 
 } /* namespace bgp_msg */

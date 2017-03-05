@@ -174,7 +174,7 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parseExtCommunities(int attr_len, u_char *data, UpdateMsg::parsed_update_data &parsed_data);
+    void parseExtCommunities(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
 
     /**
      * Parse the extended communities path attribute (20 byte as per RFC5701)
@@ -188,7 +188,7 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parsev6ExtCommunities(int attr_len, u_char *data, UpdateMsg::parsed_update_data &parsed_data);
+    void parsev6ExtCommunities(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
 
 private:
     bool             debug;                           ///< debug flag to indicate debugging
