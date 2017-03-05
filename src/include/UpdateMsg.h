@@ -343,7 +343,7 @@ private:
      * \param [in]   data           Pointer to the attribute data
      * \param [out]  attrs          Reference to the parsed attr map - will be updated
      */
-    void parseAttr_Aggegator(uint16_t attr_len, u_char *data, parsed_attrs_map &attrs);
+    void parseAttr_Aggegator(uint16_t attr_len, u_char *data, parseBMP::parsed_attrs_map &attrs);
 
 };
 
