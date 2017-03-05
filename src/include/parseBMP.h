@@ -13,6 +13,7 @@
 
 #include <string>
 #include "AddPathDataContainer.h"
+#include <list>
 
 /*
  * BMP Header lengths, not counting the version in the common hdr
@@ -435,8 +436,112 @@ public:
         unsigned char    type;
     } __attribute__ ((__packed__));
 
+    struct update_bgp_hdr {
+        /**
+         * indicates the total len of withdrawn routes field in octets.
+         */
+        uint16_t withdrawn_len;
+
+        /**
+         * Withdrawn routes data pointer
+         */
+        u_char *withdrawnPtr;
+
+        /**
+         * Total length of the path attributes field in octets
+         *
+         * A value of 0 indicates NLRI nor path attrs are present
+         */
+        uint16_t attr_len;
+
+        /**
+         * Attribute data pointer
+         */
+        u_char *attrPtr;
+
+        /**
+         * NLRI data pointer
+         */
+        u_char *nlriPtr;
+    };
+
+    enum UPDATE_ATTR_TYPES {
+        ATTR_TYPE_ORIGIN=1,
+        ATTR_TYPE_AS_PATH,
+        ATTR_TYPE_NEXT_HOP,
+        ATTR_TYPE_MED,
+        ATTR_TYPE_LOCAL_PREF,
+        ATTR_TYPE_ATOMIC_AGGREGATE,
+        ATTR_TYPE_AGGEGATOR,
+        ATTR_TYPE_COMMUNITIES,
+        ATTR_TYPE_ORIGINATOR_ID,
+        ATTR_TYPE_CLUSTER_LIST,
+        ATTR_TYPE_DPA,
+        ATTR_TYPE_ADVERTISER,
+        ATTR_TYPE_RCID_PATH,
+        ATTR_TYPE_MP_REACH_NLRI=14,
+        ATTR_TYPE_MP_UNREACH_NLRI,
+        ATTR_TYPE_EXT_COMMUNITY=16,
+        ATTR_TYPE_AS4_PATH=17,
+        ATTR_TYPE_AS4_AGGREGATOR=18,
+
+        ATTR_TYPE_AS_PATHLIMIT=21,              // Deprecated - draft-ietf-idr-as-pathlimit, JunOS will send this
+
+        ATTR_TYPE_IPV6_EXT_COMMUNITY=25,
+        ATTR_TYPE_AIGP,                         ///< RFC7311 - Accumulated IGP metric
+
+        ATTR_TYPE_BGP_LS=29,                    // BGP LS attribute draft-ietf-idr-ls-distribution
+
+        ATTR_TYPE_BGP_LINK_STATE_OLD=99,        // BGP link state Older
+        ATTR_TYPE_BGP_ATTRIBUTE_SET=128,
+
+        /*
+         * Below attribute types are for internal use only... These are derived/added based on other attributes
+         */
+                ATTR_TYPE_INTERNAL_AS_COUNT=9000,        // AS path count - number of AS's
+        ATTR_TYPE_INTERNAL_AS_ORIGIN             // The AS that originated the entry
+    };
+    /**
+     * Parsed data structure for BGP-LS
+     */
+    struct parsed_data_ls {
+        std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
+        std::list<obj_ls_link>   links;        ///< List of link state links
+        std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+    };
+    /**
+     * parsed path attributes map
+     */
+    std::map<UPDATE_ATTR_TYPES, std::string>            parsed_attrs;
+    typedef std::pair<UPDATE_ATTR_TYPES, std::string>   parsed_attrs_pair;
+    typedef std::map<UPDATE_ATTR_TYPES, std::string>    parsed_attrs_map;
+
+    // Parsed bgp-ls attributes map
+    typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
+
+
+    /**
+     * Parsed update data - decoded data from complete update parse
+     */
+    struct parsed_update_data {
+        parsed_attrs_map              attrs;              ///< Parsed attrbutes
+        std::list<bgp::prefix_tuple>  withdrawn;          ///< List of withdrawn prefixes
+        std::list<bgp::prefix_tuple>  advertised;         ///< List of advertised prefixes
+        parsed_ls_attrs_map           ls_attrs;           ///< BGP-LS specific attributes
+        parsed_data_ls                ls;                 ///< REACH: Link state parsed data
+        parsed_data_ls                ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
+        std::list<bgp::vpn_tuple>     vpn;                ///< List of vpn prefixes advertised
+        std::list<bgp::vpn_tuple>     vpn_withdrawn;      ///< List of vpn prefixes withdrawn
+        std::list<bgp::evpn_tuple>    evpn;               ///< List of evpn nlris advertised
+        std::list<bgp::evpn_tuple>    evpn_withdrawn;     ///< List of evpn nlris withdrawn
+    };
+
+
+
     struct BGPMsg{
         common_bgp_hdr common_hdr;
+        update_bgp_hdr uHdr;
+        parsed_update_data parsed_data;
     };
 //############################################################################
      /**
