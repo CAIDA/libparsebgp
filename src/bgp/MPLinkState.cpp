@@ -22,7 +22,7 @@ namespace bgp_msg {
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
     //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
-    MPLinkState::MPLinkState(std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
+    MPLinkState::MPLinkState(std::string peerAddr,parseBMP::parsed_update_data *parsed_data, bool enable_debug) {
         //logger = logPtr;
         debug = enable_debug;
         peer_addr = peerAddr;
@@ -55,7 +55,7 @@ namespace bgp_msg {
             inet_ntop(AF_INET6, ip_raw, ip_char, sizeof(ip_char));
         }
 
-        parsed_data->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+        parsed_data->attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
         /*
          * Decode based on SAFI
@@ -244,7 +244,7 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     void MPLinkState::parseNlriNode(u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        UpdateMsg::obj_ls_node node_tbl;
+        parseBMP::obj_ls_node node_tbl;
         bzero(&node_tbl, sizeof(node_tbl));
 
         if (data_len < 4) {
@@ -320,7 +320,7 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     void MPLinkState::parseNlriLink(u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        UpdateMsg::obj_ls_link link_tbl;
+        parseBMP::obj_ls_link link_tbl;
         bzero(&link_tbl, sizeof(link_tbl));
 
         if (data_len < 4) {
@@ -429,7 +429,7 @@ namespace bgp_msg {
      * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
      */
     void MPLinkState::parseNlriPrefix(u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
-        UpdateMsg::obj_ls_prefix prefix_tbl;
+        parseBMP::obj_ls_prefix prefix_tbl;
         bzero(&prefix_tbl, sizeof(prefix_tbl));
 
         if (data_len < 4) {

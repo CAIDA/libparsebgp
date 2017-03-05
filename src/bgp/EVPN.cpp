@@ -14,7 +14,7 @@ namespace bgp_msg {
 
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    EVPN::EVPN(std::string peerAddr, bool isUnreach, UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
+    EVPN::EVPN(std::string peerAddr, bool isUnreach, parseBMP::parsed_update_data *parsed_data, bool enable_debug) {
         //logger = logPtr;
         debug = enable_debug;
         peer_addr = peerAddr;

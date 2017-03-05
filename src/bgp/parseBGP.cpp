@@ -96,7 +96,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg)
          */
         bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info, debug);
 
-        if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, parsed_data)) != (size - BGP_MSG_HDR_LEN)) {
+        if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgpMsg->parsed_data)) != (size - BGP_MSG_HDR_LEN)) {
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
             return true;
         }

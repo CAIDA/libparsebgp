@@ -50,7 +50,7 @@ MPUnReachAttr::~MPUnReachAttr() {
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, bgp_msg::UpdateMsg::parsed_update_data &parsed_data) {
+void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
     mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -95,7 +95,7 @@ void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, bgp_msg::Up
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, UpdateMsg::parsed_update_data &parsed_data) {
+void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
 
     switch (nlri.afi) {
         case bgp::BGP_AFI_IPV6 :  // IPv6
@@ -146,7 +146,7 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, UpdateMsg::parsed_update_dat
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_unreach_nlri &nlri, UpdateMsg::parsed_update_data &parsed_data) {
+void MPUnReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
 
     /*
      * Decode based on SAFI

@@ -63,7 +63,7 @@ UpdateMsg::~UpdateMsg() {
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parsed_update_data &parsed_data) {
+size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data) {
     size_t      read_size       = 0;
     u_char      *bufPtr         = data;
 
@@ -242,7 +242,7 @@ void UpdateMsg::parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::pref
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parsed_update_data &parsed_data) {
+void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data) {
     /*
      * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
      */
@@ -314,7 +314,7 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parsed_update_data &
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parsed_update_data &parsed_data) {
+void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
     std::string decodeStr       = "";
     u_char      ipv4_raw[4];
     char        ipv4_char[16];
@@ -333,7 +333,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
                case 2 : decodeStr.assign("incomplete"); break;
             }
 
-            parsed_data.attrs[ATTR_TYPE_ORIGIN] = decodeStr;
+            parsed_data.attrs[parseBMP::ATTR_TYPE_ORIGIN] = decodeStr;
             break;
 
         case ATTR_TYPE_AS_PATH : // AS_PATH
@@ -343,7 +343,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
         case ATTR_TYPE_NEXT_HOP : // Next hop v4
             memcpy(ipv4_raw, data, 4);
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-            parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ipv4_char);
+            parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ipv4_char);
             break;
 
         case ATTR_TYPE_MED : // MED value
@@ -352,7 +352,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
             bgp::SWAP_BYTES(&value32bit);
             std::ostringstream numString;
             numString << value32bit;
-            parsed_data.attrs[ATTR_TYPE_MED] = numString.str();
+            parsed_data.attrs[parseBMP::ATTR_TYPE_MED] = numString.str();
             break;
         }
         case ATTR_TYPE_LOCAL_PREF : // local pref value
@@ -361,11 +361,11 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
             bgp::SWAP_BYTES(&value32bit);
             std::ostringstream numString;
             numString << value32bit;
-            parsed_data.attrs[ATTR_TYPE_LOCAL_PREF] = numString.str();
+            parsed_data.attrs[parseBMP::ATTR_TYPE_LOCAL_PREF] = numString.str();
             break;
         }
         case ATTR_TYPE_ATOMIC_AGGREGATE : // Atomic aggregate
-            parsed_data.attrs[ATTR_TYPE_ATOMIC_AGGREGATE] = std::string("1");
+            parsed_data.attrs[parseBMP::ATTR_TYPE_ATOMIC_AGGREGATE] = std::string("1");
             break;
 
         case ATTR_TYPE_AGGEGATOR : // Aggregator
@@ -375,7 +375,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
         case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
             memcpy(ipv4_raw, data, 4);
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-            parsed_data.attrs[ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
+            parsed_data.attrs[parseBMP::ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
             break;
 
         case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
@@ -388,7 +388,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
                 decodeStr.append(" ");
             }
 
-            parsed_data.attrs[ATTR_TYPE_CLUSTER_LIST] = decodeStr;
+            parsed_data.attrs[parseBMP::ATTR_TYPE_CLUSTER_LIST] = decodeStr;
             break;
 
         case ATTR_TYPE_COMMUNITIES : // Community list
@@ -414,7 +414,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
                 decodeStr.append(numString.str());
             }
 
-            parsed_data.attrs[ATTR_TYPE_COMMUNITIES] = decodeStr;
+            parsed_data.attrs[parseBMP::ATTR_TYPE_COMMUNITIES] = decodeStr;
 
             break;
         }
@@ -487,7 +487,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-void UpdateMsg::parseAttr_Aggegator(uint16_t attr_len, u_char *data, parsed_attrs_map &attrs) {
+void UpdateMsg::parseAttr_Aggegator(uint16_t attr_len, u_char *data, parseBMP::parsed_attrs_map &attrs) {
     std::string decodeStr;
     uint32_t    value32bit = 0;
     uint16_t    value16bit = 0;
@@ -519,7 +519,7 @@ void UpdateMsg::parseAttr_Aggegator(uint16_t attr_len, u_char *data, parsed_attr
      inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
      decodeStr.append(ipv4_char);
 
-     attrs[ATTR_TYPE_AGGEGATOR] = decodeStr;
+     attrs[parseBMP::ATTR_TYPE_AGGEGATOR] = decodeStr;
 }
 
 /**
@@ -529,7 +529,7 @@ void UpdateMsg::parseAttr_Aggegator(uint16_t attr_len, u_char *data, parsed_attr
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parsed_attrs_map &attrs) {
+void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parseBMP::parsed_attrs_map &attrs) {
     std::string decoded_path;
     int         path_len    = attr_len;
     uint16_t    as_path_cnt = 0;
@@ -636,11 +636,11 @@ void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parsed_attrs_m
     /*
      * Update the attributes map
      */
-    attrs[ATTR_TYPE_AS_PATH] = decoded_path;
+    attrs[parseBMP::ATTR_TYPE_AS_PATH] = decoded_path;
 
     std::ostringstream numString;
     numString << as_path_cnt;
-    attrs[ATTR_TYPE_INTERNAL_AS_COUNT] = numString.str();
+    attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_COUNT] = numString.str();
 
     /*
      * Get the last ASN and update the attributes map
@@ -658,7 +658,7 @@ void UpdateMsg::parseAttr_AsPath(uint16_t attr_len, u_char *data, parsed_attrs_m
      }
 
      if (spos >= 0)   // positive only if found
-         attrs[ATTR_TYPE_INTERNAL_AS_ORIGIN] = decoded_path.substr(spos, (epos - spos) + 1);
+         attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_ORIGIN] = decoded_path.substr(spos, (epos - spos) + 1);
 }
 
 } /* namespace bgp_msg */

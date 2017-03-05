@@ -52,7 +52,7 @@ MPReachAttr::~MPReachAttr() {
  * \param [in]   data                   Pointer to the attribute data
  * \param [out]  parsed_data            Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPReachAttr::parseReachNlriAttr(int attr_len, u_char *data, UpdateMsg::parsed_update_data &parsed_data) {
+void MPReachAttr::parseReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
     mp_reach_nlri nlri;
     /*
      * Set the MP NLRI struct
@@ -95,7 +95,7 @@ void MPReachAttr::parseReachNlriAttr(int attr_len, u_char *data, UpdateMsg::pars
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPReachAttr::parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &parsed_data) {
+void MPReachAttr::parseAfi(mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
 
     switch (nlri.afi) {
         case bgp::BGP_AFI_IPV6 :  // IPv6
@@ -129,7 +129,7 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &p
 
             inet_ntop(nlri.nh_len == 4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-            parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+            parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             // parse by safi
             switch (nlri.safi) {
@@ -163,7 +163,7 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &p
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg::parsed_update_data &parsed_data) {
+void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
     u_char      ip_raw[16];
     char        ip_char[40];
 
@@ -183,7 +183,7 @@ void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg:
 
             inet_ntop(isIPv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-            parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+            parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             // Data is an IP address - parse the address and save it
             parseNlriData_IPv4IPv6(isIPv4, nlri.nlri_data, nlri.nlri_len, peer_info, parsed_data.advertised);
@@ -198,7 +198,7 @@ void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg:
 
             inet_ntop(isIPv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-            parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+            parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             // Data is an Label, IP address tuple parse and save it
             parseNlriData_LabelIPv4IPv6(isIPv4, nlri.nlri_data, nlri.nlri_len, peer_info, parsed_data.advertised);
@@ -220,7 +220,7 @@ void MPReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, UpdateMsg:
 
             inet_ntop(isIPv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-            parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+            parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             parseNlriData_LabelIPv4IPv6(isIPv4, nlri.nlri_data, nlri.nlri_len, peer_info, parsed_data.vpn);
 
