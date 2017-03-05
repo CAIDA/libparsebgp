@@ -172,7 +172,7 @@ private:
      *
      * \returns BGP message type
      */
-    u_char parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_hdr *common_hdr);
+    u_char parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_hdr &common_hdr);
 
     /**
      * Update the Database with the parsed updated data
