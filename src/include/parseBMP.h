@@ -15,6 +15,7 @@
 #include "AddPathDataContainer.h"
 #include <list>
 #include <vector>
+#include <array>
 
 /*
  * BMP Header lengths, not counting the version in the common hdr
