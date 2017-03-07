@@ -181,7 +181,7 @@ private:
      *
      * \param  parsed_data          Reference to the parsed update data
      */
-    void UpdateDB(bgp_msg::UpdateMsg::parsed_update_data &parsed_data);
+    void UpdateDB(parseBMP::BGPMsg *bgp_msg);
 
     /**
      * Update the Database path attributes
@@ -190,7 +190,7 @@ private:
      *
      * \param  attrs            Reference to the parsed attributes map
      */
-    void UpdateDBAttrs(bgp_msg::UpdateMsg::parsed_attrs_map &attrs);
+    void UpdateDBAttrs(parseBMP::parsed_attrs_map &attrs);
 
     /**
      * Update the Database advertised prefixes
@@ -200,7 +200,7 @@ private:
      * \param  adv_prefixes         Reference to the list<prefix_tuple> of advertised prefixes
      * \param  attrs            Reference to the parsed attributes map
      */
-    void UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes, bgp_msg::UpdateMsg::parsed_attrs_map &attrs);
+    void UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes, parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_rib> &rib_list);
 
     /**
      * Update the Database withdrawn prefixes
@@ -209,7 +209,7 @@ private:
      *
      * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
      */
-    void UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes);
+    void UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes, vector<parseBMP::obj_rib> &rib_list);
 
     /**
      * Update the Database advertised l3vpn 
@@ -220,7 +220,7 @@ private:
      * \param [in] adv_vpn      Reference to the list<vpn_tuple> of advertised vpns
      * \param [in] attrs        Reference to the parsed attributes map
      */ 
-    void UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &adv_vpn, bgp_msg::UpdateMsg::parsed_attrs_map &attrs);
+    void UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &adv_vpn, parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_vpn> &rib_list);
 
     /**
      * Updates for either advertised or withdrawn Evpn NLRI's
@@ -229,7 +229,7 @@ private:
      * \param [in] nlris           Reference to the list<evpn_tuple>
      * \param [in] attrs           Reference to the parsed attributes map
      */
-    void UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris, bgp_msg::UpdateMsg::parsed_attrs_map &attrs);
+    void UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris, parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_evpn> &rib_list);
 
     /**
      * Update the Database for bgp-ls
@@ -240,8 +240,8 @@ private:
      * \param [in] ls_data     Reference to the parsed link state nlri information
      * \param [in] ls_attrs    Reference to the parsed link state attribute information
      */
-    void UpdateDbBgpLs(bool remove, bgp_msg::UpdateMsg::parsed_data_ls ls_data,
-                                 bgp_msg::UpdateMsg::parsed_ls_attrs_map &ls_attrs);
+    void UpdateDbBgpLs(bool remove, parseBMP::parsed_data_ls ls_data,
+                                 parseBMP::parsed_ls_attrs_map &ls_attrs);
 
 
 };

@@ -14,6 +14,7 @@
 #include <string>
 #include "AddPathDataContainer.h"
 #include <list>
+#include <vector>
 
 /*
  * BMP Header lengths, not counting the version in the common hdr
@@ -490,7 +491,6 @@ public:
     // Parsed bgp-ls attributes map
     typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
-
     /**
      * Parsed update data - decoded data from complete update parse
      */
@@ -507,11 +507,13 @@ public:
         std::list<bgp::evpn_tuple>    evpn_withdrawn;     ///< List of evpn nlris withdrawn
     };
 
-
-
     struct BGPMsg{
         common_bgp_hdr common_hdr;
         parsed_update_data parsed_data;
+        vector<parseBMP::obj_vpn> obj_vpn_rib_list;
+        vector<parseBMP::obj_evpn> obj_evpn_rib_list;
+        vector<parseBMP::obj_rib> adv_obj_rib_list;
+        vector<parseBMP::obj_rib> wdrawn_obj_rib_list;
     };
 //############################################################################
      /**
