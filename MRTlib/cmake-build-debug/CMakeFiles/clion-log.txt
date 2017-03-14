@@ -1,0 +1,4 @@
+/home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/ojas/Desktop/CAIDA/parse_lib/MRTlib
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug
