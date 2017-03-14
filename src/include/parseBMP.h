@@ -522,7 +522,7 @@ public:
       */
      struct common_hdr_v3 {
         // 4 bytes total for the common header
-        //u_char      ver;                // 1 byte; BMP version -- Not part of struct since it's read before
+        u_char      ver;                // 1 byte; BMP version -- Not part of struct since it's read before
 
         uint32_t    len;                ///< 4 bytes; BMP msg length in bytes including all headers
 
