@@ -101,9 +101,21 @@ public:
 
     //view name is optional if not present viewname length is set to 0
     struct peer_index_table{
-        char        collector_BGPID[46];
+        char        collector_BGPID[4];
         uint16_t    view_name_length;
-        uint16_t    ;
+        char*       view_name[16]; //doubtful about this setting, willl have to confirm
+        uint16_t    peer_count;
+        u_char*     peerEntries;
+    };
+
+    struct peer_entry{
+        uint8_t     peer_type;
+        char        peer_BGPID[4];
+        char        peer_IP[46];
+        bool        isIPv4;
+        bool        ASsize; //0 for 16 bits; 1 for 32 bits
+        uint16_t    peerAS16;
+        uint32_t    peerAS32;
     };
 
 
