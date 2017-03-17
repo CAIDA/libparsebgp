@@ -291,18 +291,6 @@ public:
         int         mpls_label_2;
     };
 
-    /// Unicast prefix action codes
-    enum unicast_prefix_action_code {
-        UNICAST_PREFIX_ACTION_ADD=0,
-        UNICAST_PREFIX_ACTION_DEL,
-    };
-
-    /// Vpn action codes
-    enum vpn_action_code {
-        VPN_ACTION_ADD=0,
-        VPN_ACTION_DEL,
-    };
-
     /**
      * OBJECT: ls_node
      *
@@ -325,11 +313,6 @@ public:
         char        sr_capabilities_tlv[255];   ///< SR Capabilities TLV
     };
 
-    /// LS action code (node, link, and prefix)
-    enum ls_action_code {
-        LS_ACTION_ADD=0,
-        LS_ACTION_DEL
-    };
 
     /**
      * OBJECT: ls_link
@@ -522,7 +505,7 @@ public:
       */
      struct common_hdr_v3 {
         // 4 bytes total for the common header
-        //u_char      ver;                // 1 byte; BMP version -- Not part of struct since it's read before
+        u_char      ver;                // 1 byte; BMP version -- Not part of struct since it's read before
 
         uint32_t    len;                ///< 4 bytes; BMP msg length in bytes including all headers
 
