@@ -3,18 +3,20 @@
 #include <fstream>
 using namespace std;
 
-void readFile(ifstream &fin, u_char *array2, int &position, int read_size)
+int readFile(ifstream &fin, u_char *array2, int position, int read_size)
 {
+    int curr=0;
     char *array = new char[read_size];
     if(fin.is_open())
     {
-        fin.read(array, read_size);
-//      while(!fin.eof() && position < read_size)
-//      {
-//          fin.get(array[position]); //reading one character from file to array
-//          position++;
-//      }
-//      array[position-1] = '\0'; //placing character array terminating character
+        fin.seekg(position, fin.beg);
+        //fin.read(array, read_size);
+        while(!fin.eof() && curr < read_size)
+        {
+            fin.get(array[curr]); //reading one character from file to array
+            curr++;
+        }
+        array[curr-1] = '\0'; //placing character array terminating character
         stringstream ss;
         for(int i=0, j=0;i<read_size;i+=3, j++)
         {
@@ -27,23 +29,27 @@ void readFile(ifstream &fin, u_char *array2, int &position, int read_size)
     else //file could not be opened
         cout << "File could not be opened." << endl;
 
+    return fin.eof();
 }
 
 int main() {
     int read_size = 3072;
     int position = 0;
-    u_char *buffer = new u_char[read_size/3];
+
 
     bool msg_read;
     ifstream fin("../testfile.txt");
 
-    int len = 1024;
-    int suc_read=0, prev_len=len;
-    while(!fin.eof())
+    int len = 1024, cur=0;
+    int prev_len=len;
+    int end_reach=0;
+    while(!end_reach)
     {
-        cout<<"reading in while"<<endl;
-        readFile(fin, buffer, position, read_size);
+        cur++;
+        u_char *buffer = new u_char[read_size/3];
+        end_reach = readFile(fin, buffer, 3*position, read_size);
         msg_read = true;
+        len = 1024;
         while(msg_read)
         {
             parseBMP *p = new parseBMP();
@@ -54,22 +60,23 @@ int main() {
                 if(!len)
                     msg_read=false;
 
-                suc_read+=prev_len-len;
+                position+=prev_len-len;
                 prev_len=len;
-                cout<<len<<" "<<suc_read<<endl;
+                cout<<len<<" "<<position<<endl;
             }
             catch (char const *str) {
                 cout << "\nCrashed!" <<endl;
-                cout << "incomplete message received\n";
                 msg_read = false;
             }
-            //cout<<len<<" "<<int(*buffer)<<int(*(buffer+1))<<int(*(buffer+2))<<int(*(buffer+3))<<int(*(buffer+4))<<int(*(buffer+5))<<int(*(buffer+6))<<endl;
+
+ //           cout<<len;
+            cout<<len<<" "<<int(*buffer)<<int(*(buffer+1))<<int(*(buffer+2))<<int(*(buffer+3))<<int(*(buffer+4))<<int(*(buffer+5))<<int(*(buffer+6))<<endl;
 //            cout<<"Peer Address "<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy<<endl;
 //            cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
             delete p;
         }
-        cout<<"breaking while after first iteration"<<endl;
-        break;
+        if(cur==2)
+            return 1;
     }
     return 1;
 }
