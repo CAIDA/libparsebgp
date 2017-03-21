@@ -101,11 +101,11 @@ public:
 
     //view name is optional if not present viewname length is set to 0
     struct peer_index_table{
-        char        collector_BGPID[4];
-        uint16_t    view_name_length;
-        char*       view_name[16]; //doubtful about this setting, willl have to confirm
-        uint16_t    peer_count;
-        u_char*     peerEntries;
+        char                collector_BGPID[4];
+        uint16_t            view_name_length;
+        char*               view_name[16]; //doubtful about this setting, willl have to confirm
+        uint16_t            peer_count;
+        vector<peer_entry>  peerEntries;
     };
 
     struct peer_entry{
@@ -118,6 +118,14 @@ public:
         uint32_t    peerAS32;
     };
 
+
+    //4.3.4
+    struct RIB_entries{
+        uint16_t    peer_index;
+        uint32_t    originatedTime;
+        uint16_t    attribute_len;
+        u_char*     bgp_attribute;
+    };
 
 private:
 
