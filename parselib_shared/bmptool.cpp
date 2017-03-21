@@ -17,7 +17,7 @@ int readFile(ifstream &fin, u_char *array2, int position, int read_size)
             curr++;
         }
         array[curr-1] = '\0'; //placing character array terminating character
-        stringstream ss;
+
         for(int i=0, j=0;i<read_size;i+=3, j++)
         {
             int tmp;
@@ -35,7 +35,6 @@ int readFile(ifstream &fin, u_char *array2, int position, int read_size)
 int main() {
     int read_size = 3072;
     int position = 0;
-
 
     bool msg_read;
     ifstream fin("../testfile.txt");
@@ -70,9 +69,11 @@ int main() {
             }
 
  //           cout<<len;
-            cout<<len<<" "<<int(*buffer)<<int(*(buffer+1))<<int(*(buffer+2))<<int(*(buffer+3))<<int(*(buffer+4))<<int(*(buffer+5))<<int(*(buffer+6))<<endl;
+ //           cout<<len<<" "<<int(*buffer)<<int(*(buffer+1))<<int(*(buffer+2))<<int(*(buffer+3))<<int(*(buffer+4))<<int(*(buffer+5))<<int(*(buffer+6))<<endl;
 //            cout<<"Peer Address "<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy<<endl;
 //            cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
+//            <dump-type>|<elem-type>|<record-ts>|<project>|<collector>|<peer-ASn>|<peer-IP>|<prefix>|<next-hop-IP>|<AS-path>|<origin-AS>|<communities>|<old-state>|<new-state>
+
             delete p;
         }
         if(cur==2)
