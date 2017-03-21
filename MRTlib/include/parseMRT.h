@@ -158,6 +158,58 @@ public:
         uint16_t    new_state;
     };
 
+    //4.4.2
+    struct BGP4MP_message{
+        uint16_t    peer_AS_number;
+        uint16_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        u_char*     BGP_message;
+    };
+
+    //4.4.3
+    struct BGP4MP_message_AS4{
+        uint32_t    peer_AS_number;
+        uint32_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        u_char*     BGP_message;
+    };
+
+    //4.4.4
+    struct BGP4MP_state_change_AS4{
+        uint32_t    peer_AS_number;
+        uint32_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        uint16_t    old_state;
+        uint16_t    new_state;
+    };
+
+    //4.4.5
+    struct BGP4MP_message_local{
+        uint32_t    peer_AS_number;
+        uint32_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        u_char*     BGP_message;
+    };
+
+    //4.6
+    struct OSPFv3_messsage{
+        uint16_t    address_family;
+        char        remote_ip[46];
+        char        local_ip[46];
+        u_char*     OSPF_message;
+    };
 
 private:
 
