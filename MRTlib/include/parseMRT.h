@@ -99,13 +99,14 @@ public:
         u_char*     bgp_attribute;
     };
 
+    //4.3.1
     //view name is optional if not present viewname length is set to 0
     struct peer_index_table{
         char                collector_BGPID[4];
         uint16_t            view_name_length;
         char*               view_name[16]; //doubtful about this setting, willl have to confirm
         uint16_t            peer_count;
-        vector<peer_entry>  peerEntries;
+        list<peer_entry>  peerEntries;
     };
 
     struct peer_entry{
@@ -118,14 +119,45 @@ public:
         uint32_t    peerAS32;
     };
 
+    //4.3.2
+    struct RIB_entry_header{
+        uint32_t        sequence_number;
+        uint8_t         prefix_length;
+        u_char*         prefix;
+        uint16_t        entry_count;
+        list<RIB_entry> RIB_entries;
+    };
+
+    //4.3.3
+    struct RIB_generic_entry_header{
+        uint32_t        sequence_number;
+        uint16_t        address_family_identifier;
+        uint8_t         subsequentAFI;
+        u_char *        NLRI;
+        uint16_t        entry_count;
+        list<RIB_entry> RIB_entries;
+    };
 
     //4.3.4
-    struct RIB_entries{
+    struct RIB_entry{
         uint16_t    peer_index;
         uint32_t    originatedTime;
         uint16_t    attribute_len;
         u_char*     bgp_attribute;
     };
+
+    //4.4.1
+    struct BGP4MP_state_change{
+        uint16_t    peer_AS_number;
+        uint16_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        uint16_t    old_state;
+        uint16_t    new_state;
+    };
+
 
 private:
 
