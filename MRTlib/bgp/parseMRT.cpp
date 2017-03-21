@@ -32,7 +32,6 @@
  * \param [in]     logPtr      Pointer to existing Logger for app logging
  * \param [in,out] peer_entry  Pointer to the peer entry
  */
-//parseBMP::parseBMP(MsgBusInterface::obj_bgp_peer *peer_entry) {
 parseMRT::parseMRT() {
 }
 
@@ -48,7 +47,7 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
     char mrt_type = 0;
 
     try {
-        mrt_type = handleMRTMessage(buffer, bufLen);
+        mrt_type = parseCommonHeader(buffer, bufLen);
 
         switch (mrt_type) {
             case MRT_TYPE::OSPFv2 : {
@@ -95,7 +94,7 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
 }
 
 /**
- * Process the incoming MRT message
+ * Process the incoming MRT message header
  *
  * \returns
  *      returns the MRT message type. A type of >= 0 is normal,
@@ -104,18 +103,22 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
  * //throws (const  char *) on error.   String will detail error message.
  */
 
-char parseMRT::handleMRTMessage(unsigned char*& buffer, int& bufLen) {
-    ssize_t bytes_read;
+char parseMRT::parseCommonHeader(unsigned char*& buffer, int& bufLen) {
 
-    bytes_read = parseBMP::extractFromBuffer(buffer, bufLen, &mrt_type, 2);
-    if (bytes_read < 0)
-        throw "(1) Failed to read from socket.";
-    else if (bytes_read == 0)
-        throw "(2) Connection closed";
-    else if (bytes_read != 1)
-        throw "(3) Cannot read the BMP version byte from socket";
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
+        throw "Error in parsing MRT common header: timestamp";
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.type, 2) != 2)
+        throw "Error in parsing MRT Common header: type";
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.subType, 2) != 2)
+        throw "Error in parsing MRT common header: subtype";
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.len, 4) != 4)
+        throw "Error in parsing MRT Common header: length";
 
-    return mrt_type;
+    if (c_hdr.type == MRT_TYPE::BGP4MP_ET || c_hdr.type == MRT_TYPE::ISIS_ET || c_hdr.type == MRT_TYPE::OSPFv3_ET) {
+        if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.microsecond_timestamp, 4) != 4)
+            throw "Error in parsing MRT Common header: microsecond timestamp";
+    }
+    return c_hdr.type;
 }
 
 /**
