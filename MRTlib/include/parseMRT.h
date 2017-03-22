@@ -16,7 +16,7 @@
 #include <vector>
 
 
-#define MRT_PACKET_BUF_SIZE 4096   ///< Size of the BMP packet buffer (memory)
+#define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
 
 /**
@@ -206,8 +206,6 @@ public:
     parseMRT parseMRT();
 
     parseMRT ~parseMRT();
-
-    ssize_t extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
 
     bool parseMsg(unsigned char *&buffer, int& bufLen);
 

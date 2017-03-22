@@ -57,6 +57,15 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
                 parseOSPFv2(mrt_data, mrt_data_len);
                 break;
             }
+
+            case MRT_TYPE::OSPFv3 : {
+                break;
+            }
+
+            case MRT_TYPE::OSPFv3_ET : {
+                break;
+            }
+
             case MRT_TYPE::TABLE_DUMP : {
                 break;
             }
@@ -80,12 +89,8 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
             case MRT_TYPE::ISIS_ET : {
                 break;
             }
-
-            case MRT_TYPE::OSPFv3 : {
-                break;
-            }
-
-            case MRT_TYPE::OSPFv3_ET : {
+            default: {
+                throw "MRT type is unexpected as per rfc6396";
                 break;
             }
         }
@@ -109,17 +114,17 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
 
 char parseMRT::parseCommonHeader(unsigned char*& buffer, int& bufLen) {
 
-    if (parseMRT::extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
         throw "Error in parsing MRT common header: timestamp";
-    if (parseMRT::extractFromBuffer(buffer, bufLen, &c_hdr.type, 2) != 2)
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.type, 2) != 2)
         throw "Error in parsing MRT Common header: type";
-    if (parseMRT::extractFromBuffer(buffer, bufLen, &c_hdr.subType, 2) != 2)
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.subType, 2) != 2)
         throw "Error in parsing MRT common header: subtype";
-    if (parseMRT::extractFromBuffer(buffer, bufLen, &c_hdr.len, 4) != 4)
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.len, 4) != 4)
         throw "Error in parsing MRT Common header: length";
 
     if (c_hdr.type == MRT_TYPE::BGP4MP_ET || c_hdr.type == MRT_TYPE::ISIS_ET || c_hdr.type == MRT_TYPE::OSPFv3_ET) {
-        if (parseMRT::extractFromBuffer(buffer, bufLen, &c_hdr.microsecond_timestamp, 4) != 4)
+        if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
     }
 
