@@ -276,7 +276,7 @@ public:
       *
       * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
       */
-     size_t parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data);
+     size_t parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
 
 private:
@@ -311,7 +311,7 @@ private:
      * \param [in]   len        Length of the data in bytes to be read
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data);
+    void parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
     /**
      * Parse attribute data based on attribute type
@@ -325,7 +325,7 @@ private:
      * \param [in]   data           Pointer to the attribute data
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
+    void parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
     /**
      * Parse attribute AS_PATH data

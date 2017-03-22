@@ -67,7 +67,7 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
+    void parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
 private:
     bool                    debug;              ///< debug flag to indicate debugging

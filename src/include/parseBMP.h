@@ -498,6 +498,7 @@ public:
         vector<parseBMP::obj_evpn> obj_evpn_rib_list;
         vector<parseBMP::obj_rib> adv_obj_rib_list;
         vector<parseBMP::obj_rib> wdrawn_obj_rib_list;
+        bool hasEndOfRIBMarker;
     };
 //############################################################################
      /**

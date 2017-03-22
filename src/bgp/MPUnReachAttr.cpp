@@ -50,7 +50,7 @@ MPUnReachAttr::~MPUnReachAttr() {
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
+void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -74,6 +74,7 @@ void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::p
     //SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), nlri.afi, nlri.safi);
 
     if (nlri.nlri_len == 0) {
+        hasEndOfRIBMarker = true;
         //LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
 
     } else {

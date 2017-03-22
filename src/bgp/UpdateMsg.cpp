@@ -63,7 +63,7 @@ UpdateMsg::~UpdateMsg() {
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data) {
+size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     size_t      read_size       = 0;
     u_char      *bufPtr         = data;
 
@@ -122,7 +122,7 @@ size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_upd
      * Check if End-Of-RIB
      */
     if (not uHdr.withdrawn_len and (size - read_size) <= 0 and not uHdr.attr_len) {
-
+        hasEndOfRIBMarker = true;
         //LOG_INFO("%s: rtr=%s: End-Of-RIB marker", peer_addr.c_str(), router_addr.c_str());
 
     } else {
@@ -140,7 +140,7 @@ size_t UpdateMsg::parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_upd
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (uHdr.attr_len > 0) {
-            parseAttributes(uHdr.attrPtr, uHdr.attr_len, parsed_data);
+            parseAttributes(uHdr.attrPtr, uHdr.attr_len, parsed_data, hasEndOfRIBMarker);
         }
 
         /* ---------------------------------------------------------
@@ -242,7 +242,7 @@ void UpdateMsg::parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::pref
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data) {
+void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     /*
      * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
      */
@@ -286,7 +286,7 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_upd
             /*
              * Parse data based on attribute type
              */
-            parseAttrData(attr_type, attr_len, data, parsed_data);
+            parseAttrData(attr_type, attr_len, data, parsed_data, hasEndOfRIBMarker);
             data        += attr_len;
             read_size   += attr_len;
 
@@ -314,7 +314,7 @@ void UpdateMsg::parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_upd
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
+void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     std::string decodeStr       = "";
     u_char      ipv4_raw[4];
     char        ipv4_char[16];
@@ -442,7 +442,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
         case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
         {
             MPUnReachAttr mp(peer_addr, peer_info, debug);
-            mp.parseUnReachNlriAttr(attr_len, data, parsed_data);
+            mp.parseUnReachNlriAttr(attr_len, data, parsed_data, hasEndOfRIBMarker);
             break;
         }
 

@@ -43,6 +43,8 @@ parseBMP::parseBMP() {
     bmp_packet_len = 0;
     bzero(bmp_packet, sizeof(bmp_packet));
 
+    bgpMsg.hasEndOfRIBMarker = false;
+
     //parseMsg(buffer, bufLen);
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
