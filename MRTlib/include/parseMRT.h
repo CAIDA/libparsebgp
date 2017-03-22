@@ -15,6 +15,10 @@
 #include <list>
 #include <vector>
 
+
+#define MRT_PACKET_BUF_SIZE 4096   ///< Size of the BMP packet buffer (memory)
+
+
 /**
  * \class   parseMRT
  *
@@ -57,25 +61,13 @@ public:
       */
     struct MRT_common_hdr
     {
-        uint32_t        timeStamp;      ///< 4 byte; timestamp value in seconds
-        uint16_t        type;           ///< 2 byte; type of information contained in message field
-        uint16_t        subType;        ///< 2 byte; further distinguishing message information
-        uint32_t        len;            ///< 4 byte; length of the message EXCLUDING common header length
-        u_char*         message;       ///< variable length message
-    }__attribute__ ((__packed__));
-
-
-    /**
-      * MRT extended header
-      */
-    struct extended_MRT_header{
         uint32_t        timeStamp;              ///< 4 byte; timestamp value in seconds
         uint16_t        type;                   ///< 2 byte; type of information contained in message field
         uint16_t        subType;                ///< 2 byte; further distinguishing message information
         uint32_t        len;                    ///< 4 byte; length of the message EXCLUDING common header length
-        uint32_t        microseond_timestamp;   ///< 4 byte: timestamp in microseconds
+        uint32_t        microsecond_timestamp;   ///< 4 byte: timestamp in microseconds
         u_char*         message;                ///< variable length message
-    }__attribute__ ((__packed__));
+    };
 
     /**
       * OSPFv2 Message Type
@@ -211,8 +203,43 @@ public:
         u_char*     OSPF_message;
     };
 
+    parseMRT parseMRT();
+
+    parseMRT ~parseMRT();
+
+    ssize_t extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
+
+    bool parseMsg(unsigned char *&buffer, int& bufLen);
+
+    char parseCommonHeader(unsigned char*& buffer, int& bufLen);
+
+    void bufferMRTMessage(u_char *& buffer, int& bufLen);
+
+    void parseOSPFv2(unsigned char* buffer, int& bufLen);
+
+
+    MRT_common_hdr c_hdr;
+    OSPFv2_messsage OSPFv2_msg;
+
+    /**
+     * BMP message buffer (normally only contains the BGP message)
+     *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.
+     *      Complete BGP message is read, otherwise error is generated.
+     */
+    u_char      mrt_data[MRT_PACKET_BUF_SIZE + 1];
+    uint32_t    mrt_data_len;              ///< Length/size of data in the data buffer
+
+
+
 private:
+    uint16_t   mrt_type;
+    uint32_t   mrt_len;                    ///< Length of the BMP message - does not include the common header size
 
 };
 
 #endif /* PARSEBMP_H_ */
+
+
+
+
+
