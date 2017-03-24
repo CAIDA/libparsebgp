@@ -186,6 +186,17 @@ public:
 
     //4.4.5
     struct BGP4MP_message_local{
+        uint16_t    peer_AS_number;
+        uint16_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        u_char*     BGP_message;
+    };
+
+    //4.4.6
+    struct BGP4MP_message_AS4_local{
         uint32_t    peer_AS_number;
         uint32_t    local_AS_number;
         uint16_t    interface_index;
@@ -215,9 +226,28 @@ public:
 
     void parseOSPFv2(unsigned char* buffer, int& bufLen);
 
+    void parseBGP4MP(unsigned char* buffer, int& bufLen);
+
+    /**
+     * get current MRT message type
+    */
+    char getMRTType();
+
+    /**
+     * get current MRT message length
+     *
+     * The length returned does not include the common header length
+     */
+    uint32_t getMRTLength();
 
     MRT_common_hdr c_hdr;
     OSPFv2_messsage OSPFv2_msg;
+    BGP4MP_state_change bgp_state_change;
+    BGP4MP_state_change_AS4 bgp_state_change_as4;
+    BGP4MP_message bgp4mp_msg;
+    BGP4MP_message_AS4 bgp4mp_msg_as4;
+    BGP4MP_message_local bgp4mp_msg_local;
+    BGP4MP_message_AS4_local bgp4mp_msg_as4_local;
 
     /**
      * BMP message buffer (normally only contains the BGP message)
@@ -225,7 +255,7 @@ public:
      *      Complete BGP message is read, otherwise error is generated.
      */
     u_char      mrt_data[MRT_PACKET_BUF_SIZE + 1];
-    uint32_t    mrt_data_len;              ///< Length/size of data in the data buffer
+    int         mrt_data_len;              ///< Length/size of data in the data buffer
 
 
 

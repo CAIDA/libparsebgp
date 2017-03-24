@@ -74,11 +74,9 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
                 break;
             }
 
-            case MRT_TYPE::BGP4MP : {
-                break;
-            }
-
+            case MRT_TYPE::BGP4MP :
             case MRT_TYPE::BGP4MP_ET : {
+                parseBGP4MP(buffer, bufLen);
                 break;
             }
 
@@ -102,6 +100,108 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
     return rval;
 }
 
+void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
+    //bufferMRTMessage(buffer, bufLen);
+    switch (c_hdr.subType) {
+        case BGP4MP_STATE_CHANGE: {
+            int ip_addr_len = 4;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp_state_change, 8) != 8)
+                throw;
+            if (bgp_state_change.address_family == 2)
+                ip_addr_len = 16;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.peer_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.local_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.old_state, 2) != 2)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.new_state, 2) != 2)
+                throw;
+            //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
+            break;
+        }
+        case BGP4MP_MESSAGE: {
+            int ip_addr_len = 4;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
+                throw;
+            if (bgp4mp_msg.address_family == 2)
+                ip_addr_len = 16;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            int bgp_msg_len = mrt_data_len - 8 - 2*ip_addr_len;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
+                throw;
+            break;
+        }
+        case BGP4MP_MESSAGE_AS4: {
+            int ip_addr_len = 4;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
+                throw;
+            if (bgp4mp_msg_as4.address_family == 2)
+                ip_addr_len = 16;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            int bgp_msg_len = mrt_data_len - 12 - 2*ip_addr_len;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
+                throw;
+            break;
+        }
+        case BGP4MP_STATE_CHANGE_AS4: {
+            int ip_addr_len = 4;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp_state_change_as4, 12) != 12)
+                throw;
+            if (bgp_state_change_as4.address_family == 2)
+                ip_addr_len = 16;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.peer_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.local_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.old_state, 2) != 2)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.new_state, 2) != 2)
+                throw;
+            break;
+        }
+        case BGP4MP_MESSAGE_LOCAL: {
+            int ip_addr_len = 4;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
+                throw;
+            if (bgp4mp_msg.address_family == 2)
+                ip_addr_len = 16;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            int bgp_msg_len = mrt_data_len - 8 - 2*ip_addr_len;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
+                throw;
+            break;
+        }
+        case BGP4MP_MESSAGE_AS4_LOCAL: {
+            int ip_addr_len = 4;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
+                throw;
+            if (bgp4mp_msg_as4.address_family == 2)
+                ip_addr_len = 16;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
+                throw;
+            int bgp_msg_len = mrt_data_len - 12 - 2*ip_addr_len;
+            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
+                throw;
+            break;
+        }
+        default: {
+            throw "Subtype for BGP4MP not supported";
+        }
+    }
+}
+
 /**
  * Process the incoming MRT message header
  *
@@ -114,39 +214,45 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
 
 char parseMRT::parseCommonHeader(unsigned char*& buffer, int& bufLen) {
 
-    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
+    /*if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
         throw "Error in parsing MRT common header: timestamp";
     if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.type, 2) != 2)
         throw "Error in parsing MRT Common header: type";
     if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.subType, 2) != 2)
         throw "Error in parsing MRT common header: subtype";
     if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.len, 4) != 4)
-        throw "Error in parsing MRT Common header: length";
+        throw "Error in parsing MRT Common header: length";*/
+
+    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr, 12) != 12)
+        throw "Error in parsing MRT common header";
+
+    mrt_len = c_hdr.len;
 
     if (c_hdr.type == MRT_TYPE::BGP4MP_ET || c_hdr.type == MRT_TYPE::ISIS_ET || c_hdr.type == MRT_TYPE::OSPFv3_ET) {
         if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
+        mrt_len -= 4;
     }
-
-    mrt_len = c_hdr.len;
+    else
+        c_hdr.microsecond_timestamp = 0;
 
     return c_hdr.type;
 }
 
 /**
- * get current BMP message type
+ * get current MRT message type
  */
-char parseBMP::getBMPType() {
-    return bmp_type;
+char parseMRT::getMRTType() {
+    return mrt_type;
 }
 
 /**
- * get current BMP message length
+ * get current MRT message length
  *
- * The length returned does not include the version 3 common header length
+ * The length returned does not include the common header length
  */
-uint32_t parseBMP::getBMPLength() {
-    return bmp_len;
+uint32_t parseMRT::getMRTLength() {
+    return mrt_len;
 }
 
 /**
@@ -161,29 +267,20 @@ uint32_t parseBMP::getBMPLength() {
  *
  * \throws String error
  */
-// void parseBMP::bufferBMPMessage(int sock) {
 void parseMRT::bufferMRTMessage(u_char *& buffer, int& bufLen) {
     if (mrt_len <= 0)
         return;
 
     if (mrt_len > sizeof(mrt_data)) {
-        //       LOG_WARN("sock=%d: BMP message is invalid, length of %d is larger than max buffer size of %d",sock, bmp_len, sizeof(bmp_data));
-        throw "BMP message length is too large for buffer, invalid BMP sender";
+        throw "MRT message length is too large for buffer, invalid MRT sender";
     }
 
-//    SELF_DEBUG("sock=%d: Buffering %d from socket", sock, bmp_len);
-    /*if ((bmp_data_len=Recv(sock, bmp_data, bmp_len, MSG_WAITALL)) != bmp_len) {
- //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
-         throw "Error while reading BMP data into buffer";
-    }*/
-    if ((mrt_data_len=extractFromBuffer(buffer, bufLen, mrt_data, mrt_len)) != mrt_len) {
-        //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
-        throw "Error while reading BMP data into buffer";
+    if ((mrt_data_len=extractFromBuffer(buffer, bufLen, mrt_data, mrt_len)) != mrt_len) { ;
+        throw "Error while reading MRT data from buffer";
     }
 
     // Indicate no more data is left to read
     mrt_len = 0;
-
 }
 
 

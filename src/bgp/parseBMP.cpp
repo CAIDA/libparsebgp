@@ -69,7 +69,7 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
         bmp_type = handleMessage(buffer, bufLen);
 
         if (bmp_type < 4) {
-            memcpy(p_entry.router_hash_id, r_entry.hash_id, sizeof(r_entry.hash_id));
+            //memcpy(p_entry.router_hash_id, r_entry.hash_id, sizeof(r_entry.hash_id));
             peer_info_key =  p_entry.peer_addr;
             peer_info_key += p_entry.peer_rd;
 
