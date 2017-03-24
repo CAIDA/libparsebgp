@@ -52,21 +52,13 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
         mrt_type = parseCommonHeader(buffer, bufLen);
 
         switch (mrt_type) {
-            case MRT_TYPE::OSPFv2 : {
-                bufferMRTMessage(buffer, bufLen);
-                parseOSPFv2(mrt_data, mrt_data_len);
-                break;
-            }
-
-            case MRT_TYPE::OSPFv3 : {
-                break;
-            }
-
-            case MRT_TYPE::OSPFv3_ET : {
-                break;
-            }
+            case MRT_TYPE::OSPFv2 :
+            case MRT_TYPE::OSPFv3 :
+            case MRT_TYPE::OSPFv3_ET :
 
             case MRT_TYPE::TABLE_DUMP : {
+                bufferMRTMessage(buffer, bufLen);
+                parseTableDump(mrt_data, mrt_data_len);
                 break;
             }
 
@@ -105,94 +97,94 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
     switch (c_hdr.subType) {
         case BGP4MP_STATE_CHANGE: {
             int ip_addr_len = 4;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp_state_change, 8) != 8)
+            if (extractFromBuffer(buffer, bufLen, &bgp_state_change, 8) != 8)
                 throw;
             if (bgp_state_change.address_family == 2)
                 ip_addr_len = 16;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.peer_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change.peer_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.local_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change.local_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.old_state, 2) != 2)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change.old_state, 2) != 2)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change.new_state, 2) != 2)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change.new_state, 2) != 2)
                 throw;
             //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
             break;
         }
         case BGP4MP_MESSAGE: {
             int ip_addr_len = 4;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
                 throw;
             if (bgp4mp_msg.address_family == 2)
                 ip_addr_len = 16;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
                 throw;
             int bgp_msg_len = mrt_data_len - 8 - 2*ip_addr_len;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
                 throw;
             break;
         }
         case BGP4MP_MESSAGE_AS4: {
             int ip_addr_len = 4;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
                 throw;
             if (bgp4mp_msg_as4.address_family == 2)
                 ip_addr_len = 16;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
                 throw;
             int bgp_msg_len = mrt_data_len - 12 - 2*ip_addr_len;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
                 throw;
             break;
         }
         case BGP4MP_STATE_CHANGE_AS4: {
             int ip_addr_len = 4;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp_state_change_as4, 12) != 12)
+            if (extractFromBuffer(buffer, bufLen, &bgp_state_change_as4, 12) != 12)
                 throw;
             if (bgp_state_change_as4.address_family == 2)
                 ip_addr_len = 16;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.peer_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.peer_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.local_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.local_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.old_state, 2) != 2)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.old_state, 2) != 2)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, bgp_state_change_as4.new_state, 2) != 2)
+            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.new_state, 2) != 2)
                 throw;
             break;
         }
         case BGP4MP_MESSAGE_LOCAL: {
             int ip_addr_len = 4;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
                 throw;
             if (bgp4mp_msg.address_family == 2)
                 ip_addr_len = 16;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
                 throw;
             int bgp_msg_len = mrt_data_len - 8 - 2*ip_addr_len;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
                 throw;
             break;
         }
         case BGP4MP_MESSAGE_AS4_LOCAL: {
             int ip_addr_len = 4;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
                 throw;
             if (bgp4mp_msg_as4.address_family == 2)
                 ip_addr_len = 16;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
                 throw;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
                 throw;
             int bgp_msg_len = mrt_data_len - 12 - 2*ip_addr_len;
-            if (parseBMP::extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
+            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
                 throw;
             break;
         }
@@ -214,22 +206,22 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
 
 char parseMRT::parseCommonHeader(unsigned char*& buffer, int& bufLen) {
 
-    /*if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
+    /*if (extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
         throw "Error in parsing MRT common header: timestamp";
-    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.type, 2) != 2)
+    if (extractFromBuffer(buffer, bufLen, &c_hdr.type, 2) != 2)
         throw "Error in parsing MRT Common header: type";
-    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.subType, 2) != 2)
+    if (extractFromBuffer(buffer, bufLen, &c_hdr.subType, 2) != 2)
         throw "Error in parsing MRT common header: subtype";
-    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.len, 4) != 4)
+    if (extractFromBuffer(buffer, bufLen, &c_hdr.len, 4) != 4)
         throw "Error in parsing MRT Common header: length";*/
 
-    if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr, 12) != 12)
+    if (extractFromBuffer(buffer, bufLen, &c_hdr, 12) != 12)
         throw "Error in parsing MRT common header";
 
     mrt_len = c_hdr.len;
 
     if (c_hdr.type == MRT_TYPE::BGP4MP_ET || c_hdr.type == MRT_TYPE::ISIS_ET || c_hdr.type == MRT_TYPE::OSPFv3_ET) {
-        if (parseBMP::extractFromBuffer(buffer, bufLen, &c_hdr.microsecond_timestamp, 4) != 4)
+        if (extractFromBuffer(buffer, bufLen, &c_hdr.microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
         mrt_len -= 4;
     }
@@ -284,11 +276,19 @@ void parseMRT::bufferMRTMessage(u_char *& buffer, int& bufLen) {
 }
 
 
-void parseMRT::parseOSPFv2(unsigned char *buffer, int& bufLen)
+void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
 {
-
+    
 }
 
+ssize_t  parseMRT::extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
+    if (outputLen > bufLen)
+        return (outputLen - bufLen);
+    memcpy(outputbuf, buffer, outputLen);
+    buffer = (buffer + outputLen);
+    bufLen -= outputLen;
+    return outputLen;
+}
 
 int main() {
     u_char temp[] = {0x03, 0x00, 0x00, 0x00, 0x06, 0x04};

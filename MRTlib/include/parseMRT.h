@@ -69,15 +69,6 @@ public:
         u_char*         message;                ///< variable length message
     };
 
-    /**
-      * OSPFv2 Message Type
-      */
-    struct OSPFv2_messsage{
-        char        remote_ip[46];
-        char        local_ip[46];
-        u_char*     OSPF_message;
-    };
-
     struct table_dump_message{
         uint16_t    view_number;
         uint16_t    sequence;
@@ -206,14 +197,6 @@ public:
         u_char*     BGP_message;
     };
 
-    //4.6
-    struct OSPFv3_messsage{
-        uint16_t    address_family;
-        char        remote_ip[46];
-        char        local_ip[46];
-        u_char*     OSPF_message;
-    };
-
     parseMRT parseMRT();
 
     parseMRT ~parseMRT();
@@ -224,13 +207,15 @@ public:
 
     void bufferMRTMessage(u_char *& buffer, int& bufLen);
 
-    void parseOSPFv2(unsigned char* buffer, int& bufLen);
+    void parseTableDump(unsigned char* buffer, int& bufLen);
 
     void parseBGP4MP(unsigned char* buffer, int& bufLen);
 
-    /**
-     * get current MRT message type
-    */
+    ssize_t extractFromBuffer(unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
+
+        /**
+         * get current MRT message type
+        */
     char getMRTType();
 
     /**
@@ -241,7 +226,7 @@ public:
     uint32_t getMRTLength();
 
     MRT_common_hdr c_hdr;
-    OSPFv2_messsage OSPFv2_msg;
+    table_dump_message table_dump;
     BGP4MP_state_change bgp_state_change;
     BGP4MP_state_change_AS4 bgp_state_change_as4;
     BGP4MP_message bgp4mp_msg;
