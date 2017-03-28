@@ -511,6 +511,7 @@ void UpdateMsg::parseAttr_Aggegator(uint16_t attr_len, u_char *data, parseBMP::p
 
      } else {
          //LOG_ERR("%s: rtr=%s: path attribute is not the correct size of 6 or 8 octets.", peer_addr.c_str(), router_addr.c_str());
+         //throw "path attribute is not the correct size of 6 or 8 octets";
          return;
      }
 

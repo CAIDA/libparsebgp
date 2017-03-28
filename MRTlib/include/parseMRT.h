@@ -14,6 +14,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include "../../src/include/parseBMP.h"
 
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
@@ -39,7 +40,7 @@ public:
     /**
       * Table Dump Types
       */
-    enum TABLE_DUMP_TYPES {AFI_IPv4=1,AFI_IPv6};
+    enum ADDRESS_FAMILY_TYPES {AFI_IPv4=1,AFI_IPv6};
 
     /**
       * Table Dump V2 Types
@@ -197,6 +198,8 @@ public:
         u_char*     BGP_message;
     };
 
+    BGPMsg bgpMsg;
+
     parseMRT parseMRT();
 
     parseMRT ~parseMRT();
@@ -210,6 +213,8 @@ public:
     void parseTableDump(unsigned char* buffer, int& bufLen);
 
     void parseBGP4MP(unsigned char* buffer, int& bufLen);
+
+    void parseBGP4MPaux(void *&bgp4mp, char *buffer, int bufLen, bool isAS4, bool isStateChange);
 
     ssize_t extractFromBuffer(unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
 

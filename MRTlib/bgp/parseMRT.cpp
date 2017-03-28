@@ -94,103 +94,74 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
 
 void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
     //bufferMRTMessage(buffer, bufLen);
+    string peer_info_key;
     switch (c_hdr.subType) {
         case BGP4MP_STATE_CHANGE: {
-            int ip_addr_len = 4;
-            if (extractFromBuffer(buffer, bufLen, &bgp_state_change, 8) != 8)
-                throw;
-            if (bgp_state_change.address_family == 2)
-                ip_addr_len = 16;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change.peer_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change.local_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change.old_state, 2) != 2)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change.new_state, 2) != 2)
-                throw;
-            //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
+            parseBGP4MPaux(bgp_state_change_as4, buffer, bufLen, false, true);
             break;
         }
         case BGP4MP_MESSAGE: {
-            int ip_addr_len = 4;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
-                throw;
-            if (bgp4mp_msg.address_family == 2)
-                ip_addr_len = 16;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            int bgp_msg_len = mrt_data_len - 8 - 2*ip_addr_len;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
-                throw;
+            parseBGP4MPaux(bgp4mp_msg, buffer, bufLen, false, false);
+            peer_info_key =  bgp4mp_msg.peer_IP;
+            //peer_info_key += p_entry.peer_rd;
+            pBGP = new parseBGP(bgp4mp_msg.peer_IP, bgp4mp_msg.peer_AS_number, (bgp4mp_msg.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
+            //pBGP->parseBgpHeader(mrt_data, mrt_data_len, pBGP->bgpMsg->common_hdr);
             break;
         }
         case BGP4MP_MESSAGE_AS4: {
-            int ip_addr_len = 4;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
-                throw;
-            if (bgp4mp_msg_as4.address_family == 2)
-                ip_addr_len = 16;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            int bgp_msg_len = mrt_data_len - 12 - 2*ip_addr_len;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
-                throw;
+            parseBGP4MPaux(bgp4mp_msg_as4, buffer, bufLen, true, false);
+            peer_info_key =  bgp4mp_msg_as4.peer_IP;
+            //peer_info_key += p_entry.peer_rd;
+            pBGP = new parseBGP(bgp4mp_msg_as4.peer_IP, bgp4mp_msg_as4.peer_AS_number, (bgp4mp_msg_as4.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
             break;
         }
         case BGP4MP_STATE_CHANGE_AS4: {
-            int ip_addr_len = 4;
-            if (extractFromBuffer(buffer, bufLen, &bgp_state_change_as4, 12) != 12)
-                throw;
-            if (bgp_state_change_as4.address_family == 2)
-                ip_addr_len = 16;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.peer_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.local_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.old_state, 2) != 2)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, bgp_state_change_as4.new_state, 2) != 2)
-                throw;
+            parseBGP4MPaux(bgp_state_change_as4, buffer, bufLen, true, true);
             break;
         }
         case BGP4MP_MESSAGE_LOCAL: {
-            int ip_addr_len = 4;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg, 8) != 8)
-                throw;
-            if (bgp4mp_msg.address_family == 2)
-                ip_addr_len = 16;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.peer_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.local_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            int bgp_msg_len = mrt_data_len - 8 - 2*ip_addr_len;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg.BGP_message, bgp_msg_len) != bgp_msg_len)
-                throw;
+            parseBGP4MPaux(bgp4mp_msg_local, buffer, bufLen, false, false);
+            peer_info_key =  bgp4mp_msg_local.peer_IP;
+            //peer_info_key += p_entry.peer_rd;
+            pBGP = new parseBGP(bgp4mp_msg_local.peer_IP, bgp4mp_msg_local.peer_AS_number, (bgp4mp_msg_local.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
             break;
         }
         case BGP4MP_MESSAGE_AS4_LOCAL: {
-            int ip_addr_len = 4;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4, 12) != 12)
-                throw;
-            if (bgp4mp_msg_as4.address_family == 2)
-                ip_addr_len = 16;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.peer_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.local_IP, ip_addr_len) != ip_addr_len)
-                throw;
-            int bgp_msg_len = mrt_data_len - 12 - 2*ip_addr_len;
-            if (extractFromBuffer(buffer, bufLen, &bgp4mp_msg_as4.BGP_message, bgp_msg_len) != bgp_msg_len)
-                throw;
+            parseBGP4MPaux(bgp4mp_msg_as4_local, buffer, bufLen, true, false);
+            peer_info_key =  bgp4mp_msg_as4_local.peer_IP;
+            //peer_info_key += p_entry.peer_rd;
+            pBGP = new parseBGP(bgp4mp_msg_as4_local.peer_IP, bgp4mp_msg_as4_local.peer_AS_number, (bgp4mp_msg_as4_local.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
             break;
         }
         default: {
             throw "Subtype for BGP4MP not supported";
         }
+    }
+    if (c_hdr.subType != BGP4MP_STATE_CHANGE && c_hdr.subType != BGP4MP_STATE_CHANGE_AS4)
+        pBGP->parseBgpHeader(mrt_data, mrt_data_len, pBGP->bgpMsg->common_hdr);
+}
+
+void parseMRT::parseBGP4MPaux(void *&bgp4mp, char *buffer, int bufLen, bool isAS4, bool isStateChange) {
+    int asn_len = isAS4 ? 12 : 8;
+    int ip_addr_len = 4;
+    if (extractFromBuffer(buffer, bufLen, &bgp4mp, asn_len) != asn_len)
+        throw;
+    if (bgp4mp_msg_as4.address_family == AFI_IPv6)
+        ip_addr_len = 16;
+    if (extractFromBuffer(buffer, bufLen, &bgp4mp.peer_IP, ip_addr_len) != ip_addr_len)
+        throw;
+    if (extractFromBuffer(buffer, bufLen, &bgp4mp.local_IP, ip_addr_len) != ip_addr_len)
+        throw;
+    if (isStateChange) {
+        if (extractFromBuffer(buffer, bufLen, bgp4mp.old_state, 2) != 2)
+            throw;
+        if (extractFromBuffer(buffer, bufLen, bgp4mp.new_state, 2) != 2)
+            throw;
+    }
+    else {
+        int bgp_msg_len = mrt_data_len - asn_len - 2 * ip_addr_len;
+        if (extractFromBuffer(buffer, bufLen, &bgp4mp.BGP_message, bgp_msg_len) != bgp_msg_len)
+            throw;
     }
 }
 

@@ -48,7 +48,7 @@ parseBMP::parseBMP() {
     //parseMsg(buffer, bufLen);
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
-//    bzero(p_entry, sizeof(MsgBusInterface::obj_bgp_peer));
+    bzero(&p_entry, sizeof(obj_bgp_peer));
 }
 
 parseBMP::~parseBMP() {
@@ -277,12 +277,14 @@ char parseBMP::handleMessage(unsigned char*& buffer, int& bufLen) {
     //memcpy(&ver,buffer,1);
     //*buffer++;
     //bufLen-=1;
-    if (bytes_read < 0)
-        throw "(1) Failed to read from socket.";
-    else if (bytes_read == 0)
-        throw "(2) Connection closed";
-    else if (bytes_read != 1)
-        throw "(3) Cannot read the BMP version byte from socket";
+//    if (bytes_read < 0)
+//        throw "(1) Failed to read from socket.";
+//    else if (bytes_read == 0)
+//        throw "(2) Connection closed";
+//    else if (bytes_read != 1)
+//        throw "(3) Cannot read the BMP version byte from socket";
+    if (bytes_read != 1)
+        throw "Cannot read BMP version byte from buffer";
 
     // check the version
     if (ver == 3) { // draft-ietf-grow-bmp-04 - 07
@@ -570,6 +572,7 @@ void parseBMP::parsePeerHdr(unsigned char*& buffer, int& bufLen) {
     if ((i = extractFromBuffer(buffer, bufLen, &p_hdr, BMP_PEER_HDR_LEN))
         != BMP_PEER_HDR_LEN) {
         //       LOG_ERR("sock=%d: Couldn't read all bytes, read %d bytes",sock, i);
+        throw "Couldn't read all bytes";
     }
 
     // Adjust the common header length to remove the peer header (as it's been read)

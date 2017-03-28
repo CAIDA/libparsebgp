@@ -13,6 +13,7 @@
 #include <vector>
 #include <list>
 #include "../include/parseBMP.h"
+#include "../../MRTlib/include/parseMRT.h"
 #include "bgp_common.h"
 #include "UpdateMsg.h"
 
@@ -80,6 +81,7 @@ public:
     //parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::c, string routerAddr,
     //         BMPReader::peer_info *peer_info);
     parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info);
+    parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info);
 
     virtual ~parseBGP();
 
@@ -94,6 +96,9 @@ public:
      *
      * \returns True if error, false if no error.
      */
+
+    bool parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
+
     bool handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
 
     /**
