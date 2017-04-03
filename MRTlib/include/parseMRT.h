@@ -86,16 +86,16 @@ public:
     //4.3.1
     //view name is optional if not present viewname length is set to 0
     struct peer_index_table{
-        char                collector_BGPID[4];
+        char                collector_BGPID[46];
         uint16_t            view_name_length;
-        char*               view_name[16]; //doubtful about this setting, willl have to confirm
+        char*               view_name[46]; //doubtful about this setting, will have to confirm
         uint16_t            peer_count;
-        list<peer_entry>  peerEntries;
+        list<peer_entry>    peerEntries;
     };
 
     struct peer_entry{
         uint8_t     peer_type;
-        char        peer_BGPID[4];
+        char        peer_BGPID[46];
         char        peer_IP[46];
         bool        isIPv4;
         bool        ASsize; //0 for 16 bits; 1 for 32 bits
@@ -212,6 +212,8 @@ public:
 
     void parseTableDump(unsigned char* buffer, int& bufLen);
 
+    void parseTableDump_V2(unsigned char* buffer, int& bufLen);
+
     void parseBGP4MP(unsigned char* buffer, int& bufLen);
 
     void parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
@@ -232,6 +234,7 @@ public:
 
     MRT_common_hdr c_hdr;
     table_dump_message table_dump;
+    peer_index_table peerIndexTable;
     BGP4MP_state_change bgp_state_change;
     BGP4MP_state_change_AS4 bgp_state_change_as4;
     BGP4MP_message bgp4mp_msg;

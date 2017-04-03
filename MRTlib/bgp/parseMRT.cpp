@@ -63,6 +63,8 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
             }
 
             case MRT_TYPE::TABLE_DUMP_V2 : {
+                bufferMRTMessage(buffer, bufLen);
+                parseTableDump_V2(mrt_data, mrt_data_len);
                 break;
             }
 
@@ -154,8 +156,52 @@ void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
     if (extractFromBuffer(buffer, bufLen, &table_dump.attribute_len, 2) != 2)
         throw "Error in parsing attribute length";
 
-    parseBgpAttributes(buffer, bufLen);
+    //parseBgpAttributes(buffer, bufLen); TO DO
 
+}
+void parseMRT::parseTableDump_V2(unsigned char *buffer, int& bufLen) {
+
+    uint16_t count = 0;
+    switch (c_hdr.subType) {
+        case PEER_INDEX_TABLE:
+            if (extractFromBuffer(buffer, bufLen, &peerIndexTable.collector_BGPID, 4) != 4)
+                throw "Error in parsing collector_BGPID";
+
+            if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name_length, 2) != 2)
+                throw "Error in parsing view_name_length";
+
+            if (!peerIndexTable.view_name_length) {
+                if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name, peerIndexTable.view_name_length) !=
+                    peerIndexTable.view_name_length)
+                    throw "Error in parsing view_name";
+            }
+
+            if (extractFromBuffer(buffer, bufLen, &peerIndexTable.peer_count, 2) != 2)
+                throw "Error in parsing peer count";
+
+            while(count<peerIndexTable.peer_count)
+            {
+                peer_entry p_entry;
+                if (extractFromBuffer(buffer, bufLen, &p_entry.peer_type, 1) != 1)
+                    throw "Error in parsing collector_BGPID";
+
+                if(p_entry.peer_type & 0x01)
+
+                delete p_entry;
+            }
+
+            break;
+        case RIB_IPV4_UNICAST:
+            break;
+        case RIB_IPV4_MULTICAST:
+            break;
+        case RIB_IPV6_UNICAST:
+            break;
+        case RIB_IPV6_MULTICAST:
+            break;
+        case RIB_GENERIC:
+            break;
+    }
 }
 
 
