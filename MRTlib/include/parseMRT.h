@@ -214,7 +214,7 @@ public:
 
     void parseBGP4MP(unsigned char* buffer, int& bufLen);
 
-    void parseBGP4MPaux(void *&bgp4mp, char *buffer, int bufLen, bool isAS4, bool isStateChange);
+    void parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
 
     ssize_t extractFromBuffer(unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
 

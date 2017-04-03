@@ -52,9 +52,9 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
         mrt_type = parseCommonHeader(buffer, bufLen);
 
         switch (mrt_type) {
-            case MRT_TYPE::OSPFv2 :
-            case MRT_TYPE::OSPFv3 :
-            case MRT_TYPE::OSPFv3_ET :
+            case MRT_TYPE::OSPFv2 :     //do nothing
+            case MRT_TYPE::OSPFv3 :     //do nothing
+            case MRT_TYPE::OSPFv3_ET :  //do nothing
 
             case MRT_TYPE::TABLE_DUMP : {
                 bufferMRTMessage(buffer, bufLen);
@@ -91,6 +91,73 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
 
     return rval;
 }
+
+void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
+{
+    u_char local_addr[16];
+    if (extractFromBuffer(buffer, bufLen, &table_dump.view_number, 2) != 2)
+        throw "Error in parsing view number";
+    if (extractFromBuffer(buffer, bufLen, &table_dump.sequence, 2) != 2)
+        throw "Error in parsing sequence";
+
+    //parsing prefix in local address variable
+    if ( extractFromBuffer(buffer, bufLen, &local_addr, 16) != 16)
+        throw "Error in parsing prefix in IPv4";
+
+    switch (c_hdr.subType) {
+        case AFI_IPv4:{
+            snprintf(table_dump.prefix, sizeof(table_dump.prefix), "%d.%d.%d.%d",
+                         local_addr[12], local_addr[13], local_addr[14],
+                         local_addr[15]);
+            break;
+        }
+        case AFI_IPv6:{
+            inet_ntop(AF_INET6, local_addr, table_dump.prefix, sizeof(table_dump.prefix));
+            break;
+        }
+        default: {
+            throw "Address family is unexpected as per rfc6396";
+        }
+    }
+    if (extractFromBuffer(buffer, bufLen, &table_dump.prefix_len, 1) != 1)
+        throw "Error in parsing prefix length";
+
+    if (extractFromBuffer(buffer, bufLen, &table_dump.status, 1) != 1)
+        throw "Error in parsing status";
+
+    if (extractFromBuffer(buffer, bufLen, &table_dump.originated_time, 4) != 4)
+        throw "Error in parsing originated time";
+
+    //parsing prefix in local address variable
+    if ( extractFromBuffer(buffer, bufLen, &local_addr, 16) != 16)
+        throw "Error in parsing prefix in IPv4";
+
+    switch (c_hdr.subType) {
+        case AFI_IPv4:{
+            snprintf(table_dump.peer_IP, sizeof(table_dump.peer_IP), "%d.%d.%d.%d",
+                     local_addr[12], local_addr[13], local_addr[14],
+                     local_addr[15]);
+            break;
+        }
+        case AFI_IPv6:{
+            inet_ntop(AF_INET6, local_addr, table_dump.peer_IP, sizeof(table_dump.peer_IP));
+            break;
+        }
+        default: {
+            throw "Address family is unexpected as per rfc6396";
+        }
+    }
+
+    if (extractFromBuffer(buffer, bufLen, &table_dump.peerAS, 2) != 2)
+        throw "Error in parsing peer AS";
+
+    if (extractFromBuffer(buffer, bufLen, &table_dump.attribute_len, 2) != 2)
+        throw "Error in parsing attribute length";
+
+    parseBgpAttributes(buffer, bufLen);
+
+}
+
 
 void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
     //bufferMRTMessage(buffer, bufLen);
@@ -141,7 +208,7 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
         pBGP->parseBgpHeader(mrt_data, mrt_data_len, pBGP->bgpMsg->common_hdr);
 }
 
-void parseMRT::parseBGP4MPaux(void *&bgp4mp, char *buffer, int bufLen, bool isAS4, bool isStateChange) {
+void parseMRT::parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange) {
     int asn_len = isAS4 ? 12 : 8;
     int ip_addr_len = 4;
     if (extractFromBuffer(buffer, bufLen, &bgp4mp, asn_len) != asn_len)
@@ -153,9 +220,9 @@ void parseMRT::parseBGP4MPaux(void *&bgp4mp, char *buffer, int bufLen, bool isAS
     if (extractFromBuffer(buffer, bufLen, &bgp4mp.local_IP, ip_addr_len) != ip_addr_len)
         throw;
     if (isStateChange) {
-        if (extractFromBuffer(buffer, bufLen, bgp4mp.old_state, 2) != 2)
+        if (extractFromBuffer(buffer, bufLen, &bgp4mp.old_state, 2) != 2)
             throw;
-        if (extractFromBuffer(buffer, bufLen, bgp4mp.new_state, 2) != 2)
+        if (extractFromBuffer(buffer, bufLen, &bgp4mp.new_state, 2) != 2)
             throw;
     }
     else {
@@ -246,11 +313,6 @@ void parseMRT::bufferMRTMessage(u_char *& buffer, int& bufLen) {
     mrt_len = 0;
 }
 
-
-void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
-{
-    
-}
 
 ssize_t  parseMRT::extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
     if (outputLen > bufLen)
