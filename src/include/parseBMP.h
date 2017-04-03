@@ -87,12 +87,12 @@ public:
 
 
 /**
-     * Read messages from BMP stream
+     * Read messages from buffer
      *
      * BMP routers send BMP/BGP messages, this method reads and parses those.
      *
-     * \param [in]  client      Client information pointer
-     * \param [in]  mbus_ptr     The database pointer referencer - DB should be already initialized
+     * \param [in]  buffer       Buffer containing BMP message
+     * \param [in]  bufLen       length of the buffer
      * \return true if more to read, false if the connection is done/closed
      */
     //bool parseMsg(int read_fd);

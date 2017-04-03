@@ -85,13 +85,6 @@ public:
 
     //4.3.1
     //view name is optional if not present viewname length is set to 0
-    struct peer_index_table{
-        char                collector_BGPID[46];
-        uint16_t            view_name_length;
-        char*               view_name[46]; //doubtful about this setting, will have to confirm
-        uint16_t            peer_count;
-        list<peer_entry>    peerEntries;
-    };
 
     struct peer_entry{
         uint8_t     peer_type;
@@ -101,6 +94,22 @@ public:
         bool        ASsize; //0 for 16 bits; 1 for 32 bits
         uint16_t    peerAS16;
         uint32_t    peerAS32;
+    };
+
+    struct peer_index_table{
+        char                collector_BGPID[46];
+        uint16_t            view_name_length;
+        char*               view_name[46]; //doubtful about this setting, will have to confirm
+        uint16_t            peer_count;
+        list<peer_entry>    peerEntries;
+    };
+
+    //4.3.4
+    struct RIB_entry{
+        uint16_t    peer_index;
+        uint32_t    originatedTime;
+        uint16_t    attribute_len;
+        u_char*     bgp_attribute;
     };
 
     //4.3.2
@@ -120,14 +129,6 @@ public:
         u_char *        NLRI;
         uint16_t        entry_count;
         list<RIB_entry> RIB_entries;
-    };
-
-    //4.3.4
-    struct RIB_entry{
-        uint16_t    peer_index;
-        uint32_t    originatedTime;
-        uint16_t    attribute_len;
-        u_char*     bgp_attribute;
     };
 
     //4.4.1
@@ -198,24 +199,60 @@ public:
         u_char*     BGP_message;
     };
 
-    BGPMsg bgpMsg;
+    parseBMP::BGPMsg bgpMsg;
 
-    parseMRT parseMRT();
+    /*
+     * Constructor for class
+     */
+    parseMRT();
 
-    parseMRT ~parseMRT();
+    /*
+     * Destructor
+     */
+    ~parseMRT();
 
+    /**
+     * Function to parse MRT message
+     *
+     * \param [in] buffer       Contains the MRT message
+     * \param [in] bufLen       Length of buffer
+     */
     bool parseMsg(unsigned char *&buffer, int& bufLen);
 
+    /**
+     * Function to parse the MRT common header
+     * @param buffer
+     * @param bufLen
+     * @return common header type
+     */
     char parseCommonHeader(unsigned char*& buffer, int& bufLen);
 
+    /**
+     * Parses remaining MRT message
+     * @param buffer
+     * @param bufLen
+     */
     void bufferMRTMessage(u_char *& buffer, int& bufLen);
 
     void parseTableDump(unsigned char* buffer, int& bufLen);
 
     void parseTableDump_V2(unsigned char* buffer, int& bufLen);
 
+    /**
+     * Function to parse MRT of type BGP4MP
+     * @param buffer
+     * @param bufLen
+     */
     void parseBGP4MP(unsigned char* buffer, int& bufLen);
 
+    /**
+     * Auxiliary function to parse BGP4MP messages
+     * @param bgp4mp        The corresponding structure
+     * @param buffer
+     * @param bufLen
+     * @param isAS4         indicates whether ASN is 4 bytes
+     * @param isStateChange indicates if the message is for state change or BGP message
+     */
     void parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
 
     ssize_t extractFromBuffer(unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
@@ -259,8 +296,3 @@ private:
 };
 
 #endif /* PARSEBMP_H_ */
-
-
-
-
-

@@ -231,8 +231,8 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
         // Mark the router as disconnected and update the error to be a local disconnect (no term message received)
       //  LOG_INFO("%s: Caught: %s", client->c_ip, str);
        // disconnect(client, mbus_ptr, parseBMP::TERM_REASON_OPENBMP_CONN_ERR, str);
-        cout<<str;
-        //delete pBMP;                    // Make sure to free the resource
+        //cout<<str;
+        delete pBGP;                    // Make sure to free the resource
         throw str;
     }
 
@@ -978,7 +978,6 @@ void parseBMP::handleInitMsg(unsigned char*& buffer, int& bufLen) {
 
         bufPtr += BMP_INIT_MSG_LEN;                // Move pointer past the info header
 
-        // TODO: Change to SELF_DEBUG after IOS supports INIT messages correctly
  //       LOG_INFO("Init message type %hu and length %hu parsed", initMsg.type, initMsg.len);
 
         if (initMsg.len > 0) {

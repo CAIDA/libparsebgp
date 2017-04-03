@@ -37,11 +37,15 @@ parseMRT::parseMRT() {
     mrt_data_len = 0;
 }
 
+/*
+ * Destructor for class
+ */
 parseMRT::~parseMRT() {
     // clean up
 }
 
 parseBGP *pBGP;
+
 
 bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
 {
@@ -54,7 +58,9 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
         switch (mrt_type) {
             case MRT_TYPE::OSPFv2 :     //do nothing
             case MRT_TYPE::OSPFv3 :     //do nothing
-            case MRT_TYPE::OSPFv3_ET :  //do nothing
+            case MRT_TYPE::OSPFv3_ET : { //do nothing
+                break;
+            }
 
             case MRT_TYPE::TABLE_DUMP : {
                 bufferMRTMessage(buffer, bufLen);
@@ -83,7 +89,7 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
             }
             default: {
                 throw "MRT type is unexpected as per rfc6396";
-                break;
+                //break;
             }
         }
 
@@ -250,8 +256,9 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
             throw "Subtype for BGP4MP not supported";
         }
     }
-    if (c_hdr.subType != BGP4MP_STATE_CHANGE && c_hdr.subType != BGP4MP_STATE_CHANGE_AS4)
-        pBGP->parseBgpHeader(mrt_data, mrt_data_len, pBGP->bgpMsg->common_hdr);
+    if (c_hdr.subType != BGP4MP_STATE_CHANGE && c_hdr.subType != BGP4MP_STATE_CHANGE_AS4) {
+        pBGP->parseBGPfromMRT(mrt_data, mrt_data_len, pBGP->bgpMsg, c_hdr.subType > 5);
+    }
 }
 
 void parseMRT::parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange) {

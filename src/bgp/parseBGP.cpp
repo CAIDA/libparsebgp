@@ -103,7 +103,7 @@ parseBGP::~parseBGP() {
  * \param [in] bgpMsg           Structure to store the bgp messages
  * \returns True if error, false if no error.
  */
-bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg) {
+bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, bool isLocalMsg) {
     u_char  bgpMsgType = parseBgpHeader(data, size, bgpMsg->common_hdr);
     switch (bgpMsgType) {
         case BGP_MSG_UPDATE: {
@@ -141,13 +141,50 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
 //                strncpy(down_event->error_text, parsed_msg.error_text, sizeof(down_event->error_text));
             }
             return rval;
-            break;
+            //break;
         }
         case BGP_MSG_KEEPALIVE: {
             break;
         }
         case BGP_MSG_OPEN: {
-            //TODO
+            bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info, debug);
+            list <string>       cap_list;  //TODO: Need to store these
+            string              local_bgp_id, remote_bgp_id, bgp_id;
+            size_t              read_size;
+            uint16_t holdTime;
+
+            p_info->recv_four_octet_asn = false;
+            p_info->sent_four_octet_asn = false;
+            p_info->using_2_octet_asn = false;
+
+            data += BGP_MSG_HDR_LEN;
+
+            read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, isLocalMsg, p_entry->peer_as, holdTime, bgp_id, cap_list);
+
+            if (!read_size) {
+                //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
+                throw "Failed to read open message";
+            }
+
+            data += read_size;                                          // Move the pointer pase the sent open message
+            data_bytes_remaining -= read_size;
+
+            string cap_str;
+            for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
+                if ( it != cap_list.begin())
+                    cap_str.append(", ");
+
+                // Check for 4 octet ASN support
+                if ((*it).find("4 Octet ASN") != std::string::npos) {
+                    if (isLocalMsg)
+                        p_info->sent_four_octet_asn = true;
+                    else
+                        p_info->recv_four_octet_asn = true;
+                }
+
+                cap_str.append((*it));
+            }
+
             break;
         }
         default: {

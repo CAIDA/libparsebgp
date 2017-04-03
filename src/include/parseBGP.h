@@ -97,7 +97,7 @@ public:
      * \returns True if error, false if no error.
      */
 
-    bool parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
+    bool parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, bool isLocalMsg = false);
 
     bool handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
 
