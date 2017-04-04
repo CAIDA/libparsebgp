@@ -80,16 +80,12 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
                 break;
             }
 
-            case MRT_TYPE::ISIS : {
-                break;
-            }
-
+            case MRT_TYPE::ISIS :
             case MRT_TYPE::ISIS_ET : {
-                break;
+                break;  //do nothing
             }
             default: {
                 throw "MRT type is unexpected as per rfc6396";
-                //break;
             }
         }
 
