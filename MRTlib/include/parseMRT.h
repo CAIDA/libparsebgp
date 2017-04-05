@@ -92,7 +92,7 @@ public:
         char        peer_IP[46];
         bool        isIPv4;
         bool        ASsize; //0 for 16 bits; 1 for 32 bits
-        uint16_t    peerAS16;
+ //       uint16_t    peerAS16;
         uint32_t    peerAS32;
     };
 
@@ -116,7 +116,7 @@ public:
     struct RIB_entry_header{
         uint32_t        sequence_number;
         uint8_t         prefix_length;
-        u_char*         prefix;
+        char            prefix[46];
         uint16_t        entry_count;
         list<RIB_entry> RIB_entries;
     };
@@ -238,6 +238,13 @@ public:
 
     void parseTableDump_V2(unsigned char* buffer, int& bufLen);
 
+    void parsePeerIndexTable(unsigned char* buffer, int& bufLen);
+
+    void parseRIB_UNICAST(unsigned char* buffer, int& bufLen);
+
+    void parseRIB_GENERIC(unsigned char* buffer, int& bufLen);
+
+
     /**
      * Function to parse MRT of type BGP4MP
      * @param buffer
@@ -272,6 +279,7 @@ public:
     MRT_common_hdr c_hdr;
     table_dump_message table_dump;
     peer_index_table peerIndexTable;
+    RIB_entry_header ribEntryHeader;
     BGP4MP_state_change bgp_state_change;
     BGP4MP_state_change_AS4 bgp_state_change_as4;
     BGP4MP_message bgp4mp_msg;

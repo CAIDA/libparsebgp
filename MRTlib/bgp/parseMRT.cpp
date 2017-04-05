@@ -166,50 +166,130 @@ void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
 
 }
 void parseMRT::parseTableDump_V2(unsigned char *buffer, int& bufLen) {
-
-    uint16_t count = 0;
     switch (c_hdr.subType) {
         case PEER_INDEX_TABLE:
-            if (extractFromBuffer(buffer, bufLen, &peerIndexTable.collector_BGPID, 4) != 4)
-                throw "Error in parsing collector_BGPID";
-
-            if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name_length, 2) != 2)
-                throw "Error in parsing view_name_length";
-
-            if (!peerIndexTable.view_name_length) {
-                if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name, peerIndexTable.view_name_length) !=
-                    peerIndexTable.view_name_length)
-                    throw "Error in parsing view_name";
-            }
-
-            if (extractFromBuffer(buffer, bufLen, &peerIndexTable.peer_count, 2) != 2)
-                throw "Error in parsing peer count";
-
-            while(count<peerIndexTable.peer_count)
-            {
-                peer_entry p_entry;
-                if (extractFromBuffer(buffer, bufLen, &p_entry.peer_type, 1) != 1)
-                    throw "Error in parsing collector_BGPID";
-
-                if(p_entry.peer_type & 0x01)
-
-                delete p_entry;
-            }
-
+            parsePeerIndexTable(buffer,bufLen);
             break;
+
         case RIB_IPV4_UNICAST:
-            break;
-        case RIB_IPV4_MULTICAST:
+            parseRIB_UNICAST(buffer,bufLen);
             break;
         case RIB_IPV6_UNICAST:
+            parseRIB_UNICAST(buffer,bufLen);
             break;
-        case RIB_IPV6_MULTICAST:
-            break;
+
+        case RIB_IPV4_MULTICAST: //TO DO: due to lack of multicast data
+        case RIB_IPV6_MULTICAST: //TO DO: due to lack of multicast data
         case RIB_GENERIC:
+            parseRIB_GENERIC(buffer,bufLen);
             break;
     }
 }
 
+void parseMRT::parsePeerIndexTable(unsigned char *buffer, int& bufLen)
+{
+    uint16_t count = 0;
+    uint8_t  AS_num;
+    uint8_t  Addr_fam;
+
+    if (extractFromBuffer(buffer, bufLen, &peerIndexTable.collector_BGPID, 4) != 4)
+        throw "Error in parsing collector_BGPID";
+
+    if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name_length, 2) != 2)
+        throw "Error in parsing view_name_length";
+
+    if (!peerIndexTable.view_name_length) {
+        if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name, peerIndexTable.view_name_length) !=
+            peerIndexTable.view_name_length)
+            throw "Error in parsing view_name";
+    }
+
+    if (extractFromBuffer(buffer, bufLen, &peerIndexTable.peer_count, 2) != 2)
+        throw "Error in parsing peer count";
+
+    u_char local_addr[4];
+
+    while (count < peerIndexTable.peer_count) {
+        peer_entry p_entry;
+        if (extractFromBuffer(buffer, bufLen, &p_entry.peer_type, 1) != 1)
+            throw "Error in parsing collector_BGPID";
+
+        AS_num = p_entry.peer_type & 0x16 ? 4 : 2; //using 32 bits and 16 bits.
+        Addr_fam = p_entry.peer_type & 0x01 ? AFI_IPv6:AFI_IPv4;
+
+        if ( extractFromBuffer(buffer, bufLen, &local_addr, 4) != 4)
+            throw "Error in parsing local address in IPv4";
+
+        switch (Addr_fam) {
+            case AFI_IPv4:{
+                snprintf(p_entry.peer_IP, sizeof(p_entry.peer_IP), "%d.%d.%d.%d",
+                         local_addr[0], local_addr[1], local_addr[2],
+                         local_addr[3]);
+                break;
+            }
+            case AFI_IPv6:{
+                inet_ntop(AF_INET6, local_addr, p_entry.peer_IP, sizeof(p_entry.peer_IP));
+                break;
+            }
+            default: {
+                throw "Address family is unexpected as per rfc6396";
+            }
+        }
+        if ( extractFromBuffer(buffer, bufLen, &p_entry.peerAS32, AS_num) != AS_num)
+            throw "Error in parsing local address in IPv4";
+
+        peerIndexTable.peerEntries.push_back(p_entry);
+        delete p_entry;
+        count++;
+    }
+}
+
+void parseMRT::parseRIB_UNICAST(unsigned char *buffer, int& bufLen)
+{
+    uint16_t count = 0;
+    uint8_t  IPlen;
+    u_char* local_addr;
+
+    if (extractFromBuffer(buffer, bufLen, &ribEntryHeader.sequence_number, 4) != 4)
+        throw "Error in parsing sequence number";
+
+    if (extractFromBuffer(buffer, bufLen, &ribEntryHeader.prefix_length, 1) != 1)
+        throw "Error in parsing view_name_length";
+
+    if (extractFromBuffer(buffer, bufLen, &local_addr, ribEntryHeader.prefix_length) != ribEntryHeader.prefix_length)
+        throw "Error in parsing prefix";
+    switch (c_hdr.subType) {
+        case RIB_IPV4_UNICAST:
+            inet_ntop(AF_INET, local_addr, ribEntryHeader.prefix, sizeof(ribEntryHeader.prefix));
+            break;
+        case RIB_IPV6_UNICAST:
+            inet_ntop(AF_INET6, local_addr, ribEntryHeader.prefix, sizeof(ribEntryHeader.prefix));
+            break
+    }
+    if (extractFromBuffer(buffer, bufLen, &ribEntryHeader.entry_count, 2) != 2)
+        throw "Error in parsing peer count";
+
+    while (count < peerIndexTable.peer_count) {
+        RIB_entry r_entry;
+        if (extractFromBuffer(buffer, bufLen, &r_entry.peer_index, 2) != 2)
+            throw "Error in parsing peer Index";
+
+        if ( extractFromBuffer(buffer, bufLen, &r_entry.originatedTime, 4) != 4)
+            throw "Error in parsing local address in IPv4";
+
+        if ( extractFromBuffer(buffer, bufLen, &r_entry.attribute_len, 2) != 2)
+            throw "Error in parsing local address in IPv4";
+
+        if ( extractFromBuffer(buffer, bufLen, &r_entry.bgp_attribute, r_entry.attribute_len) != r_entry.attribute_len)
+            throw "Error in parsing local address in IPv4";
+
+        //TO DO: parse bgp attributes
+
+        ribEntryHeader.RIB_entries.push_back(r_entry);
+        delete r_entry;
+        count++;
+    }
+}
 
 void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
     //bufferMRTMessage(buffer, bufLen);
