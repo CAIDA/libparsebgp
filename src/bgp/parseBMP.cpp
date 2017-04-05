@@ -59,7 +59,7 @@ parseBGP *pBGP;
 //bool parseBMP::parseMsg(int read_fd)
 bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
 {
-    bool rval = true;
+    //bool rval = true;
     string peer_info_key;
     // MsgBusInterface::obj_bgp_peer p_entry;
 
@@ -221,7 +221,7 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
                 //mbus_ptr->update_Router(r_object, mbus_ptr->ROUTER_ACTION_TERM);
          //       close(client->c_sock);
 
-                rval = false;                           // Indicate connection is closed
+                //rval = false;                           // Indicate connection is closed
                 break;
             }
 
@@ -242,7 +242,8 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
     // Free the bmp parser
     //delete pBMP;
 
-    return rval;
+    //return rval;
+    return true;
 }
 
 ssize_t  parseBMP::extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
