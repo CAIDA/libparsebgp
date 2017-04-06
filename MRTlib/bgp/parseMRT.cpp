@@ -47,10 +47,10 @@ parseMRT::~parseMRT() {
 parseBGP *pBGP;
 
 
-bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
+bool parseMRT::parseMsg(u_char *&buffer, int& bufLen)
 {
     bool rval = true;
-    char mrt_type = 0;
+    uint16_t mrt_type = 0;
 
     try {
         mrt_type = parseCommonHeader(buffer, bufLen);
@@ -437,7 +437,7 @@ void parseMRT::parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool is
  * //throws (const  char *) on error.   String will detail error message.
  */
 
-char parseMRT::parseCommonHeader(unsigned char*& buffer, int& bufLen) {
+uint16_t parseMRT::parseCommonHeader(u_char *& buffer, int& bufLen) {
 
     /*if (extractFromBuffer(buffer, bufLen, &c_hdr.timeStamp, 4) != 4)
         throw "Error in parsing MRT common header: timestamp";

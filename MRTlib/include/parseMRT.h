@@ -70,6 +70,9 @@ public:
         u_char*         message;                ///< variable length message
     };
 
+    /**
+      * Table Dump Message format
+      */
     struct table_dump_message{
         uint16_t    view_number;
         uint16_t    sequence;
@@ -83,6 +86,10 @@ public:
         u_char*     bgp_attribute;
     };
 
+
+    /**
+      * Peer Entry Message format
+      */
     //4.3.1
     //view name is optional if not present viewname length is set to 0
 
@@ -96,6 +103,9 @@ public:
         uint32_t    peerAS32;
     };
 
+    /**
+      * Peer Index Table Message format
+      */
     struct peer_index_table{
         char                collector_BGPID[46];
         uint16_t            view_name_length;
@@ -105,6 +115,9 @@ public:
     };
 
     //4.3.4
+    /**
+      * RIB Entry Message format
+      */
     struct RIB_entry{
         uint16_t    peer_index;
         uint32_t    originatedTime;
@@ -113,6 +126,9 @@ public:
     };
 
     //4.3.2
+    /**
+      * RIB Entry Header Message format
+      */
     struct RIB_entry_header{
         uint32_t        sequence_number;
         uint8_t         prefix_length;
@@ -122,6 +138,9 @@ public:
     };
 
     //4.3.3
+    /**
+      * RIB generic entry header
+      */
     struct RIB_generic_entry_header{
         uint32_t        sequence_number;
         uint16_t        address_family_identifier;
@@ -131,7 +150,9 @@ public:
         list<RIB_entry> RIB_entries;
     };
 
-    //4.4.1
+    /**
+      * BGP4MP State Change Format
+      */
     struct BGP4MP_state_change{
         uint16_t    peer_AS_number;
         uint16_t    local_AS_number;
@@ -143,7 +164,9 @@ public:
         uint16_t    new_state;
     };
 
-    //4.4.2
+    /**
+      * BGP4MP Message Format
+      */
     struct BGP4MP_message{
         uint16_t    peer_AS_number;
         uint16_t    local_AS_number;
@@ -154,7 +177,9 @@ public:
         u_char*     BGP_message;
     };
 
-    //4.4.3
+    /**
+      * BGP4MP Message_AS4 Format
+      */
     struct BGP4MP_message_AS4{
         uint32_t    peer_AS_number;
         uint32_t    local_AS_number;
@@ -165,7 +190,9 @@ public:
         u_char*     BGP_message;
     };
 
-    //4.4.4
+    /**
+      * BGP4MP State Change AS4 Format
+      */
     struct BGP4MP_state_change_AS4{
         uint32_t    peer_AS_number;
         uint32_t    local_AS_number;
@@ -177,7 +204,9 @@ public:
         uint16_t    new_state;
     };
 
-    //4.4.5
+    /**
+      * BGP4MP Message Local Format
+      */
     struct BGP4MP_message_local{
         uint16_t    peer_AS_number;
         uint16_t    local_AS_number;
@@ -188,7 +217,9 @@ public:
         u_char*     BGP_message;
     };
 
-    //4.4.6
+    /**
+      * BGP4MP Message AS4 Local Format
+      */
     struct BGP4MP_message_AS4_local{
         uint32_t    peer_AS_number;
         uint32_t    local_AS_number;
@@ -217,7 +248,7 @@ public:
      * \param [in] buffer       Contains the MRT message
      * \param [in] bufLen       Length of buffer
      */
-    bool parseMsg(unsigned char *&buffer, int& bufLen);
+    bool parseMsg(u_char *&buffer, int& bufLen);
 
     /**
      * Function to parse the MRT common header
@@ -225,7 +256,7 @@ public:
      * @param bufLen
      * @return common header type
      */
-    char parseCommonHeader(unsigned char*& buffer, int& bufLen);
+    uint16_t parseCommonHeader(u_char *& buffer, int& bufLen);
 
     /**
      * Parses remaining MRT message
@@ -234,14 +265,39 @@ public:
      */
     void bufferMRTMessage(u_char *& buffer, int& bufLen);
 
+    /**
+     * Parses Table Dump message
+     * @param buffer
+     * @param bufLen
+     */
     void parseTableDump(u_char* buffer, int& bufLen);
 
+    /**
+     * Parses Table Dump V2 message
+     * @param buffer
+     * @param bufLen
+     */
     void parseTableDump_V2(u_char* buffer, int& bufLen);
 
+    /**
+     * Parses Peer Index Table message
+     * @param buffer
+     * @param bufLen
+     */
     void parsePeerIndexTable(u_char* buffer, int& bufLen);
 
+    /**
+     * Parses RIB UNICAST message
+     * @param buffer
+     * @param bufLen
+     */
     void parseRIB_UNICAST(u_char* buffer, int& bufLen);
 
+    /**
+     * Parses RIB GENERIC message
+     * @param buffer
+     * @param bufLen
+     */
     void parseRIB_GENERIC(u_char* buffer, int& bufLen);
 
 
@@ -250,7 +306,7 @@ public:
      * @param buffer
      * @param bufLen
      */
-    void parseBGP4MP(unsigned char* buffer, int& bufLen);
+    void parseBGP4MP(u_char* buffer, int& bufLen);
 
     /**
      * Auxiliary function to parse BGP4MP messages
