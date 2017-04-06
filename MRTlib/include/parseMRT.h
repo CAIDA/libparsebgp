@@ -234,15 +234,15 @@ public:
      */
     void bufferMRTMessage(u_char *& buffer, int& bufLen);
 
-    void parseTableDump(unsigned char* buffer, int& bufLen);
+    void parseTableDump(u_char* buffer, int& bufLen);
 
-    void parseTableDump_V2(unsigned char* buffer, int& bufLen);
+    void parseTableDump_V2(u_char* buffer, int& bufLen);
 
-    void parsePeerIndexTable(unsigned char* buffer, int& bufLen);
+    void parsePeerIndexTable(u_char* buffer, int& bufLen);
 
-    void parseRIB_UNICAST(unsigned char* buffer, int& bufLen);
+    void parseRIB_UNICAST(u_char* buffer, int& bufLen);
 
-    void parseRIB_GENERIC(unsigned char* buffer, int& bufLen);
+    void parseRIB_GENERIC(u_char* buffer, int& bufLen);
 
 
     /**
@@ -280,6 +280,7 @@ public:
     table_dump_message table_dump;
     peer_index_table peerIndexTable;
     RIB_entry_header ribEntryHeader;
+    RIB_generic_entry_header ribGenericEntryHeader;
     BGP4MP_state_change bgp_state_change;
     BGP4MP_state_change_AS4 bgp_state_change_as4;
     BGP4MP_message bgp4mp_msg;
