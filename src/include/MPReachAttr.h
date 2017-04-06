@@ -52,7 +52,7 @@ public:
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
     //MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
-    MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug=false);
+    MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info);
 
     virtual ~MPReachAttr();
 
@@ -119,7 +119,7 @@ public:
     static inline uint16_t decodeLabel(u_char *data, uint16_t len, std::string &labels);
 
 private:
-    bool                    debug;                  ///< debug flag to indicate debugging
+    //bool                    debug;                  ///< debug flag to indicate debugging
     //Logger                   *logger;               ///< Logging class pointer
     std::string             peer_addr;              ///< Printed form of the peer address for logging
     parseBMP::peer_info    *peer_info;

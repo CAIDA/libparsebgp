@@ -15,7 +15,7 @@
 #include <list>
 #include <vector>
 #include "../../src/include/parseBMP.h"
-
+#include "../../src/include/parseBGP.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
@@ -316,7 +316,7 @@ public:
      * @param isAS4         indicates whether ASN is 4 bytes
      * @param isStateChange indicates if the message is for state change or BGP message
      */
-    void parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
+    void parseBGP4MPaux(void *bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
 
     ssize_t extractFromBuffer(unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
 
@@ -352,12 +352,14 @@ public:
     u_char      mrt_data[MRT_PACKET_BUF_SIZE + 1];
     int         mrt_data_len;              ///< Length/size of data in the data buffer
 
-
+    parseBGP *pBGP;
 
 private:
     uint16_t   mrt_type;
     uint32_t   mrt_len;                    ///< Length of the BMP message - does not include the common header size
     std::map<std::string, parseBMP::peer_info> peer_info_map;
 };
+
+extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int bufLen);
 
 #endif /* PARSEBMP_H_ */

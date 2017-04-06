@@ -83,7 +83,7 @@ public:
         bool checked_asn_octet_length;                          ///< Indicates if the ASN octet length has been checked or not
         AddPathDataContainer add_path_capability;               ///< Stores data about Add Path capability
         string peer_group;                                      ///< Peer group name of defined
-};
+    };
 
 
 /**
@@ -719,8 +719,8 @@ public:
     uint32_t getBMPLength();
 
     // Debug methods
-    void enableDebug();
-    void disableDebug();
+//    void enableDebug();
+//    void disableDebug();
 
     obj_bgp_peer p_entry;         ///< peer table entry - will be updated with BMP info
     obj_router r_entry;
@@ -729,7 +729,7 @@ public:
     obj_stats_report stats;
     BGPMsg bgpMsg;
 private:
-    bool            debug;                      ///< debug flag to indicate debugging
+    //bool            debug;                      ///< debug flag to indicate debugging
    // Logger          *logger;                    ///< Logging class pointer
 
     char            bmp_type;                   ///< The BMP message type
@@ -775,5 +775,7 @@ private:
     void parsePeerHdr(unsigned char*& buffer, int& bufLen);
 
 };
+
+extern "C" parseBMP parseBMPwrapper(unsigned char *buffer, int bufLen);
 
 #endif /* PARSEBMP_H_ */

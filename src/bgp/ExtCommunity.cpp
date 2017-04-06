@@ -26,9 +26,9 @@ namespace bgp_msg {
      * \param [in]     pperAddr     Printed form of peer address used for logging
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    ExtCommunity::ExtCommunity(std::string peerAddr, bool enable_debug) {
+    ExtCommunity::ExtCommunity(std::string peerAddr) {
         //logger = logPtr;
-        debug = enable_debug;
+        //debug = enable_debug;
         peer_addr = peerAddr;
     }
 

@@ -39,19 +39,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake
+CMAKE_COMMAND = /cygdrive/c/Users/Induja/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe
 
 # The command to remove a file.
-RM = /home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake -E remove -f
+RM = /cygdrive/c/Users/Induja/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ojas/Desktop/CAIDA/parse_lib/MRTlib
+CMAKE_SOURCE_DIR = /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug
+CMAKE_BINARY_DIR = /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	/cygdrive/c/Users/Induja/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -70,7 +70,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/cygdrive/c/Users/Induja/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -80,9 +80,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug/CMakeFiles /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -123,303 +123,6 @@ MRTlib/fast:
 	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/build
 .PHONY : MRTlib/fast
 
-bgp/AddPathDataContainer.o: bgp/AddPathDataContainer.cpp.o
-
-.PHONY : bgp/AddPathDataContainer.o
-
-# target to build an object file
-bgp/AddPathDataContainer.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/AddPathDataContainer.cpp.o
-.PHONY : bgp/AddPathDataContainer.cpp.o
-
-bgp/AddPathDataContainer.i: bgp/AddPathDataContainer.cpp.i
-
-.PHONY : bgp/AddPathDataContainer.i
-
-# target to preprocess a source file
-bgp/AddPathDataContainer.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/AddPathDataContainer.cpp.i
-.PHONY : bgp/AddPathDataContainer.cpp.i
-
-bgp/AddPathDataContainer.s: bgp/AddPathDataContainer.cpp.s
-
-.PHONY : bgp/AddPathDataContainer.s
-
-# target to generate assembly for a file
-bgp/AddPathDataContainer.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/AddPathDataContainer.cpp.s
-.PHONY : bgp/AddPathDataContainer.cpp.s
-
-bgp/EVPN.o: bgp/EVPN.cpp.o
-
-.PHONY : bgp/EVPN.o
-
-# target to build an object file
-bgp/EVPN.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/EVPN.cpp.o
-.PHONY : bgp/EVPN.cpp.o
-
-bgp/EVPN.i: bgp/EVPN.cpp.i
-
-.PHONY : bgp/EVPN.i
-
-# target to preprocess a source file
-bgp/EVPN.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/EVPN.cpp.i
-.PHONY : bgp/EVPN.cpp.i
-
-bgp/EVPN.s: bgp/EVPN.cpp.s
-
-.PHONY : bgp/EVPN.s
-
-# target to generate assembly for a file
-bgp/EVPN.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/EVPN.cpp.s
-.PHONY : bgp/EVPN.cpp.s
-
-bgp/ExtCommunity.o: bgp/ExtCommunity.cpp.o
-
-.PHONY : bgp/ExtCommunity.o
-
-# target to build an object file
-bgp/ExtCommunity.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/ExtCommunity.cpp.o
-.PHONY : bgp/ExtCommunity.cpp.o
-
-bgp/ExtCommunity.i: bgp/ExtCommunity.cpp.i
-
-.PHONY : bgp/ExtCommunity.i
-
-# target to preprocess a source file
-bgp/ExtCommunity.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/ExtCommunity.cpp.i
-.PHONY : bgp/ExtCommunity.cpp.i
-
-bgp/ExtCommunity.s: bgp/ExtCommunity.cpp.s
-
-.PHONY : bgp/ExtCommunity.s
-
-# target to generate assembly for a file
-bgp/ExtCommunity.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/ExtCommunity.cpp.s
-.PHONY : bgp/ExtCommunity.cpp.s
-
-bgp/MPLinkState.o: bgp/MPLinkState.cpp.o
-
-.PHONY : bgp/MPLinkState.o
-
-# target to build an object file
-bgp/MPLinkState.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPLinkState.cpp.o
-.PHONY : bgp/MPLinkState.cpp.o
-
-bgp/MPLinkState.i: bgp/MPLinkState.cpp.i
-
-.PHONY : bgp/MPLinkState.i
-
-# target to preprocess a source file
-bgp/MPLinkState.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPLinkState.cpp.i
-.PHONY : bgp/MPLinkState.cpp.i
-
-bgp/MPLinkState.s: bgp/MPLinkState.cpp.s
-
-.PHONY : bgp/MPLinkState.s
-
-# target to generate assembly for a file
-bgp/MPLinkState.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPLinkState.cpp.s
-.PHONY : bgp/MPLinkState.cpp.s
-
-bgp/MPLinkStateAttr.o: bgp/MPLinkStateAttr.cpp.o
-
-.PHONY : bgp/MPLinkStateAttr.o
-
-# target to build an object file
-bgp/MPLinkStateAttr.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPLinkStateAttr.cpp.o
-.PHONY : bgp/MPLinkStateAttr.cpp.o
-
-bgp/MPLinkStateAttr.i: bgp/MPLinkStateAttr.cpp.i
-
-.PHONY : bgp/MPLinkStateAttr.i
-
-# target to preprocess a source file
-bgp/MPLinkStateAttr.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPLinkStateAttr.cpp.i
-.PHONY : bgp/MPLinkStateAttr.cpp.i
-
-bgp/MPLinkStateAttr.s: bgp/MPLinkStateAttr.cpp.s
-
-.PHONY : bgp/MPLinkStateAttr.s
-
-# target to generate assembly for a file
-bgp/MPLinkStateAttr.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPLinkStateAttr.cpp.s
-.PHONY : bgp/MPLinkStateAttr.cpp.s
-
-bgp/MPReachAttr.o: bgp/MPReachAttr.cpp.o
-
-.PHONY : bgp/MPReachAttr.o
-
-# target to build an object file
-bgp/MPReachAttr.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPReachAttr.cpp.o
-.PHONY : bgp/MPReachAttr.cpp.o
-
-bgp/MPReachAttr.i: bgp/MPReachAttr.cpp.i
-
-.PHONY : bgp/MPReachAttr.i
-
-# target to preprocess a source file
-bgp/MPReachAttr.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPReachAttr.cpp.i
-.PHONY : bgp/MPReachAttr.cpp.i
-
-bgp/MPReachAttr.s: bgp/MPReachAttr.cpp.s
-
-.PHONY : bgp/MPReachAttr.s
-
-# target to generate assembly for a file
-bgp/MPReachAttr.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPReachAttr.cpp.s
-.PHONY : bgp/MPReachAttr.cpp.s
-
-bgp/MPUnReachAttr.o: bgp/MPUnReachAttr.cpp.o
-
-.PHONY : bgp/MPUnReachAttr.o
-
-# target to build an object file
-bgp/MPUnReachAttr.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPUnReachAttr.cpp.o
-.PHONY : bgp/MPUnReachAttr.cpp.o
-
-bgp/MPUnReachAttr.i: bgp/MPUnReachAttr.cpp.i
-
-.PHONY : bgp/MPUnReachAttr.i
-
-# target to preprocess a source file
-bgp/MPUnReachAttr.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPUnReachAttr.cpp.i
-.PHONY : bgp/MPUnReachAttr.cpp.i
-
-bgp/MPUnReachAttr.s: bgp/MPUnReachAttr.cpp.s
-
-.PHONY : bgp/MPUnReachAttr.s
-
-# target to generate assembly for a file
-bgp/MPUnReachAttr.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/MPUnReachAttr.cpp.s
-.PHONY : bgp/MPUnReachAttr.cpp.s
-
-bgp/NotificationMsg.o: bgp/NotificationMsg.cpp.o
-
-.PHONY : bgp/NotificationMsg.o
-
-# target to build an object file
-bgp/NotificationMsg.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/NotificationMsg.cpp.o
-.PHONY : bgp/NotificationMsg.cpp.o
-
-bgp/NotificationMsg.i: bgp/NotificationMsg.cpp.i
-
-.PHONY : bgp/NotificationMsg.i
-
-# target to preprocess a source file
-bgp/NotificationMsg.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/NotificationMsg.cpp.i
-.PHONY : bgp/NotificationMsg.cpp.i
-
-bgp/NotificationMsg.s: bgp/NotificationMsg.cpp.s
-
-.PHONY : bgp/NotificationMsg.s
-
-# target to generate assembly for a file
-bgp/NotificationMsg.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/NotificationMsg.cpp.s
-.PHONY : bgp/NotificationMsg.cpp.s
-
-bgp/OpenMsg.o: bgp/OpenMsg.cpp.o
-
-.PHONY : bgp/OpenMsg.o
-
-# target to build an object file
-bgp/OpenMsg.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/OpenMsg.cpp.o
-.PHONY : bgp/OpenMsg.cpp.o
-
-bgp/OpenMsg.i: bgp/OpenMsg.cpp.i
-
-.PHONY : bgp/OpenMsg.i
-
-# target to preprocess a source file
-bgp/OpenMsg.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/OpenMsg.cpp.i
-.PHONY : bgp/OpenMsg.cpp.i
-
-bgp/OpenMsg.s: bgp/OpenMsg.cpp.s
-
-.PHONY : bgp/OpenMsg.s
-
-# target to generate assembly for a file
-bgp/OpenMsg.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/OpenMsg.cpp.s
-.PHONY : bgp/OpenMsg.cpp.s
-
-bgp/UpdateMsg.o: bgp/UpdateMsg.cpp.o
-
-.PHONY : bgp/UpdateMsg.o
-
-# target to build an object file
-bgp/UpdateMsg.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/UpdateMsg.cpp.o
-.PHONY : bgp/UpdateMsg.cpp.o
-
-bgp/UpdateMsg.i: bgp/UpdateMsg.cpp.i
-
-.PHONY : bgp/UpdateMsg.i
-
-# target to preprocess a source file
-bgp/UpdateMsg.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/UpdateMsg.cpp.i
-.PHONY : bgp/UpdateMsg.cpp.i
-
-bgp/UpdateMsg.s: bgp/UpdateMsg.cpp.s
-
-.PHONY : bgp/UpdateMsg.s
-
-# target to generate assembly for a file
-bgp/UpdateMsg.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/UpdateMsg.cpp.s
-.PHONY : bgp/UpdateMsg.cpp.s
-
-bgp/parseBGP.o: bgp/parseBGP.cpp.o
-
-.PHONY : bgp/parseBGP.o
-
-# target to build an object file
-bgp/parseBGP.cpp.o:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/parseBGP.cpp.o
-.PHONY : bgp/parseBGP.cpp.o
-
-bgp/parseBGP.i: bgp/parseBGP.cpp.i
-
-.PHONY : bgp/parseBGP.i
-
-# target to preprocess a source file
-bgp/parseBGP.cpp.i:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/parseBGP.cpp.i
-.PHONY : bgp/parseBGP.cpp.i
-
-bgp/parseBGP.s: bgp/parseBGP.cpp.s
-
-.PHONY : bgp/parseBGP.s
-
-# target to generate assembly for a file
-bgp/parseBGP.cpp.s:
-	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/bgp/parseBGP.cpp.s
-.PHONY : bgp/parseBGP.cpp.s
-
 bgp/parseMRT.o: bgp/parseMRT.cpp.o
 
 .PHONY : bgp/parseMRT.o
@@ -456,39 +159,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... MRTlib"
-	@echo "... bgp/AddPathDataContainer.o"
-	@echo "... bgp/AddPathDataContainer.i"
-	@echo "... bgp/AddPathDataContainer.s"
-	@echo "... bgp/EVPN.o"
-	@echo "... bgp/EVPN.i"
-	@echo "... bgp/EVPN.s"
-	@echo "... bgp/ExtCommunity.o"
-	@echo "... bgp/ExtCommunity.i"
-	@echo "... bgp/ExtCommunity.s"
-	@echo "... bgp/MPLinkState.o"
-	@echo "... bgp/MPLinkState.i"
-	@echo "... bgp/MPLinkState.s"
-	@echo "... bgp/MPLinkStateAttr.o"
-	@echo "... bgp/MPLinkStateAttr.i"
-	@echo "... bgp/MPLinkStateAttr.s"
-	@echo "... bgp/MPReachAttr.o"
-	@echo "... bgp/MPReachAttr.i"
-	@echo "... bgp/MPReachAttr.s"
-	@echo "... bgp/MPUnReachAttr.o"
-	@echo "... bgp/MPUnReachAttr.i"
-	@echo "... bgp/MPUnReachAttr.s"
-	@echo "... bgp/NotificationMsg.o"
-	@echo "... bgp/NotificationMsg.i"
-	@echo "... bgp/NotificationMsg.s"
-	@echo "... bgp/OpenMsg.o"
-	@echo "... bgp/OpenMsg.i"
-	@echo "... bgp/OpenMsg.s"
-	@echo "... bgp/UpdateMsg.o"
-	@echo "... bgp/UpdateMsg.i"
-	@echo "... bgp/UpdateMsg.s"
-	@echo "... bgp/parseBGP.o"
-	@echo "... bgp/parseBGP.i"
-	@echo "... bgp/parseBGP.s"
 	@echo "... bgp/parseMRT.o"
 	@echo "... bgp/parseMRT.i"
 	@echo "... bgp/parseMRT.s"

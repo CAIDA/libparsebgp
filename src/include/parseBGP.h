@@ -13,7 +13,6 @@
 #include <vector>
 #include <list>
 #include "../include/parseBMP.h"
-#include "../../MRTlib/include/parseMRT.h"
 #include "bgp_common.h"
 #include "UpdateMsg.h"
 
@@ -85,6 +84,9 @@ public:
 
     virtual ~parseBGP();
 
+    bool parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, bool isLocalMsg = false);
+
+
     /**
      * handle BGP update message and store in DB
      *
@@ -96,9 +98,6 @@ public:
      *
      * \returns True if error, false if no error.
      */
-
-    bool parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, bool isLocalMsg = false);
-
     bool handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
 
     /**
@@ -132,8 +131,8 @@ public:
     /*
      * Debug methods
      */
-    void enableDebug();
-    void disableDebug();
+//    void enableDebug();
+//    void disableDebug();
 
 
 private:
@@ -161,7 +160,7 @@ private:
 
     unsigned char path_hash_id[16];                  ///< current path hash ID
 
-    bool            debug;                           ///< debug flag to indicate debugging
+    //bool            debug;                           ///< debug flag to indicate debugging
     //Logger          *logger;                         ///< Logging class pointer
 
     /**

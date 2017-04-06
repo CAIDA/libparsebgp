@@ -38,7 +38,7 @@ namespace bgp_msg {
         //EVPN(Logger *logPtr, std::string peerAddr, bool isUnreach,
         //     UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
         EVPN(std::string peerAddr, bool isUnreach,
-                   parseBMP::parsed_update_data *parsed_data, bool enable_debug);
+                   parseBMP::parsed_update_data *parsed_data);
         virtual ~EVPN();
 
         /**
@@ -82,7 +82,7 @@ namespace bgp_msg {
 
 
     private:
-        bool             debug;                           ///< debug flag to indicate debugging
+        //bool             debug;                           ///< debug flag to indicate debugging
         //Logger           *logger;                         ///< Logging class pointer
         std::string      peer_addr;                       ///< Printed form of the peer address for logging
         bool             isUnreach;                       ///< True if MP UNREACH, false if MP REACH

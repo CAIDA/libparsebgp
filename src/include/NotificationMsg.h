@@ -115,7 +115,7 @@ public:
      * \details Handles bgp notification messages
      *
      */
-    NotificationMsg(bool enable_debug=false);
+    NotificationMsg();
     virtual ~NotificationMsg();
 
     /**
@@ -134,7 +134,7 @@ public:
     bool parseNotify(u_char *data, size_t size, parsed_notify_msg &parsed_msg);
 
 private:
-    bool             debug;                           ///< debug flag to indicate debugging
+    //bool             debug;                           ///< debug flag to indicate debugging
     //Logger           *logger;                         ///< Logging class pointer
 
 };

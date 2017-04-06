@@ -22,9 +22,9 @@ namespace bgp_msg {
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
     //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
-    MPLinkState::MPLinkState(std::string peerAddr,parseBMP::parsed_update_data *parsed_data, bool enable_debug) {
+    MPLinkState::MPLinkState(std::string peerAddr,parseBMP::parsed_update_data *parsed_data) {
         //logger = logPtr;
-        debug = enable_debug;
+        //debug = enable_debug;
         peer_addr = peerAddr;
         this->parsed_data = parsed_data;
     }

@@ -28,8 +28,7 @@ namespace bgp_msg {
  */
 //MPUnReachAttr::MPUnReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
 //        : logger{logPtr}, debug{enable_debug}{
-MPUnReachAttr::MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug)
-        : debug{enable_debug}{
+MPUnReachAttr::MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info) {
     this->peer_addr = peerAddr;
     this->peer_info = peer_info;
 }
@@ -109,7 +108,7 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            MPLinkState ls(peer_addr, &parsed_data, debug);
+            MPLinkState ls(peer_addr, &parsed_data);
             ls.parseUnReachLinkState(nlri);
             break;
         }
@@ -120,7 +119,7 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data
             switch (nlri.safi) {
                 case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    EVPN evpn(peer_addr, true, &parsed_data, debug);
+                    EVPN evpn(peer_addr, true, &parsed_data);
                     evpn.parseNlriData(nlri.nlri_data, nlri.nlri_len);
                     break;
                 }

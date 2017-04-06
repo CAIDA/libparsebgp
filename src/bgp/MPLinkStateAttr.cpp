@@ -101,9 +101,9 @@ namespace bgp_msg {
      */
     //MPLinkStateAttr::MPLinkStateAttr(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
-        MPLinkStateAttr::MPLinkStateAttr(std::string peerAddr,parseBMP::parsed_update_data *parsed_data, bool enable_debug) {
+        MPLinkStateAttr::MPLinkStateAttr(std::string peerAddr,parseBMP::parsed_update_data *parsed_data) {
         //logger = logPtr;
-        debug = enable_debug;
+        //debug = enable_debug;
         peer_addr = peerAddr;
         this->parsed_data = parsed_data;
     }

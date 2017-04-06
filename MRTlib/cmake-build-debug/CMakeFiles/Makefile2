@@ -45,19 +45,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake
+CMAKE_COMMAND = /cygdrive/c/Users/Induja/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe
 
 # The command to remove a file.
-RM = /home/ojas/Downloads/clion-2016.3.4/bin/cmake/bin/cmake -E remove -f
+RM = /cygdrive/c/Users/Induja/.CLion2016.3/system/cygwin_cmake/bin/cmake.exe -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ojas/Desktop/CAIDA/parse_lib/MRTlib
+CMAKE_SOURCE_DIR = /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug
+CMAKE_BINARY_DIR = /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug
 
 #=============================================================================
 # Target rules for target CMakeFiles/MRTlib.dir
@@ -66,7 +66,7 @@ CMAKE_BINARY_DIR = /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug
 CMakeFiles/MRTlib.dir/all:
 	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/depend
 	$(MAKE) -f CMakeFiles/MRTlib.dir/build.make CMakeFiles/MRTlib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13 "Built target MRTlib"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target MRTlib"
 .PHONY : CMakeFiles/MRTlib.dir/all
 
 # Include target in all.
@@ -76,9 +76,9 @@ all: CMakeFiles/MRTlib.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/MRTlib.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug/CMakeFiles 13
+	$(CMAKE_COMMAND) -E cmake_progress_start /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/MRTlib.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ojas/Desktop/CAIDA/parse_lib/MRTlib/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles 0
 .PHONY : CMakeFiles/MRTlib.dir/rule
 
 # Convenience name for target.

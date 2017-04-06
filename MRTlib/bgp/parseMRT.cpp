@@ -8,7 +8,6 @@
  */
 
 #include "../include/parseMRT.h"
-#include "../../src/include/parseBGP.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -19,6 +18,13 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "../../src/include/bgp_common.h"
+
+// Wrapper for parseMRT
+parseMRT parseMRTwrapper(unsigned char *buffer, int bufLen) {
+    parseMRT pMRT;
+    pMRT.parseMsg(buffer, bufLen);
+    return pMRT;
+}
 
 /**
  * Constructor for class
@@ -35,6 +41,12 @@
 parseMRT::parseMRT() {
     mrt_len = 0;
     mrt_data_len = 0;
+/*    bzero(&bgp_state_change, sizeof(bgp_state_change));
+    bzero(&bgp_state_change_as4, sizeof(bgp_state_change_as4));
+    bzero(&bgp4mp_msg, sizeof(bgp4mp_msg));
+    bzero(&bgp4mp_msg_as4, sizeof(bgp4mp_msg_as4));
+    bzero(&bgp4mp_msg_local, sizeof(bgp4mp_msg_local));
+    bzero(&bgp4mp_msg_as4_local, sizeof(bgp4mp_msg_as4_local));*/
 }
 
 /*
@@ -44,12 +56,9 @@ parseMRT::~parseMRT() {
     // clean up
 }
 
-parseBGP *pBGP;
-
-
 bool parseMRT::parseMsg(u_char *&buffer, int& bufLen)
 {
-    bool rval = true;
+    //bool rval = true;
     uint16_t mrt_type = 0;
 
     try {
@@ -93,7 +102,7 @@ bool parseMRT::parseMsg(u_char *&buffer, int& bufLen)
         throw str;
     }
 
-    return rval;
+    return true;
 }
 
 void parseMRT::parseTableDump(u_char *buffer, int& bufLen)
@@ -355,14 +364,14 @@ void parseMRT::parseRIB_GENERIC(unsigned char *buffer, int& bufLen)
 
 void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
     //bufferMRTMessage(buffer, bufLen);
-    string peer_info_key;
-    switch (c_hdr.subType) {
+    //string peer_info_key;
+    /*switch (c_hdr.subType) {
         case BGP4MP_STATE_CHANGE: {
-            parseBGP4MPaux(bgp_state_change_as4, buffer, bufLen, false, true);
+            parseBGP4MPaux(&bgp_state_change, buffer, bufLen, false, true);
             break;
         }
         case BGP4MP_MESSAGE: {
-            parseBGP4MPaux(bgp4mp_msg, buffer, bufLen, false, false);
+            parseBGP4MPaux(&bgp4mp_msg, buffer, bufLen, false, false);
             peer_info_key =  bgp4mp_msg.peer_IP;
             //peer_info_key += p_entry.peer_rd;
             pBGP = new parseBGP(bgp4mp_msg.peer_IP, bgp4mp_msg.peer_AS_number, (bgp4mp_msg.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
@@ -370,25 +379,25 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
             break;
         }
         case BGP4MP_MESSAGE_AS4: {
-            parseBGP4MPaux(bgp4mp_msg_as4, buffer, bufLen, true, false);
+            parseBGP4MPaux(&bgp4mp_msg_as4, buffer, bufLen, true, false);
             peer_info_key =  bgp4mp_msg_as4.peer_IP;
             //peer_info_key += p_entry.peer_rd;
             pBGP = new parseBGP(bgp4mp_msg_as4.peer_IP, bgp4mp_msg_as4.peer_AS_number, (bgp4mp_msg_as4.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
             break;
         }
         case BGP4MP_STATE_CHANGE_AS4: {
-            parseBGP4MPaux(bgp_state_change_as4, buffer, bufLen, true, true);
+            parseBGP4MPaux(&bgp_state_change_as4, buffer, bufLen, true, true);
             break;
         }
         case BGP4MP_MESSAGE_LOCAL: {
-            parseBGP4MPaux(bgp4mp_msg_local, buffer, bufLen, false, false);
+            parseBGP4MPaux(&bgp4mp_msg_local, buffer, bufLen, false, false);
             peer_info_key =  bgp4mp_msg_local.peer_IP;
             //peer_info_key += p_entry.peer_rd;
             pBGP = new parseBGP(bgp4mp_msg_local.peer_IP, bgp4mp_msg_local.peer_AS_number, (bgp4mp_msg_local.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
             break;
         }
         case BGP4MP_MESSAGE_AS4_LOCAL: {
-            parseBGP4MPaux(bgp4mp_msg_as4_local, buffer, bufLen, true, false);
+            parseBGP4MPaux(&bgp4mp_msg_as4_local, buffer, bufLen, true, false);
             peer_info_key =  bgp4mp_msg_as4_local.peer_IP;
             //peer_info_key += p_entry.peer_rd;
             pBGP = new parseBGP(bgp4mp_msg_as4_local.peer_IP, bgp4mp_msg_as4_local.peer_AS_number, (bgp4mp_msg_as4_local.address_family == AFI_IPv4), c_hdr.timeStamp, c_hdr.microsecond_timestamp, &peer_info_map[peer_info_key]);
@@ -400,15 +409,15 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
     }
     if (c_hdr.subType != BGP4MP_STATE_CHANGE && c_hdr.subType != BGP4MP_STATE_CHANGE_AS4) {
         pBGP->parseBGPfromMRT(mrt_data, mrt_data_len, &bgpMsg, c_hdr.subType > 5);
-    }
+    }*/
 }
 
-void parseMRT::parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange) {
+void parseMRT::parseBGP4MPaux(void *bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange) {
     int asn_len = isAS4 ? 12 : 8;
     int ip_addr_len = 4;
     if (extractFromBuffer(buffer, bufLen, &bgp4mp, asn_len) != asn_len)
         throw;
-    if (bgp4mp_msg_as4.address_family == AFI_IPv6)
+    /*if (bgp4mp.address_family == AFI_IPv6)
         ip_addr_len = 16;
     if (extractFromBuffer(buffer, bufLen, &bgp4mp.peer_IP, ip_addr_len) != ip_addr_len)
         throw;
@@ -424,7 +433,7 @@ void parseMRT::parseBGP4MPaux(void *&bgp4mp, u_char *buffer, int bufLen, bool is
         int bgp_msg_len = mrt_data_len - asn_len - 2 * ip_addr_len;
         if (extractFromBuffer(buffer, bufLen, &bgp4mp.BGP_message, bgp_msg_len) != bgp_msg_len)
             throw;
-    }
+    }*/
 }
 
 /**

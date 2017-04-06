@@ -131,7 +131,7 @@ public:
       * \param [in]     peer_info       Persistent peer information
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
-    OpenMsg(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug=false);
+    OpenMsg(std::string peerAddr, parseBMP::peer_info *peer_info);
     virtual ~OpenMsg();
 
     /**
@@ -156,7 +156,7 @@ public:
 
 
 private:
-    bool                    debug;          ///< debug flag to indicate debugging
+    //bool                    debug;          ///< debug flag to indicate debugging
     std::string             peer_addr;      ///< Printed form of the peer address for logging
     parseBMP::peer_info    *peer_info;     ///< Persistent Peer info pointer
 

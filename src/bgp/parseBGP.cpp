@@ -49,7 +49,7 @@ using namespace std;
 //parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
 //                   BMPReader::peer_info *peer_info) {
 parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info) {
-    debug = false;
+    //debug = false;
 
     //logger = logPtr;
 
@@ -69,7 +69,7 @@ parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseB
 }
 
 parseBGP::parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info) {
-    debug = false;
+    //debug = false;
 
     //logger = logPtr;
 
@@ -109,7 +109,7 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
         case BGP_MSG_UPDATE: {
             int read_size = 0;
             data += BGP_MSG_HDR_LEN;
-            bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info, debug);
+            bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info);
 
             if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgpMsg->parsed_data, bgpMsg->hasEndOfRIBMarker)) != (size - BGP_MSG_HDR_LEN)) {
                 //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
@@ -126,7 +126,7 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
             data += BGP_MSG_HDR_LEN;
 
             bgp_msg::parsed_notify_msg parsed_msg;
-            bgp_msg::NotificationMsg nMsg(debug);
+            bgp_msg::NotificationMsg nMsg;
             if ( (rval=nMsg.parseNotify(data, data_bytes_remaining, parsed_msg)))
             {
                 // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
@@ -147,7 +147,7 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
             break;
         }
         case BGP_MSG_OPEN: {
-            bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info, debug);
+            bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info);
             list <string>       cap_list;  //TODO: Need to store these
             string              local_bgp_id, remote_bgp_id, bgp_id;
             size_t              read_size;
@@ -214,7 +214,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg)
         /*
          * Parse the update message - stored results will be in parsed_data
          */
-        bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info, debug);
+        bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info);
 
         if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgpMsg->parsed_data, bgpMsg->hasEndOfRIBMarker)) != (size - BGP_MSG_HDR_LEN)) {
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
@@ -254,7 +254,7 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down
         data += BGP_MSG_HDR_LEN;
 
         bgp_msg::parsed_notify_msg parsed_msg;
-        bgp_msg::NotificationMsg nMsg(debug);
+        bgp_msg::NotificationMsg nMsg;
         if ( (rval=nMsg.parseNotify(data, data_bytes_remaining, parsed_msg)))
         {
             // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
@@ -290,7 +290,7 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down
  * \returns True if error, false if no error.
  */
 bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::BGPMsg *bgpMsg) {
-    bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info, debug);
+    bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info);
     list <string>       cap_list;
     string              local_bgp_id, remote_bgp_id;
     size_t              read_size;
@@ -310,7 +310,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
-            throw "Failed to read open message";
+            throw "Failed to read sent open message";
         }
 
         data += read_size;                                          // Move the pointer pase the sent open message
@@ -352,7 +352,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
-            throw "Failed to read open message";
+            throw "Failed to read received open message";
         }
 
         data += read_size;                                          // Move the pointer pase the sent open message
@@ -421,9 +421,9 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer
      *      It is expected that the passed bgp message buffer holds the complete BGP message to be parsed
      */
-    if (common_hdr.len > size) {
+//    if (common_hdr.len > size) {
 //        LOG_WARN("%s: rtr=%s: BGP message size of %hu is greater than passed data buffer, cannot parse the BGP message",p_entry->peer_addr, router_addr.c_str(), common_hdr.len, size);
-    }
+//    }
 
  //   SELF_DEBUG("%s: rtr=%s: BGP hdr len = %u, type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.len, common_hdr.type);
 
@@ -1042,10 +1042,10 @@ void parseBGP::UpdateDbBgpLs(bool remove, parseBMP::parsed_data_ls ls_data,
 }
 
 
-void parseBGP::enableDebug() {
+/*void parseBGP::enableDebug() {
     debug = true;
 }
 
 void parseBGP::disableDebug() {
     debug = false;
-}
+}*/

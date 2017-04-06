@@ -159,7 +159,7 @@ public:
      * \param [in]     pperAddr     Printed form of peer address used for logging
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    ExtCommunity(std::string peerAddr, bool enable_debug=false);
+    ExtCommunity(std::string peerAddr);
     virtual ~ExtCommunity();
 		 
     /**
@@ -191,7 +191,7 @@ public:
     void parsev6ExtCommunities(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
 
 private:
-    bool             debug;                           ///< debug flag to indicate debugging
+    //bool             debug;                           ///< debug flag to indicate debugging
     //Logger           *logger;                         ///< Logging class pointer
     std::string      peer_addr;                       ///< Printed form of the peer address for logging
 

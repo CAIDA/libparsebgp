@@ -50,8 +50,7 @@ public:
      * \param [in]     peer_info                Persistent Peer info pointer
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
-    MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info,
-                  bool enable_debug=false);
+    MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info);
 
     virtual ~MPUnReachAttr();
 
@@ -70,7 +69,7 @@ public:
     void parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
 private:
-    bool                    debug;              ///< debug flag to indicate debugging
+    //bool                    debug;              ///< debug flag to indicate debugging
     //Logger                  *logger;            ///< Logging class pointer
     std::string             peer_addr;          ///< Printed form of the peer address for logging
     parseBMP::peer_info    *peer_info;         ///< Persistent Peer info pointer

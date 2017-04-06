@@ -144,7 +144,7 @@ namespace bgp_msg {
          * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
-        MPLinkState(std::string peerAddr,parseBMP::parsed_update_data *parsed_data, bool enable_debug);
+        MPLinkState(std::string peerAddr,parseBMP::parsed_update_data *parsed_data);
         virtual ~MPLinkState();
 
         /**
@@ -167,7 +167,7 @@ namespace bgp_msg {
 
 
     private:
-        bool             debug;                           ///< debug flag to indicate debugging
+        //bool             debug;                           ///< debug flag to indicate debugging
         //Logger           *logger;                         ///< Logging class pointer
         std::string      peer_addr;                       ///< Printed form of the peer address for logging
 

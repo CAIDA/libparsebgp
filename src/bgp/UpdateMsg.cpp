@@ -36,10 +36,8 @@ namespace bgp_msg {
         : logger(logPtr),
           debug(enable_debug),
           peer_info(peer_info) {*/
-UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info,
-                     bool enable_debug)
-        : debug(enable_debug),
-          peer_info(peer_info) {
+UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info)
+        : peer_info(peer_info) {
 
     this->peer_addr = peerAddr;
     this->router_addr = routerAddr;
@@ -428,28 +426,28 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
         }
         case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
         {
-            ExtCommunity ec(peer_addr, debug);
+            ExtCommunity ec(peer_addr);
             ec.parseExtCommunities(attr_len, data, parsed_data);
             break;
         }
 
         case ATTR_TYPE_IPV6_EXT_COMMUNITY : // IPv6 specific extended community list (RFC 5701)
         {
-            ExtCommunity ec6(peer_addr, debug);
+            ExtCommunity ec6(peer_addr);
             ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
             break;
         }
 
         case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
         {
-            MPReachAttr mp(peer_addr, peer_info, debug);
+            MPReachAttr mp(peer_addr, peer_info);
             mp.parseReachNlriAttr(attr_len, data, parsed_data);
             break;
         }
 
         case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
         {
-            MPUnReachAttr mp(peer_addr, peer_info, debug);
+            MPUnReachAttr mp(peer_addr, peer_info);
             mp.parseUnReachNlriAttr(attr_len, data, parsed_data, hasEndOfRIBMarker);
             break;
         }
@@ -461,7 +459,7 @@ void UpdateMsg::parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data,
 
         case ATTR_TYPE_BGP_LS:
         {
-            MPLinkStateAttr ls(peer_addr, &parsed_data, debug);
+            MPLinkStateAttr ls(peer_addr, &parsed_data);
             ls.parseAttrLinkState(attr_len, data);
             break;
         }

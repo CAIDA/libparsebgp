@@ -20,9 +20,9 @@ namespace bgp_msg {
  * \param [in]     logPtr       Pointer to existing Logger for app logging
  * \param [in]     enable_debug Debug true to enable, false to disable
  */
-NotificationMsg::NotificationMsg(bool enable_debug) {
+NotificationMsg::NotificationMsg() {
     //logger = logPtr;
-    debug = enable_debug;
+    //debug = enable_debug;
 }
 
 NotificationMsg::~NotificationMsg() {

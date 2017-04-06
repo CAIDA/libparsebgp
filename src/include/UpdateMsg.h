@@ -259,8 +259,7 @@ public:
      * \param [in,out] peer_info   Persistent peer information
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-     UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info,
-                bool enable_debug=false);
+     UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info);
 
      UpdateMsg(std::string peerAddr, parseBMP::peer_info *peer_info);
 

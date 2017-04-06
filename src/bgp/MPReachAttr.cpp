@@ -31,8 +31,8 @@ namespace bgp_msg {
     : logger{logPtr}, peer_info{peer_info}, debug{enable_debug} {
         this->peer_addr = peerAddr;
 }*/
-MPReachAttr::MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info, bool enable_debug)
-        : peer_info{peer_info}, debug{enable_debug} {
+MPReachAttr::MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info)
+        : peer_info{peer_info} {
     this->peer_addr = peerAddr;
 }
 
@@ -108,7 +108,7 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, parseBMP::parsed_update_data &pa
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            MPLinkState ls(peer_addr, &parsed_data, debug);
+            MPLinkState ls(peer_addr, &parsed_data);
             ls.parseReachLinkState(nlri);
 
             break;
@@ -135,7 +135,7 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, parseBMP::parsed_update_data &pa
             switch (nlri.safi) {
                 case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    EVPN evpn(peer_addr, false, &parsed_data, debug);
+                    EVPN evpn(peer_addr, false, &parsed_data);
                     evpn.parseNlriData(nlri.nlri_data, nlri.nlri_len);
                     break;
                 }
