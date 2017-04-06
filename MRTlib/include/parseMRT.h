@@ -107,7 +107,7 @@ public:
       * Peer Index Table Message format
       */
     struct peer_index_table{
-        char                collector_BGPID[46];
+        char                collector_BGPID[4];
         uint16_t            view_name_length;
         char*               view_name[46]; //doubtful about this setting, will have to confirm
         uint16_t            peer_count;
