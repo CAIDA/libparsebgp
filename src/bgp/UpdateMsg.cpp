@@ -46,6 +46,14 @@ UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::pee
 
     four_octet_asn = peer_info->recv_four_octet_asn and peer_info->sent_four_octet_asn;
 }
+UpdateMsg::UpdateMsg(std::string peerAddr, parseBMP::peer_info *peer_info)
+        :peer_info(peer_info) {
+
+    this->peer_addr = peerAddr;
+//        this->router_addr = routerAddr;
+
+    four_octet_asn = peer_info->recv_four_octet_asn and peer_info->sent_four_octet_asn;
+}
 
 UpdateMsg::~UpdateMsg() {
 }

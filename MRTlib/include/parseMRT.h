@@ -300,7 +300,7 @@ public:
 private:
     uint16_t   mrt_type;
     uint32_t   mrt_len;                    ///< Length of the BMP message - does not include the common header size
-
+    std::map<std::string, parseBMP::peer_info> peer_info_map;
 };
 
 #endif /* PARSEBMP_H_ */

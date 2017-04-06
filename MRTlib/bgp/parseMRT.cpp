@@ -96,8 +96,9 @@ bool parseMRT::parseMsg(unsigned char *&buffer, int& bufLen)
     return rval;
 }
 
-void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
+void parseMRT::parseTableDump(u_char *buffer, int& bufLen)
 {
+    string peer_info_key;
     u_char local_addr[16];
     if (extractFromBuffer(buffer, bufLen, &table_dump.view_number, 2) != 2)
         throw "Error in parsing view number";
@@ -158,10 +159,17 @@ void parseMRT::parseTableDump(unsigned char *buffer, int& bufLen)
     if (extractFromBuffer(buffer, bufLen, &table_dump.attribute_len, 2) != 2)
         throw "Error in parsing attribute length";
 
-    //parseBgpAttributes(buffer, bufLen); TO DO
+    if (extractFromBuffer(buffer, bufLen, &table_dump.bgp_attribute, table_dump.attribute_len) != table_dump.attribute_len)
+        throw "Error in parsing attribute";
 
+    peer_info_key =  bgp4mp_msg_local.peer_IP;
+    bgp_msg::UpdateMsg uMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
+    uMsg.parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
+            //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
+    //parseBgpAttributes(buffer, bufLen); TO DO
+    delete uMsg;
 }
-void parseMRT::parseTableDump_V2(unsigned char *buffer, int& bufLen) {
+void parseMRT::parseTableDump_V2(u_char *buffer, int& bufLen) {
     switch (c_hdr.subType) {
         case PEER_INDEX_TABLE:
             parsePeerIndexTable(buffer,bufLen);
@@ -245,6 +253,8 @@ void parseMRT::parseRIB_UNICAST(unsigned char *buffer, int& bufLen)
     uint16_t count = 0;
     uint8_t  IPlen;
     u_char* local_addr;
+    string peer_info_key;
+    int read_size;
 
     if (extractFromBuffer(buffer, bufLen, &ribEntryHeader.sequence_number, 4) != 4)
         throw "Error in parsing sequence number";
@@ -260,7 +270,7 @@ void parseMRT::parseRIB_UNICAST(unsigned char *buffer, int& bufLen)
             break;
         case RIB_IPV6_UNICAST:
             inet_ntop(AF_INET6, local_addr, ribEntryHeader.prefix, sizeof(ribEntryHeader.prefix));
-            break
+            break;
     }
     if (extractFromBuffer(buffer, bufLen, &ribEntryHeader.entry_count, 2) != 2)
         throw "Error in parsing peer count";
@@ -279,9 +289,13 @@ void parseMRT::parseRIB_UNICAST(unsigned char *buffer, int& bufLen)
         if ( extractFromBuffer(buffer, bufLen, &r_entry.bgp_attribute, r_entry.attribute_len) != r_entry.attribute_len)
             throw "Error in parsing local address in IPv4";
 
-        //TO DO: parse bgp attributes
+        peer_info_key =  bgp4mp_msg_local.peer_IP;
+        bgp_msg::UpdateMsg uMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
+        uMsg.parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
+            //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         ribEntryHeader.RIB_entries.push_back(r_entry);
+        delete uMsg;
         delete r_entry;
         count++;
     }
@@ -333,7 +347,7 @@ void parseMRT::parseBGP4MP(unsigned char* buffer, int& bufLen) {
         }
     }
     if (c_hdr.subType != BGP4MP_STATE_CHANGE && c_hdr.subType != BGP4MP_STATE_CHANGE_AS4) {
-        pBGP->parseBGPfromMRT(mrt_data, mrt_data_len, pBGP->bgpMsg, c_hdr.subType > 5);
+        pBGP->parseBGPfromMRT(mrt_data, mrt_data_len, &bgpMsg, c_hdr.subType > 5);
     }
 }
 

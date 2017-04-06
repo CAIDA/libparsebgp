@@ -261,7 +261,10 @@ public:
      */
      UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info,
                 bool enable_debug=false);
-     virtual ~UpdateMsg();
+
+     UpdateMsg(std::string peerAddr, parseBMP::peer_info *peer_info);
+
+    virtual ~UpdateMsg();
 
      /**
       * Parses the update message
@@ -278,6 +281,17 @@ public:
       */
      size_t parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
+    /**
+     * Parses the BGP attributes in the update
+     *
+     * \details
+     *     Parses all attributes.  Decoded values are updated in 'parsed_data'
+     *
+     * \param [in]   data       Pointer to the start of the prefixes to be parsed
+     * \param [in]   len        Length of the data in bytes to be read
+     * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+     */
+    void parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
 private:
     bool                    debug;                           ///< debug flag to indicate debugging
@@ -301,17 +315,6 @@ private:
      */
     void parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::prefix_tuple> &prefixes);
 
-    /**
-     * Parses the BGP attributes in the update
-     *
-     * \details
-     *     Parses all attributes.  Decoded values are updated in 'parsed_data'
-     *
-     * \param [in]   data       Pointer to the start of the prefixes to be parsed
-     * \param [in]   len        Length of the data in bytes to be read
-     * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
-     */
-    void parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
     /**
      * Parse attribute data based on attribute type
