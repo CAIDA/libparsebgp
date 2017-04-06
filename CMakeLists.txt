@@ -28,6 +28,8 @@ set(SOURCE_FILES
         src/include/OpenMsg.h
         src/include/parseBGP.h
         src/include/UpdateMsg.h
-        src/include/parseBMP.h)
+        src/include/parseBMP.h
+        MRTlib/bgp/parseMRT.cpp
+        MRTlib/include/parseMRT.h)
 
 add_executable(parse_lib ${SOURCE_FILES})

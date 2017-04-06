@@ -163,8 +163,8 @@ void parseMRT::parseTableDump(u_char *buffer, int& bufLen)
         throw "Error in parsing attribute";
 
     peer_info_key =  bgp4mp_msg_local.peer_IP;
-    bgp_msg::UpdateMsg uMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
-    uMsg.parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
+    bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
+    uMsg->parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
     //parseBgpAttributes(buffer, bufLen); TO DO
     delete uMsg;
@@ -214,35 +214,35 @@ void parseMRT::parsePeerIndexTable(unsigned char *buffer, int& bufLen)
     u_char local_addr[4];
 
     while (count < peerIndexTable.peer_count) {
-        peer_entry p_entry;
-        if (extractFromBuffer(buffer, bufLen, &p_entry.peer_type, 1) != 1)
+        peer_entry *p_entry = new peer_entry;
+        if (extractFromBuffer(buffer, bufLen, &p_entry->peer_type, 1) != 1)
             throw "Error in parsing collector_BGPID";
 
-        AS_num = p_entry.peer_type & 0x16 ? 4 : 2; //using 32 bits and 16 bits.
-        Addr_fam = p_entry.peer_type & 0x01 ? AFI_IPv6:AFI_IPv4;
+        AS_num = p_entry->peer_type & 0x16 ? 4 : 2; //using 32 bits and 16 bits.
+        Addr_fam = p_entry->peer_type & 0x01 ? AFI_IPv6:AFI_IPv4;
 
         if ( extractFromBuffer(buffer, bufLen, &local_addr, 4) != 4)
             throw "Error in parsing local address in IPv4";
 
         switch (Addr_fam) {
             case AFI_IPv4:{
-                snprintf(p_entry.peer_IP, sizeof(p_entry.peer_IP), "%d.%d.%d.%d",
+                snprintf(p_entry->peer_IP, sizeof(p_entry->peer_IP), "%d.%d.%d.%d",
                          local_addr[0], local_addr[1], local_addr[2],
                          local_addr[3]);
                 break;
             }
             case AFI_IPv6:{
-                inet_ntop(AF_INET6, local_addr, p_entry.peer_IP, sizeof(p_entry.peer_IP));
+                inet_ntop(AF_INET6, local_addr, p_entry->peer_IP, sizeof(p_entry->peer_IP));
                 break;
             }
             default: {
                 throw "Address family is unexpected as per rfc6396";
             }
         }
-        if ( extractFromBuffer(buffer, bufLen, &p_entry.peerAS32, AS_num) != AS_num)
+        if ( extractFromBuffer(buffer, bufLen, &p_entry->peerAS32, AS_num) != AS_num)
             throw "Error in parsing local address in IPv4";
 
-        peerIndexTable.peerEntries.push_back(p_entry);
+        peerIndexTable.peerEntries.push_back(*p_entry);
         delete p_entry;
         count++;
     }
@@ -276,25 +276,25 @@ void parseMRT::parseRIB_UNICAST(unsigned char *buffer, int& bufLen)
         throw "Error in parsing peer count";
 
     while (count < peerIndexTable.peer_count) {
-        RIB_entry r_entry;
-        if (extractFromBuffer(buffer, bufLen, &r_entry.peer_index, 2) != 2)
+        RIB_entry *r_entry;
+        if (extractFromBuffer(buffer, bufLen, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
 
-        if ( extractFromBuffer(buffer, bufLen, &r_entry.originatedTime, 4) != 4)
+        if ( extractFromBuffer(buffer, bufLen, &r_entry->originatedTime, 4) != 4)
             throw "Error in parsing local address in IPv4";
 
-        if ( extractFromBuffer(buffer, bufLen, &r_entry.attribute_len, 2) != 2)
+        if ( extractFromBuffer(buffer, bufLen, &r_entry->attribute_len, 2) != 2)
             throw "Error in parsing local address in IPv4";
 
-        if ( extractFromBuffer(buffer, bufLen, &r_entry.bgp_attribute, r_entry.attribute_len) != r_entry.attribute_len)
+        if ( extractFromBuffer(buffer, bufLen, &r_entry->bgp_attribute, r_entry->attribute_len) != r_entry->attribute_len)
             throw "Error in parsing local address in IPv4";
 
         peer_info_key =  bgp4mp_msg_local.peer_IP;
-        bgp_msg::UpdateMsg uMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
-        uMsg.parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
+        bgp_msg::UpdateMsg *uMsg= new bgp_msg::UpdateMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
+        uMsg->parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
-        ribEntryHeader.RIB_entries.push_back(r_entry);
+        ribEntryHeader.RIB_entries.push_back(*r_entry);
         delete uMsg;
         delete r_entry;
         count++;
@@ -328,25 +328,25 @@ void parseMRT::parseRIB_GENERIC(unsigned char *buffer, int& bufLen)
         throw "Error in parsing peer count";
 
     while (count < peerIndexTable.peer_count) {
-        RIB_entry r_entry;
-        if (extractFromBuffer(buffer, bufLen, &r_entry.peer_index, 2) != 2)
+        RIB_entry *r_entry;
+        if (extractFromBuffer(buffer, bufLen, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
 
-        if ( extractFromBuffer(buffer, bufLen, &r_entry.originatedTime, 4) != 4)
+        if ( extractFromBuffer(buffer, bufLen, &r_entry->originatedTime, 4) != 4)
             throw "Error in parsing local address in IPv4";
 
-        if ( extractFromBuffer(buffer, bufLen, &r_entry.attribute_len, 2) != 2)
+        if ( extractFromBuffer(buffer, bufLen, &r_entry->attribute_len, 2) != 2)
             throw "Error in parsing local address in IPv4";
 
-        if ( extractFromBuffer(buffer, bufLen, &r_entry.bgp_attribute, r_entry.attribute_len) != r_entry.attribute_len)
+        if ( extractFromBuffer(buffer, bufLen, &r_entry->bgp_attribute, r_entry->attribute_len) != r_entry->attribute_len)
             throw "Error in parsing local address in IPv4";
 
         peer_info_key =  bgp4mp_msg_local.peer_IP;
-        bgp_msg::UpdateMsg uMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
-        uMsg.parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
+        bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(table_dump.peer_IP, &peer_info_map[peer_info_key]);
+        uMsg->parseAttributes(table_dump.bgp_attribute, table_dump.attribute_len, bgpMsg.parsed_data, bgpMsg.hasEndOfRIBMarker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
-        ribEntryHeader.RIB_entries.push_back(r_entry);
+        ribEntryHeader.RIB_entries.push_back(*r_entry);
         delete uMsg;
         delete r_entry;
         count++;
@@ -519,11 +519,11 @@ ssize_t  parseMRT::extractFromBuffer (unsigned char*& buffer, int &bufLen, void 
 }
 
 int main() {
-    u_char temp[] = {0x03, 0x00, 0x00, 0x00, 0x06, 0x04};
+    u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x01, 0x00, 0x00, 0x03, 0x96};
     u_char *tmp;
     tmp = temp;
-    parseBMP *p = new parseBMP();
-    int len = 870;
+    parseMRT *p = new parseMRT();
+    int len = 12;
     try {
         if (p->parseMsg(tmp, len))
             cout << "Hello Ojas and Induja"<<endl;
@@ -533,8 +533,8 @@ int main() {
     catch (char const *str) {
         cout << "Crashed!" << str<<endl;
     }
-    cout<<"Peer Address "<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy<<endl;
-    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
-    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
+//    cout<<"Peer Address "<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy<<endl;
+//    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
+//    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
     return 1;
 }
