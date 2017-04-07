@@ -13,6 +13,7 @@
 
 #include <string>
 #include "AddPathDataContainer.h"
+#include "parseUtils.h"
 #include <list>
 #include <vector>
 #include <array>
@@ -616,15 +617,6 @@ public:
      */
     ssize_t Recv(int sockfd, void *buf, size_t len, int flags);
 
-    /**
-     * function to extract message from buffer
-     * @param buffer
-     * @param bufLen
-     * @param outputbuf
-     * @param outputLen
-     * @return
-     */
-    ssize_t  extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
     /**
      * Process the incoming BMP message
      *

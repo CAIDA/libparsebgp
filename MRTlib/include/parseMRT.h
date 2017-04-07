@@ -16,6 +16,7 @@
 #include <vector>
 #include "../../src/include/parseBMP.h"
 #include "../../src/include/parseBGP.h"
+#include "../../src/include/parseUtils.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
@@ -230,6 +231,16 @@ public:
         u_char*     BGP_message;
     };
 
+    struct BGP4MP_msg{
+        uint32_t    peer_AS_number;
+        uint32_t    local_AS_number;
+        uint16_t    interface_index;
+        uint16_t    address_family;
+        char        peer_IP[40];
+        char        local_IP[40];
+        u_char*     BGP_message;
+    };
+
     parseBMP::BGPMsg bgpMsg;
 
     /*
@@ -316,9 +327,7 @@ public:
      * @param isAS4         indicates whether ASN is 4 bytes
      * @param isStateChange indicates if the message is for state change or BGP message
      */
-    void parseBGP4MPaux(void *bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
-
-    ssize_t extractFromBuffer(unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen);
+    //void parseBGP4MPaux(void *bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
 
         /**
          * get current MRT message type
@@ -337,13 +346,16 @@ public:
     peer_index_table peerIndexTable;
     RIB_entry_header ribEntryHeader;
     RIB_generic_entry_header ribGenericEntryHeader;
+//    BGP4MP_state_change bgp_state_change;
+//    BGP4MP_state_change_AS4 bgp_state_change_as4;
+//    BGP4MP_message bgp4mp_msg;
+//    BGP4MP_message_AS4 bgp4mp_msg_as4;
+//    BGP4MP_message_local bgp4mp_msg_local;
+//    BGP4MP_message_AS4_local bgp4mp_msg_as4_local;
+    BGP4MP_msg bgp4mp_msg;
     BGP4MP_state_change bgp_state_change;
-    BGP4MP_state_change_AS4 bgp_state_change_as4;
-    BGP4MP_message bgp4mp_msg;
-    BGP4MP_message_AS4 bgp4mp_msg_as4;
-    BGP4MP_message_local bgp4mp_msg_local;
-    BGP4MP_message_AS4_local bgp4mp_msg_as4_local;
 
+    parseBMP::obj_peer_up_event up_event;
     /**
      * BMP message buffer (normally only contains the BGP message)
      *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.

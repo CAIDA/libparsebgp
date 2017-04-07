@@ -101,9 +101,10 @@ parseBGP::~parseBGP() {
  * \param [in] data             Pointer to the raw BGP message header
  * \param [in] size             length of the data buffer (used to prevent overrun)
  * \param [in] bgpMsg           Structure to store the bgp messages
- * \returns True if error, false if no error.
+ * \returns BGP message type
  */
-bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, bool isLocalMsg) {
+u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, parseBMP::obj_peer_up_event *up_event,
+                               uint32_t asn, bool isLocalMsg) {
     u_char  bgpMsgType = parseBgpHeader(data, size, bgpMsg->common_hdr);
     switch (bgpMsgType) {
         case BGP_MSG_UPDATE: {
@@ -122,12 +123,12 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
             break;
         }
         case BGP_MSG_NOTIFICATION: {
-            bool rval;
+            //bool rval;
             data += BGP_MSG_HDR_LEN;
 
             bgp_msg::parsed_notify_msg parsed_msg;
             bgp_msg::NotificationMsg nMsg;
-            if ( (rval=nMsg.parseNotify(data, data_bytes_remaining, parsed_msg)))
+            if (nMsg.parseNotify(data, data_bytes_remaining, parsed_msg))
             {
                 // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
                 throw "Failed to parse the BGP notification message";
@@ -140,26 +141,95 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
 //                down_event->bgp_err_subcode = parsed_msg.error_subcode;
 //                strncpy(down_event->error_text, parsed_msg.error_text, sizeof(down_event->error_text));
             }
-            return rval;
-            //break;
+            //return rval;
+            break;
         }
         case BGP_MSG_KEEPALIVE: {
             break;
         }
         case BGP_MSG_OPEN: {
             bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info);
-            list <string>       cap_list;  //TODO: Need to store these
-            string              local_bgp_id, remote_bgp_id, bgp_id;
+            list <string>       cap_list;
+            string              local_bgp_id, remote_bgp_id;
             size_t              read_size;
-            uint16_t holdTime;
 
             p_info->recv_four_octet_asn = false;
             p_info->sent_four_octet_asn = false;
             p_info->using_2_octet_asn = false;
 
             data += BGP_MSG_HDR_LEN;
+            if (isLocalMsg) {
+                read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, true, asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
-            read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, isLocalMsg, p_entry->peer_as, holdTime, bgp_id, cap_list);
+                if (!read_size) {
+                    //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
+                    throw "Failed to read sent open message";
+                }
+
+                data += read_size;                                          // Move the pointer pase the sent open message
+                data_bytes_remaining -= read_size;
+
+                strncpy(up_event->local_bgp_id, local_bgp_id.c_str(), sizeof(up_event->local_bgp_id));
+
+                // Convert the list to string
+                bzero(up_event->sent_cap, sizeof(up_event->sent_cap));
+
+                string cap_str;
+                for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
+                    if ( it != cap_list.begin())
+                        cap_str.append(", ");
+
+                    // Check for 4 octet ASN support
+                    if ((*it).find("4 Octet ASN") != std::string::npos)
+                        p_info->sent_four_octet_asn = true;
+
+                    cap_str.append((*it));
+                }
+
+                strncpy(up_event->sent_cap, cap_str.c_str(), sizeof(up_event->sent_cap));
+
+            }
+
+            /*
+             * Process the received open message
+             */
+
+            else {
+                read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
+
+                if (!read_size) {
+                    //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
+                    throw "Failed to read received open message";
+                }
+
+                data += read_size;                                          // Move the pointer pase the sent open message
+                data_bytes_remaining -= read_size;
+
+                strncpy(up_event->remote_bgp_id, remote_bgp_id.c_str(), sizeof(up_event->remote_bgp_id));
+
+                // Convert the list to string
+                bzero(up_event->recv_cap, sizeof(up_event->recv_cap));
+
+                string cap_str;
+                for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
+                    if ( it != cap_list.begin())
+                        cap_str.append(", ");
+
+                    // Check for 4 octet ASN support - reset to false if
+                    if ((*it).find("4 Octet ASN") != std::string::npos)
+                        p_info->recv_four_octet_asn = true;
+
+                    cap_str.append((*it));
+                }
+
+                strncpy(up_event->recv_cap, cap_str.c_str(), sizeof(up_event->recv_cap));
+
+            }
+
+            /*
+            data += BGP_MSG_HDR_LEN;
+
+            read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, isLocalMsg, asn, up_event->local_hold_time, bgp_id, cap_list);
 
             if (!read_size) {
                 //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
@@ -183,7 +253,7 @@ bool parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpM
                 }
 
                 cap_str.append((*it));
-            }
+            }*/
 
             break;
         }

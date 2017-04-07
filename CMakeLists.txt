@@ -16,6 +16,8 @@ set(SOURCE_FILES
         src/bgp/parseBGP.cpp
         src/bgp/UpdateMsg.cpp
         src/bgp/parseBMP.cpp
+        src/bgp/parseUtils.cpp
+        MRTlib/bgp/parseMRT.cpp
         src/include/MPLinkStateAttr.h
         src/include/MPLinkState.h
         src/include/AddPathDataContainer.h
@@ -29,7 +31,7 @@ set(SOURCE_FILES
         src/include/parseBGP.h
         src/include/UpdateMsg.h
         src/include/parseBMP.h
-        MRTlib/bgp/parseMRT.cpp
+        src/include/parseUtils.h
         MRTlib/include/parseMRT.h)
 
 add_executable(parse_lib ${SOURCE_FILES})

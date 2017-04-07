@@ -252,15 +252,6 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& bufLen)
     return true;
 }
 
-ssize_t  parseBMP::extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
-    if (outputLen > bufLen)
-        return (outputLen - bufLen);
-    memcpy(outputbuf, buffer, outputLen);
-    buffer = (buffer + outputLen);
-    bufLen -= outputLen;
-    return outputLen;
-}
-
 /**
  * Process the incoming BMP message
  *
