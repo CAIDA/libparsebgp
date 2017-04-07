@@ -96,7 +96,7 @@ public:
 
     struct peer_entry{
         uint8_t     peer_type;
-        char        peer_BGPID[46];
+        char        peer_BGPID[4];
         char        peer_IP[46];
         bool        isIPv4;
         bool        ASsize; //0 for 16 bits; 1 for 32 bits

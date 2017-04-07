@@ -211,7 +211,7 @@ void parseMRT::parsePeerIndexTable(unsigned char *buffer, int& bufLen)
     if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name_length, 2) != 2)
         throw "Error in parsing view_name_length";
 
-    if (!peerIndexTable.view_name_length) {
+    if (peerIndexTable.view_name_length) {
         if (extractFromBuffer(buffer, bufLen, &peerIndexTable.view_name, peerIndexTable.view_name_length) !=
             peerIndexTable.view_name_length)
             throw "Error in parsing view_name";
@@ -221,28 +221,34 @@ void parseMRT::parsePeerIndexTable(unsigned char *buffer, int& bufLen)
         throw "Error in parsing peer count";
 
     bgp::SWAP_BYTES(&peerIndexTable.peer_count);
-    u_char local_addr[4];
 
     while (count < peerIndexTable.peer_count) {
         peer_entry *p_entry = new peer_entry;
         if (extractFromBuffer(buffer, bufLen, &p_entry->peer_type, 1) != 1)
             throw "Error in parsing collector_BGPID";
 
-        AS_num = p_entry->peer_type & 0x16 ? 4 : 2; //using 32 bits and 16 bits.
+        AS_num = p_entry->peer_type & 0x02 ? 4 : 2; //using 32 bits and 16 bits.
         Addr_fam = p_entry->peer_type & 0x01 ? AFI_IPv6:AFI_IPv4;
 
-        if ( extractFromBuffer(buffer, bufLen, &local_addr, 4) != 4)
-            throw "Error in parsing local address in IPv4";
+        if ( extractFromBuffer(buffer, bufLen, &p_entry->peer_BGPID, 4) != 4)
+            throw "Error in parsing local address in peer_BGPID";
 
         switch (Addr_fam) {
             case AFI_IPv4:{
+                u_char local_addr[4];
+                if ( extractFromBuffer(buffer, bufLen, &local_addr, 4) != 4)
+                    throw "Error in parsing local address in IPv4";
+//                inet_ntop(AF_INET, local_addr, p_entry->peer_IP, sizeof(local_addr));
                 snprintf(p_entry->peer_IP, sizeof(p_entry->peer_IP), "%d.%d.%d.%d",
                          local_addr[0], local_addr[1], local_addr[2],
                          local_addr[3]);
                 break;
             }
             case AFI_IPv6:{
-                inet_ntop(AF_INET6, local_addr, p_entry->peer_IP, sizeof(p_entry->peer_IP));
+                u_char local_addr[6];
+                if ( extractFromBuffer(buffer, bufLen, &local_addr, 6) != 6)
+                    throw "Error in parsing local address in IPv4";
+                inet_ntop(AF_INET6, local_addr, p_entry->peer_IP, sizeof(local_addr));
                 break;
             }
             default: {
@@ -614,7 +620,7 @@ int main() {
     catch (char const *str) {
         cout << "Crashed!" << str<<endl;
     }
-//    cout<<"Peer Address "<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy<<endl;
+   cout<<"Peer Address "<<int(p->peerIndexTable.peerEntries.begin()->peer_type);
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
 //    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
     return 1;
