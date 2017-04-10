@@ -319,19 +319,10 @@ public:
      */
     void parseBGP4MP(u_char* buffer, int& bufLen);
 
-    /**
-     * Auxiliary function to parse BGP4MP messages
-     * @param bgp4mp        The corresponding structure
-     * @param buffer
-     * @param bufLen
-     * @param isAS4         indicates whether ASN is 4 bytes
-     * @param isStateChange indicates if the message is for state change or BGP message
-     */
-    //void parseBGP4MPaux(void *bgp4mp, u_char *buffer, int bufLen, bool isAS4, bool isStateChange);
 
-        /**
-         * get current MRT message type
-        */
+    /**
+     * get current MRT message type
+     */
     char getMRTType();
 
     /**

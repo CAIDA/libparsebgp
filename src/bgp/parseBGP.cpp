@@ -67,7 +67,7 @@ parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseB
 
     router_addr = routerAddr;
 }
-
+/*
 parseBGP::parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info) {
     //debug = false;
 
@@ -78,7 +78,7 @@ parseBGP::parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t time
 
     // Set our peer entry
     bzero(&p_entry, sizeof(parseBMP::obj_bgp_peer));
-    memcpy(p_entry->peer_addr, peer_addr, 40);
+    //memcpy(&p_entry->peer_addr, peer_addr, sizeof(p_entry->peer_addr));
     p_entry->isIPv4 = isIPv4;
     p_entry->peer_as = peer_as;
     p_entry->timestamp_secs = timestamp_secs;
@@ -87,7 +87,7 @@ parseBGP::parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t time
     p_info = peer_info;
 
     router_addr = "";
-}
+}*/
 
 /**
  * Desctructor
@@ -258,10 +258,10 @@ u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bg
             break;
         }
         default: {
-            return true;
+            throw "BGP message type does not match";
         }
     }
-    return false;
+    return bgpMsgType;
 }
 
 /**

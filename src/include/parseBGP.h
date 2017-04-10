@@ -80,7 +80,7 @@ public:
     //parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::c, string routerAddr,
     //         BMPReader::peer_info *peer_info);
     parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info);
-    parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info);
+    //parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info);
 
     virtual ~parseBGP();
 
