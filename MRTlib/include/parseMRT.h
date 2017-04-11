@@ -120,10 +120,11 @@ public:
       * RIB Entry Message format
       */
     struct RIB_entry{
-        uint16_t    peer_index;
-        uint32_t    originatedTime;
-        uint16_t    attribute_len;
-        u_char*     bgp_attribute;
+        uint16_t                     peer_index;
+        uint32_t                     originatedTime;
+        uint16_t                     attribute_len;
+        bool                         endOfRIBMarker;
+        parseBMP::parsed_update_data parsed_data;
     };
 
     //4.3.2
@@ -146,7 +147,7 @@ public:
         uint32_t        sequence_number;
         uint16_t        address_family_identifier;
         uint8_t         subsequentAFI;
-        u_char *        NLRI;
+        u_char*         NLRI;
         uint16_t        entry_count;
         list<RIB_entry> RIB_entries;
     };
