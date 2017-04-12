@@ -348,6 +348,7 @@ public:
     BGP4MP_state_change bgp_state_change;
 
     parseBMP::obj_peer_up_event up_event;
+    parseBMP::obj_peer_down_event down_event;
     /**
      * BMP message buffer (normally only contains the BGP message)
      *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.

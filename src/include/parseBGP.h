@@ -85,7 +85,7 @@ public:
     virtual ~parseBGP();
 
     u_char parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, parseBMP::obj_peer_up_event *up_event,
-                         uint32_t asn, bool isLocalMsg = false);
+                           parseBMP::obj_peer_down_event *down_event, uint32_t asn, bool isLocalMsg = false);
 
 
     /**

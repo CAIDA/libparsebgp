@@ -104,7 +104,7 @@ parseBGP::~parseBGP() {
  * \returns BGP message type
  */
 u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, parseBMP::obj_peer_up_event *up_event,
-                               uint32_t asn, bool isLocalMsg) {
+                               parseBMP::obj_peer_down_event *down_event, uint32_t asn, bool isLocalMsg) {
     u_char  bgpMsgType = parseBgpHeader(data, size, bgpMsg->common_hdr);
     switch (bgpMsgType) {
         case BGP_MSG_UPDATE: {
@@ -137,9 +137,9 @@ u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bg
                 data += 2;                                                 // Move pointer past notification message
                 data_bytes_remaining -= 2;
 
-//                down_event->bgp_err_code = parsed_msg.error_code;
-//                down_event->bgp_err_subcode = parsed_msg.error_subcode;
-//                strncpy(down_event->error_text, parsed_msg.error_text, sizeof(down_event->error_text));
+                down_event->bgp_err_code = parsed_msg.error_code;
+                down_event->bgp_err_subcode = parsed_msg.error_subcode;
+                strncpy(down_event->error_text, parsed_msg.error_text, sizeof(down_event->error_text));
             }
             //return rval;
             break;
