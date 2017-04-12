@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/libtest.dir/bmptool.cpp.o  -o libtest -rdynamic libparse.so -Wl,-rpath,/home/ojas/Desktop/CAIDA/parse_lib/parselib_shared/build 
