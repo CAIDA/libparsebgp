@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include "../../src/include/bgp_common.h"
+#include "../include/bgp_common.h"
 
 // Wrapper for parseMRT
 parseMRT parseMRTwrapper(unsigned char *buffer, int bufLen) {
