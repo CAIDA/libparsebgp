@@ -259,7 +259,7 @@ void MPReachAttr::parseNlriData_IPv4IPv6(bool isIPv4, u_char *data, uint16_t len
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4/v6
     tuple.type = isIPv4 ? bgp::PREFIX_UNICAST_V4 : bgp::PREFIX_UNICAST_V6;
-    tuple.isIPv4 = isIPv4;
+    tuple.is_ipv4 = isIPv4;
 
     bool add_path_enabled = peer_info->add_path_capability.isAddPathEnabled(isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
                                                                             bgp::BGP_SAFI_NLRI_LABEL);
@@ -328,7 +328,7 @@ void MPReachAttr::parseNlriData_LabelIPv4IPv6(bool isIPv4, u_char *data, uint16_
         return;
 
     tuple.type = isIPv4 ? bgp::PREFIX_LABEL_UNICAST_V4 : bgp::PREFIX_LABEL_UNICAST_V6;
-    tuple.isIPv4 = isIPv4;
+    tuple.is_ipv4 = isIPv4;
 
     bool add_path_enabled = peer_info->add_path_capability.isAddPathEnabled(isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
                                                                             bgp::BGP_SAFI_NLRI_LABEL);

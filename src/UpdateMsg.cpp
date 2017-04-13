@@ -186,7 +186,7 @@ void UpdateMsg::parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::pref
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4
     // Set the type for all to be unicast V4
     tuple.type = bgp::PREFIX_UNICAST_V4;
-    tuple.isIPv4 = true;
+    tuple.is_ipv4 = true;
 
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {

@@ -271,7 +271,7 @@ char parseBMP::handleMessage(unsigned char*& buffer, int& bufLen) {
     // Get the version in order to determine what we read next
     //    As of Junos 10.4R6.5, it supports version 1
     //bytes_read = Recv(sock, &ver, 1, MSG_WAITALL);
-    bytes_read = extractFromBuffer(buffer, bufLen, &ver, 1);
+    bytes_read = extract_from_buffer(buffer, bufLen, &ver, 1);
     //memcpy(&ver,buffer,1);
     //*buffer++;
     //bufLen-=1;
@@ -327,7 +327,7 @@ void parseBMP::parseBMPv2(unsigned char*& buffer, int& bufLen) {
         //     SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",sock, i);
         throw "ERROR: Cannot read v1/v2 BMP common header.";
     }*/
-    if ((i = extractFromBuffer(buffer, bufLen, &c_hdr, BMP_HDRv1v2_LEN))
+    if ((i = extract_from_buffer(buffer, bufLen, &c_hdr, BMP_HDRv1v2_LEN))
         != BMP_HDRv1v2_LEN) {
         //     SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",sock, i);
         throw "ERROR: Cannot read v1/v2 BMP common header.";
@@ -341,7 +341,7 @@ void parseBMP::parseBMPv2(unsigned char*& buffer, int& bufLen) {
 
             // Get the length of the remaining message by reading the BGP length
             //if ((i=Recv(sock, buf, 18, MSG_PEEK | MSG_WAITALL)) == 18) {
-            if ((i=extractFromBuffer(buffer, bufLen, buf, 18)) == 18) {
+            if ((i=extract_from_buffer(buffer, bufLen, buf, 18)) == 18) {
                 uint16_t len;
                 memcpy(&len, (buf+16), 2);
                 bgp::SWAP_BYTES(&len);
@@ -363,12 +363,12 @@ void parseBMP::parseBMPv2(unsigned char*& buffer, int& bufLen) {
 
             // Get the length of the remaining message by reading the BGP length
             //if ((i=Recv(sock, buf, 1, MSG_PEEK)) != 1) {
-            if ((i=extractFromBuffer(buffer, bufLen, buf, 1)) != 1) {
+            if ((i=extract_from_buffer(buffer, bufLen, buf, 1)) != 1) {
 
                 // Is there a BGP message
                 if (buf[0] == 1 or buf[0] == 3) {
                     //if ((i = Recv(sock, buf, 18, MSG_PEEK | MSG_WAITALL)) == 18) {
-                    if ((i = extractFromBuffer(buffer, bufLen, buf, 18)) == 18) {
+                    if ((i = extract_from_buffer(buffer, bufLen, buf, 18)) == 18) {
                         memcpy(&bmp_len, buf + 16, 2);
                         bgp::SWAP_BYTES(&bmp_len);
 
@@ -493,7 +493,7 @@ void parseBMP::parseBMPv3(unsigned char*& buffer, int& bufLen) {
     /*if ((Recv(sock, &c_hdr, BMP_HDRv3_LEN, MSG_WAITALL)) != BMP_HDRv3_LEN) {
         throw "ERROR: Cannot read v3 BMP common header.";
     }*/
-    if ((extractFromBuffer(buffer, bufLen, &c_hdr, BMP_HDRv3_LEN)) != BMP_HDRv3_LEN) {
+    if ((extract_from_buffer(buffer, bufLen, &c_hdr, BMP_HDRv3_LEN)) != BMP_HDRv3_LEN) {
         throw "ERROR: Cannot read v3 BMP common header.";
     }
 
@@ -567,7 +567,7 @@ void parseBMP::parsePeerHdr(unsigned char*& buffer, int& bufLen) {
         != BMP_PEER_HDR_LEN) {
         //       LOG_ERR("sock=%d: Couldn't read all bytes, read %d bytes",sock, i);
     }*/
-    if ((i = extractFromBuffer(buffer, bufLen, &p_hdr, BMP_PEER_HDR_LEN))
+    if ((i = extract_from_buffer(buffer, bufLen, &p_hdr, BMP_PEER_HDR_LEN))
         != BMP_PEER_HDR_LEN) {
         //       LOG_ERR("sock=%d: Couldn't read all bytes, read %d bytes",sock, i);
         throw "Couldn't read all bytes";
@@ -696,7 +696,7 @@ bool parseBMP::parsePeerDownEventHdr(unsigned char*& buffer, int& bufLen) {
 
     char reason;
     //if (Recv(sock, &reason, 1, 0) == 1) {
-    if (extractFromBuffer(buffer, bufLen, &reason, 1) == 1) {
+    if (extract_from_buffer(buffer, bufLen, &reason, 1) == 1) {
       //  LOG_NOTICE("sock=%d : %s: BGP peer down notification with reason code: %d", sock, p_entry->peer_addr, reason);
 
         // Indicate that data has been read
@@ -739,7 +739,7 @@ void parseBMP::bufferBMPMessage(unsigned char*& buffer, int& bufLen) {
  //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
          throw "Error while reading BMP data into buffer";
     }*/
-    if ((bmp_data_len=extractFromBuffer(buffer, bufLen, bmp_data, bmp_len)) != bmp_len) {
+    if ((bmp_data_len=extract_from_buffer(buffer, bufLen, bmp_data, bmp_len)) != bmp_len) {
         //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
         throw "Error while reading BMP data into buffer";
     }
@@ -768,7 +768,7 @@ bool parseBMP::parsePeerUpEventHdr(unsigned char*& buffer, int& bufLen) {
 
     // Get the local address
     //if ( Recv(sock, &local_addr, 16, MSG_WAITALL) != 16)
-    if ( extractFromBuffer(buffer, bufLen, &local_addr, 16) != 16)
+    if ( extract_from_buffer(buffer, bufLen, &local_addr, 16) != 16)
         isParseGood = false;
     else
         bytes_read += 16;
@@ -786,7 +786,7 @@ bool parseBMP::parsePeerUpEventHdr(unsigned char*& buffer, int& bufLen) {
 
     // Get the local port
     //if (isParseGood and Recv(sock, &up_event.local_port, 2, MSG_WAITALL) != 2)
-    if (isParseGood and extractFromBuffer(buffer, bufLen, &up_event.local_port, 2) != 2)
+    if (isParseGood and extract_from_buffer(buffer, bufLen, &up_event.local_port, 2) != 2)
             isParseGood = false;
 
     else if (isParseGood) {
@@ -796,7 +796,7 @@ bool parseBMP::parsePeerUpEventHdr(unsigned char*& buffer, int& bufLen) {
 
     // Get the remote port
     //if (isParseGood and Recv(sock, &up_event.remote_port, 2, MSG_WAITALL) != 2)
-    if (isParseGood and extractFromBuffer(buffer, bufLen, &up_event.remote_port, 2) != 2)
+    if (isParseGood and extract_from_buffer(buffer, bufLen, &up_event.remote_port, 2) != 2)
         isParseGood = false;
 
     else if (isParseGood) {
@@ -835,7 +835,7 @@ bool parseBMP::handleStatsReport(unsigned char*& buffer, int& bufLen) {
     unsigned char b[8];
 
     //if ((Recv(sock, b, 4, MSG_WAITALL)) != 4)
-    if ((extractFromBuffer(buffer, bufLen, b, 4)) != 4)
+    if ((extract_from_buffer(buffer, bufLen, b, 4)) != 4)
         throw "ERROR:  Cannot proceed since we cannot read the stats mon counter";
 
     bmp_len -= 4;
@@ -855,10 +855,10 @@ bool parseBMP::handleStatsReport(unsigned char*& buffer, int& bufLen) {
     for (unsigned long i = 0; i < stats_cnt; i++) {
 
         //if ((Recv(sock, &stat_type, 2, MSG_WAITALL)) != 2)
-        if ((extractFromBuffer(buffer, bufLen, &stat_type, 2)) != 2)
+        if ((extract_from_buffer(buffer, bufLen, &stat_type, 2)) != 2)
             throw "ERROR: Cannot proceed since we cannot read the stats type.";
         //if ((Recv(sock, &stat_len, 2, MSG_WAITALL)) != 2)
-        if ((extractFromBuffer(buffer, bufLen, &stat_len, 2)) != 2)
+        if ((extract_from_buffer(buffer, bufLen, &stat_len, 2)) != 2)
             throw "ERROR: Cannot proceed since we cannot read the stats len.";
 
         bmp_len -= 4;
@@ -875,7 +875,7 @@ bool parseBMP::handleStatsReport(unsigned char*& buffer, int& bufLen) {
 
             // Read the stats counter - 32/64 bits
             //if ((Recv(sock, b, stat_len, MSG_WAITALL)) == stat_len) {
-            if ((extractFromBuffer(buffer, bufLen, b, stat_len)) == stat_len) {
+            if ((extract_from_buffer(buffer, bufLen, b, stat_len)) == stat_len) {
                 bmp_len -= stat_len;
 
                 // convert the bytes from network to host order
@@ -939,7 +939,7 @@ bool parseBMP::handleStatsReport(unsigned char*& buffer, int& bufLen) {
    //                     sock, stat_type, stat_len);
 
             while (stat_len-- > 0)
-                extractFromBuffer(buffer, bufLen, &b[0], 1);
+                extract_from_buffer(buffer, bufLen, &b[0], 1);
                 //Recv(sock, &b[0], 1, 0);
         }
     }

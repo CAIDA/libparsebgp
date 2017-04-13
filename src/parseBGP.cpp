@@ -672,7 +672,7 @@ void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
 
         snprintf(rib_entry.labels, sizeof(rib_entry.labels), "%s", tuple.labels.c_str());
         
-        rib_entry.isIPv4 = tuple.isIPv4 ? 1 : 0;
+        rib_entry.isIPv4 = tuple.is_ipv4 ? 1 : 0;
 
         memcpy(rib_entry.prefix_bin, tuple.prefix_bin, sizeof(rib_entry.prefix_bin));
 
@@ -824,7 +824,7 @@ void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
 
         rib_entry.prefix_len     = tuple.len;
 
-        rib_entry.isIPv4 = tuple.isIPv4 ? 1 : 0;
+        rib_entry.isIPv4 = tuple.is_ipv4 ? 1 : 0;
 
         memcpy(rib_entry.prefix_bin, tuple.prefix_bin, sizeof(rib_entry.prefix_bin));
 
@@ -915,7 +915,7 @@ void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefi
 
         rib_entry.prefix_len     = tuple.len;
 
-        rib_entry.isIPv4 = tuple.isIPv4 ? 1 : 0;
+        rib_entry.isIPv4 = tuple.is_ipv4 ? 1 : 0;
 
         memcpy(rib_entry.prefix_bin, tuple.prefix_bin, sizeof(rib_entry.prefix_bin));
 

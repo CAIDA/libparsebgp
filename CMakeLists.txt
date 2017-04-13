@@ -32,6 +32,6 @@ set(SOURCE_FILES
         include/UpdateMsg.h
         include/parseBMP.h
         include/parseUtils.h
-        include/parseMRT.h)
+        include/parseMRT.h include/parse_common.h)
 
 add_executable(parse_lib ${SOURCE_FILES})
