@@ -14,9 +14,9 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "../../src/include/parseBMP.h"
-#include "../../src/include/parseBGP.h"
-#include "../../src/include/parseUtils.h"
+#include "../include/parseBMP.h"
+#include "../include/parseBGP.h"
+#include "../include/parseUtils.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 

@@ -1,3 +1,0 @@
-/cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles/edit_cache.dir
-/cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/cygdrive/c/Users/Induja/CLionProjects/openbmp-bmpparser/MRTlib/cmake-build-debug/CMakeFiles/MRTlib.dir
