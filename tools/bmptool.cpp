@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../src/include/parseBMP.h"
+#include "../include/parseBMP.h"
 #include <fstream>
 using namespace std;
 
