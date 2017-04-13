@@ -3,10 +3,10 @@ set(CMAKE_CXX_STANDARD 11)
 project (bmp_tool C CXX)
 
 #Bring the headers, such as Student.h into the project
-include_directories(../src/include)
+include_directories(../include)
 
 #However, the file(GLOB...) allows for wildcard additions:
-file(GLOB SOURCES "../src/bgp/*.cpp")
+file(GLOB SOURCES "../src/*.cpp")
  
 #Generate the static library from the sources
 add_library(parse SHARED ${SOURCES})
