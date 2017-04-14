@@ -31,8 +31,8 @@
 
 using namespace std;
 
-class parseMRT {
-public:
+//class parseMRT {
+//public:
     /**
       * MRT Message Types
       */
@@ -61,7 +61,7 @@ public:
     /**
       * MRT common header
       */
-    struct MRT_common_hdr
+    struct mrt_common_hdr
     {
         uint32_t        time_stamp;              ///< 4 byte; timestamp value in seconds
         uint16_t        type;                   ///< 2 byte; type of information contained in message field
@@ -242,17 +242,40 @@ public:
         u_char*     bgp_data;
     };
 
-    parseBMP::BGPMsg bgp_msg;
+struct libParseBGP_parse_mrt_parsed_data {
+    mrt_common_hdr c_hdr;
+    table_dump_message table_dump;
+    peer_index_table peer_index_table;
+    rib_entry_header rib_entry_header;
+    rib_generic_entry_header rib_generic_entry_header;
 
+    bgp4mp_msg bgp4mp_msg;
+    bgp4mp_state_change bgp4mp_state_change;
+
+    parseBMP::obj_peer_up_event up_event;
+    parseBMP::obj_peer_down_event down_event;
+
+    u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
+    int mrt_data_len;              ///< Length/size of data in the data buffer
+
+    parseBGP *pbgp;
+    parseBMP::parsed_bgp_msg bgp_msg;
+
+//private:
+    uint16_t mrt_type;
+    uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
+    std::map<std::string, parseBMP::peer_info> peer_info_map;
+};
     /*
      * Constructor for class
      */
-    parseMRT();
+    //parseMRT();
+    void libParseBGP_parse_mrt_init(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /*
      * Destructor
      */
-    ~parseMRT();
+    //~parseMRT();
 
     /**
      * Function to parse MRT message
@@ -260,7 +283,7 @@ public:
      * \param [in] buffer       Contains the MRT message
      * \param [in] buf_len       Length of buffer
      */
-    bool parseMsg(u_char *&buffer, int& buf_len);
+    bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Function to parse the MRT common header
@@ -268,49 +291,49 @@ public:
      * @param buf_len
      * @return common header type
      */
-    uint16_t parse_common_header(u_char *& buffer, int& buf_len);
+    uint16_t libParseBGP_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses remaining MRT message
      * @param buffer
      * @param buf_len
      */
-    void buffer_mrt_message(u_char *& buffer, int& buf_len);
+    void libParseBGP_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses Table Dump message
      * @param buffer
      * @param buf_len
      */
-    void parse_table_dump(u_char* buffer, int& buf_len);
+    void libParseBGP_parse_mrt_parse_table_dump(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses Table Dump V2 message
      * @param buffer
      * @param buf_len
      */
-    void parse_table_dump_v2(u_char* buffer, int& buf_len);
+    void libParseBGP_parse_mrt_parse_table_dump_v2(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses Peer Index Table message
      * @param buffer
      * @param buf_len
      */
-    void parse_peer_index_table(u_char* buffer, int& buf_len);
+    void libParseBGP_parse_mrt_parse_peer_index_table(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses RIB UNICAST message
      * @param buffer
      * @param buf_len
      */
-    void parse_rib_unicast(u_char* buffer, int& buf_len);
+    void libParseBGP_parse_mrt_parse_rib_unicast(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses RIB GENERIC message
      * @param buffer
      * @param buf_len
      */
-    void parse_rib_generic(u_char* buffer, int& buf_len);
+    void libParseBGP_parse_mrt_parse_rib_generic(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
 
     /**
@@ -318,53 +341,26 @@ public:
      * @param buffer
      * @param buf_len
      */
-    void parse_bgp4mp(u_char* buffer, int& buf_len);
+    void libParseBGP_parse_mrt_parse_bgp4mp(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
 
     /**
      * get current MRT message type
      */
-    char get_mrt_type();
+    char libParseBGP_parse_mrt_get_mrt_type(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * get current MRT message length
      *
      * The length returned does not include the common header length
      */
-    uint32_t get_mrt_length();
+    uint32_t libParseBGP_parse_mrt_get_mrt_length(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
-    MRT_common_hdr c_hdr;
-    table_dump_message table_dump;
-    peer_index_table peer_index_table;
-    rib_entry_header rib_entry_header;
-    rib_generic_entry_header rib_generic_entry_header;
-//    BGP4MP_state_change bgp_state_change;
-//    BGP4MP_state_change_AS4 bgp_state_change_as4;
-//    BGP4MP_message bgp4mp_msg;
-//    BGP4MP_message_AS4 bgp4mp_msg_as4;
-//    BGP4MP_message_local bgp4mp_msg_local;
-//    BGP4MP_message_AS4_local bgp4mp_msg_as4_local;
-    bgp4mp_msg bgp4mp_msg;
-    bgp4mp_state_change bgp4mp_state_change;
 
-    parseBMP::obj_peer_up_event up_event;
-    parseBMP::obj_peer_down_event down_event;
-    /**
-     * BMP message buffer (normally only contains the BGP message)
-     *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.
-     *      Complete BGP message is read, otherwise error is generated.
-     */
-    u_char      mrt_data[MRT_PACKET_BUF_SIZE + 1];
-    int         mrt_data_len;              ///< Length/size of data in the data buffer
+//libParseBGP_parse_mrt_parsed_data parse_mrt_parsed_data;
+//};
 
-    parseBGP *pbgp;
-
-private:
-    uint16_t   mrt_type;
-    uint32_t   mrt_len;                    ///< Length of the BMP message - does not include the common header size
-    std::map<std::string, parseBMP::peer_info> peer_info_map;
-};
-
-extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
+//extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
+libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *buffer, int buf_len);
 
 #endif /* PARSEBMP_H_ */

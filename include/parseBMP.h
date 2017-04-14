@@ -93,11 +93,11 @@ public:
      * BMP routers send BMP/BGP messages, this method reads and parses those.
      *
      * \param [in]  buffer       Buffer containing BMP message
-     * \param [in]  bufLen       length of the buffer
+     * \param [in]  buf_len       length of the buffer
      * \return true if more to read, false if the connection is done/closed
      */
     //bool parseMsg(int read_fd);
-    bool parseMsg(unsigned char *&buffer, int& bufLen);
+    bool parseMsg(unsigned char *&buffer, int& buf_len);
  
 /**
      * OBJECT: routers
@@ -134,16 +134,13 @@ public:
         char        peer_addr[46];          ///< Peer IP address in printed form
         char        peer_bgp_id[16];        ///< Peer BGP ID in printed form
         uint32_t    peer_as;                ///< Peer ASN
-        bool        isL3VPN;                ///< true if peer is L3VPN, otherwise it is Global
-        bool        isPrePolicy;            ///< True if the routes are pre-policy, false if not
-        bool        isAdjIn;                ///< True if the routes are Adj-Rib-In, false if not
-        bool        isIPv4;                 ///< true if peer is IPv4 or false if IPv6
+        bool        is_l3vpn;                ///< true if peer is L3VPN, otherwise it is Global
+        bool        is_pre_policy;            ///< True if the routes are pre-policy, false if not
+        bool        is_adj_in;                ///< True if the routes are Adj-Rib-In, false if not
+        bool        is_ipv4;                 ///< true if peer is IPv4 or false if IPv6
         uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
         uint32_t    timestamp_us;           ///< Timestamp microseconds
     };
-
-
-
 
     /**
      * OBJECT: peer_down_events
@@ -257,7 +254,7 @@ public:
         u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
         u_char      path_attr_hash_id[16];  ///< path attrs hash_id
         u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
-        u_char      isIPv4;                 ///< 0 if IPv6, 1 if IPv4
+        u_char      is_ipv4;                 ///< 0 if IPv6, 1 if IPv4
         char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
         u_char      prefix_len;             ///< Length of prefix in bits
         uint8_t     prefix_bin[16];         ///< Prefix in binary form
@@ -300,7 +297,7 @@ public:
     struct obj_ls_node {
         u_char      hash_id[16];                ///< hash id for the entry
         uint64_t    id;                         ///< Routing universe identifier
-        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        bool        is_ipv4;                     ///< True if interface/neighbor is IPv4, false otherwise
         uint32_t    asn;                        ///< BGP ASN
         uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
         uint8_t     igp_router_id[8];           ///< IGP router ID
@@ -344,7 +341,7 @@ public:
         uint8_t     nei_addr[16];               ///< Neighbor binary address
         uint32_t    local_link_id;              ///< Local Link ID (IS-IS)
         uint32_t    remote_link_id;             ///< Remote Link ID (IS-IS)
-        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        bool        is_ipv4;                     ///< True if interface/neighbor is IPv4, false otherwise
         u_char      local_node_hash_id[16];     ///< Local node hash ID
         u_char      remote_node_hash_id[16];    ///< Remove node hash ID
         uint32_t    admin_group;                ///< Admin group
@@ -492,14 +489,14 @@ public:
         std::list<bgp::evpn_tuple>    evpn_withdrawn;     ///< List of evpn nlris withdrawn
     };
 
-    struct BGPMsg{
+    struct parsed_bgp_msg{
         common_bgp_hdr common_hdr;
         parsed_update_data parsed_data;
         vector<parseBMP::obj_vpn> obj_vpn_rib_list;
         vector<parseBMP::obj_evpn> obj_evpn_rib_list;
         vector<parseBMP::obj_rib> adv_obj_rib_list;
         vector<parseBMP::obj_rib> wdrawn_obj_rib_list;
-        bool hasEndOfRIBMarker;
+        bool has_end_of_rib_marker;
     };
 //############################################################################
      /**
@@ -615,7 +612,7 @@ public:
     /**
      * Recv wrapper for recv() to enable packet buffering
      */
-    ssize_t Recv(int sockfd, void *buf, size_t len, int flags);
+    //ssize_t Recv(int sockfd, void *buf, size_t len, int flags);
 
     /**
      * Process the incoming BMP message
@@ -629,7 +626,7 @@ public:
      * throws (const char *) on error.   String will detail error message.
      */
     //char handleMessage(int sock);
-    char handleMessage(unsigned char*& buffer, int& bufLen);
+    char handle_message(unsigned char*& buffer, int& buf_len);
 
     /**
      * Parse and return back the stats report
@@ -640,7 +637,7 @@ public:
      * \return true if error, false if no error
      */
     //bool handleStatsReport(int sock);
-    bool handleStatsReport(unsigned char*& buffer, int& bufLen);
+    bool handle_stats_report(unsigned char*& buffer, int& buf_len);
 
     /**
      * handle the initiation message and udpate the router entry
@@ -649,7 +646,7 @@ public:
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
     //void handleInitMsg(int sock);
-    void handleInitMsg(unsigned char*& buffer, int& bufLen);
+    void handle_init_msg(unsigned char*& buffer, int& buf_len);
 
     /**
      * handle the termination message, router entry will be updated
@@ -658,7 +655,7 @@ public:
      * \param [in/out] r_entry     Already defined router entry reference (will be updated)
      */
     //void handleTermMsg(int sock);
-    void handleTermMsg(unsigned char*& buffer, int& bufLen);
+    void handle_term_msg(unsigned char*& buffer, int& buf_len);
     /**
      * Buffer remaining BMP message
      *
@@ -670,7 +667,7 @@ public:
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
     //void bufferBMPMessage(int sock);
-    void bufferBMPMessage(unsigned char*& buffer, int& bufLen);
+    void buffer_bmp_message(unsigned char*& buffer, int& buf_len);
 
     /**
      * Parse the v3 peer down BMP header
@@ -683,7 +680,7 @@ public:
      * \returns true if successfully parsed the bmp peer down header, false otherwise
      */
     //bool parsePeerDownEventHdr(int sock);
-    bool parsePeerDownEventHdr(unsigned char*& buffer, int& bufLen);
+    bool parse_peer_down_event_hdr(unsigned char*& buffer, int& buf_len);
 
     /**
      * Parse the v3 peer up BMP header
@@ -696,19 +693,19 @@ public:
      * \returns true if successfully parsed the bmp peer up header, false otherwise
      */
     //bool parsePeerUpEventHdr(int sock);
-    bool parsePeerUpEventHdr(unsigned char*& buffer, int& bufLen);
+    bool parse_peer_up_event_hdr(unsigned char*& buffer, int& buf_len);
 
     /**
      * get current BMP message type
      */
-    char getBMPType();
+    char get_bmp_type();
 
     /**
      * get current BMP message length
      *
      * The length returned does not include the version 3 common header length
      */
-    uint32_t getBMPLength();
+    uint32_t get_bmp_length();
 
     // Debug methods
 //    void enableDebug();
@@ -719,7 +716,7 @@ public:
     obj_peer_down_event down_event;
     obj_peer_up_event up_event;
     obj_stats_report stats;
-    BGPMsg bgpMsg;
+    parsed_bgp_msg bgp_msg;
 private:
     //bool            debug;                      ///< debug flag to indicate debugging
    // Logger          *logger;                    ///< Logging class pointer
@@ -744,7 +741,7 @@ private:
      * \param [in]  sock        Socket to read the message from
      */
     //void parseBMPv2(int sock);
-    void parseBMPv2(unsigned char*& buffer, int& bufLen);
+    void parse_bmp_v2(unsigned char*& buffer, int& buf_len);
 
     /**
      * Parse v3 BMP header
@@ -756,7 +753,7 @@ private:
      * \param [in]  sock        Socket to read the message from
      */
     //void parseBMPv3(int sock);
-    void parseBMPv3(unsigned char*& buffer, int& bufLen);
+    void parse_bmp_v3(unsigned char*& buffer, int& buf_len);
 
     /**
      * Parse the v3 peer header
@@ -764,10 +761,10 @@ private:
      * \param [in]  sock        Socket to read the message from
      */
     //void parsePeerHdr(int sock);
-    void parsePeerHdr(unsigned char*& buffer, int& bufLen);
+    void parse_peer_hdr(unsigned char*& buffer, int& buf_len);
 
 };
 
-extern "C" parseBMP parseBMPwrapper(unsigned char *buffer, int bufLen);
+extern "C" parseBMP parseBMPwrapper(unsigned char *buffer, int buf_len);
 
 #endif /* PARSEBMP_H_ */

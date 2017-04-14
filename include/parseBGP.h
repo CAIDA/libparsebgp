@@ -84,7 +84,7 @@ public:
 
     virtual ~parseBGP();
 
-    u_char parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, parseBMP::obj_peer_up_event *up_event,
+    u_char parseBGPfromMRT(u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg, parseBMP::obj_peer_up_event *up_event,
                            parseBMP::obj_peer_down_event *down_event, uint32_t asn, bool isLocalMsg = false);
 
 
@@ -99,7 +99,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg);
+    bool handleUpdate(u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -114,7 +114,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleDownEvent(u_char *data, size_t size, parseBMP::obj_peer_down_event *down_event, parseBMP::BGPMsg *bgpMsg);
+    bool handleDownEvent(u_char *data, size_t size, parseBMP::obj_peer_down_event *down_event, parseBMP::parsed_bgp_msg *bgp_msg);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated
@@ -127,7 +127,7 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::BGPMsg *bgpMsg);
+    bool handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::parsed_bgp_msg *bgp_msg);
 
     /*
      * Debug methods
@@ -186,7 +186,7 @@ private:
      *
      * \param  parsed_data          Reference to the parsed update data
      */
-    void UpdateDB(parseBMP::BGPMsg *bgp_msg);
+    void UpdateDB(parseBMP::parsed_bgp_msg *bgp_msg);
 
     /**
      * Update the Database path attributes

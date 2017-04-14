@@ -100,26 +100,26 @@ parseBGP::~parseBGP() {
  *
  * \param [in] data             Pointer to the raw BGP message header
  * \param [in] size             length of the data buffer (used to prevent overrun)
- * \param [in] bgpMsg           Structure to store the bgp messages
+ * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns BGP message type
  */
-u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg, parseBMP::obj_peer_up_event *up_event,
+u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg, parseBMP::obj_peer_up_event *up_event,
                                parseBMP::obj_peer_down_event *down_event, uint32_t asn, bool isLocalMsg) {
-    u_char  bgpMsgType = parseBgpHeader(data, size, bgpMsg->common_hdr);
-    switch (bgpMsgType) {
+    u_char  bgp_msg_type = parseBgpHeader(data, size, bgp_msg->common_hdr);
+    switch (bgp_msg_type) {
         case BGP_MSG_UPDATE: {
             int read_size = 0;
             data += BGP_MSG_HDR_LEN;
             bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info);
 
-            if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgpMsg->parsed_data, bgpMsg->hasEndOfRIBMarker)) != (size - BGP_MSG_HDR_LEN)) {
+            if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
                 //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
                 return true;
             }
 
             data_bytes_remaining -= read_size;
 
-            UpdateDB(bgpMsg);
+            UpdateDB(bgp_msg);
             break;
         }
         case BGP_MSG_NOTIFICATION: {
@@ -261,7 +261,7 @@ u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bg
             throw "BGP message type does not match";
         }
     }
-    return bgpMsgType;
+    return bgp_msg_type;
 }
 
 /**
@@ -274,11 +274,11 @@ u_char parseBGP::parseBGPfromMRT(u_char *data, size_t size, parseBMP::BGPMsg *bg
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg) {
+bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg) {
     //bgp_msg::UpdateMsg::parsed_update_data parsed_data;
     int read_size = 0;
 
-    if (parseBgpHeader(data, size, bgpMsg->common_hdr) == BGP_MSG_UPDATE) {
+    if (parseBgpHeader(data, size, bgp_msg->common_hdr) == BGP_MSG_UPDATE) {
         data += BGP_MSG_HDR_LEN;
 
         /*
@@ -286,7 +286,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg)
          */
         bgp_msg::UpdateMsg uMsg(p_entry->peer_addr, router_addr, p_info);
 
-        if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgpMsg->parsed_data, bgpMsg->hasEndOfRIBMarker)) != (size - BGP_MSG_HDR_LEN)) {
+        if ((read_size=uMsg.parseUpdateMsg(data, data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
             return true;
         }
@@ -296,7 +296,7 @@ bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg)
         /*
          * Update the DB with the update data
          */
-        UpdateDB(bgpMsg);
+        UpdateDB(bgp_msg);
     }
 
     return false;
@@ -315,11 +315,11 @@ bool parseBGP::handleUpdate(u_char *data, size_t size, parseBMP::BGPMsg *bgpMsg)
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down_event *down_event, parseBMP::BGPMsg *bgpMsg) {
+bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down_event *down_event, parseBMP::parsed_bgp_msg *bgp_msg) {
     bool        rval;
 
     // Process the BGP message normally
-    if (parseBgpHeader(data, size, bgpMsg->common_hdr) == BGP_MSG_NOTIFICATION) {
+    if (parseBgpHeader(data, size, bgp_msg->common_hdr) == BGP_MSG_NOTIFICATION) {
 
         data += BGP_MSG_HDR_LEN;
 
@@ -359,7 +359,7 @@ bool parseBGP::handleDownEvent(u_char *data, size_t size,parseBMP::obj_peer_down
  *
  * \returns True if error, false if no error.
  */
-bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::BGPMsg *bgpMsg) {
+bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::parsed_bgp_msg *bgp_msg) {
     bgp_msg::OpenMsg    oMsg(p_entry->peer_addr, this->p_info);
     list <string>       cap_list;
     string              local_bgp_id, remote_bgp_id;
@@ -373,7 +373,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
     /*
      * Process the sent open message
      */
-    if (parseBgpHeader(data, size, bgpMsg->common_hdr) == BGP_MSG_OPEN) {
+    if (parseBgpHeader(data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
         read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
@@ -415,7 +415,7 @@ bool parseBGP::handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_ev
      */
     cap_list.clear();
 
-    if (parseBgpHeader(data, size, bgpMsg->common_hdr) == BGP_MSG_OPEN) {
+    if (parseBgpHeader(data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
         read_size = oMsg.parseOpenMsg(data, data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
@@ -526,7 +526,7 @@ u_char parseBGP::parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_
  *
  * \param  parsed_data          Reference to the parsed update data
  */
-void parseBGP::UpdateDB(parseBMP::BGPMsg *bgp_msg) {
+void parseBGP::UpdateDB(parseBMP::parsed_bgp_msg *bgp_msg) {
     /*
      * Update the path attributes
      */
@@ -672,12 +672,12 @@ void parseBGP::UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &prefixes,
 
         snprintf(rib_entry.labels, sizeof(rib_entry.labels), "%s", tuple.labels.c_str());
         
-        rib_entry.isIPv4 = tuple.is_ipv4 ? 1 : 0;
+        rib_entry.is_ipv4 = tuple.is_ipv4 ? 1 : 0;
 
         memcpy(rib_entry.prefix_bin, tuple.prefix_bin, sizeof(rib_entry.prefix_bin));
 
         // Add the ending IP for the prefix based on bits
-        if (rib_entry.isIPv4) {
+        if (rib_entry.is_ipv4) {
             if (tuple.len < 32) {
                 memcpy(&value_32bit, tuple.prefix_bin, 4);
                 bgp::SWAP_BYTES(&value_32bit);
@@ -824,12 +824,12 @@ void parseBGP::UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes,
 
         rib_entry.prefix_len     = tuple.len;
 
-        rib_entry.isIPv4 = tuple.is_ipv4 ? 1 : 0;
+        rib_entry.is_ipv4 = tuple.is_ipv4 ? 1 : 0;
 
         memcpy(rib_entry.prefix_bin, tuple.prefix_bin, sizeof(rib_entry.prefix_bin));
 
         // Add the ending IP for the prefix based on bits
-        if (rib_entry.isIPv4) {
+        if (rib_entry.is_ipv4) {
             if (tuple.len < 32) {
                 memcpy(&value_32bit, tuple.prefix_bin, 4);
                 bgp::SWAP_BYTES(&value_32bit);
@@ -915,7 +915,7 @@ void parseBGP::UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefi
 
         rib_entry.prefix_len     = tuple.len;
 
-        rib_entry.isIPv4 = tuple.is_ipv4 ? 1 : 0;
+        rib_entry.is_ipv4 = tuple.is_ipv4 ? 1 : 0;
 
         memcpy(rib_entry.prefix_bin, tuple.prefix_bin, sizeof(rib_entry.prefix_bin));
 
@@ -966,7 +966,7 @@ void parseBGP::UpdateDbBgpLs(bool remove, parseBMP::parsed_data_ls ls_data,
 
             if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end()) {
                 memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
-                (*it).isIPv4 = false;
+                (*it).is_ipv4 = false;
             }
 
             if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_MT_ID) != ls_attrs.end()) {
@@ -998,15 +998,15 @@ void parseBGP::UpdateDbBgpLs(bool remove, parseBMP::parsed_data_ls ls_data,
         for (list<parseBMP::obj_ls_link>::iterator it = ls_data.links.begin();
              it != ls_data.links.end(); it++) {
 
-            if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
+            if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
                 memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
 
             else if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end()) {
                 memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
-                (*it).isIPv4 = true;
+                (*it).is_ipv4 = true;
             }
 
-            if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV6_ROUTER_ID_REMOTE) != ls_attrs.end())
+            if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV6_ROUTER_ID_REMOTE) != ls_attrs.end())
                 memcpy((*it).remote_router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), 16);
 
             else if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV4_ROUTER_ID_REMOTE) != ls_attrs.end()) {
