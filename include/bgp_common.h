@@ -122,7 +122,7 @@ namespace bgp {
         std::string   prefix;               ///< Printed form of the IP address
         uint8_t       prefix_bin[16];       ///< Prefix in binary form
         uint32_t      path_id;              ///< Path ID (add path draft-ietf-idr-add-paths-15)
-        bool          isIPv4;               ///< True if IPv4, false if IPv6
+        bool          is_ipv4;               ///< True if IPv4, false if IPv6
 
         std::string   labels;               ///< Labels in the format of label, label, ...
     };

@@ -298,7 +298,7 @@ namespace bgp_msg {
 
 
         // Update node table entry and add to parsed data list
-        node_tbl.isIPv4 = true;
+        node_tbl.is_ipv4 = true;
         memcpy(node_tbl.hash_id, info.hash_bin, sizeof(node_tbl.hash_id));
         node_tbl.asn = info.asn;
         memcpy(node_tbl.ospf_area_Id, info.ospf_area_Id, sizeof(node_tbl.ospf_area_Id));
@@ -407,7 +407,7 @@ namespace bgp_msg {
 
         // Save link to parsed data
   //      SELF_DEBUG("MT-ID = %u/%u", link_tbl.mt_id, info.mt_id);
-        link_tbl.isIPv4             = info.isIPv4;
+        link_tbl.is_ipv4             = info.isIPv4;
         link_tbl.mt_id              = info.mt_id;
         link_tbl.local_link_id      = info.local_id;
         link_tbl.remote_link_id     = info.remote_id;

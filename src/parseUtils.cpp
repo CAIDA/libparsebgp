@@ -7,16 +7,16 @@
 /**
  * Function to extract data from buffer
  * @param buffer    Containes the data
- * @param bufLen    Length of buffer provided
- * @param outputbuf Data from buffer is stored into this
- * @param outputLen Length to be stored in output buffer
- * @return  size of data stored in outputbuf
+ * @param buf_len    Length of buffer provided
+ * @param output_buf Data from buffer is stored into this
+ * @param output_len Length to be stored in output buffer
+ * @return  size of data stored in output_buf
  */
-ssize_t  extractFromBuffer (unsigned char*& buffer, int &bufLen, void *outputbuf, int outputLen) {
-    if (outputLen > bufLen)
-        return (outputLen - bufLen);
-    memcpy(outputbuf, buffer, outputLen);
-    buffer = (buffer + outputLen);
-    bufLen -= outputLen;
-    return outputLen;
+ssize_t  extract_from_buffer (unsigned char*& buffer, int &buf_len, void *output_buf, int output_len) {
+    if (output_len > buf_len)
+        return (output_len - buf_len);
+    memcpy(output_buf, buffer, output_len);
+    buffer = (buffer + output_len);
+    buf_len -= output_len;
+    return output_len;
 }
