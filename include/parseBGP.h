@@ -26,8 +26,8 @@ using namespace std;
  * \details This class can be used as needed to parse a complete BGP message. This
  *          class will read directly from the socket to read the BGP message.
  */
-class parseBGP {
-public:
+//class parseBGP {
+//public:
     /**
      * Below defines the common BGP header per RFC4271
      */
@@ -62,6 +62,35 @@ public:
     } __attribute__ ((__packed__));
 
 
+struct libParseBGP_parse_bgp_parsed_data {
+    /**
+     * data_bytes_remaining is a counter that starts at the message size and then is
+     * decremented as the message is read.
+     *
+     * This is used to ensure no buffer overruns on bgp data buffer
+     */
+    unsigned int data_bytes_remaining;
+
+    /**
+     * BGP data buffer for the raw BGP message to be parsed
+     */
+    unsigned char *data;                             ///< Pointer to the data buffer for the raw BGP message
+
+    //common_bgp_hdr common_hdr;                       ///< Current/last pased bgp common header
+
+    parseBMP::obj_bgp_peer *p_entry;       ///< peer table entry - will be updated with BMP info
+    parseBMP::obj_path_attr base_attr;      ///< Base attribute object
+
+    string router_addr;    ///< Router IP address - used for logging
+    parseBMP::peer_info *p_info;        ///< Persistent Peer information
+
+    unsigned char path_hash_id[16];                  ///< current path hash ID
+
+    //bool            debug;                           ///< debug flag to indicate debugging
+    //Logger          *logger;                         ///< Logging class pointer
+};
+
+
     /**
      * Constructor for class -
      *
@@ -79,13 +108,17 @@ public:
      */
     //parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::c, string routerAddr,
     //         BMPReader::peer_info *peer_info);
-    parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info);
+    //parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info);
     //parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info);
 
-    virtual ~parseBGP();
+    void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::obj_bgp_peer *peer_entry,
+                                    string router_addr, parseBMP::peer_info *peer_info);
 
-    u_char parseBGPfromMRT(u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg, parseBMP::obj_peer_up_event *up_event,
-                           parseBMP::obj_peer_down_event *down_event, uint32_t asn, bool isLocalMsg = false);
+    //virtual ~parseBGP();
+
+    u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg,
+                                                    parseBMP::obj_peer_up_event *up_event, parseBMP::obj_peer_down_event *down_event,
+                                                    uint32_t asn, bool is_local_msg = false);
 
 
     /**
@@ -99,7 +132,8 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleUpdate(u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg);
+    bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+                                             parseBMP::parsed_bgp_msg *bgp_msg);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -114,7 +148,8 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleDownEvent(u_char *data, size_t size, parseBMP::obj_peer_down_event *down_event, parseBMP::parsed_bgp_msg *bgp_msg);
+    bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data,
+                                                 size_t size, parseBMP::obj_peer_down_event *down_event, parseBMP::parsed_bgp_msg *bgp_msg);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated
@@ -127,7 +162,8 @@ public:
      *
      * \returns True if error, false if no error.
      */
-    bool handleUpEvent(u_char *data, size_t size, parseBMP::obj_peer_up_event *up_event, parseBMP::parsed_bgp_msg *bgp_msg);
+    bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+                                               parseBMP::obj_peer_up_event *up_event, parseBMP::parsed_bgp_msg *bgp_msg);
 
     /*
      * Debug methods
@@ -136,34 +172,7 @@ public:
 //    void disableDebug();
 
 
-private:
-    /**
-     * data_bytes_remaining is a counter that starts at the message size and then is
-     * decremented as the message is read.
-     *
-     * This is used to ensure no buffer overruns on bgp data buffer
-     */
-    unsigned int data_bytes_remaining;
-
-    /**
-     * BGP data buffer for the raw BGP message to be parsed
-     */
-    unsigned char *data;                             ///< Pointer to the data buffer for the raw BGP message
-
-    //common_bgp_hdr common_hdr;                       ///< Current/last pased bgp common header
-
-    parseBMP::obj_bgp_peer    *p_entry;       ///< peer table entry - will be updated with BMP info
-    parseBMP::obj_path_attr   base_attr;      ///< Base attribute object
-
-    //MsgBusInterface *mbus_ptr;                       ///< Pointer to open DB implementation
-    string                           router_addr;    ///< Router IP address - used for logging
-    parseBMP::peer_info              *p_info;        ///< Persistent Peer information
-
-    unsigned char path_hash_id[16];                  ///< current path hash ID
-
-    //bool            debug;                           ///< debug flag to indicate debugging
-    //Logger          *logger;                         ///< Logging class pointer
-
+//private:
     /**
      * Parses the BGP common header
      *
@@ -177,7 +186,8 @@ private:
      *
      * \returns BGP message type
      */
-    u_char parseBgpHeader(u_char *data, size_t size, parseBMP::common_bgp_hdr &common_hdr);
+    u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+                                              parseBMP::common_bgp_hdr &common_hdr);
 
     /**
      * Update the Database with the parsed updated data
@@ -185,8 +195,8 @@ private:
      * \details This method will update the database based on the supplied parsed update data
      *
      * \param  parsed_data          Reference to the parsed update data
-     */
-    void UpdateDB(parseBMP::parsed_bgp_msg *bgp_msg);
+     *
+    void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::parsed_bgp_msg *bgp_msg); */
 
     /**
      * Update the Database path attributes
@@ -194,8 +204,8 @@ private:
      * \details This method will update the database for the supplied path attributes
      *
      * \param  attrs            Reference to the parsed attributes map
-     */
-    void UpdateDBAttrs(parseBMP::parsed_attrs_map &attrs);
+     *
+    void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::parsed_attrs_map &attrs);*/
 
     /**
      * Update the Database advertised prefixes
@@ -204,8 +214,9 @@ private:
      *
      * \param  adv_prefixes         Reference to the list<prefix_tuple> of advertised prefixes
      * \param  attrs            Reference to the parsed attributes map
-     */
-    void UpdateDBAdvPrefixes(std::list<bgp::prefix_tuple> &adv_prefixes, parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_rib> &rib_list);
+     *
+    void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<bgp::prefix_tuple> &adv_prefixes,
+                             parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_rib> &rib_list); */
 
     /**
      * Update the Database withdrawn prefixes
@@ -213,8 +224,9 @@ private:
      * \details This method will update the database for the supplied advertised prefixes
      *
      * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
-     */
-    void UpdateDBWdrawnPrefixes(std::list<bgp::prefix_tuple> &wdrawn_prefixes, vector<parseBMP::obj_rib> &rib_list);
+     *
+    void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<bgp::prefix_tuple> &wdrawn_prefixes,
+                                vector<parseBMP::obj_rib> &rib_list); */
 
     /**
      * Update the Database advertised l3vpn 
@@ -224,8 +236,9 @@ private:
      * \param [in] remove       True if the records should be deleted, false if they are to be added/updated
      * \param [in] adv_vpn      Reference to the list<vpn_tuple> of advertised vpns
      * \param [in] attrs        Reference to the parsed attributes map
-     */ 
-    void UpdateDBL3Vpn(bool remove, std::list<bgp::vpn_tuple> &adv_vpn, parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_vpn> &rib_list);
+     *
+    void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<bgp::vpn_tuple> &adv_vpn,
+                       parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_vpn> &rib_list); */
 
     /**
      * Updates for either advertised or withdrawn Evpn NLRI's
@@ -233,8 +246,9 @@ private:
      * \param [in] remove          True if the records should be deleted, false if they are to be added/updated
      * \param [in] nlris           Reference to the list<evpn_tuple>
      * \param [in] attrs           Reference to the parsed attributes map
-     */
-    void UpdateDBeVPN(bool remove, std::list<bgp::evpn_tuple> &nlris, parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_evpn> &rib_list);
+     *
+    void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<bgp::evpn_tuple> &nlris,
+                      parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_evpn> &rib_list); */
 
     /**
      * Update the Database for bgp-ls
@@ -244,11 +258,11 @@ private:
      * \param [in] remove      True if the records should be deleted, false if they are to be added/updated
      * \param [in] ls_data     Reference to the parsed link state nlri information
      * \param [in] ls_attrs    Reference to the parsed link state attribute information
-     */
-    void UpdateDbBgpLs(bool remove, parseBMP::parsed_data_ls ls_data,
-                                 parseBMP::parsed_ls_attrs_map &ls_attrs);
+     *
+    void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, parseBMP::parsed_data_ls ls_data,
+                                 parseBMP::parsed_ls_attrs_map &ls_attrs);*/
 
 
-};
+//};
 
 #endif /* PARSEBGP_H_ */

@@ -73,9 +73,9 @@ enum UPDATE_ATTR_TYPES {
  * \details This class parses a BGP update message.  It can be extended to create messages.
  *          message.
  */
-class UpdateMsg {
+//class UpdateMsg {
 
-public:
+//public:
 
 
     /**
@@ -90,7 +90,7 @@ public:
         /**
          * Withdrawn routes data pointer
          */
-        u_char *withdrawnPtr;
+        u_char *withdrawn_ptr;
 
         /**
          * Total length of the path attributes field in octets
@@ -102,24 +102,33 @@ public:
         /**
          * Attribute data pointer
          */
-        u_char *attrPtr;
+        u_char *attr_ptr;
 
         /**
          * NLRI data pointer
          */
-        u_char *nlriPtr;
+        u_char *nlri_ptr;
     };
 
-    /**
-     * parsed path attributes map
-     */
-    std::map<bgp_msg::UPDATE_ATTR_TYPES, std::string>            parsed_attrs;
-    typedef std::pair<bgp_msg::UPDATE_ATTR_TYPES, std::string>   parsed_attrs_pair;
-    typedef std::map<bgp_msg::UPDATE_ATTR_TYPES, std::string>    parsed_attrs_map;
+    typedef std::pair<bgp_msg::UPDATE_ATTR_TYPES, std::string> parsed_attrs_pair;
+    typedef std::map<bgp_msg::UPDATE_ATTR_TYPES, std::string> parsed_attrs_map;
 
     // Parsed bgp-ls attributes map
-    typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
+    typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
+    struct libParseBGP_update_msg_data {
+        /**
+         * parsed path attributes map
+         */
+        std::map<bgp_msg::UPDATE_ATTR_TYPES, std::string> parsed_attrs;
+
+        bool debug;                           ///< debug flag to indicate debugging
+        //Logger                  *logger;                         ///< Logging class pointer
+        std::string peer_addr;                       ///< Printed form of the peer address for logging
+        std::string router_addr;                     ///< Router IP address - used for logging
+        bool four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
+        parseBMP::peer_info *peer_info;                      ///< Persistent Peer info pointer
+    };
     /**
      * OBJECT: ls_node
      *
@@ -128,11 +137,11 @@ public:
     struct obj_ls_node {
         u_char      hash_id[16];                ///< hash id for the entry
         uint64_t    id;                         ///< Routing universe identifier
-        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        bool        is_ipv4;                     ///< True if interface/neighbor is IPv4, false otherwise
         uint32_t    asn;                        ///< BGP ASN
         uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
         uint8_t     igp_router_id[8];           ///< IGP router ID
-        uint8_t     ospf_area_Id[4];            ///< OSPF area ID
+        uint8_t     ospf_area_id[4];            ///< OSPF area ID
         char        protocol[32];               ///< String representation of the protocol name
         uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID
         uint8_t     isis_area_id[9];            ///< IS-IS area ID
@@ -155,7 +164,7 @@ public:
         uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
         uint8_t     igp_router_id[8];           ///< IGP router ID (local)
         uint8_t     remote_igp_router_id[8];    ///< IGP router ID (remote)
-        uint8_t     ospf_area_Id[4];            ///< OSPF area ID
+        uint8_t     ospf_area_id[4];            ///< OSPF area ID
         uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID (local)
         uint8_t     remote_router_id[16];       ///< IPv4 or IPv6 router ID (remote)
 
@@ -171,7 +180,7 @@ public:
         uint8_t     nei_addr[16];               ///< Neighbor binary address
         uint32_t    local_link_id;              ///< Local Link ID (IS-IS)
         uint32_t    remote_link_id;             ///< Remote Link ID (IS-IS)
-        bool        isIPv4;                     ///< True if interface/neighbor is IPv4, false otherwise
+        bool        is_ipv4;                     ///< True if interface/neighbor is IPv4, false otherwise
         u_char      local_node_hash_id[16];     ///< Local node hash ID
         u_char      remote_node_hash_id[16];    ///< Remove node hash ID
         uint32_t    admin_group;                ///< Admin group
@@ -201,7 +210,7 @@ public:
 
         uint32_t    bgp_ls_id;              ///< BGP-LS Identifier
         uint8_t     igp_router_id[8];       ///< IGP router ID
-        uint8_t     ospf_area_Id[4];        ///< OSPF area ID
+        uint8_t     ospf_area_id[4];        ///< OSPF area ID
         uint8_t     router_id[16];          ///< IPv4 or IPv6 router ID
         uint8_t     isis_area_id[9];        ///< IS-IS area ID
         uint8_t     intf_addr[16];          ///< Interface binary address
@@ -210,7 +219,7 @@ public:
         u_char      local_node_hash_id[16]; ///< Local node hash ID
         uint32_t    mt_id;                  ///< Multi-Topology ID
         uint32_t    metric;                 ///< Prefix metric
-        bool        isIPv4;                 ///< True if interface/neighbor is IPv4, false otherwise
+        bool        is_ipv4;                 ///< True if interface/neighbor is IPv4, false otherwise
         u_char      prefix_len;             ///< Length of prefix in bits
         char        ospf_route_type[32];    ///< String representation of the OSPF route type
         uint8_t     prefix_bin[16];         ///< Prefix in binary form
@@ -259,11 +268,14 @@ public:
      * \param [in,out] peer_info   Persistent peer information
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-     UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info);
+//     UpdateMsg(std::string peer_addr, std::string router_addr, parseBMP::peer_info *peer_info);
 
-     UpdateMsg(std::string peerAddr, parseBMP::peer_info *peer_info);
+//     UpdateMsg(std::string peer_addr, parseBMP::peer_info *peer_info);
 
-    virtual ~UpdateMsg();
+//    virtual ~UpdateMsg();
+
+    void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
+                                               std::string router_addr, parseBMP::peer_info *peer_info);
 
      /**
       * Parses the update message
@@ -278,7 +290,8 @@ public:
       *
       * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
       */
-     size_t parseUpdateMsg(u_char *data, size_t size, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+     size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *update_msg, u_char *data, size_t size,
+                                                    parseBMP::parsed_update_data &parsed_data, bool &has_end_of_rib_marker);
 
     /**
      * Parses the BGP attributes in the update
@@ -290,16 +303,17 @@ public:
      * \param [in]   len        Length of the data in bytes to be read
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAttributes(u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+    void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data,
+                         bool &has_end_of_rib_marker);
 
-private:
+/*private:
     bool                    debug;                           ///< debug flag to indicate debugging
     //Logger                  *logger;                         ///< Logging class pointer
     std::string             peer_addr;                       ///< Printed form of the peer address for logging
     std::string             router_addr;                     ///< Router IP address - used for logging
     bool                    four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
     parseBMP::peer_info    *peer_info;                      ///< Persistent Peer info pointer
-
+*/
 
     /**
      * Parses NLRI info (IPv4) from the BGP message
@@ -312,7 +326,8 @@ private:
      * \param [in]   len        Length of the data in bytes to be read
      * \param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
      */
-    void parseNlriData_v4(u_char *data, uint16_t len, std::list<bgp::prefix_tuple> &prefixes);
+    //void libParseBGP_update_msg_parse_nlri_data_v4(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len,
+    //                                               std::list<bgp::prefix_tuple> &prefixes);
 
 
     /**
@@ -327,7 +342,8 @@ private:
      * \param [in]   data           Pointer to the attribute data
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAttrData(u_char attr_type, uint16_t attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+    //void libParseBGP_update_msg_parse_attr_data(libParseBGP_update_msg_data *update_msg, u_char attr_type, uint16_t attr_len,
+    //                                            u_char *data, parseBMP::parsed_update_data &parsed_data, bool &has_end_of_rib_marker);
 
     /**
      * Parse attribute AS_PATH data
@@ -336,7 +352,8 @@ private:
      * \param [in]   data           Pointer to the attribute data
      * \param [out]  attrs          Reference to the parsed attr map - will be updated
      */
-    void parseAttr_AsPath(uint16_t attr_len, u_char *data, parseBMP::parsed_attrs_map &attrs);
+    //void libParseBGP_update_msg_parse_attr_as_path(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data,
+    //                                               parseBMP::parsed_attrs_map &attrs);
 
     /**
      * Parse attribute AGGEGATOR data
@@ -345,9 +362,10 @@ private:
      * \param [in]   data           Pointer to the attribute data
      * \param [out]  attrs          Reference to the parsed attr map - will be updated
      */
-    void parseAttr_Aggegator(uint16_t attr_len, u_char *data, parseBMP::parsed_attrs_map &attrs);
+    //void libParseBGP_update_msg_parse_attr_aggegator(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data,
+    //                                                 parseBMP::parsed_attrs_map &attrs);
 
-};
+//};
 
 } /* namespace bgp_msg */
 

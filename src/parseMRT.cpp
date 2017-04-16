@@ -181,11 +181,14 @@ void libParseBGP_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libPar
         throw "Error in parsing attribute";
 
     peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
-    bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
-    uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+    bgp_msg::libParseBGP_update_msg_data u_msg;
+    bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+    bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+    //bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
+    //uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
     //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
-    //parseBgpAttributes(buffer, buf_len); TO DO
-    delete uMsg;
+    //parseBgpAttributes(buffer, buf_len); //TODO
+//    delete u_msg;
 }
 
 void libParseBGP_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
@@ -326,12 +329,15 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
 //            throw "Error in parsing bgp_attribute";
 
         peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
-        bgp_msg::UpdateMsg *uMsg= new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
-        uMsg->parseAttributes(buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
+        bgp_msg::libParseBGP_update_msg_data u_msg;
+        bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+        bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
+        //bgp_msg::UpdateMsg *uMsg= new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
+        //uMsg->parseAttributes(buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         mrt_parsed_data->rib_entry_header.rib_entries.push_back(*r_entry);
-        delete uMsg;
+//        delete u_msg;
         delete r_entry;
         count++;
     }
@@ -378,12 +384,15 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
             throw "Error in parsing local address in IPv4";
 
         peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
-        bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
-        uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+        bgp_msg::libParseBGP_update_msg_data u_msg;
+        bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+        bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+        //bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
+        //uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         mrt_parsed_data->rib_entry_header.rib_entries.push_back(*r_entry);
-        delete uMsg;
+//        delete u_msg;
         delete r_entry;
         count++;
     }
@@ -505,9 +514,12 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
             p_entry.timestamp_secs = mrt_parsed_data->c_hdr.time_stamp;
             p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;
 
-            mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+            //mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+            libParseBGP_parse_bgp_init(mrt_parsed_data->pbgp, &p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
             uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->bgp4mp_msg.local_asn : mrt_parsed_data->bgp4mp_msg.peer_asn;
-            if (mrt_parsed_data->pbgp->parseBGPfromMRT(buffer, mrt_parsed_data->mrt_data_len, &mrt_parsed_data->bgp_msg, &mrt_parsed_data->up_event, &mrt_parsed_data->down_event, asn, mrt_parsed_data->c_hdr.sub_type > 5) == parseBGP::BGP_MSG_OPEN) {
+            if (libParseBGP_parse_bgp_parse_msg_from_mrt(mrt_parsed_data->pbgp, buffer, mrt_parsed_data->mrt_data_len,
+                                                         &mrt_parsed_data->bgp_msg, &mrt_parsed_data->up_event, &mrt_parsed_data->down_event,
+                                                         asn, mrt_parsed_data->c_hdr.sub_type > 5) == BGP_MSG_OPEN) {
                 mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_msg.local_asn;
                 mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_msg.peer_asn;
                 memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_msg.local_ip, 40);

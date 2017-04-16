@@ -258,7 +258,7 @@ struct libParseBGP_parse_mrt_parsed_data {
     u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
     int mrt_data_len;              ///< Length/size of data in the data buffer
 
-    parseBGP *pbgp;
+    libParseBGP_parse_bgp_parsed_data *pbgp;
     parseBMP::parsed_bgp_msg bgp_msg;
 
 //private:
