@@ -61,7 +61,7 @@ parseBMP::~parseBMP() {
     // clean up
 }
 
-parseBGP *pBGP;
+libParseBGP_parse_bgp_parsed_data *pBGP;
 //bool parseBMP::parseMsg(int read_fd)
 bool parseBMP::parseMsg(unsigned char *&buffer, int& buf_len)
 {
@@ -96,7 +96,8 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& buf_len)
 
 
                     // Prepare the BGP parser
-                    pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
+                    libParseBGP_parse_bgp_init(pBGP, &p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
+                    //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
 
       //              if (cfg->debug_bgp)
       //                 pBGP->enableDebug();
@@ -107,7 +108,8 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& buf_len)
                             snprintf(down_event.error_text, sizeof(down_event.error_text),
                                     "Local close by (%s) for peer (%s) : ", r_entry.ip_addr,
                                     p_entry.peer_addr);
-                            pBGP->handleDownEvent(bmp_data, bmp_data_len,&down_event,&bgp_msg);
+                            libParseBGP_parse_bgp_handle_down_event(pBGP, bmp_data, bmp_data_len,&down_event,&bgp_msg);
+                            //pBGP->handleDownEvent(bmp_data, bmp_data_len,&down_event,&bgp_msg);
                             break;
                         }
                         case 2 : // Local system close, no bgp notify
@@ -127,7 +129,8 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& buf_len)
                                     "Remote peer (%s) closed local (%s) session: ", r_entry.ip_addr,
                                     p_entry.peer_addr);
 
-                            pBGP->handleDownEvent(bmp_data, bmp_data_len, &down_event,&bgp_msg);
+                            libParseBGP_parse_bgp_handle_down_event(pBGP, bmp_data, bmp_data_len, &down_event,&bgp_msg);
+                            //pBGP->handleDownEvent(bmp_data, bmp_data_len, &down_event,&bgp_msg);
                             break;
                         }
                     }
@@ -156,13 +159,15 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& buf_len)
                     buffer_bmp_message(buffer, buf_len);
 
                     // Prepare the BGP parser
-                    pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
+                    //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
+                    libParseBGP_parse_bgp_init(pBGP, &p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
 
         //            if (cfg->debug_bgp)
         //               pBGP->enableDebug();
 
 // Parse the BGP sent/received open messages
-                    pBGP->handleUpEvent(bmp_data, bmp_data_len, &up_event,&bgp_msg);
+                    libParseBGP_parse_bgp_handle_up_event(pBGP, bmp_data, bmp_data_len, &up_event,&bgp_msg);
+                    //pBGP->handleUpEvent(bmp_data, bmp_data_len, &up_event,&bgp_msg);
 
                     // Free the bgp parser
                     //delete pBGP;
@@ -184,13 +189,15 @@ bool parseBMP::parseMsg(unsigned char *&buffer, int& buf_len)
                  * Read and parse the the BGP message from the client.
                  *     parseBGP will update mysql directly
                  */
-                pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr,
-                                    &peer_info_map[peer_info_key]);
+                //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr,
+                //                    &peer_info_map[peer_info_key]);
+                libParseBGP_parse_bgp_init(pBGP, &p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
 
                // if (cfg->debug_bgp)
                //     pBGP->enableDebug();
 
-                pBGP->handleUpdate(bmp_data, bmp_data_len, &bgp_msg);
+                //pBGP->handleUpdate(bmp_data, bmp_data_len, &bgp_msg);
+                libParseBGP_parse_bgp_handle_update(pBGP, bmp_data, bmp_data_len, &bgp_msg);
                 //delete pBGP;
 
                 break;
