@@ -563,15 +563,17 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
 
             case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
             {
-                MPReachAttr mp(update_msg->peer_addr, update_msg->peer_info);
-                mp.parseReachNlriAttr(attr_len, data, parsed_data);
+                libParseBGP_mp_reach_attr_parsed_data *parse_data;
+                libParseBGP_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_info);
+                libParseBGP_parse_reach_nlri_attr(parse_data, attr_len, data, parsed_data);
                 break;
             }
 
             case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
             {
-                MPUnReachAttr mp(update_msg->peer_addr, update_msg->peer_info);
-                mp.parseUnReachNlriAttr(attr_len, data, parsed_data, has_end_of_rib_marker);
+                libParseBGP_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
+                libParseBGP_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_info);
+                libParseBGP_parse_un_reach_nlri_attr(mp_un_reach_attr_data, attr_len, data, parsed_data, has_end_of_rib_marker);
                 break;
             }
 

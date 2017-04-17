@@ -161,7 +161,7 @@ namespace bgp_msg {
          *
          * \param [in]   nlri           Reference to parsed NLRI struct
          */
-        void libParseBGP_parse_reach_link_state(libparseBGP_MP_link_state_parsed_data *data,MPReachAttr::mp_reach_nlri &nlri);
+        void libParseBGP_parse_reach_link_state(libparseBGP_MP_link_state_parsed_data *data, mp_reach_nlri &nlri);
 
         /**
          * MP UnReach Link State NLRI parse
@@ -170,7 +170,7 @@ namespace bgp_msg {
          *
          * \param [in]   nlri           Reference to parsed NLRI struct
          */
-        void libParseBGP_parse_unreach_link_state(libparseBGP_MP_link_state_parsed_data *data, MPUnReachAttr::mp_unreach_nlri &nlri);
+        void libParseBGP_parse_unreach_link_state(libparseBGP_MP_link_state_parsed_data *data, mp_unreach_nlri &nlri);
 
 
 //    private:

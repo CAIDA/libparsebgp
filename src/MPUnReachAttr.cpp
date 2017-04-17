@@ -29,14 +29,14 @@ namespace bgp_msg {
 //MPUnReachAttr::MPUnReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
 //        : logger{logPtr}, debug{enable_debug}{}
 
-    libparseBGP_MP_link_state_parsed_data *parse_data;
-MPUnReachAttr::MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info) {
-    this->peer_addr = peerAddr;
-    this->peer_info = peer_info;
+    libparseBGP_MP_link_state_parsed_data *link_state_parse_data;
+    void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr, parseBMP::peer_info *peer_info) {
+        parse_data->peer_addr = peerAddr;
+        parse_data->peer_info = peer_info;
 }
-
-MPUnReachAttr::~MPUnReachAttr() {
-}
+//
+//MPUnReachAttr::~MPUnReachAttr() {
+//}
 
 /**
  * Parse the MP_UNREACH NLRI attribute data
@@ -51,7 +51,7 @@ MPUnReachAttr::~MPUnReachAttr() {
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
+void libParseBGP_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -83,7 +83,7 @@ void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::p
          * NLRI data depends on the AFI & SAFI
          *  Parse data based on AFI + SAFI
          */
-        parseAfi(nlri, parsed_data);
+        libParseBGP_parse_afi(parse_data, nlri, parsed_data);
     }
 }
 
@@ -97,21 +97,21 @@ void MPUnReachAttr::parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::p
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
+void libParseBGP_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
 
     switch (nlri.afi) {
         case bgp::BGP_AFI_IPV6 :  // IPv6
-            parseAfi_IPv4IPv6(false, nlri, parsed_data);
+            libParseBGP_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
             break;
 
         case bgp::BGP_AFI_IPV4 : // IPv4
-            parseAfi_IPv4IPv6(true, nlri, parsed_data);
+            libParseBGP_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
             break;
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            libParseBGP_MP_link_state_init(parse_data, peer_addr, &parsed_data);
-            libParseBGP_parse_unreach_link_state(parse_data,nlri);
+            libParseBGP_MP_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
+            libParseBGP_parse_unreach_link_state(link_state_parse_data,nlri);
             break;
         }
 
@@ -121,8 +121,9 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data
             switch (nlri.safi) {
                 case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    EVPN evpn(peer_addr, true, &parsed_data);
-                    evpn.parseNlriData(nlri.nlri_data, nlri.nlri_len);
+                    libParseBGP_evpn_data *evpn_data;
+                    libParseBGP_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
+                    libParseBGP_parse_nlri_data(evpn_data,nlri.nlri_data, nlri.nlri_len);
                     break;
                 }
 
@@ -148,7 +149,7 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void MPUnReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
+void libParseBGP_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data,bool isIPv4, mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
 
     /*
      * Decode based on SAFI
@@ -157,17 +158,17 @@ void MPUnReachAttr::parseAfi_IPv4IPv6(bool isIPv4, mp_unreach_nlri &nlri, parseB
         case bgp::BGP_SAFI_UNICAST: // Unicast IP address prefix
 
             // Data is an IP address - parse the address and save it
-            MPReachAttr::parseNlriData_IPv4IPv6(isIPv4, nlri.nlri_data, nlri.nlri_len, peer_info,
+            libParseBGP_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info,
                                                 parsed_data.withdrawn);
             break;
 
         case bgp::BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            MPReachAttr::parseNlriData_LabelIPv4IPv6(isIPv4, nlri.nlri_data, nlri.nlri_len, peer_info,
+            libParseBGP_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info,
                                                      parsed_data.withdrawn);
             break;
 
         case bgp::BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            MPReachAttr::parseNlriData_LabelIPv4IPv6(isIPv4, nlri.nlri_data, nlri.nlri_len, peer_info,
+            libParseBGP_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info,
                                                      parsed_data.vpn_withdrawn);
 
             break;

@@ -13,9 +13,9 @@
 
 namespace bgp_msg {
 
-    class EVPN {
-
-    public:
+//    class EVPN {
+//
+//    public:
 
         enum EVPN_ROUTE_TYPES {
             EVPN_ROUTE_TYPE_ETHERNET_AUTO_DISCOVERY = 1,
@@ -23,6 +23,14 @@ namespace bgp_msg {
             EVPN_ROUTE_TYPE_INCLUSIVE_MULTICAST_ETHERNET_TAG,
             EVPN_ROUTE_TYPE_ETHERNET_SEGMENT_ROUTE,
         };
+
+
+    struct libParseBGP_evpn_data {
+        std::string peer_addr;                       ///< Printed form of the peer address for logging
+        bool is_un_reach;                       ///< True if MP UNREACH, false if MP REACH
+
+        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
+    };
 
         /**
          * Constructor for class
@@ -37,9 +45,9 @@ namespace bgp_msg {
          */
         //EVPN(Logger *logPtr, std::string peerAddr, bool isUnreach,
         //     UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
-        EVPN(std::string peerAddr, bool isUnreach,
-                   parseBMP::parsed_update_data *parsed_data);
-        virtual ~EVPN();
+
+        void libParseBGP_evpn_init(libParseBGP_evpn_data *evpn_data, std::string peerAddr, bool isUnreach, parseBMP::parsed_update_data *parsed_data);
+//        virtual ~EVPN();
 
         /**
          * Parse Ethernet Segment Identifier
@@ -52,7 +60,7 @@ namespace bgp_msg {
          * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
          * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
          */
-        void parseEthernetSegmentIdentifier(u_char *data_pointer, std::string *parsed_data);
+//        void libParseBGP_parse_ethernet_segment_identifier(libParseBGP_evpn_init *evpn_data, u_char *data_pointer, std::string *parsed_data);
 
         /**
          * Parse Route Distinguisher
@@ -65,8 +73,8 @@ namespace bgp_msg {
          * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
          * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
          */
-        static void parseRouteDistinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
-                                       std::string *rd_administrator_subfield);
+        void libParseBGP_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
+                                      std::string *rd_administrator_subfield);
 
         /**
          * Parse all EVPN nlri's
@@ -78,19 +86,15 @@ namespace bgp_msg {
          * \param [in]   data_len               Length of the data in bytes to be read
          *
          */
-        void parseNlriData(u_char *data, uint16_t data_len);
+        void libParseBGP_parse_nlri_data(libParseBGP_evpn_data *evpn_data,u_char *data, uint16_t data_len);
 
 
-    private:
+//    private:
         //bool             debug;                           ///< debug flag to indicate debugging
         //Logger           *logger;                         ///< Logging class pointer
-        std::string      peer_addr;                       ///< Printed form of the peer address for logging
-        bool             isUnreach;                       ///< True if MP UNREACH, false if MP REACH
-
-        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
 
 
-    };
+//    };
 
 }
 

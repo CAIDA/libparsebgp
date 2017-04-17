@@ -27,8 +27,8 @@ namespace bgp_msg {
  * \details This class parses MP_UNREACH attributes.
  *          It can be extended to create attributes messages.
  */
-class MPUnReachAttr {
-public:
+//class MPUnReachAttr {
+//public:
 
     /**
      * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
@@ -40,6 +40,10 @@ public:
         uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
     };
 
+    struct libParseBGP_mp_un_reach_attr_parse_data {
+        std::string peer_addr;          ///< Printed form of the peer address for logging
+        parseBMP::peer_info *peer_info;         ///< Persistent Peer info pointer
+    };
     /**
      * Constructor for class
      *
@@ -50,9 +54,9 @@ public:
      * \param [in]     peer_info                Persistent Peer info pointer
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
-    MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info);
+    void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr, parseBMP::peer_info *peer_info);
 
-    virtual ~MPUnReachAttr();
+//    virtual ~MPUnReachAttr();
 
     /**
      * Parse the MP_UNREACH NLRI attribute data
@@ -66,13 +70,11 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parseUnReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+    void libParseBGP_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
-private:
+//private:
     //bool                    debug;              ///< debug flag to indicate debugging
     //Logger                  *logger;            ///< Logging class pointer
-    std::string             peer_addr;          ///< Printed form of the peer address for logging
-    parseBMP::peer_info    *peer_info;         ///< Persistent Peer info pointer
 
     /**
      * MP UnReach NLRI parse based on AFI
@@ -83,7 +85,7 @@ private:
      * \param [in]   nlri           Reference to parsed UnReach NLRI struct
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
+    void libParseBGP_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
 
     /**
      * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
@@ -94,8 +96,8 @@ private:
      * \param [in]   nlri           Reference to parsed UnReach NLRI struct
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void parseAfi_IPv4IPv6(bool isIPv4, mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
-};
+    void libParseBGP_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
+//};
 
 } /* namespace bgp_msg */
 

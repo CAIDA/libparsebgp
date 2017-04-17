@@ -25,8 +25,8 @@ namespace bgp_msg {
  * \details This class parses MP_REACH attributes.
  *          It can be extended to create attributes messages.
  */
-class MPReachAttr {
-public:
+//class MPReachAttr {
+//public:
     /**
      * struct defines the MP_REACH_NLRI (RFC4760 Section 3)
      */
@@ -41,6 +41,11 @@ public:
         uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
     };
 
+    struct libParseBGP_mp_reach_attr_parsed_data {
+        std::string peer_addr;              ///< Printed form of the peer address for logging
+        parseBMP::peer_info *peer_info;
+    };
+
     /**
      * Constructor for class
      *
@@ -52,9 +57,9 @@ public:
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
     //MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
-    MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info);
+    void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peer_addr, parseBMP::peer_info *peer_info);
 
-    virtual ~MPReachAttr();
+//    virtual ~MPReachAttr();
 
     /**
      * Parse the MP_REACH NLRI attribute data
@@ -68,7 +73,7 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parseReachNlriAttr(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
+    void libParseBGP_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
 
     /**
      * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -82,7 +87,7 @@ public:
      * \param [in]   peer_info                  Persistent Peer info pointer
      * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
      */
-    static void parseNlriData_IPv4IPv6(bool isIPv4, u_char *data, uint16_t len,
+    void libParseBGP_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                        parseBMP::peer_info *peer_info,
                                        std::list<bgp::prefix_tuple> &prefixes);
 
@@ -99,7 +104,7 @@ public:
      * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
      */
     template <typename PREFIX_TUPLE>
-    static void parseNlriData_LabelIPv4IPv6(bool isIPv4, u_char *data, uint16_t len,
+    void libParseBGP_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                             parseBMP::peer_info *peer_info,
                                             std::list<PREFIX_TUPLE> &prefixes);
 
@@ -118,34 +123,12 @@ public:
      */
     static inline uint16_t decodeLabel(u_char *data, uint16_t len, std::string &labels);
 
-private:
+//private:
     //bool                    debug;                  ///< debug flag to indicate debugging
     //Logger                   *logger;               ///< Logging class pointer
-    std::string             peer_addr;              ///< Printed form of the peer address for logging
-    parseBMP::peer_info    *peer_info;
 
-    /**
-     * MP Reach NLRI parse based on AFI
-     *
-     * \details Will parse the next-hop and nlri data based on AFI.  A call to
-     *          the specific SAFI method will be performed to further parse the message.
-     *
-     * \param [in]   nlri           Reference to parsed NLRI struct
-     * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
-     */
-    void parseAfi(mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
 
-    /**
-     * MP Reach NLRI parse for BGP_AFI_IPv4 & BGP_AFI_IPV6
-     *
-     * \details Will handle parsing the SAFI's for address family ipv6 and IPv4
-     *
-     * \param [in]   isIPv4         True false to indicate if IPv4 or IPv6
-     * \param [in]   nlri           Reference to parsed NLRI struct
-     * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
-     */
-    void parseAfi_IPv4IPv6(bool isIPv4, mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
-};
+    //};
 
 } /* namespace bgp_msg */
 
