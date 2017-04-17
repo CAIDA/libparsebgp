@@ -73,21 +73,21 @@ int main() {
 //            cout<<"Peer Address "<<p->p_entry.peer_addr<<" "<<p->p_entry.timestamp_secs<<" "<<p->p_entry.isPrePolicy<<endl;
 //            cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
 //            <dump-type>|<elem-type>|<record-ts>|<project>|<collector>|<peer-ASn>|<peer-IP>|<prefix>|<next-hop-IP>|<AS-path>|<origin-AS>|<communities>|<old-state>|<new-state>
-            if (p->getBMPType() == 0 || p->getBMPType() == 1 || p->getBMPType() == 3) {
-                stringstream out;
-                if (p->bgpMsg.hasEndOfRIBMarker)
-                    out << "R|E|"; //End of RIB
-                else
-                    out << "U||";
-                out << p->p_entry.timestamp_secs << "|||" << p->p_entry.peer_addr << "|" << p->p_entry.peer_as << "||";
-                if (p->bgpMsg.parsed_data.attrs.size() > 0)
-                    out << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] << "|" << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_AS_PATH] << "|" << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_ORIGIN] << "|" << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_COMMUNITIES] << "|";
-                else
-                    out << "||||";
-                out << "|";
-                cout << out.str() << endl;
-            }
-            delete p;
+//            if (p->getBMPType() == 0 || p->getBMPType() == 1 || p->getBMPType() == 3) {
+//                stringstream out;
+//                if (p->bgpMsg.hasEndOfRIBMarker)
+//                    out << "R|E|"; //End of RIB
+//                else
+//                    out << "U||";
+//                out << p->p_entry.timestamp_secs << "|||" << p->p_entry.peer_addr << "|" << p->p_entry.peer_as << "||";
+//                if (p->bgpMsg.parsed_data.attrs.size() > 0)
+//                    out << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] << "|" << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_AS_PATH] << "|" << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_ORIGIN] << "|" << p->bgpMsg.parsed_data.attrs[parseBMP::ATTR_TYPE_COMMUNITIES] << "|";
+//                else
+//                    out << "||||";
+//                out << "|";
+//                cout << out.str() << endl;
+//            }
+//            delete p;
         }
         if(cur==2)
             return 1;

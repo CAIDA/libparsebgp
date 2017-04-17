@@ -155,7 +155,7 @@ UpdateMsg::~UpdateMsg() {
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
 size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *update_msg, u_char *data, size_t size,
-                                               parseBMP::parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
+                                               parse_common::parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
     size_t      read_size       = 0;
     u_char      *bufPtr         = data;
 
@@ -255,7 +255,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-    static void libParseBGP_update_msg_parse_attr_as_path(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data, parseBMP::parsed_attrs_map &attrs) {
+    static void libParseBGP_update_msg_parse_attr_as_path(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data, parse_common::parsed_attrs_map &attrs) {
         std::string decoded_path;
         int         path_len    = attr_len;
         uint16_t    as_path_cnt = 0;
@@ -362,11 +362,11 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
         /*
          * Update the attributes map
          */
-        attrs[parseBMP::ATTR_TYPE_AS_PATH] = decoded_path;
+        attrs[parse_common::ATTR_TYPE_AS_PATH] = decoded_path;
 
         std::ostringstream numString;
         numString << as_path_cnt;
-        attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_COUNT] = numString.str();
+        attrs[parse_common::ATTR_TYPE_INTERNAL_AS_COUNT] = numString.str();
 
         /*
          * Get the last ASN and update the attributes map
@@ -384,7 +384,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
         }
 
         if (spos >= 0)   // positive only if found
-            attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_ORIGIN] = decoded_path.substr(spos, (epos - spos) + 1);
+            attrs[parse_common::ATTR_TYPE_INTERNAL_AS_ORIGIN] = decoded_path.substr(spos, (epos - spos) + 1);
     }
 
     /**
@@ -395,7 +395,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
     static void libParseBGP_update_msg_parse_attr_aggegator(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data,
-                                                            parseBMP::parsed_attrs_map &attrs) {
+                                                            parse_common::parsed_attrs_map &attrs) {
         std::string decodeStr;
         uint32_t    value32bit = 0;
         uint16_t    value16bit = 0;
@@ -428,7 +428,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
         inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
         decodeStr.append(ipv4_char);
 
-        attrs[parseBMP::ATTR_TYPE_AGGEGATOR] = decodeStr;
+        attrs[parse_common::ATTR_TYPE_AGGEGATOR] = decodeStr;
     }
 /**
  * Parse attribute data based on attribute type
@@ -443,7 +443,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
     static void libParseBGP_update_msg_parse_attr_data(libParseBGP_update_msg_data *update_msg, u_char attr_type, uint16_t attr_len,
-                                                       u_char *data, parseBMP::parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
+                                                       u_char *data, parse_common::parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
         std::string decodeStr       = "";
         u_char      ipv4_raw[4];
         char        ipv4_char[16];
@@ -462,7 +462,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                     case 2 : decodeStr.assign("incomplete"); break;
                 }
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_ORIGIN] = decodeStr;
+                parsed_data.attrs[parse_common::ATTR_TYPE_ORIGIN] = decodeStr;
                 break;
 
             case ATTR_TYPE_AS_PATH : // AS_PATH
@@ -472,7 +472,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             case ATTR_TYPE_NEXT_HOP : // Next hop v4
                 memcpy(ipv4_raw, data, 4);
                 inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-                parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ipv4_char);
+                parsed_data.attrs[parse_common::ATTR_TYPE_NEXT_HOP] = std::string(ipv4_char);
                 break;
 
             case ATTR_TYPE_MED : // MED value
@@ -481,7 +481,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                 bgp::SWAP_BYTES(&value32bit);
                 std::ostringstream numString;
                 numString << value32bit;
-                parsed_data.attrs[parseBMP::ATTR_TYPE_MED] = numString.str();
+                parsed_data.attrs[parse_common::ATTR_TYPE_MED] = numString.str();
                 break;
             }
             case ATTR_TYPE_LOCAL_PREF : // local pref value
@@ -490,11 +490,11 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                 bgp::SWAP_BYTES(&value32bit);
                 std::ostringstream numString;
                 numString << value32bit;
-                parsed_data.attrs[parseBMP::ATTR_TYPE_LOCAL_PREF] = numString.str();
+                parsed_data.attrs[parse_common::ATTR_TYPE_LOCAL_PREF] = numString.str();
                 break;
             }
             case ATTR_TYPE_ATOMIC_AGGREGATE : // Atomic aggregate
-                parsed_data.attrs[parseBMP::ATTR_TYPE_ATOMIC_AGGREGATE] = std::string("1");
+                parsed_data.attrs[parse_common::ATTR_TYPE_ATOMIC_AGGREGATE] = std::string("1");
                 break;
 
             case ATTR_TYPE_AGGEGATOR : // Aggregator
@@ -504,7 +504,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
                 memcpy(ipv4_raw, data, 4);
                 inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-                parsed_data.attrs[parseBMP::ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
+                parsed_data.attrs[parse_common::ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
                 break;
 
             case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
@@ -517,7 +517,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                     decodeStr.append(" ");
                 }
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_CLUSTER_LIST] = decodeStr;
+                parsed_data.attrs[parse_common::ATTR_TYPE_CLUSTER_LIST] = decodeStr;
                 break;
 
             case ATTR_TYPE_COMMUNITIES : // Community list
@@ -543,7 +543,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                     decodeStr.append(numString.str());
                 }
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_COMMUNITIES] = decodeStr;
+                parsed_data.attrs[parse_common::ATTR_TYPE_COMMUNITIES] = decodeStr;
 
                 break;
             }
@@ -624,7 +624,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
 void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len,
-                                             parseBMP::parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
+                                             parse_common::parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
     /*
      * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
      */

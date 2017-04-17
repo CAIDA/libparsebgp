@@ -146,7 +146,7 @@ namespace bgp_msg {
 * \param [in]   nlri           Reference to parsed NLRI struct
 * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
 */
-    void libParseBGP_parse_afi_ipv4_ipv6(libParseBGP_mp_reach_attr_parsed_data *parse_data, bool isIPv4, mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
+    void libParseBGP_parse_afi_ipv4_ipv6(libParseBGP_mp_reach_attr_parsed_data *parse_data, bool isIPv4, mp_reach_nlri &nlri, parse_common::parsed_update_data &parsed_data) {
         u_char      ip_raw[16];
         char        ip_char[40];
 
@@ -166,7 +166,7 @@ namespace bgp_msg {
 
                 inet_ntop(isIPv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                parsed_data.attrs[parse_common::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an IP address - parse the address and save it
                 libParseBGP_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info, parsed_data.advertised);
@@ -181,7 +181,7 @@ namespace bgp_msg {
 
                 inet_ntop(isIPv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                parsed_data.attrs[parse_common::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an Label, IP address tuple parse and save it
                 libParseBGP_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info, parsed_data.advertised);
@@ -203,7 +203,7 @@ namespace bgp_msg {
 
                 inet_ntop(isIPv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                parsed_data.attrs[parse_common::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 libParseBGP_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info, parsed_data.vpn);
 
@@ -226,7 +226,7 @@ namespace bgp_msg {
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-    static void libParseBGP_parse_afi(libParseBGP_mp_reach_attr_parsed_data *parse_data, mp_reach_nlri &nlri, parseBMP::parsed_update_data &parsed_data) {
+    static void libParseBGP_parse_afi(libParseBGP_mp_reach_attr_parsed_data *parse_data, mp_reach_nlri &nlri, parse_common::parsed_update_data &parsed_data) {
 
         switch (nlri.afi) {
             case bgp::BGP_AFI_IPV6 :  // IPv6
@@ -260,7 +260,7 @@ namespace bgp_msg {
 
                 inet_ntop(nlri.nh_len == 4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                parsed_data.attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                parsed_data.attrs[parse_common::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // parse by safi
                 switch (nlri.safi) {
@@ -300,7 +300,7 @@ namespace bgp_msg {
  * \param [in]   data                   Pointer to the attribute data
  * \param [out]  parsed_data            Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
+void libParseBGP_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
     mp_reach_nlri nlri;
     /*
      * Set the MP NLRI struct

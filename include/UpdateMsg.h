@@ -291,7 +291,7 @@ enum UPDATE_ATTR_TYPES {
       * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
       */
      size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *update_msg, u_char *data, size_t size,
-                                                    parseBMP::parsed_update_data &parsed_data, bool &has_end_of_rib_marker);
+                                                    parse_common::parsed_update_data &parsed_data, bool &has_end_of_rib_marker);
 
     /**
      * Parses the BGP attributes in the update
@@ -303,7 +303,7 @@ enum UPDATE_ATTR_TYPES {
      * \param [in]   len        Length of the data in bytes to be read
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len, parseBMP::parsed_update_data &parsed_data,
+    void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len, parse_common::parsed_update_data &parsed_data,
                          bool &has_end_of_rib_marker);
 
 /*private:

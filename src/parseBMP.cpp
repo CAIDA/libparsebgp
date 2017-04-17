@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "../include/bgp_common.h"
+#include "../include/parse_common.h"
 
 parseBMP parseBMPwrapper(unsigned char *buffer, int buf_len) {
     parseBMP pBMP;
@@ -54,7 +55,7 @@ parseBMP::parseBMP() {
     //parseMsg(buffer, buf_len);
     // Set the passed storage for the router entry items.
 //    p_entry = peer_entry;
-    bzero(&p_entry, sizeof(obj_bgp_peer));
+    bzero(&p_entry, sizeof(parse_common::obj_bgp_peer));
 }
 
 parseBMP::~parseBMP() {

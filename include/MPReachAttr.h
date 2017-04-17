@@ -73,7 +73,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data);
+    void libParseBGP_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
 
     /**
      * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)

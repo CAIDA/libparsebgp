@@ -13,12 +13,12 @@
 #include <vector>
 #include <list>
 #include "../include/parseBMP.h"
+#include "../include/parse_common.h"
 #include "bgp_common.h"
 #include "UpdateMsg.h"
 
 
 using namespace std;
-
 /**
  * \class   parseBGP
  *
@@ -78,8 +78,8 @@ struct libParseBGP_parse_bgp_parsed_data {
 
     //common_bgp_hdr common_hdr;                       ///< Current/last pased bgp common header
 
-    parseBMP::obj_bgp_peer *p_entry;       ///< peer table entry - will be updated with BMP info
-    parseBMP::obj_path_attr base_attr;      ///< Base attribute object
+    parse_common::obj_bgp_peer *p_entry;       ///< peer table entry - will be updated with BMP info
+    parse_common::obj_path_attr base_attr;      ///< Base attribute object
 
     string router_addr;    ///< Router IP address - used for logging
     parseBMP::peer_info *p_info;        ///< Persistent Peer information
@@ -111,13 +111,13 @@ struct libParseBGP_parse_bgp_parsed_data {
     //parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info);
     //parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info);
 
-    void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::obj_bgp_peer *peer_entry,
+    void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parse_common::obj_bgp_peer *peer_entry,
                                     string router_addr, parseBMP::peer_info *peer_info);
 
     //virtual ~parseBGP();
 
-    u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg,
-                                                    parseBMP::obj_peer_up_event *up_event, parseBMP::obj_peer_down_event *down_event,
+    u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parse_common::parsed_bgp_msg *bgp_msg,
+                                                    parse_common::obj_peer_up_event *up_event, parse_common::obj_peer_down_event *down_event,
                                                     uint32_t asn, bool is_local_msg = false);
 
 
@@ -133,7 +133,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      * \returns True if error, false if no error.
      */
     bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                             parseBMP::parsed_bgp_msg *bgp_msg);
+                                             parse_common::parsed_bgp_msg *bgp_msg);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -149,7 +149,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      * \returns True if error, false if no error.
      */
     bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data,
-                                                 size_t size, parseBMP::obj_peer_down_event *down_event, parseBMP::parsed_bgp_msg *bgp_msg);
+                                                 size_t size, parse_common::obj_peer_down_event *down_event, parse_common::parsed_bgp_msg *bgp_msg);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated
@@ -163,7 +163,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      * \returns True if error, false if no error.
      */
     bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                               parseBMP::obj_peer_up_event *up_event, parseBMP::parsed_bgp_msg *bgp_msg);
+                                               parse_common::obj_peer_up_event *up_event, parse_common::parsed_bgp_msg *bgp_msg);
 
     /*
      * Debug methods
@@ -186,8 +186,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      *
      * \returns BGP message type
      */
-    u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                              parseBMP::common_bgp_hdr &common_hdr);
+    u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parse_common::common_bgp_hdr &common_hdr);
 
     /**
      * Update the Database with the parsed updated data

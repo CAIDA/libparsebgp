@@ -30,7 +30,6 @@
 #include "../include/MPLinkStateAttr.h"
 
 using namespace std;
-
 /**
  * Constructor for class -
  *
@@ -68,7 +67,7 @@ using namespace std;
     router_addr = routerAddr;
 }*/
 
-void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::obj_bgp_peer *peer_entry,
+void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parse_common::obj_bgp_peer *peer_entry,
                                 string router_addr, parseBMP::peer_info *peer_info) {
     //debug = false;
     //logger = logPtr;
@@ -121,60 +120,60 @@ parseBGP::~parseBGP() {
  *
  * \param  attrs            Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::parsed_attrs_map &attrs) {
+static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parse_common::parsed_attrs_map &attrs) {
 
     /*
      * Setup the record
      */
-    bgp_parsed_data->base_attr.as_path                  = (string)attrs[parseBMP::ATTR_TYPE_AS_PATH];
-    bgp_parsed_data->base_attr.cluster_list             = (string)attrs[parseBMP::ATTR_TYPE_CLUSTER_LIST];
-    bgp_parsed_data->base_attr.community_list           = (string)attrs[parseBMP::ATTR_TYPE_COMMUNITIES];
-    bgp_parsed_data->base_attr.ext_community_list       = (string)attrs[parseBMP::ATTR_TYPE_EXT_COMMUNITY];
+    bgp_parsed_data->base_attr.as_path                  = (string)attrs[parse_common::ATTR_TYPE_AS_PATH];
+    bgp_parsed_data->base_attr.cluster_list             = (string)attrs[parse_common::ATTR_TYPE_CLUSTER_LIST];
+    bgp_parsed_data->base_attr.community_list           = (string)attrs[parse_common::ATTR_TYPE_COMMUNITIES];
+    bgp_parsed_data->base_attr.ext_community_list       = (string)attrs[parse_common::ATTR_TYPE_EXT_COMMUNITY];
 
-    bgp_parsed_data->base_attr.atomic_agg               = ((string)attrs[parseBMP::ATTR_TYPE_ATOMIC_AGGREGATE]).compare("1") == 0 ? true : false;
+    bgp_parsed_data->base_attr.atomic_agg               = ((string)attrs[parse_common::ATTR_TYPE_ATOMIC_AGGREGATE]).compare("1") == 0 ? true : false;
 
-    if (((string)attrs[parseBMP::ATTR_TYPE_LOCAL_PREF]).length() > 0)
-        bgp_parsed_data->base_attr.local_pref = std::stoul(((string)attrs[parseBMP::ATTR_TYPE_LOCAL_PREF]));
+    if (((string)attrs[parse_common::ATTR_TYPE_LOCAL_PREF]).length() > 0)
+        bgp_parsed_data->base_attr.local_pref = std::stoul(((string)attrs[parse_common::ATTR_TYPE_LOCAL_PREF]));
     else
         bgp_parsed_data->base_attr.local_pref = 0;
 
-    if (((string)attrs[parseBMP::ATTR_TYPE_MED]).length() > 0)
-        bgp_parsed_data->base_attr.med = std::stoul(((string)attrs[parseBMP::ATTR_TYPE_MED]));
+    if (((string)attrs[parse_common::ATTR_TYPE_MED]).length() > 0)
+        bgp_parsed_data->base_attr.med = std::stoul(((string)attrs[parse_common::ATTR_TYPE_MED]));
     else
         bgp_parsed_data->base_attr.med = 0;
 
-    if (((string)attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_COUNT]).length() > 0)
-        bgp_parsed_data->base_attr.as_path_count = std::stoi(((string)attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_COUNT]));
+    if (((string)attrs[parse_common::ATTR_TYPE_INTERNAL_AS_COUNT]).length() > 0)
+        bgp_parsed_data->base_attr.as_path_count = std::stoi(((string)attrs[parse_common::ATTR_TYPE_INTERNAL_AS_COUNT]));
     else
         bgp_parsed_data->base_attr.as_path_count = 0;
 
-    if (((string)attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_ORIGIN]).length() > 0)
-        bgp_parsed_data->base_attr.origin_as = std::stoul(((string)attrs[parseBMP::ATTR_TYPE_INTERNAL_AS_ORIGIN]));
+    if (((string)attrs[parse_common::ATTR_TYPE_INTERNAL_AS_ORIGIN]).length() > 0)
+        bgp_parsed_data->base_attr.origin_as = std::stoul(((string)attrs[parse_common::ATTR_TYPE_INTERNAL_AS_ORIGIN]));
     else
         bgp_parsed_data->base_attr.origin_as = 0;
 
-    if (((string)attrs[parseBMP::ATTR_TYPE_ORIGINATOR_ID]).length() > 0)
-        strncpy(bgp_parsed_data->base_attr.originator_id, ((string)attrs[parseBMP::ATTR_TYPE_ORIGINATOR_ID]).c_str(), sizeof(bgp_parsed_data->base_attr.originator_id));
+    if (((string)attrs[parse_common::ATTR_TYPE_ORIGINATOR_ID]).length() > 0)
+        strncpy(bgp_parsed_data->base_attr.originator_id, ((string)attrs[parse_common::ATTR_TYPE_ORIGINATOR_ID]).c_str(), sizeof(bgp_parsed_data->base_attr.originator_id));
     else
         bzero(bgp_parsed_data->base_attr.originator_id, sizeof(bgp_parsed_data->base_attr.originator_id));
 
-    if ( ((string)attrs[parseBMP::ATTR_TYPE_NEXT_HOP]).find_first_of(':') ==  string::npos)
+    if ( ((string)attrs[parse_common::ATTR_TYPE_NEXT_HOP]).find_first_of(':') ==  string::npos)
         bgp_parsed_data->base_attr.nexthop_isIPv4 = true;
     else // is IPv6
         bgp_parsed_data->base_attr.nexthop_isIPv4 = false;
 
-    if ( ((string)attrs[parseBMP::ATTR_TYPE_AGGEGATOR]).length() > 0)
-        strncpy(bgp_parsed_data->base_attr.aggregator, ((string)attrs[parseBMP::ATTR_TYPE_AGGEGATOR]).c_str(), sizeof(bgp_parsed_data->base_attr.aggregator));
+    if ( ((string)attrs[parse_common::ATTR_TYPE_AGGEGATOR]).length() > 0)
+        strncpy(bgp_parsed_data->base_attr.aggregator, ((string)attrs[parse_common::ATTR_TYPE_AGGEGATOR]).c_str(), sizeof(bgp_parsed_data->base_attr.aggregator));
     else
         bzero(bgp_parsed_data->base_attr.aggregator, sizeof(bgp_parsed_data->base_attr.aggregator));
 
-    if ( ((string)attrs[parseBMP::ATTR_TYPE_ORIGIN]).length() > 0)
-        strncpy(bgp_parsed_data->base_attr.origin, ((string)attrs[parseBMP::ATTR_TYPE_ORIGIN]).c_str(), sizeof(bgp_parsed_data->base_attr.origin));
+    if ( ((string)attrs[parse_common::ATTR_TYPE_ORIGIN]).length() > 0)
+        strncpy(bgp_parsed_data->base_attr.origin, ((string)attrs[parse_common::ATTR_TYPE_ORIGIN]).c_str(), sizeof(bgp_parsed_data->base_attr.origin));
     else
         bzero(bgp_parsed_data->base_attr.origin, sizeof(bgp_parsed_data->base_attr.origin));
 
-    if ( ((string)attrs[parseBMP::ATTR_TYPE_NEXT_HOP]).length() > 0)
-        strncpy(bgp_parsed_data->base_attr.next_hop, ((string)attrs[parseBMP::ATTR_TYPE_NEXT_HOP]).c_str(), sizeof(bgp_parsed_data->base_attr.next_hop));
+    if ( ((string)attrs[parse_common::ATTR_TYPE_NEXT_HOP]).length() > 0)
+        strncpy(bgp_parsed_data->base_attr.next_hop, ((string)attrs[parse_common::ATTR_TYPE_NEXT_HOP]).c_str(), sizeof(bgp_parsed_data->base_attr.next_hop));
 
     else {
         // Skip adding path attributes if next hop is missing
@@ -204,8 +203,8 @@ static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_d
  * \param [in] ls_data     Reference to the parsed link state nlri information
  * \param [in] ls_attrs    Reference to the parsed link state attribute information
  */
-static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, parseBMP::parsed_data_ls ls_data,
-                                                   parseBMP::parsed_ls_attrs_map &ls_attrs) {
+static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, parse_common::parsed_data_ls ls_data,
+                                                   parse_common::parsed_ls_attrs_map &ls_attrs) {
     /*
      * Update table entry with attributes based on NLRI
      */
@@ -213,7 +212,7 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
         //SELF_DEBUG("%s: Updating BGP-LS: Nodes %d", p_entry->peer_addr, ls_data.nodes.size());
 
         // Merge attributes to each table entry
-        for (list<parseBMP::obj_ls_node>::iterator it = ls_data.nodes.begin();it != ls_data.nodes.end(); it++) {
+        for (list<parse_common::obj_ls_node>::iterator it = ls_data.nodes.begin();it != ls_data.nodes.end(); it++) {
 
             if (ls_attrs.find(bgp_msg::ATTR_NODE_NAME) != ls_attrs.end())
                 memcpy((*it).name, ls_attrs[bgp_msg::ATTR_NODE_NAME].data(), sizeof((*it).name));
@@ -252,7 +251,7 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
         //SELF_DEBUG("%s: Updating BGP-LS: Links %d ", p_entry->peer_addr, ls_data.links.size());
 
         // Merge attributes to each table entry
-        for (list<parseBMP::obj_ls_link>::iterator it = ls_data.links.begin();
+        for (list<parse_common::obj_ls_link>::iterator it = ls_data.links.begin();
              it != ls_data.links.end(); it++) {
 
             if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
@@ -323,7 +322,7 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
         //SELF_DEBUG("%s: Updating BGP-LS: Prefixes %d ", p_entry->peer_addr, ls_data.prefixes.size());
 
         // Merge attributes to each table entry
-        for (list<parseBMP::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();it != ls_data.prefixes.end(); it++) {
+        for (list<parse_common::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();it != ls_data.prefixes.end(); it++) {
 
             if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
                 memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
@@ -377,9 +376,9 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
  * \param [in] attrs           Reference to the parsed attributes map
  */
 static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<bgp::vpn_tuple> &prefixes,
-                                                  parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_vpn> &rib_list) {
+                                                  parse_common::parsed_attrs_map &attrs, vector<parse_common::obj_vpn> &rib_list) {
     //vector<parseBMP::obj_vpn> rib_list;
-    parseBMP::obj_vpn         rib_entry;
+    parse_common::obj_vpn            rib_entry;
     uint32_t                         value_32bit;
     uint64_t                         value_64bit;
 
@@ -477,10 +476,10 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
  * \param [in] attrs           Reference to the parsed attributes map
  */
 static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<bgp::evpn_tuple> &nlris,
-                                                 parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_evpn> &rib_list) {
+                                                 parse_common::parsed_attrs_map &attrs, vector<parse_common::obj_evpn> &rib_list) {
 
     //vector<parseBMP::obj_evpn> rib_list;
-    parseBMP::obj_evpn         rib_entry;
+    parse_common::obj_evpn         rib_entry;
 
     /*
      * Loop through all vpn and add/update them in the DB
@@ -535,9 +534,9 @@ static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_da
  * \param  attrs            Reference to the parsed attributes map
  */
 static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<bgp::prefix_tuple> &adv_prefixes,
-                                                         parseBMP::parsed_attrs_map &attrs, vector<parseBMP::obj_rib> &rib_list) {
+                                                         parse_common::parsed_attrs_map &attrs, vector<parse_common::obj_rib> &rib_list) {
     //vector<parseBMP::obj_rib> rib_list;
-    parseBMP::obj_rib         rib_entry;
+    parse_common::obj_rib         rib_entry;
     uint32_t                         value_32bit;
     uint64_t                         value_64bit;
 
@@ -629,9 +628,9 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
  * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
  */
 static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<bgp::prefix_tuple> &wdrawn_prefixes,
-                                                            vector<parseBMP::obj_rib> &rib_list) {
+                                                            vector<parse_common::obj_rib> &rib_list) {
     //vector<parseBMP::obj_rib> rib_list;
-    parseBMP::obj_rib         rib_entry;
+    parse_common::obj_rib         rib_entry;
 
     /*
      * Loop through all prefixes and add/update them in the DB
@@ -676,7 +675,7 @@ static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bg
  *
  * \param  parsed_data          Reference to the parsed update data
  */
-static void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parseBMP::parsed_bgp_msg *bgp_msg) {
+static void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parse_common::parsed_bgp_msg *bgp_msg) {
     /*
      * Update the path attributes
      */
@@ -715,8 +714,8 @@ static void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *b
  * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns BGP message type
  */
-u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parseBMP::parsed_bgp_msg *bgp_msg,
-                                                parseBMP::obj_peer_up_event *up_event, parseBMP::obj_peer_down_event *down_event,
+u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parse_common::parsed_bgp_msg *bgp_msg,
+                                                parse_common::obj_peer_up_event *up_event, parse_common::obj_peer_down_event *down_event,
                                                 uint32_t asn, bool is_local_msg) {
     u_char  bgp_msg_type = libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr);
     switch (bgp_msg_type) {
@@ -892,7 +891,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
  * \returns True if error, false if no error.
  */
 bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                         parseBMP::parsed_bgp_msg *bgp_msg) {
+                                         parse_common::parsed_bgp_msg *bgp_msg) {
     //bgp_msg::UpdateMsg::parsed_update_data parsed_data;
     int read_size = 0;
 
@@ -937,7 +936,7 @@ bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_
  * \returns True if error, false if no error.
  */
 bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                             parseBMP::obj_peer_down_event *down_event, parseBMP::parsed_bgp_msg *bgp_msg) {
+                                             parse_common::obj_peer_down_event *down_event, parse_common::parsed_bgp_msg *bgp_msg) {
     bool        rval;
 
     // Process the BGP message normally
@@ -982,7 +981,7 @@ bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *
  * \returns True if error, false if no error.
  */
 bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                           parseBMP::obj_peer_up_event *up_event, parseBMP::parsed_bgp_msg *bgp_msg) {
+                                           parse_common::obj_peer_up_event *up_event, parse_common::parsed_bgp_msg *bgp_msg) {
     bgp_msg::libParseBGP_open_msg_data *open_msg_data;
     libParseBGP_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
     list <string>       cap_list;
@@ -1093,7 +1092,7 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
  * \returns BGP message type
  */
 u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                parseBMP::common_bgp_hdr &common_hdr) {
+                                          parse_common::common_bgp_hdr &common_hdr) {
     //bzero(&common_hdr, sizeof(common_hdr));
 
     /*

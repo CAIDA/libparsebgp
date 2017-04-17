@@ -23,7 +23,7 @@ namespace bgp_msg {
      */
     //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
-    void libParseBGP_MP_link_state_init(libparseBGP_MP_link_state_parsed_data *data,std::string peer_address,parseBMP::parsed_update_data *parse_data) {
+    void libParseBGP_MP_link_state_init(libparseBGP_MP_link_state_parsed_data *data,std::string peer_address,parse_common::parsed_update_data *parse_data) {
         //logger = logPtr;
         //debug = enable_debug;
         data->peer_addr = peer_address;
@@ -226,7 +226,7 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     static void libParseBGP_parse_nlri_node(libparseBGP_MP_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        parseBMP::obj_ls_node node_tbl;
+        parse_common::obj_ls_node node_tbl;
         bzero(&node_tbl, sizeof(node_tbl));
 
         if (data_len < 4) {
@@ -462,7 +462,7 @@ namespace bgp_msg {
      * \param [in]   proto_id       NLRI protocol type id
      */
     static void libParseBGP_parse_nlri_link(libparseBGP_MP_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-        parseBMP::obj_ls_link link_tbl;
+        parse_common::obj_ls_link link_tbl;
         bzero(&link_tbl, sizeof(link_tbl));
 
         if (data_len < 4) {
@@ -748,7 +748,7 @@ namespace bgp_msg {
      * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
      */
     static void libParseBGP_parse_nlri_prefix(libparseBGP_MP_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
-        parseBMP::obj_ls_prefix prefix_tbl;
+        parse_common::obj_ls_prefix prefix_tbl;
         bzero(&prefix_tbl, sizeof(prefix_tbl));
 
         if (data_len < 4) {
@@ -935,7 +935,7 @@ namespace bgp_msg {
             inet_ntop(AF_INET6, ip_raw, ip_char, sizeof(ip_char));
         }
 
-        data->parsed_data->attrs[parseBMP::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+        data->parsed_data->attrs[parse_common::ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
         /*
          * Decode based on SAFI

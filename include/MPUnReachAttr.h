@@ -70,7 +70,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+    void libParseBGP_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
 //private:
     //bool                    debug;              ///< debug flag to indicate debugging
@@ -85,7 +85,7 @@ namespace bgp_msg {
      * \param [in]   nlri           Reference to parsed UnReach NLRI struct
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void libParseBGP_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
+    void libParseBGP_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parse_common::parsed_update_data &parsed_data);
 
     /**
      * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
@@ -96,7 +96,7 @@ namespace bgp_msg {
      * \param [in]   nlri           Reference to parsed UnReach NLRI struct
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
-    void libParseBGP_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parseBMP::parsed_update_data &parsed_data);
+    void libParseBGP_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parse_common::parsed_update_data &parsed_data);
 //};
 
 } /* namespace bgp_msg */

@@ -124,7 +124,7 @@ using namespace std;
         uint32_t                     originated_time;
         uint16_t                     attribute_len;
         bool                         end_of_rib_marker;
-        parseBMP::parsed_update_data parsed_data;
+        parse_common::parsed_update_data parsed_data;
     };
 
     //4.3.2
@@ -252,14 +252,14 @@ struct libParseBGP_parse_mrt_parsed_data {
     bgp4mp_msg bgp4mp_mssg;
     bgp4mp_state_change bgp4mp_state_change_msg;
 
-    parseBMP::obj_peer_up_event up_event;
-    parseBMP::obj_peer_down_event down_event;
+    parse_common::obj_peer_up_event up_event;
+    parse_common::obj_peer_down_event down_event;
 
     u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
     int mrt_data_len;              ///< Length/size of data in the data buffer
 
     libParseBGP_parse_bgp_parsed_data *pbgp;
-    parseBMP::parsed_bgp_msg bgp_msg;
+    parse_common::parsed_bgp_msg bgp_msg;
 
 //private:
     uint16_t mrt_type;

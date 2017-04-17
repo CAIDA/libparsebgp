@@ -136,8 +136,8 @@ namespace bgp_msg {
     struct libparseBGP_MP_link_state_parsed_data {
         std::string peer_addr;                       ///< Printed form of the peer address for logging
 
-        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
-        parseBMP::parsed_data_ls *ls_data;           ///< Parsed LS Data
+        parse_common::parsed_update_data *parsed_data;       ///< Parsed data structure
+        parse_common::parsed_data_ls *ls_data;           ///< Parsed LS Data
     };
         /**
          * Constructor for class
@@ -150,7 +150,7 @@ namespace bgp_msg {
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
 
-        void libParseBGP_MP_link_state_init(libparseBGP_MP_link_state_parsed_data *data,std::string peer_address,parseBMP::parsed_update_data *parse_data);
+        void libParseBGP_MP_link_state_init(libparseBGP_MP_link_state_parsed_data *data,std::string peer_address,parse_common::parsed_update_data *parse_data);
 
             //       virtual ~MPLinkState();
 

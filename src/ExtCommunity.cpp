@@ -48,7 +48,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void ExtCommunity::parseExtCommunities(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
+    void ExtCommunity::parseExtCommunities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
 
         std::string decodeStr = "";
         extcomm_hdr ec_hdr;
@@ -116,7 +116,7 @@ namespace bgp_msg {
                 decodeStr.append(" ");
         }
 
-        parsed_data.attrs[parseBMP::ATTR_TYPE_EXT_COMMUNITY] = decodeStr;
+        parsed_data.attrs[parse_common::ATTR_TYPE_EXT_COMMUNITY] = decodeStr;
     }
 
     /**
@@ -580,7 +580,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void ExtCommunity::parsev6ExtCommunities(int attr_len, u_char *data, parseBMP::parsed_update_data &parsed_data) {
+    void ExtCommunity::parsev6ExtCommunities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
         std::string decodeStr = "";
         extcomm_hdr ec_hdr;
 

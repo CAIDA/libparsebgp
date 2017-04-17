@@ -14,7 +14,7 @@ namespace bgp_msg {
 
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    void libParseBGP_evpn_init(libParseBGP_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parseBMP::parsed_update_data *parsed_data) {
+    void libParseBGP_evpn_init(libParseBGP_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parse_common::parsed_update_data *parsed_data) {
         //logger = logPtr;
         //debug = enable_debug;
         evpn_data->peer_addr = peerAddr;
