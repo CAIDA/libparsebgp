@@ -25,8 +25,8 @@ namespace bgp_msg {
  * \details This class parses a BGP open message.  It can be extended to create messages.
  *          message.
  */
-class OpenMsg {
-public:
+//class OpenMsg {
+//public:
    /**
      * Defines the BGP capabilities
      *      http://www.iana.org/assignments/capability-codes/capability-codes.xhtml
@@ -122,6 +122,10 @@ public:
     } __attribute__((__packed__));
 
 
+    struct libParseBGP_open_msg_data{
+        std::string             peer_addr;      ///< Printed form of the peer address for logging
+        parseBMP::peer_info    *peer_info;     ///< Persistent Peer info pointer
+    };
      /**
       * Constructor for class
       *
@@ -131,8 +135,8 @@ public:
       * \param [in]     peer_info       Persistent peer information
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
-    OpenMsg(std::string peerAddr, parseBMP::peer_info *peer_info);
-    virtual ~OpenMsg();
+     void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data, std::string peerAddr, parseBMP::peer_info *peer_info);
+//    virtual ~OpenMsg();
 
     /**
      * Parses an open message
@@ -151,14 +155,12 @@ public:
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
      */
-    size_t parseOpenMsg(u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
+    size_t libParseBGP_parse_open_msg(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
                         std::string &bgp_id, std::list<std::string> &capabilities);
 
 
-private:
+//private:
     //bool                    debug;          ///< debug flag to indicate debugging
-    std::string             peer_addr;      ///< Printed form of the peer address for logging
-    parseBMP::peer_info    *peer_info;     ///< Persistent Peer info pointer
 
     /**
      * Parses capabilities from buffer
@@ -175,9 +177,9 @@ private:
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read
      */
-    size_t parseCapabilities(u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
+    size_t libParseBGP_parse_capabilities(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
                              std::list<std::string> &capabilities);
-};
+//};
 
 } /* namespace bgp */
 
