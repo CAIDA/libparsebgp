@@ -21,8 +21,8 @@
 
 namespace bgp_msg {
 
-    class MPLinkStateAttr {
-    public:
+ //   class MPLinkStateAttr {
+ //   public:
         /**
          * Node Attribute types
          */
@@ -79,15 +79,15 @@ namespace bgp_msg {
         };
 
 
-        /*
-         * static const arrays - initialized in implementation
-         */
-        static const char * const LS_FLAGS_NODE_NLRI[];
-        static const char * const LS_FLAGS_PEER_ADJ_SID_ISIS[];
-        static const char * const LS_FLAGS_PEER_ADJ_SID_OSPF[];
-        static const char * const LS_FLAGS_SR_CAP_ISIS[];
-        static const char * const LS_FLAGS_PREFIX_SID_ISIS[];
-        static const char * const LS_FLAGS_PREFIX_SID_OSPF[];
+//        /*
+//         * static const arrays - initialized in implementation
+//         */
+//        static const char * const LS_FLAGS_NODE_NLRI[];
+//        static const char * const LS_FLAGS_PEER_ADJ_SID_ISIS[];
+//        static const char * const LS_FLAGS_PEER_ADJ_SID_OSPF[];
+//        static const char * const LS_FLAGS_SR_CAP_ISIS[];
+//        static const char * const LS_FLAGS_PREFIX_SID_ISIS[];
+//        static const char * const LS_FLAGS_PREFIX_SID_OSPF[];
 
 
         /**
@@ -103,7 +103,13 @@ namespace bgp_msg {
             ATTR_PREFIX_SID                                     ///< Prefix-SID TLV (len=variable)
         };
 
-        /**
+    struct libparseBGP_attr_link_state_parsed_data {
+        std::string peer_addr;                       ///< Printed form of the peer address for logging
+
+        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
+    };
+
+    /**
          * Constructor for class
          *
          * \details Handles bgp Extended Communities
@@ -113,8 +119,10 @@ namespace bgp_msg {
          * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
-        MPLinkStateAttr(std::string peerAddr,parseBMP::parsed_update_data *parsed_data);
-        virtual ~MPLinkStateAttr();
+
+
+        void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peer_addr,parseBMP::parsed_update_data *parsed_data);
+    //     virtual ~MPLinkStateAttr();
 
 
         /**
@@ -125,18 +133,14 @@ namespace bgp_msg {
          * \param [in]   attr_len       Length of the attribute data
          * \param [in]   data           Pointer to the attribute data
          */
-        void parseAttrLinkState(int attr_len, u_char *data);
+        void libParseBGP_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
 
 
-
-    private:
+//    private:
 //        bool             debug;                           ///< debug flag to indicate debugging
 //        Logger           *logger;                         ///< Logging class pointer
-        std::string      peer_addr;                       ///< Printed form of the peer address for logging
 
-        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
-
-        #define IEEE_INFINITY         0x7F800000
+       #define IEEE_INFINITY         0x7F800000
         #define MINUS_INFINITY        (int32_t)0x80000000L
         #define PLUS_INFINITY         0x7FFFFFFF
         #define IEEE_NUMBER_WIDTH       32        /* bits in number */
@@ -160,38 +164,9 @@ namespace bgp_msg {
          *
          * \returns length of the TLV attribute parsed
          */
-        int parseAttrLinkStateTLV(int attr_len, u_char *data);
-        
-        /*******************************************************************************//**
-         * Parse flags to string
-         *
-         * \details   Will parse flags from binary representation to string.
-         *            Bits are read left to right as documented in RFC/drafts.   Left most
-         *            bit == index 0 in array and so on.
-         *
-         * \param [in]   data             Flags byte
-         * \param [in]   flags_array      Array of flags - Array item equals the bit position for flag
-         *                                Must have a size of 8 or less.
-         * \param [in]   flags_array_len  Length of flags array
-         *
-         * \returns string with flags
-         */
-        std::string parse_flags_to_string(u_char data, const char * const flags_array[], int flags_array_len);
+        int libParseBGP_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
 
-        /*******************************************************************************//**
-         * Parse SID/Label value to string
-         *
-         * \details Parses the SID to index, label, or IPv6 string value
-         *
-         * \param [in]  data            Raw SID data to be parsed
-         * \param [in]  len             Length of the data (min is 3 and max is 16).
-         *
-         * \returns string value of SID
-         */
-        std::string parse_sid_value(u_char *data, int len);
-
-        uint32_t ieee_float_to_kbps(int32_t float_val);
-    };
+//    };
 
 }
 

@@ -178,32 +178,6 @@ namespace bgp_msg {
         //Logger           *logger;                         ///< Logging class pointer
 
         /**********************************************************************************//*
-         * Parse Node Descriptor
-         *
-         * \details will parse node descriptor
-         *
-         * \param [in]   data           Pointer to the start of the node NLRI data
-         * \param [in]   data_len       Length of the data
-         * \param [out]  info           Node descriptor information returned/updated
-         *
-         * \returns number of bytes read
-         */
-        int parseDescrLocalRemoteNode(u_char *data, int data_len, node_descriptor &info);
-
-        /**********************************************************************************//*
-         * Parse Link Descriptor sub-tlvs
-         *
-         * \details will parse a link descriptor (series of sub-tlv's)
-         *
-         * \param [in]   data           Pointer to the start of the node NLRI data
-         * \param [in]   data_len       Length of the data
-         * \param [out]  info           link descriptor information returned/updated
-         *
-         * \returns number of bytes read
-         */
-        int parseDescrLink(u_char *data, int data_len, link_descriptor &info);
-
-        /**********************************************************************************//*
          * Parse Prefix Descriptor sub-tlvs
          *
          * \details will parse a prefix descriptor (series of sub-tlv's)
@@ -216,18 +190,6 @@ namespace bgp_msg {
          * \returns number of bytes read
          */
         int parseDescrPrefix(u_char *data, int data_len, prefix_descriptor &info, bool isIPv4);
-
-        /**********************************************************************************//*
-         * Decode Protocol ID
-         *
-         * \details will decode and return string representation of protocol (matches DB enum)
-         *
-         * \param [in]   proto_id       NLRI protocol type id
-         *
-         * \return string representation for the protocol that matches the DB enum string value
-         *          empty will be returned if invalid/unknown.
-         */
-        std::string decodeNlriProtocolId(uint8_t proto_id);
 
         /**********************************************************************************//*
          * Hash node descriptor info

@@ -582,8 +582,9 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
 
             case ATTR_TYPE_BGP_LS:
             {
-                MPLinkStateAttr ls(update_msg->peer_addr, &parsed_data);
-                ls.parseAttrLinkState(attr_len, data);
+                libparseBGP_attr_link_state_parsed_data *parse_data;
+                libParseBGP_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
+                libParseBGP_parse_attr_link_state(parse_data, attr_len, data);
                 break;
             }
 

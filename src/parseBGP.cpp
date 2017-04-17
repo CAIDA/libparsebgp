@@ -215,30 +215,30 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
         // Merge attributes to each table entry
         for (list<parseBMP::obj_ls_node>::iterator it = ls_data.nodes.begin();it != ls_data.nodes.end(); it++) {
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_NAME) != ls_attrs.end())
-                memcpy((*it).name, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_NAME].data(), sizeof((*it).name));
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_NAME) != ls_attrs.end())
+                memcpy((*it).name, ls_attrs[bgp_msg::ATTR_NODE_NAME].data(), sizeof((*it).name));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end())
-                memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end())
+                memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end()) {
-                memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end()) {
+                memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
                 (*it).is_ipv4 = false;
             }
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_MT_ID) != ls_attrs.end()) {
-                strncpy((char *)&(*it).mt_id, (char *)ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_MT_ID].data(),
-                        strlen((char *)ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_MT_ID].data()) + 1);
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_MT_ID) != ls_attrs.end()) {
+                strncpy((char *)&(*it).mt_id, (char *)ls_attrs[bgp_msg::ATTR_NODE_MT_ID].data(),
+                        strlen((char *)ls_attrs[bgp_msg::ATTR_NODE_MT_ID].data()) + 1);
             }
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_FLAG) != ls_attrs.end())
-                memcpy((*it).flags, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_FLAG].data(), sizeof((*it).flags));
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_FLAG) != ls_attrs.end())
+                memcpy((*it).flags, ls_attrs[bgp_msg::ATTR_NODE_FLAG].data(), sizeof((*it).flags));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_ISIS_AREA_ID) != ls_attrs.end())
-                memcpy((*it).isis_area_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_ISIS_AREA_ID].data(), sizeof((*it).isis_area_id));
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_ISIS_AREA_ID) != ls_attrs.end())
+                memcpy((*it).isis_area_id, ls_attrs[bgp_msg::ATTR_NODE_ISIS_AREA_ID].data(), sizeof((*it).isis_area_id));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_SR_CAPABILITIES) != ls_attrs.end()) {
-                memcpy((*it).sr_capabilities_tlv, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_SR_CAPABILITIES].data(), sizeof((*it).sr_capabilities_tlv));
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_SR_CAPABILITIES) != ls_attrs.end()) {
+                memcpy((*it).sr_capabilities_tlv, ls_attrs[bgp_msg::ATTR_NODE_SR_CAPABILITIES].data(), sizeof((*it).sr_capabilities_tlv));
             }
         }
 
@@ -255,62 +255,62 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
         for (list<parseBMP::obj_ls_link>::iterator it = ls_data.links.begin();
              it != ls_data.links.end(); it++) {
 
-            if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
-                memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
+            if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
+                memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
 
-            else if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end()) {
-                memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
+            else if (ls_attrs.find(bgp_msg::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end()) {
+                memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
                 (*it).is_ipv4 = true;
             }
 
-            if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV6_ROUTER_ID_REMOTE) != ls_attrs.end())
-                memcpy((*it).remote_router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), 16);
+            if (not (*it).is_ipv4 and ls_attrs.find(bgp_msg::ATTR_LINK_IPV6_ROUTER_ID_REMOTE) != ls_attrs.end())
+                memcpy((*it).remote_router_id, ls_attrs[bgp_msg::ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), 16);
 
-            else if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV4_ROUTER_ID_REMOTE) != ls_attrs.end()) {
-                memcpy((*it).remote_router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_IPV4_ROUTER_ID_REMOTE].data(), 4);
+            else if (ls_attrs.find(bgp_msg::ATTR_LINK_IPV4_ROUTER_ID_REMOTE) != ls_attrs.end()) {
+                memcpy((*it).remote_router_id, ls_attrs[bgp_msg::ATTR_LINK_IPV4_ROUTER_ID_REMOTE].data(), 4);
                 //(*it).isIPv4 = true; // only set for local rid
             }
 
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_ISIS_AREA_ID) != ls_attrs.end())
-                memcpy((*it).isis_area_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_ISIS_AREA_ID].data(), sizeof((*it).isis_area_id));
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_ISIS_AREA_ID) != ls_attrs.end())
+                memcpy((*it).isis_area_id, ls_attrs[bgp_msg::ATTR_NODE_ISIS_AREA_ID].data(), sizeof((*it).isis_area_id));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_ADMIN_GROUP) != ls_attrs.end())
-                memcpy(&(*it).admin_group, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_ADMIN_GROUP].data(), sizeof((*it).admin_group));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_ADMIN_GROUP) != ls_attrs.end())
+                memcpy(&(*it).admin_group, ls_attrs[bgp_msg::ATTR_LINK_ADMIN_GROUP].data(), sizeof((*it).admin_group));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_MAX_LINK_BW) != ls_attrs.end())
-                memcpy(&(*it).max_link_bw, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_MAX_LINK_BW].data(),
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_MAX_LINK_BW) != ls_attrs.end())
+                memcpy(&(*it).max_link_bw, ls_attrs[bgp_msg::ATTR_LINK_MAX_LINK_BW].data(),
                        sizeof((*it).max_link_bw));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_MAX_RESV_BW) != ls_attrs.end())
-                memcpy(&(*it).max_resv_bw, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_MAX_RESV_BW].data(), sizeof((*it).max_resv_bw));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_MAX_RESV_BW) != ls_attrs.end())
+                memcpy(&(*it).max_resv_bw, ls_attrs[bgp_msg::ATTR_LINK_MAX_RESV_BW].data(), sizeof((*it).max_resv_bw));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_UNRESV_BW) != ls_attrs.end())
-                memcpy(&(*it).unreserved_bw, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_UNRESV_BW].data(), sizeof((*it).unreserved_bw));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_UNRESV_BW) != ls_attrs.end())
+                memcpy(&(*it).unreserved_bw, ls_attrs[bgp_msg::ATTR_LINK_UNRESV_BW].data(), sizeof((*it).unreserved_bw));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_TE_DEF_METRIC) != ls_attrs.end())
-                memcpy(&(*it).te_def_metric, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_TE_DEF_METRIC].data(), sizeof((*it).te_def_metric));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_TE_DEF_METRIC) != ls_attrs.end())
+                memcpy(&(*it).te_def_metric, ls_attrs[bgp_msg::ATTR_LINK_TE_DEF_METRIC].data(), sizeof((*it).te_def_metric));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_PROTECTION_TYPE) != ls_attrs.end())
-                memcpy((*it).protection_type, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_PROTECTION_TYPE].data(), sizeof((*it).protection_type));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_PROTECTION_TYPE) != ls_attrs.end())
+                memcpy((*it).protection_type, ls_attrs[bgp_msg::ATTR_LINK_PROTECTION_TYPE].data(), sizeof((*it).protection_type));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_MPLS_PROTO_MASK) != ls_attrs.end())
-                memcpy((*it).mpls_proto_mask, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_MPLS_PROTO_MASK].data(), sizeof((*it).mpls_proto_mask));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_MPLS_PROTO_MASK) != ls_attrs.end())
+                memcpy((*it).mpls_proto_mask, ls_attrs[bgp_msg::ATTR_LINK_MPLS_PROTO_MASK].data(), sizeof((*it).mpls_proto_mask));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_IGP_METRIC) != ls_attrs.end())
-                memcpy(&(*it).igp_metric, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_IGP_METRIC].data(), sizeof((*it).igp_metric));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_IGP_METRIC) != ls_attrs.end())
+                memcpy(&(*it).igp_metric, ls_attrs[bgp_msg::ATTR_LINK_IGP_METRIC].data(), sizeof((*it).igp_metric));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_SRLG) != ls_attrs.end())
-                memcpy((*it).srlg, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_SRLG].data(), sizeof((*it).srlg));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_SRLG) != ls_attrs.end())
+                memcpy((*it).srlg, ls_attrs[bgp_msg::ATTR_LINK_SRLG].data(), sizeof((*it).srlg));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_NAME) != ls_attrs.end())
-                memcpy((*it).name, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_NAME].data(), sizeof((*it).name));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_NAME) != ls_attrs.end())
+                memcpy((*it).name, ls_attrs[bgp_msg::ATTR_LINK_NAME].data(), sizeof((*it).name));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_PEER_EPE_NODE_SID) != ls_attrs.end())
-                memcpy((*it).peer_node_sid, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_PEER_EPE_NODE_SID].data(), sizeof((*it).peer_node_sid));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_PEER_EPE_NODE_SID) != ls_attrs.end())
+                memcpy((*it).peer_node_sid, ls_attrs[bgp_msg::ATTR_LINK_PEER_EPE_NODE_SID].data(), sizeof((*it).peer_node_sid));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_LINK_ADJACENCY_SID) != ls_attrs.end())
-                memcpy((*it).peer_adj_sid, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_LINK_ADJACENCY_SID].data(), sizeof((*it).peer_adj_sid));
+            if (ls_attrs.find(bgp_msg::ATTR_LINK_ADJACENCY_SID) != ls_attrs.end())
+                memcpy((*it).peer_adj_sid, ls_attrs[bgp_msg::ATTR_LINK_ADJACENCY_SID].data(), sizeof((*it).peer_adj_sid));
         }
 
 //        if (remove)
@@ -325,34 +325,34 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
         // Merge attributes to each table entry
         for (list<parseBMP::obj_ls_prefix>::iterator it = ls_data.prefixes.begin();it != ls_data.prefixes.end(); it++) {
 
-            if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
-                memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
+            if (not (*it).isIPv4 and ls_attrs.find(bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL) != ls_attrs.end())
+                memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), 16);
 
-            else if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end()) {
-                memcpy((*it).router_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
+            else if (ls_attrs.find(bgp_msg::ATTR_NODE_IPV4_ROUTER_ID_LOCAL) != ls_attrs.end()) {
+                memcpy((*it).router_id, ls_attrs[bgp_msg::ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), 4);
                 (*it).isIPv4 = true;
             }
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_NODE_ISIS_AREA_ID) != ls_attrs.end())
-                memcpy((*it).isis_area_id, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_NODE_ISIS_AREA_ID].data(), sizeof((*it).isis_area_id));
+            if (ls_attrs.find(bgp_msg::ATTR_NODE_ISIS_AREA_ID) != ls_attrs.end())
+                memcpy((*it).isis_area_id, ls_attrs[bgp_msg::ATTR_NODE_ISIS_AREA_ID].data(), sizeof((*it).isis_area_id));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_PREFIX_IGP_FLAGS) != ls_attrs.end())
-                memcpy((*it).igp_flags, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_IGP_FLAGS].data(), sizeof((*it).igp_flags));
+            if (ls_attrs.find(bgp_msg::ATTR_PREFIX_IGP_FLAGS) != ls_attrs.end())
+                memcpy((*it).igp_flags, ls_attrs[bgp_msg::ATTR_PREFIX_IGP_FLAGS].data(), sizeof((*it).igp_flags));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_PREFIX_ROUTE_TAG) != ls_attrs.end())
-                memcpy(&(*it).route_tag, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_ROUTE_TAG].data(), sizeof((*it).route_tag));
+            if (ls_attrs.find(bgp_msg::ATTR_PREFIX_ROUTE_TAG) != ls_attrs.end())
+                memcpy(&(*it).route_tag, ls_attrs[bgp_msg::ATTR_PREFIX_ROUTE_TAG].data(), sizeof((*it).route_tag));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_PREFIX_EXTEND_TAG) != ls_attrs.end())
-                memcpy(&(*it).ext_route_tag, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_EXTEND_TAG].data(), sizeof((*it).ext_route_tag));
+            if (ls_attrs.find(bgp_msg::ATTR_PREFIX_EXTEND_TAG) != ls_attrs.end())
+                memcpy(&(*it).ext_route_tag, ls_attrs[bgp_msg::ATTR_PREFIX_EXTEND_TAG].data(), sizeof((*it).ext_route_tag));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_PREFIX_PREFIX_METRIC) != ls_attrs.end())
-                memcpy(&(*it).metric, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_PREFIX_METRIC].data(), sizeof((*it).metric));
+            if (ls_attrs.find(bgp_msg::ATTR_PREFIX_PREFIX_METRIC) != ls_attrs.end())
+                memcpy(&(*it).metric, ls_attrs[bgp_msg::ATTR_PREFIX_PREFIX_METRIC].data(), sizeof((*it).metric));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_PREFIX_OSPF_FWD_ADDR) != ls_attrs.end())
-                memcpy((*it).ospf_fwd_addr, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_OSPF_FWD_ADDR].data(), sizeof((*it).ospf_fwd_addr));
+            if (ls_attrs.find(bgp_msg::ATTR_PREFIX_OSPF_FWD_ADDR) != ls_attrs.end())
+                memcpy((*it).ospf_fwd_addr, ls_attrs[bgp_msg::ATTR_PREFIX_OSPF_FWD_ADDR].data(), sizeof((*it).ospf_fwd_addr));
 
-            if (ls_attrs.find(bgp_msg::MPLinkStateAttr::ATTR_PREFIX_SID) != ls_attrs.end())
-                memcpy((*it).sid_tlv, ls_attrs[bgp_msg::MPLinkStateAttr::ATTR_PREFIX_SID].data(), sizeof((*it).sid_tlv));
+            if (ls_attrs.find(bgp_msg::ATTR_PREFIX_SID) != ls_attrs.end())
+                memcpy((*it).sid_tlv, ls_attrs[bgp_msg::ATTR_PREFIX_SID].data(), sizeof((*it).sid_tlv));
         }
 
 //        if (remove)
