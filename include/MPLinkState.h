@@ -21,9 +21,9 @@
 
 namespace bgp_msg {
 
-    class MPLinkState {
+ //   class MPLinkState {
 
-    public:
+ //   public:
         /**
          * Defines the BGP link state NLRI types
          *      https://tools.ietf.org/html/draft-ietf-idr-ls-distribution-10#section-3.2
@@ -85,7 +85,7 @@ namespace bgp_msg {
             uint8_t     intf_addr[16];                      ///< Interface binary address
             uint8_t     nei_addr[16];                       ///< Neighbor binary address
             uint32_t    mt_id;                              ///< Multi-Topology ID
-            bool        isIPv4;                             ///< True if IPv4, false if IPv6
+            bool        is_ipv4;                             ///< True if IPv4, false if IPv6
         };
 
         /**
@@ -133,7 +133,12 @@ namespace bgp_msg {
             OSPF_RT_NSSA_2                                  ///< NSSA type 2
         };
 
+    struct libparseBGP_MP_link_state_parsed_data {
+        std::string peer_addr;                       ///< Printed form of the peer address for logging
 
+        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
+        parseBMP::parsed_data_ls *ls_data;           ///< Parsed LS Data
+    };
         /**
          * Constructor for class
          *
@@ -144,8 +149,10 @@ namespace bgp_msg {
          * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
-        MPLinkState(std::string peerAddr,parseBMP::parsed_update_data *parsed_data);
-        virtual ~MPLinkState();
+
+        void libParseBGP_MP_link_state_init(libparseBGP_MP_link_state_parsed_data *data,std::string peer_address,parseBMP::parsed_update_data *parse_data);
+
+            //       virtual ~MPLinkState();
 
         /**
          * MP Reach Link State NLRI parse
@@ -154,7 +161,7 @@ namespace bgp_msg {
          *
          * \param [in]   nlri           Reference to parsed NLRI struct
          */
-        void parseReachLinkState(MPReachAttr::mp_reach_nlri &nlri);
+        void libParseBGP_parse_reach_link_state(libparseBGP_MP_link_state_parsed_data *data,MPReachAttr::mp_reach_nlri &nlri);
 
         /**
          * MP UnReach Link State NLRI parse
@@ -163,63 +170,12 @@ namespace bgp_msg {
          *
          * \param [in]   nlri           Reference to parsed NLRI struct
          */
-        void parseUnReachLinkState(MPUnReachAttr::mp_unreach_nlri &nlri);
+        void libParseBGP_parse_unreach_link_state(libparseBGP_MP_link_state_parsed_data *data, MPUnReachAttr::mp_unreach_nlri &nlri);
 
 
-    private:
+//    private:
         //bool             debug;                           ///< debug flag to indicate debugging
         //Logger           *logger;                         ///< Logging class pointer
-        std::string      peer_addr;                       ///< Printed form of the peer address for logging
-
-        parseBMP::parsed_update_data *parsed_data;       ///< Parsed data structure
-        parseBMP::parsed_data_ls     *ls_data;           ///< Parsed LS Data
-
-        /**********************************************************************************//*
-         * Parses Link State NLRI data
-         *
-         * \details Will parse the link state NLRI's from MP_REACH or MP_UNREACH.
-         *
-         * \param [in]   data           Pointer to the NLRI data
-         * \param [in]   len            Length of the NLRI data
-         */
-        void parseLinkStateNlriData(u_char *data, uint16_t len);
-
-        /**********************************************************************************//*
-         * Parse NODE NLRI
-         *
-         * \details will parse the node NLRI type. Data starts at local node descriptor.
-         *
-         * \param [in]   data           Pointer to the start of the node NLRI data
-         * \param [in]   data_len       Length of the data
-         * \param [in]   id             NLRI/type identifier
-         * \param [in]   proto_id       NLRI protocol type id
-         */
-        void parseNlriNode(u_char *data, int data_len, uint64_t id, uint8_t proto_id);
-
-        /**********************************************************************************//*
-         * Parse LINK NLRI
-         *
-         * \details will parse the LINK NLRI type. Data starts at local node descriptor.
-         *
-         * \param [in]   data           Pointer to the start of the node NLRI data
-         * \param [in]   data_len       Length of the data
-         * \param [in]   id             NLRI/type identifier
-         * \param [in]   proto_id       NLRI protocol type id
-         */
-        void parseNlriLink(u_char *data, int data_len, uint64_t id, uint8_t proto_id);
-
-        /**********************************************************************************//*
-         * Parse PREFIX NLRI
-         *
-         * \details will parse the PREFIX NLRI type.  Data starts at local node descriptor.
-         *
-         * \param [in]   data           Pointer to the start of the node NLRI data
-         * \param [in]   data_len       Length of the data
-         * \param [in]   id             NLRI/type identifier
-         * \param [in]   proto_id       NLRI protocol type id
-         * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
-         */
-        void parseNlriPrefix(u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4);
 
         /**********************************************************************************//*
          * Parse Node Descriptor
@@ -283,7 +239,7 @@ namespace bgp_msg {
          */
         void genNodeHashId(node_descriptor &info);
 
-    };
+ //   };
 
 } /* namespace bgp_msg */
 

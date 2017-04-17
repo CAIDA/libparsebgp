@@ -245,12 +245,12 @@ using namespace std;
 struct libParseBGP_parse_mrt_parsed_data {
     mrt_common_hdr c_hdr;
     table_dump_message table_dump;
-    peer_index_table peer_index_table;
-    rib_entry_header rib_entry_header;
-    rib_generic_entry_header rib_generic_entry_header;
+    peer_index_table peer_index_tbl;
+    rib_entry_header rib_entry_hdr;
+    rib_generic_entry_header rib_generic_entry_hdr;
 
-    bgp4mp_msg bgp4mp_msg;
-    bgp4mp_state_change bgp4mp_state_change;
+    bgp4mp_msg bgp4mp_mssg;
+    bgp4mp_state_change bgp4mp_state_change_msg;
 
     parseBMP::obj_peer_up_event up_event;
     parseBMP::obj_peer_down_event down_event;

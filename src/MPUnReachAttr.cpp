@@ -27,7 +27,9 @@ namespace bgp_msg {
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
 //MPUnReachAttr::MPUnReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
-//        : logger{logPtr}, debug{enable_debug}{
+//        : logger{logPtr}, debug{enable_debug}{}
+
+    libparseBGP_MP_link_state_parsed_data *parse_data;
 MPUnReachAttr::MPUnReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info) {
     this->peer_addr = peerAddr;
     this->peer_info = peer_info;
@@ -108,8 +110,8 @@ void MPUnReachAttr::parseAfi(mp_unreach_nlri &nlri, parseBMP::parsed_update_data
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            MPLinkState ls(peer_addr, &parsed_data);
-            ls.parseUnReachLinkState(nlri);
+            libParseBGP_MP_link_state_init(parse_data, peer_addr, &parsed_data);
+            libParseBGP_parse_unreach_link_state(parse_data,nlri);
             break;
         }
 

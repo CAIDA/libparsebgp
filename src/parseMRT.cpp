@@ -180,7 +180,7 @@ void libParseBGP_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libPar
                             mrt_parsed_data->table_dump.attribute_len) != mrt_parsed_data->table_dump.attribute_len)
         throw "Error in parsing attribute";
 
-    peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
+    peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
     bgp_msg::libParseBGP_update_msg_data u_msg;
     bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
     bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
@@ -218,24 +218,24 @@ void libParseBGP_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& bu
     uint8_t  AS_num;
     uint8_t  Addr_fam;
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_table.collector_bgp_id, 4) != 4)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_tbl.collector_bgp_id, 4) != 4)
         throw "Error in parsing collector_BGPID";
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_table.view_name_length, 2) != 2)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_tbl.view_name_length, 2) != 2)
         throw "Error in parsing view_name_length";
 
-    if (mrt_parsed_data->peer_index_table.view_name_length) {
-        if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_table.view_name,
-                                mrt_parsed_data->peer_index_table.view_name_length) != mrt_parsed_data->peer_index_table.view_name_length)
+    if (mrt_parsed_data->peer_index_tbl.view_name_length) {
+        if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_tbl.view_name,
+                                mrt_parsed_data->peer_index_tbl.view_name_length) != mrt_parsed_data->peer_index_tbl.view_name_length)
             throw "Error in parsing view_name";
     }
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_table.peer_count, 2) != 2)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_tbl.peer_count, 2) != 2)
         throw "Error in parsing peer count";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->peer_index_table.peer_count);
+    bgp::SWAP_BYTES(&mrt_parsed_data->peer_index_tbl.peer_count);
 
-    while (count < mrt_parsed_data->peer_index_table.peer_count) {
+    while (count < mrt_parsed_data->peer_index_tbl.peer_count) {
         peer_entry *p_entry = new peer_entry;
         if (extract_from_buffer(buffer, buf_len, &p_entry->peer_type, 1) != 1)
             throw "Error in parsing collector_BGPID";
@@ -271,7 +271,7 @@ void libParseBGP_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& bu
         if ( extract_from_buffer(buffer, buf_len, &p_entry->peer_as32, AS_num) != AS_num)
             throw "Error in parsing local address in IPv4";
 
-        mrt_parsed_data->peer_index_table.peer_entries.push_back(*p_entry);
+        mrt_parsed_data->peer_index_tbl.peer_entries.push_back(*p_entry);
         delete p_entry;
         count++;
     }
@@ -282,33 +282,33 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
     uint16_t count = 0;
     string peer_info_key;
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_header.sequence_number, 4) != 4)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.sequence_number, 4) != 4)
         throw "Error in parsing sequence number";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->rib_entry_header.sequence_number);
+    bgp::SWAP_BYTES(&mrt_parsed_data->rib_entry_hdr.sequence_number);
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_header.prefix_length, 1) != 1)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.prefix_length, 1) != 1)
         throw "Error in parsing view_name_length";
 
-    u_char local_addr[mrt_parsed_data->rib_entry_header.prefix_length/8];
+    u_char local_addr[mrt_parsed_data->rib_entry_hdr.prefix_length/8];
 
-    if (extract_from_buffer(buffer, buf_len, &local_addr, mrt_parsed_data->rib_entry_header.prefix_length/8) != mrt_parsed_data->rib_entry_header.prefix_length/8)
+    if (extract_from_buffer(buffer, buf_len, &local_addr, mrt_parsed_data->rib_entry_hdr.prefix_length/8) != mrt_parsed_data->rib_entry_hdr.prefix_length/8)
         throw "Error in parsing prefix";
 
     switch (mrt_parsed_data->c_hdr.sub_type) {
         case RIB_IPV4_UNICAST:
-            inet_ntop(AF_INET, local_addr, mrt_parsed_data->rib_entry_header.prefix, sizeof(mrt_parsed_data->rib_entry_header.prefix));
+            inet_ntop(AF_INET, local_addr, mrt_parsed_data->rib_entry_hdr.prefix, sizeof(mrt_parsed_data->rib_entry_hdr.prefix));
             break;
         case RIB_IPV6_UNICAST:
-            inet_ntop(AF_INET6, local_addr, mrt_parsed_data->rib_entry_header.prefix, sizeof(mrt_parsed_data->rib_entry_header.prefix));
+            inet_ntop(AF_INET6, local_addr, mrt_parsed_data->rib_entry_hdr.prefix, sizeof(mrt_parsed_data->rib_entry_hdr.prefix));
             break;
     }
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_header.entry_count, 2) != 2)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.entry_count, 2) != 2)
         throw "Error in parsing peer count";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->rib_entry_header.entry_count);
+    bgp::SWAP_BYTES(&mrt_parsed_data->rib_entry_hdr.entry_count);
 
-    while (count < mrt_parsed_data->rib_entry_header.entry_count) {
+    while (count < mrt_parsed_data->rib_entry_hdr.entry_count) {
         rib_entry *r_entry = new rib_entry;
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
@@ -328,7 +328,7 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
 //        if ( extract_from_buffer(buffer, buf_len, &r_entry->bgp_attribute, r_entry->attribute_len) != r_entry->attribute_len)
 //            throw "Error in parsing bgp_attribute";
 
-        peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
+        peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
         bgp_msg::libParseBGP_update_msg_data u_msg;
         bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
         bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
@@ -336,7 +336,7 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
         //uMsg->parseAttributes(buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
-        mrt_parsed_data->rib_entry_header.rib_entries.push_back(*r_entry);
+        mrt_parsed_data->rib_entry_hdr.rib_entries.push_back(*r_entry);
 //        delete u_msg;
         delete r_entry;
         count++;
@@ -350,26 +350,26 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
     u_char* local_addr;
     string peer_info_key;
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_generic_entry_header.sequence_number, 4) != 4)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_generic_entry_hdr.sequence_number, 4) != 4)
         throw "Error in parsing sequence number";
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_generic_entry_header.address_family_identifier, 2) != 2)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_generic_entry_hdr.address_family_identifier, 2) != 2)
         throw "Error in parsing address_family_identifier";
 
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_generic_entry_header.subsequent_afi, 1) != 1)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_generic_entry_hdr.subsequent_afi, 1) != 1)
         throw "Error in subsequent AFI";
     switch (mrt_parsed_data->c_hdr.sub_type) {
         case RIB_IPV4_UNICAST:
-            inet_ntop(AF_INET, local_addr, mrt_parsed_data->rib_entry_header.prefix, sizeof(mrt_parsed_data->rib_entry_header.prefix));
+            inet_ntop(AF_INET, local_addr, mrt_parsed_data->rib_entry_hdr.prefix, sizeof(mrt_parsed_data->rib_entry_hdr.prefix));
             break;
         case RIB_IPV6_UNICAST:
-            inet_ntop(AF_INET6, local_addr, mrt_parsed_data->rib_entry_header.prefix, sizeof(mrt_parsed_data->rib_entry_header.prefix));
+            inet_ntop(AF_INET6, local_addr, mrt_parsed_data->rib_entry_hdr.prefix, sizeof(mrt_parsed_data->rib_entry_hdr.prefix));
             break;
     }
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_header.entry_count, 2) != 2)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.entry_count, 2) != 2)
         throw "Error in parsing peer count";
 
-    while (count < mrt_parsed_data->peer_index_table.peer_count) {
+    while (count < mrt_parsed_data->peer_index_tbl.peer_count) {
         rib_entry *r_entry;
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
@@ -383,7 +383,7 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
         if ( extract_from_buffer(buffer, buf_len, &r_entry->parsed_data, r_entry->attribute_len) != r_entry->attribute_len)
             throw "Error in parsing local address in IPv4";
 
-        peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
+        peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
         bgp_msg::libParseBGP_update_msg_data u_msg;
         bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
         bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
@@ -391,7 +391,7 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
         //uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
-        mrt_parsed_data->rib_entry_header.rib_entries.push_back(*r_entry);
+        mrt_parsed_data->rib_entry_hdr.rib_entries.push_back(*r_entry);
 //        delete u_msg;
         delete r_entry;
         count++;
@@ -457,21 +457,21 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
         case BGP4MP_STATE_CHANGE_AS4: {
             int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_STATE_CHANGE_AS4) ? 8 : 4;
             int ip_addr_len = 4;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change, asn_len) != asn_len)  // ASNs
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg, asn_len) != asn_len)  // ASNs
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change.interface_index, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg.interface_index, 2) != 2)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change.address_family, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg.address_family, 2) != 2)
                 throw;
-            if (mrt_parsed_data->bgp4mp_state_change.address_family == AFI_IPv6)
+            if (mrt_parsed_data->bgp4mp_state_change_msg.address_family == AFI_IPv6)
                 ip_addr_len = 16;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change.peer_ip, ip_addr_len) != ip_addr_len)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg.peer_ip, ip_addr_len) != ip_addr_len)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change.local_ip, ip_addr_len) != ip_addr_len)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg.local_ip, ip_addr_len) != ip_addr_len)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change.old_state, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg.old_state, 2) != 2)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change.new_state, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_state_change_msg.new_state, 2) != 2)
                 throw;
             break;
         }
@@ -481,48 +481,48 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
         case BGP4MP_MESSAGE_AS4_LOCAL: {
             int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4 || mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4_LOCAL) ? 8 : 4;
             int ip_addr_len = 4;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_msg, asn_len) != asn_len) //ASNs
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg, asn_len) != asn_len) //ASNs
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_msg.interface_index, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg.interface_index, 2) != 2)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_msg.address_family, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg.address_family, 2) != 2)
                 throw;
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_msg.peer_asn);
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_msg.local_asn);
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_msg.interface_index);
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_msg.address_family);
-            if (mrt_parsed_data->bgp4mp_msg.address_family == AFI_IPv6)
+            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.peer_asn);
+            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.local_asn);
+            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.interface_index);
+            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.address_family);
+            if (mrt_parsed_data->bgp4mp_mssg.address_family == AFI_IPv6)
                 ip_addr_len = 16;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_msg.peer_ip, ip_addr_len) != ip_addr_len)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg.peer_ip, ip_addr_len) != ip_addr_len)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_msg.local_ip, ip_addr_len) != ip_addr_len)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg.local_ip, ip_addr_len) != ip_addr_len)
                 throw;
             /*int bgp_msg_len = mrt_data_len;
             if (extract_from_buffer(buffer, buf_len, &bgp4mp_msg.BGP_message, mrt_data_len) != bgp_msg_len)
                 throw;*/
             if (mrt_parsed_data->mrt_data_len != buf_len)
                 throw;
-            memcpy(&mrt_parsed_data->bgp4mp_msg.bgp_data, buffer, mrt_parsed_data->mrt_data_len);
+            memcpy(&mrt_parsed_data->bgp4mp_mssg.bgp_data, buffer, mrt_parsed_data->mrt_data_len);
 
-            peer_info_key =  mrt_parsed_data->bgp4mp_msg.peer_ip;
+            peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
 
             parseBMP::obj_bgp_peer p_entry;
             bzero(&p_entry, sizeof(parseBMP::obj_bgp_peer));
-            memcpy(&p_entry.peer_addr, mrt_parsed_data->bgp4mp_msg.peer_ip, sizeof(p_entry.peer_addr));
-            p_entry.is_ipv4 = (mrt_parsed_data->bgp4mp_msg.address_family == AFI_IPv4);
-            p_entry.peer_as = mrt_parsed_data->bgp4mp_msg.peer_asn;
+            memcpy(&p_entry.peer_addr, mrt_parsed_data->bgp4mp_mssg.peer_ip, sizeof(p_entry.peer_addr));
+            p_entry.is_ipv4 = (mrt_parsed_data->bgp4mp_mssg.address_family == AFI_IPv4);
+            p_entry.peer_as = mrt_parsed_data->bgp4mp_mssg.peer_asn;
             p_entry.timestamp_secs = mrt_parsed_data->c_hdr.time_stamp;
             p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;
 
             //mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
             libParseBGP_parse_bgp_init(mrt_parsed_data->pbgp, &p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-            uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->bgp4mp_msg.local_asn : mrt_parsed_data->bgp4mp_msg.peer_asn;
+            uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->bgp4mp_mssg.local_asn : mrt_parsed_data->bgp4mp_mssg.peer_asn;
             if (libParseBGP_parse_bgp_parse_msg_from_mrt(mrt_parsed_data->pbgp, buffer, mrt_parsed_data->mrt_data_len,
                                                          &mrt_parsed_data->bgp_msg, &mrt_parsed_data->up_event, &mrt_parsed_data->down_event,
                                                          asn, mrt_parsed_data->c_hdr.sub_type > 5) == BGP_MSG_OPEN) {
-                mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_msg.local_asn;
-                mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_msg.peer_asn;
-                memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_msg.local_ip, 40);
+                mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_mssg.local_asn;
+                mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_mssg.peer_asn;
+                memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_mssg.local_ip, 40);
             }
             break;
         }
@@ -640,14 +640,14 @@ int main() {
     try {
         parsed_data = parse_mrt_wrapper(tmp, len);
         //if (p->libParseBGP_parse_mrt_parse_msg(tmp, len))
-        //    cout << "Hello Ojas and Induja"<<endl;
+            cout << "Hello Ojas and Induja"<<endl;
         //else
         //    cout << "Oh no!"<<endl;
     }
     catch (char const *str) {
         cout << "Crashed!" << str <<endl;
     }
-    cout << "Peer Address" << int(parsed_data.peer_index_table.peer_entries.begin()->peer_type);
+    cout << "Peer Address" << int(parsed_data.peer_index_tbl.peer_entries.begin()->peer_type);
    //cout<<"Peer Address "<<int(p->peer_index_table.peer_entries.begin()->peer_type);
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
 //    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;

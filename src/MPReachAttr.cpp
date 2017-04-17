@@ -31,7 +31,10 @@ namespace bgp_msg {
     : logger{logPtr}, peer_info{peer_info}, debug{enable_debug} {
         this->peer_addr = peerAddr;
 }*/
-MPReachAttr::MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info)
+
+    libparseBGP_MP_link_state_parsed_data *data;
+
+    MPReachAttr::MPReachAttr(std::string peerAddr, parseBMP::peer_info *peer_info)
         : peer_info{peer_info} {
     this->peer_addr = peerAddr;
 }
@@ -108,9 +111,8 @@ void MPReachAttr::parseAfi(mp_reach_nlri &nlri, parseBMP::parsed_update_data &pa
 
         case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            MPLinkState ls(peer_addr, &parsed_data);
-            ls.parseReachLinkState(nlri);
-
+            libParseBGP_MP_link_state_init(data,peer_addr, &parsed_data);
+            libParseBGP_parse_reach_link_state(data,nlri);
             break;
         }
 
