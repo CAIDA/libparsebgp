@@ -1,6 +1,8 @@
 #include <iostream>
 #include "../include/parseBMP.h"
 #include <fstream>
+#include <parseMRT.h>
+
 using namespace std;
 
 int readFile(ifstream &fin, u_char *array2, int position, int read_size)
@@ -51,10 +53,12 @@ int main() {
         len = 1024;
         while(msg_read)
         {
-            parseBMP *p = new parseBMP();
+            //parseBMP *p = new parseBMP();
+            bmp_message::libParseBGP_parse_bmp_parsed_data p;
             try {
-                if (p->parseMsg(buffer, len))
-                    cout << "Message Parsed Successfully"<<endl;
+                //if (p->parseMsg(buffer, len))
+                p = parse_bmp_wrapper(buffer, len);
+                cout << "Message Parsed Successfully"<<endl;
 
                 if(!len)
                     msg_read=false;

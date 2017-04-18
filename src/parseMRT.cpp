@@ -17,7 +17,7 @@
     pMRT.parseMsg(buffer, buf_len);
     return pMRT;
 }*/
-libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *buffer, int buf_len) {
+libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len) {
     libParseBGP_parse_mrt_parsed_data mrt_parsed_data;
     try {
         libParseBGP_parse_mrt_init(&mrt_parsed_data);
@@ -515,9 +515,9 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
             p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;
 
             //mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-            libParseBGP_parse_bgp_init(mrt_parsed_data->pbgp, &p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+            libParseBGP_parse_bgp_init(&mrt_parsed_data->pbgp, &p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
             uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->bgp4mp_mssg.local_asn : mrt_parsed_data->bgp4mp_mssg.peer_asn;
-            if (libParseBGP_parse_bgp_parse_msg_from_mrt(mrt_parsed_data->pbgp, buffer, mrt_parsed_data->mrt_data_len,
+            if (libParseBGP_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->pbgp, buffer, mrt_parsed_data->mrt_data_len,
                                                          &mrt_parsed_data->bgp_msg, &mrt_parsed_data->up_event, &mrt_parsed_data->down_event,
                                                          asn, mrt_parsed_data->c_hdr.sub_type > 5) == BGP_MSG_OPEN) {
                 mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_mssg.local_asn;

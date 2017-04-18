@@ -13,7 +13,7 @@ add_library(parse SHARED ${SOURCES})
  
 #Set the location for library installation -- i.e., /usr/lib in this case
 # not really necessary in this example. Use "sudo make install" to apply
-install(TARGETS parse DESTINATION ${SRC_DIR}/parselib_shared/)
+install(TARGETS parse DESTINATION parselib_shared/)
 
 add_executable(libtest bmptool.cpp)
 target_link_libraries(libtest parse)

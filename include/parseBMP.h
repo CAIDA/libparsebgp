@@ -420,6 +420,6 @@ namespace bmp_message {
 
 //};
 
-bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len);
+bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *&buffer, int &buf_len);
 
 #endif /* PARSEBMP_H_ */

@@ -21,7 +21,7 @@
 #include "../include/bgp_common.h"
 #include "../include/parse_common.h"
 
-bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len) {
+bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *&buffer, int &buf_len) {
     //parseBMP pBMP;
     //pBMP.parseMsg(buffer, buf_len);
     //return pBMP;
@@ -65,7 +65,7 @@ parseBMP::~parseBMP() {
     // clean up
 }*/
 
-libParseBGP_parse_bgp_parsed_data *pBGP;
+libParseBGP_parse_bgp_parsed_data pBGP;
 //bool parseBMP::parseMsg(int read_fd)
 
 /**
@@ -974,7 +974,7 @@ bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_d
 
 
                     // Prepare the BGP parser
-                    libParseBGP_parse_bgp_init(pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
+                    libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
                     //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
 
       //              if (cfg->debug_bgp)
@@ -986,7 +986,7 @@ bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_d
                             snprintf(parsed_msg->down_event.error_text, sizeof(parsed_msg->down_event.error_text),
                                     "Local close by (%s) for peer (%s) : ", parsed_msg->r_entry.ip_addr,
                                      parsed_msg->p_entry.peer_addr);
-                            libParseBGP_parse_bgp_handle_down_event(pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len,&parsed_msg->down_event,&parsed_msg->bgp_msg);
+                            libParseBGP_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len,&parsed_msg->down_event,&parsed_msg->bgp_msg);
                             //pBGP->handleDownEvent(bmp_data, bmp_data_len,&down_event,&bgp_msg);
                             break;
                         }
@@ -1007,7 +1007,7 @@ bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_d
                                     "Remote peer (%s) closed local (%s) session: ", parsed_msg->r_entry.ip_addr,
                                      parsed_msg->p_entry.peer_addr);
 
-                            libParseBGP_parse_bgp_handle_down_event(pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->down_event,&parsed_msg->bgp_msg);
+                            libParseBGP_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->down_event,&parsed_msg->bgp_msg);
                             //pBGP->handleDownEvent(bmp_data, bmp_data_len, &down_event,&bgp_msg);
                             break;
                         }
@@ -1038,13 +1038,13 @@ bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_d
 
                     // Prepare the BGP parser
                     //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr, &peer_info_map[peer_info_key]);
-                    libParseBGP_parse_bgp_init(pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
+                    libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
         //            if (cfg->debug_bgp)
         //               pBGP->enableDebug();
 
 // Parse the BGP sent/received open messages
-                    libParseBGP_parse_bgp_handle_up_event(pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->up_event,&parsed_msg->bgp_msg);
+                    libParseBGP_parse_bgp_handle_up_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->up_event,&parsed_msg->bgp_msg);
                     //pBGP->handleUpEvent(bmp_data, bmp_data_len, &up_event,&bgp_msg);
 
                     // Free the bgp parser
@@ -1069,13 +1069,13 @@ bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_d
                  */
                 //pBGP = new parseBGP(&p_entry, (char *)r_entry.ip_addr,
                 //                    &peer_info_map[peer_info_key]);
-                libParseBGP_parse_bgp_init(pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
+                libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
                // if (cfg->debug_bgp)
                //     pBGP->enableDebug();
 
                 //pBGP->handleUpdate(bmp_data, bmp_data_len, &bgp_msg);
-                libParseBGP_parse_bgp_handle_update(pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->bgp_msg);
+                libParseBGP_parse_bgp_handle_update(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->bgp_msg);
                 //delete pBGP;
 
                 break;
@@ -1123,7 +1123,7 @@ bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_d
       //  LOG_INFO("%s: Caught: %s", client->c_ip, str);
        // disconnect(client, mbus_ptr, parseBMP::TERM_REASON_OPENBMP_CONN_ERR, str);
         //cout<<str;
-        delete pBGP;                    // Make sure to free the resource
+        //delete pBGP;                    // Make sure to free the resource
         throw str;
     }
 
