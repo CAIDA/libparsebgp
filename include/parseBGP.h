@@ -12,7 +12,7 @@
 
 #include <vector>
 #include <list>
-#include "../include/parseBMP.h"
+//#include "../include/parseBMP.h"
 #include "../include/parse_common.h"
 #include "bgp_common.h"
 #include "UpdateMsg.h"
@@ -82,7 +82,7 @@ struct libParseBGP_parse_bgp_parsed_data {
     parse_common::obj_path_attr base_attr;      ///< Base attribute object
 
     string router_addr;    ///< Router IP address - used for logging
-    parseBMP::peer_info *p_info;        ///< Persistent Peer information
+    bmp_message::peer_info *p_info;        ///< Persistent Peer information
 
     unsigned char path_hash_id[16];                  ///< current path hash ID
 
@@ -112,7 +112,7 @@ struct libParseBGP_parse_bgp_parsed_data {
     //parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info);
 
     void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parse_common::obj_bgp_peer *peer_entry,
-                                    string router_addr, parseBMP::peer_info *peer_info);
+                                    string router_addr, bmp_message::peer_info *peer_info);
 
     //virtual ~parseBGP();
 

@@ -10,13 +10,11 @@
 #include "../include/AddPathDataContainer.h"
 #include "../include/OpenMsg.h"
 
-#include <memory>
+//AddPathDataContainer::AddPathDataContainer() {
+//}
 
-AddPathDataContainer::AddPathDataContainer() {
-}
-
-AddPathDataContainer::~AddPathDataContainer() {
-}
+//AddPathDataContainer::~AddPathDataContainer() {
+//}
 
 /**
  * Add Add Path data to persistent storage
@@ -26,9 +24,10 @@ AddPathDataContainer::~AddPathDataContainer() {
  * \param [in] send_receive     Send Recieve code from RFC
  * \param [in] sent_open        Is obtained from sent open message. False if from recieved
  */
-void AddPathDataContainer::addAddPath(int afi, int safi, int send_receive, bool sent_open) {
-    AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
-    if(iterator == this->addPathMap.end()) {
+void libParseBGP_addpath_add(libParseBGP_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open) {
+    //AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
+    libParseBGP_addpath_map::iterator iterator = addpath_map.find(libParseBGP_addpath_get_afi_safi_key_string(afi, safi));
+    if(iterator == addpath_map.end()) {
         sendReceiveCodesForSentAndReceivedOpenMessageStructure newStructure;
 
         if (sent_open) {
@@ -37,8 +36,8 @@ void AddPathDataContainer::addAddPath(int afi, int safi, int send_receive, bool 
             newStructure.sendReceiveCodeForReceivedOpenMessage = send_receive;
         }
 
-        this->addPathMap.insert(std::pair<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure>(
-                this->getAFiSafiKeyString(afi, safi),
+        addpath_map.insert(std::pair<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure>(
+                libParseBGP_addpath_get_afi_safi_key_string(afi, safi),
                 newStructure
         ));
     } else {
@@ -58,7 +57,7 @@ void AddPathDataContainer::addAddPath(int afi, int safi, int send_receive, bool 
  *
  * \return string unique for AFI and SAFI combination
  */
-std::string AddPathDataContainer::getAFiSafiKeyString(int afi, int safi) {
+std::string libParseBGP_addpath_get_afi_safi_key_string(int afi, int safi) {
     std::string result = std::to_string(static_cast<long long>(afi));
     result.append("_");
     result.append(std::to_string(static_cast<long long>(safi)));
@@ -73,10 +72,10 @@ std::string AddPathDataContainer::getAFiSafiKeyString(int afi, int safi) {
  *
  * \return is enabled
  */
-bool AddPathDataContainer::isAddPathEnabled(int afi, int safi) {
-    AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
+bool libParseBGP_addpath_is_enabled(libParseBGP_addpath_map &addpath_map, int afi, int safi) {
+    libParseBGP_addpath_map::iterator iterator = addpath_map.find(libParseBGP_addpath_get_afi_safi_key_string(afi, safi));
 
-    if(iterator == this->addPathMap.end()) {
+    if(iterator == addpath_map.end()) {
         return false;
     } else {
         // Following the rule:

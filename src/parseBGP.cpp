@@ -68,7 +68,7 @@ using namespace std;
 }*/
 
 void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parse_common::obj_bgp_peer *peer_entry,
-                                string router_addr, parseBMP::peer_info *peer_info) {
+                                string router_addr, bmp_message::peer_info *peer_info) {
     //debug = false;
     //logger = logPtr;
 
@@ -742,8 +742,8 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
             data += BGP_MSG_HDR_LEN;
 
             bgp_msg::parsed_notify_msg parsed_msg;
-            bgp_msg::NotificationMsg nMsg;
-            if (nMsg.parseNotify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg))
+            //bgp_msg::NotificationMsg nMsg;
+            if (bgp_msg::libParseBGP_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg))
             {
                 // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
                 throw "Failed to parse the BGP notification message";
@@ -945,8 +945,8 @@ bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *
         data += BGP_MSG_HDR_LEN;
 
         bgp_msg::parsed_notify_msg parsed_msg;
-        bgp_msg::NotificationMsg nMsg;
-        if ( (rval=nMsg.parseNotify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg)))
+        //bgp_msg::NotificationMsg nMsg;
+        if ( (rval=bgp_msg::libParseBGP_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg)))
         {
             // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
             throw "Failed to parse the BGP notification message";

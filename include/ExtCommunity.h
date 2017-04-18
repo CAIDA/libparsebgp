@@ -27,8 +27,8 @@ namespace bgp_msg {
  *          It can be extended to create attributes messages.
  *          See http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
  */
-class ExtCommunity {
-public:
+//class ExtCommunity {
+//public:
     /**
      * Defines the BGP Extended communities Types
      *      http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
@@ -159,9 +159,9 @@ public:
      * \param [in]     pperAddr     Printed form of peer address used for logging
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    ExtCommunity(std::string peerAddr);
-    virtual ~ExtCommunity();
-		 
+    //ExtCommunity(std::string peerAddr);
+    //virtual ~ExtCommunity();
+
     /**
      * Parse the extended communities path attribute (8 byte as per RFC4360)
      *
@@ -174,7 +174,7 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parseExtCommunities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
+    void libParseBGP_ext_communities_parse_ext_communities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
 
     /**
      * Parse the extended communities path attribute (20 byte as per RFC5701)
@@ -188,12 +188,12 @@ public:
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void parsev6ExtCommunities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
+    void libParseBGP_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
 
-private:
+//private:
     //bool             debug;                           ///< debug flag to indicate debugging
     //Logger           *logger;                         ///< Logging class pointer
-    std::string      peer_addr;                       ///< Printed form of the peer address for logging
+    //std::string      peer_addr;                       ///< Printed form of the peer address for logging
 
     /**
      * Decode common Type/Subtypes
@@ -208,7 +208,7 @@ private:
      *
      * \return  Decoded string value
      */
-    std::string decodeType_common(const extcomm_hdr &ec_hdr, bool isGlobal4Bytes = false, bool isGlobalIPv4 = false);
+    //std::string decodeType_common(const extcomm_hdr &ec_hdr, bool isGlobal4Bytes = false, bool isGlobalIPv4 = false);
 
     /**
      * Decode EVPN subtypes
@@ -220,7 +220,7 @@ private:
      *
      * \return  Decoded string value
      */
-    std::string decodeType_EVPN(const extcomm_hdr &ec_hdr);
+    //std::string decodeType_EVPN(const extcomm_hdr &ec_hdr);
 
     /**
      * Decode Opaque subtypes
@@ -232,7 +232,7 @@ private:
      *
      * \return  Decoded string value
      */
-    std::string decodeType_Opaque(const extcomm_hdr &ec_hdr);
+    //std::string decodeType_Opaque(const extcomm_hdr &ec_hdr);
 
     /**
      * Decode Generic subtypes
@@ -246,7 +246,7 @@ private:
      *
      * \return  Decoded string value
      */
-    std::string decodeType_Generic(const extcomm_hdr &ec_hdr,  bool isGlobal4Bytes = false, bool isGlobalIPv4 = false);
+    //std::string decodeType_Generic(const extcomm_hdr &ec_hdr,  bool isGlobal4Bytes = false, bool isGlobalIPv4 = false);
 
     /**
      * Decode IPv6 Specific Type/Subtypes
@@ -259,9 +259,9 @@ private:
      *
      * \return  Decoded string value
      */
-    std::string decodeType_IPv6Specific(const extcomm_hdr &ec_hdr);
+    //std::string decodeType_IPv6Specific(const extcomm_hdr &ec_hdr);
 
-};
+//};
 
 } /* namespace bgp_msg */
 

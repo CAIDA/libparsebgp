@@ -8,6 +8,10 @@
 
 #include <iostream>
 #include <list>
+#include <vector>
+#include <map>
+#include "bgp_common.h"
+
 using namespace std;
 
 class parse_common{

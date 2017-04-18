@@ -26,7 +26,7 @@ namespace bgp_msg {
  * \param [in]     peer_info       Persistent peer information
  * \param [in]     enable_debug    Debug true to enable, false to disable
  */
-void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::string peer_addr, parseBMP::peer_info *peer_info) {
+void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::string peer_addr, bmp_message::peer_info *peer_info) {
         //debug = enable_debug;
         open_msg_data->peer_info = peer_info;
         open_msg_data->peer_addr = peer_addr;
@@ -160,8 +160,10 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
                                             break;
                                     }
 
-                                    open_msg_data->peer_info->add_path_capability.addAddPath(data.afi, data.safi, data.send_recieve,
-                                                                                    openMessageIsSent);
+                                    libParseBGP_addpath_add(open_msg_data->peer_info->add_path_capability, data.afi,
+                                                            data.safi, data.send_recieve, openMessageIsSent);
+                                    //open_msg_data->peer_info->add_path_capability.addAddPath(data.afi, data.safi, data.send_recieve,
+                                    //                                                openMessageIsSent);
 
                                     capabilities.push_back(decodeStr);
                                 }

@@ -26,7 +26,7 @@ namespace bgp_msg {
      * \param [in]     pperAddr     Printed form of peer address used for logging
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    ExtCommunity::ExtCommunity(std::string peerAddr) {
+    /*ExtCommunity::ExtCommunity(std::string peerAddr) {
         //logger = logPtr;
         //debug = enable_debug;
         peer_addr = peerAddr;
@@ -34,91 +34,7 @@ namespace bgp_msg {
 
     ExtCommunity::~ExtCommunity() {
 
-    }
-
-    /**
-     * Parse the extended communities path attribute (8 byte as per RFC4360)
-     *
-     * \details
-     *     Will parse the EXTENDED COMMUNITIES data passed. Parsed data will be stored
-     *     in parsed_data.
-     *
-     * \param [in]   attr_len       Length of the attribute data
-     * \param [in]   data           Pointer to the attribute data
-     * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
-     *
-     */
-    void ExtCommunity::parseExtCommunities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
-
-        std::string decodeStr = "";
-        extcomm_hdr ec_hdr;
-
-        if ( (attr_len % 8) ) {
-            //LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
-            return;
-        }
-
-        /*
-         * Loop through consecutive entries
-         */
-        for (int i = 0; i < attr_len; i += 8) {
-            // Setup extended community header
-            ec_hdr.high_type = data[0];
-            ec_hdr.low_type  = data[1];
-            ec_hdr.value     = data + 2;
-
-            /*
-             * Docode the community by type
-             */
-            switch (ec_hdr.high_type << 2 >> 2) {
-                case EXT_TYPE_IPV4 :
-                    decodeStr.append(decodeType_common(ec_hdr, true, true));
-                    break;
-
-                case EXT_TYPE_2OCTET_AS :
-                    decodeStr.append(decodeType_common(ec_hdr));
-                    break;
-
-                case EXT_TYPE_4OCTET_AS :
-                    decodeStr.append(decodeType_common(ec_hdr, true));
-                    break;
-
-                case EXT_TYPE_GENERIC :
-                    decodeStr.append(decodeType_Generic(ec_hdr));
-                    break;
-
-                case EXT_TYPE_GENERIC_4OCTET_AS :
-                    decodeStr.append(decodeType_Generic(ec_hdr, true));
-                    break;
-
-                case EXT_TYPE_GENERIC_IPV4 :
-                    decodeStr.append(decodeType_Generic(ec_hdr, true, true));
-                    break;
-
-                case EXT_TYPE_OPAQUE :
-                    decodeStr.append(decodeType_Opaque(ec_hdr));
-                    break;
-
-                case EXT_TYPE_EVPN :
-                    decodeStr.append(decodeType_EVPN(ec_hdr));
-                    break;
-
-                case EXT_TYPE_QOS_MARK  : break;// TODO: Implement
-                case EXT_TYPE_FLOW_SPEC : break;// TODO: Implement
-                case EXT_TYPE_COS_CAP   : break;// TODO: Implement
-                default: break;
-                    //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),ec_hdr.high_type, ec_hdr.low_type);
-            }
-
-            // Move data pointer to next entry
-            data += 8;
-            if ((i + 8) < attr_len)
-                decodeStr.append(" ");
-        }
-
-        parsed_data.attrs[parse_common::ATTR_TYPE_EXT_COMMUNITY] = decodeStr;
-    }
-
+    }*/
     /**
      * Decode common Type/Subtypes
      *
@@ -128,11 +44,11 @@ namespace bgp_msg {
      *
      * \param [in]   ec_hdr          Reference to the extended community header
      * \param [in]   isGlobal4Bytes  True if the global admin field is 4 bytes, false if 2
-     * \param [in]   isGlobalIPv4    True if the global admin field is an IPv4 address, false if not
+     * \param [in]   is_global_ipv4    True if the global admin field is an IPv4 address, false if not
      *
      * \return  Decoded string value
      */
-    std::string ExtCommunity::decodeType_common(const extcomm_hdr &ec_hdr, bool isGlobal4Bytes, bool isGlobalIPv4) {
+    static std::string decode_type_common(const extcomm_hdr &ec_hdr, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
         std::stringstream   val_ss;
         uint16_t            val_16b;
         uint32_t            val_32b;
@@ -141,14 +57,14 @@ namespace bgp_msg {
         /*
          * Decode values based on bit size
          */
-        if (isGlobal4Bytes) {
+        if (is_global_4bytes) {
             // Four-byte global field
             memcpy(&val_32b, ec_hdr.value, 4);
             memcpy(&val_16b, ec_hdr.value + 4, 2);
 
             bgp::SWAP_BYTES(&val_16b);
 
-            if (isGlobalIPv4) {
+            if (is_global_ipv4) {
                 inet_ntop(AF_INET, &val_32b, ipv4_char, sizeof(ipv4_char));
             } else
                 bgp::SWAP_BYTES(&val_32b);
@@ -169,7 +85,7 @@ namespace bgp_msg {
         switch (ec_hdr.low_type) {
 
             case EXT_COMMON_BGP_DATA_COL :
-                if (isGlobal4Bytes)
+                if (is_global_4bytes)
                     val_ss << "colc=" << val_32b << ":" << val_16b;
 
                 else
@@ -178,10 +94,10 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_ROUTE_ORIGIN :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "soo=" << ipv4_char << ":" << val_16b;
 
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << "soo=" << val_32b << ":" << val_16b;
 
                 else
@@ -189,10 +105,10 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_ROUTE_TARGET :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "rt=" << ipv4_char << ":" << val_16b;
 
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << "rt=" << val_32b << ":" << val_16b;
 
                 else
@@ -200,7 +116,7 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_SOURCE_AS :
-                if (isGlobal4Bytes)
+                if (is_global_4bytes)
                     val_ss << "sas=" << val_32b << ":" << val_16b;
 
                 else
@@ -209,10 +125,10 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_CISCO_VPN_ID :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
 
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << "vpn-id=" << val_32b << ":0x" << std::hex << val_16b;
 
                 else
@@ -221,10 +137,10 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_L2VPN_ID :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
 
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << "vpn-id=" << val_32b << ":0x" << std::hex << val_16b;
 
                 else
@@ -233,7 +149,7 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_LINK_BANDWIDTH : // is same as EXT_COMMON_GENERIC
-                if (isGlobal4Bytes)
+                if (is_global_4bytes)
                     val_ss << "link-bw=" << val_32b << ":" << val_16b;
 
                 else
@@ -242,19 +158,19 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_OSPF_DOM_ID :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "ospf-did=" << ipv4_char << ":" << val_16b;
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << "ospf-did=" << val_32b << ":" << val_16b;
                 else
                     val_ss << "ospf-did=" << val_16b << ":" << val_32b;
                 break;
 
             case EXT_COMMON_VRF_IMPORT :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "import=" << ipv4_char << ":" << val_16b;
 
-                else if (isGlobalIPv4)
+                else if (is_global_ipv4)
                     val_ss << "import=" << val_32b << ":" << val_16b;
 
                 else
@@ -263,7 +179,7 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_IA_P2MP_SEG_NH :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "p2mp-nh=" << ipv4_char << ":" << val_16b;
 
                 else
@@ -272,9 +188,9 @@ namespace bgp_msg {
                 break;
 
             case EXT_COMMON_OSPF_ROUTER_ID :
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << "ospf-rid=" << ipv4_char << ":" << val_16b;
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << "ospf-rid=" << val_32b << ":" << val_16b;
                 else
                     val_ss << "ospf-rid=" << val_16b << ":" << val_32b;
@@ -299,7 +215,7 @@ namespace bgp_msg {
      *
      * \return  Decoded string value
      */
-    std::string ExtCommunity::decodeType_EVPN(const extcomm_hdr &ec_hdr) {
+    static std::string decode_type_evpn(const extcomm_hdr &ec_hdr) {
         std::stringstream   val_ss;
         uint32_t            val_32b;
 
@@ -360,7 +276,7 @@ namespace bgp_msg {
      *
      * \return  Decoded string value
      */
-    std::string ExtCommunity::decodeType_Opaque(const extcomm_hdr &ec_hdr) {
+    static std::string decode_type_opaque(const extcomm_hdr &ec_hdr) {
         std::stringstream   val_ss;
         uint16_t            val_16b;
         uint32_t            val_32b;
@@ -459,12 +375,12 @@ namespace bgp_msg {
      *      Converts to human readable form.
      *
      * \param [in]   ec_hdr          Reference to the extended community header
-     * \param [in]   isGlobal4Bytes  True if the global admin field is 4 bytes, false if 2
-     * \param [in]   isGlobalIPv4    True if the global admin field is an IPv4 address, false if not
+     * \param [in]   is_global_4bytes  True if the global admin field is 4 bytes, false if 2
+     * \param [in]   is_global_ipv4    True if the global admin field is an IPv4 address, false if not
      *
      * \return  Decoded string value
      */
-    std::string ExtCommunity::decodeType_Generic(const extcomm_hdr &ec_hdr, bool isGlobal4Bytes, bool isGlobalIPv4) {
+    static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
         std::stringstream   val_ss;
         uint16_t            val_16b;
         uint32_t            val_32b;
@@ -473,14 +389,14 @@ namespace bgp_msg {
         /*
          * Decode values based on bit size
          */
-        if (isGlobal4Bytes) {
+        if (is_global_4bytes) {
             // Four-byte global field
             memcpy(&val_32b, ec_hdr.value, 4);
             memcpy(&val_16b, ec_hdr.value + 4, 2);
 
             bgp::SWAP_BYTES(&val_16b);
 
-            if (isGlobalIPv4) {
+            if (is_global_ipv4) {
                 inet_ntop(AF_INET, &val_32b, ipv4_char, sizeof(ipv4_char));
             } else
                 bgp::SWAP_BYTES(&val_32b);
@@ -550,10 +466,10 @@ namespace bgp_msg {
                 val_ss << "flow-redir=";
 
                 // Route target
-                if (isGlobalIPv4)
+                if (is_global_ipv4)
                     val_ss << ipv4_char << ":" << val_16b;
 
-                else if (isGlobal4Bytes)
+                else if (is_global_4bytes)
                     val_ss << val_32b << ":" << val_16b;
 
                 else
@@ -569,7 +485,7 @@ namespace bgp_msg {
     }
 
     /**
-     * Parse the extended communities path attribute (20 byte as per RFC5701)
+     * Parse the extended communities path attribute (8 byte as per RFC4360)
      *
      * \details
      *     Will parse the EXTENDED COMMUNITIES data passed. Parsed data will be stored
@@ -580,42 +496,76 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void ExtCommunity::parsev6ExtCommunities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
-        std::string decodeStr = "";
+    void libParseBGP_ext_communities_parse_ext_communities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
+
+        std::string decode_str = "";
         extcomm_hdr ec_hdr;
 
-        //LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
-
-        if ( (attr_len % 20) ) {
-            //LOG_NOTICE("%s: Parsing IPv6 extended community len=%d is invalid, expecting divisible by 20", peer_addr.c_str(), attr_len);
+        if ( (attr_len % 8) ) {
+            //LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
             return;
         }
 
         /*
          * Loop through consecutive entries
          */
-        for (int i = 0; i < attr_len; i += 20) {
+        for (int i = 0; i < attr_len; i += 8) {
             // Setup extended community header
             ec_hdr.high_type = data[0];
-            ec_hdr.low_type = data[1];
-            ec_hdr.value = data + 2;
+            ec_hdr.low_type  = data[1];
+            ec_hdr.value     = data + 2;
 
             /*
              * Docode the community by type
              */
             switch (ec_hdr.high_type << 2 >> 2) {
-                case 0 :  // Currently IPv6 specific uses this type field
-                    decodeStr.append(decodeType_IPv6Specific(ec_hdr));
+                case EXT_TYPE_IPV4 :
+                    decode_str.append(decode_type_common(ec_hdr, true, true));
                     break;
 
-                default :
-                    //LOG_NOTICE("%s: Unexpected type for IPv6 %d,%d", peer_addr.c_str(),
-                    //        ec_hdr.high_type, ec_hdr.low_type);
+                case EXT_TYPE_2OCTET_AS :
+                    decode_str.append(decode_type_common(ec_hdr));
                     break;
+
+                case EXT_TYPE_4OCTET_AS :
+                    decode_str.append(decode_type_common(ec_hdr, true));
+                    break;
+
+                case EXT_TYPE_GENERIC :
+                    decode_str.append(decode_type_generic(ec_hdr));
+                    break;
+
+                case EXT_TYPE_GENERIC_4OCTET_AS :
+                    decode_str.append(decode_type_generic(ec_hdr, true));
+                    break;
+
+                case EXT_TYPE_GENERIC_IPV4 :
+                    decode_str.append(decode_type_generic(ec_hdr, true, true));
+                    break;
+
+                case EXT_TYPE_OPAQUE :
+                    decode_str.append(decode_type_opaque(ec_hdr));
+                    break;
+
+                case EXT_TYPE_EVPN :
+                    decode_str.append(decode_type_evpn(ec_hdr));
+                    break;
+
+                case EXT_TYPE_QOS_MARK  : break;// TODO: Implement
+                case EXT_TYPE_FLOW_SPEC : break;// TODO: Implement
+                case EXT_TYPE_COS_CAP   : break;// TODO: Implement
+                default: break;
+                    //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),ec_hdr.high_type, ec_hdr.low_type);
             }
-        }
-    }
 
+            // Move data pointer to next entry
+            data += 8;
+            if ((i + 8) < attr_len)
+                decode_str.append(" ");
+        }
+
+        parsed_data.attrs[parse_common::ATTR_TYPE_EXT_COMMUNITY] = decode_str;
+    }
 
     /**
      * Decode IPv6 Specific Type/Subtypes
@@ -628,7 +578,7 @@ namespace bgp_msg {
      *
      * \return  Decoded string value
      */
-    std::string ExtCommunity::decodeType_IPv6Specific(const extcomm_hdr &ec_hdr) {
+    std::string decodeType_ipv6_specific(const extcomm_hdr &ec_hdr) {
         std::stringstream   val_ss;
         uint16_t            val_16b;
         u_char              ipv6_raw[16] = {0};
@@ -652,7 +602,7 @@ namespace bgp_msg {
                 break;
 
             case EXT_IPV6_CISCO_VPN_ID :
-                    val_ss << "vpn-id=" << ipv6_char << ":0x" << std::hex << val_16b;
+                val_ss << "vpn-id=" << ipv6_char << ":0x" << std::hex << val_16b;
 
                 break;
 
@@ -673,5 +623,53 @@ namespace bgp_msg {
         }
 
         return val_ss.str();
+    }
+
+    /**
+     * Parse the extended communities path attribute (20 byte as per RFC5701)
+     *
+     * \details
+     *     Will parse the EXTENDED COMMUNITIES data passed. Parsed data will be stored
+     *     in parsed_data.
+     *
+     * \param [in]   attr_len       Length of the attribute data
+     * \param [in]   data           Pointer to the attribute data
+     * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+     *
+     */
+    void libParseBGP_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data) {
+        std::string decode_str = "";
+        extcomm_hdr ec_hdr;
+
+        //LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
+
+        if ( (attr_len % 20) ) {
+            //LOG_NOTICE("%s: Parsing IPv6 extended community len=%d is invalid, expecting divisible by 20", peer_addr.c_str(), attr_len);
+            return;
+        }
+
+        /*
+         * Loop through consecutive entries
+         */
+        for (int i = 0; i < attr_len; i += 20) {
+            // Setup extended community header
+            ec_hdr.high_type = data[0];
+            ec_hdr.low_type = data[1];
+            ec_hdr.value = data + 2;
+
+            /*
+             * Docode the community by type
+             */
+            switch (ec_hdr.high_type << 2 >> 2) {
+                case 0 :  // Currently IPv6 specific uses this type field
+                    decode_str.append(decodeType_ipv6_specific(ec_hdr));
+                    break;
+
+                default :
+                    //LOG_NOTICE("%s: Unexpected type for IPv6 %d,%d", peer_addr.c_str(),
+                    //        ec_hdr.high_type, ec_hdr.low_type);
+                    break;
+            }
+        }
     }
 }

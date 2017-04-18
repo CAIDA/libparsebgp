@@ -20,14 +20,14 @@ namespace bgp_msg {
  * \param [in]     logPtr       Pointer to existing Logger for app logging
  * \param [in]     enable_debug Debug true to enable, false to disable
  */
-NotificationMsg::NotificationMsg() {
+//NotificationMsg::NotificationMsg() {
     //logger = logPtr;
     //debug = enable_debug;
-}
+//}
 
-NotificationMsg::~NotificationMsg() {
+//NotificationMsg::~NotificationMsg() {
 
-}
+//}
 
 /**
  * Parses a notification message stored in a byte parsed_msg.error_textfer
@@ -42,7 +42,7 @@ NotificationMsg::~NotificationMsg() {
  *
  * \return True if error, false if no error reading/parsing the notification message
  */
-bool NotificationMsg::parseNotify(u_char *data, size_t size, parsed_notify_msg &parsed_msg) {
+bool libParseBGP_notification_parse_notify(u_char *data, size_t size, parsed_notify_msg &parsed_msg) {
     u_char *dataPtr = data;
     size_t read_size = 0;
 

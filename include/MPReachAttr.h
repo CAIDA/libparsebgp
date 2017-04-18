@@ -43,7 +43,7 @@ namespace bgp_msg {
 
     struct libParseBGP_mp_reach_attr_parsed_data {
         std::string peer_addr;              ///< Printed form of the peer address for logging
-        parseBMP::peer_info *peer_info;
+        bmp_message::peer_info *peer_info;
     };
 
     /**
@@ -57,7 +57,7 @@ namespace bgp_msg {
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
     //MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
-    void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peer_addr, parseBMP::peer_info *peer_info);
+    void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peer_addr, bmp_message::peer_info *peer_info);
 
 //    virtual ~MPReachAttr();
 
@@ -88,7 +88,7 @@ namespace bgp_msg {
      * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
      */
     void libParseBGP_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                       parseBMP::peer_info *peer_info,
+                                               bmp_message::peer_info *peer_info,
                                        std::list<bgp::prefix_tuple> &prefixes);
 
     /**
@@ -105,7 +105,7 @@ namespace bgp_msg {
      */
     template <typename PREFIX_TUPLE>
     void libParseBGP_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                            parseBMP::peer_info *peer_info,
+                                                     bmp_message::peer_info *peer_info,
                                             std::list<PREFIX_TUPLE> &prefixes);
 
     /**

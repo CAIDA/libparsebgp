@@ -16,8 +16,8 @@
 #include <memory>
 
 
-class AddPathDataContainer {
-private:
+//class AddPathDataContainer {
+//private:
 
     struct sendReceiveCodesForSentAndReceivedOpenMessageStructure {
         int     sendReceiveCodeForSentOpenMessage;
@@ -25,10 +25,10 @@ private:
     };
 
     // Peer related data container. First key is afi safi unique key. Second is structure with Add Path information
-    typedef std::map<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure> AddPathMap;
+    typedef std::map<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure> libParseBGP_addpath_map;
 
     // Peer related information about Add Path
-    AddPathMap addPathMap;
+    //libParseBGP_addpath_map addpath_map;
 
     /**
      * Generates unique string from AFI and SAFI combination
@@ -38,12 +38,12 @@ private:
      *
      * \return string unique for AFI and SAFI combination
      */
-    std::string getAFiSafiKeyString(int afi, int safi);
+    std::string libParseBGP_addpath_get_afi_safi_key_string(int afi, int safi);
 
-public:
-    AddPathDataContainer();
+//public:
+//    AddPathDataContainer();
 
-    ~AddPathDataContainer();
+//p    ~AddPathDataContainer();
 
     /**
      * Add Add Path data to persistent storage
@@ -53,7 +53,7 @@ public:
      * \param [in] send_receive     Send Recieve code from RFC
      * \param [in] sent_open        Is obtained from sent open message. False if from recieved
      */
-    void addAddPath(int afi, int safi, int send_receive, bool sent_open);
+    void libParseBGP_addpath_add(libParseBGP_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open);
 
     /**
      * Is add path capability enabled for such AFI and SAFI
@@ -63,9 +63,9 @@ public:
      *
      * \return is enabled
      */
-    bool isAddPathEnabled(int afi, int safi);
+    bool libParseBGP_addpath_is_enabled(libParseBGP_addpath_map &addpath_map, int afi, int safi);
 
-};
+//};
 
 
 #endif //OPENBMP_ADDPATHDATACONTAINER_H

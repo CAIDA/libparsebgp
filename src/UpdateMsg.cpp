@@ -56,7 +56,7 @@ UpdateMsg::UpdateMsg(std::string peerAddr, parseBMP::peer_info *peer_info)
 UpdateMsg::~UpdateMsg() {
 }*/
     void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
-                                               std::string router_addr, parseBMP::peer_info *peer_info){
+                                               std::string router_addr, bmp_message::peer_info *peer_info){
         update_msg->peer_info = peer_info;
         update_msg->peer_addr = peer_addr;
         update_msg->router_addr = router_addr;
@@ -97,7 +97,8 @@ UpdateMsg::~UpdateMsg() {
             bzero(tuple.prefix_bin, sizeof(tuple.prefix_bin));
 
             // Parse add-paths if enabled
-            if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
+            //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
+            if (libParseBGP_addpath_is_enabled(update_msg->peer_info->add_path_capability, bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
                 and (len - read_size) >= 4) {
                 memcpy(&tuple.path_id, data, 4);
                 bgp::SWAP_BYTES(&tuple.path_id);
@@ -549,15 +550,17 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             }
             case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
             {
-                ExtCommunity ec(update_msg->peer_addr);
-                ec.parseExtCommunities(attr_len, data, parsed_data);
+                //ExtCommunity ec(update_msg->peer_addr);
+                //ec.parseExtCommunities(attr_len, data, parsed_data);
+                libParseBGP_ext_communities_parse_ext_communities(attr_len, data, parsed_data);
                 break;
             }
 
             case ATTR_TYPE_IPV6_EXT_COMMUNITY : // IPv6 specific extended community list (RFC 5701)
             {
-                ExtCommunity ec6(update_msg->peer_addr);
-                ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
+                //ExtCommunity ec6(update_msg->peer_addr);
+                //ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
+                libParseBGP_ext_communities_parse_v6_ext_communities(attr_len, data, parsed_data);
                 break;
             }
 
