@@ -73,7 +73,7 @@ namespace bgp_msg {
          * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
          * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
          */
-        void libParseBGP_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
+        void libParseBGP_evpn_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
                                       std::string *rd_administrator_subfield);
 
         /**
@@ -86,7 +86,7 @@ namespace bgp_msg {
          * \param [in]   data_len               Length of the data in bytes to be read
          *
          */
-        void libParseBGP_parse_nlri_data(libParseBGP_evpn_data *evpn_data,u_char *data, uint16_t data_len);
+        void libParseBGP_evpn_parse_nlri_data(libParseBGP_evpn_data *evpn_data,u_char *data, uint16_t data_len);
 
 
 //    private:

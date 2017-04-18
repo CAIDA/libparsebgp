@@ -133,7 +133,7 @@ namespace bgp_msg {
          * \param [in]   attr_len       Length of the attribute data
          * \param [in]   data           Pointer to the attribute data
          */
-        void libParseBGP_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
+        void libParseBGP_mp_link_state_attr_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
 
 
 //    private:
@@ -164,7 +164,7 @@ namespace bgp_msg {
          *
          * \returns length of the TLV attribute parsed
          */
-        int libParseBGP_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
+        int libParseBGP_mp_link_state_attr_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
 
 //    };
 

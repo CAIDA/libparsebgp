@@ -36,7 +36,7 @@ namespace bgp_msg {
      * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
      * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
      */
-    static void libParseBGP_parse_ethernet_segment_identifier(libParseBGP_evpn_data *evpn_data, u_char *data_pointer, std::string *parsed_data) {
+    static void libParseBGP_evpn_parse_ethernet_segment_identifier(libParseBGP_evpn_data *evpn_data, u_char *data_pointer, std::string *parsed_data) {
         std::stringstream result;
         uint8_t type = *data_pointer;
 
@@ -155,7 +155,7 @@ namespace bgp_msg {
      * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
      * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
      */
-    void libParseBGP_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
+    void libParseBGP_evpn_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
                                        std::string *rd_administrator_subfield) {
         std::stringstream   val_ss;
 
@@ -251,7 +251,7 @@ namespace bgp_msg {
      * \param [in]   data_len               Length of the data in bytes to be read
      *
      */
-    void libParseBGP_parse_nlri_data(libParseBGP_evpn_data *evpn_data, u_char *data, uint16_t data_len) {
+    void libParseBGP_evpn_parse_nlri_data(libParseBGP_evpn_data *evpn_data, u_char *data, uint16_t data_len) {
         u_char      *data_pointer = data;
         u_char      ip_binary[16];
         int         addr_bytes;
@@ -278,7 +278,7 @@ namespace bgp_msg {
             int len = *data_pointer;
             data_pointer++;
 
-            libParseBGP_parse_route_distinguisher(
+            libParseBGP_evpn_parse_route_distinguisher(
                     data_pointer,
                     &tuple.rd_type,
                     &tuple.rd_assigned_number,
@@ -295,7 +295,7 @@ namespace bgp_msg {
                     if ((data_read + 17 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libParseBGP_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libParseBGP_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         //Ethernet Tag Id (4 bytes), printing in hex.
@@ -329,7 +329,7 @@ namespace bgp_msg {
                     if ((data_read + 25 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libParseBGP_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libParseBGP_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         // Ethernet Tag ID (4 bytes)
@@ -458,7 +458,7 @@ namespace bgp_msg {
                     if ((data_read + 11 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libParseBGP_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libParseBGP_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         // IP Address Length (1 bytes)

@@ -133,7 +133,7 @@ namespace bgp_msg {
             OSPF_RT_NSSA_2                                  ///< NSSA type 2
         };
 
-    struct libparseBGP_MP_link_state_parsed_data {
+    struct libparseBGP_mp_link_state_parsed_data {
         std::string peer_addr;                       ///< Printed form of the peer address for logging
 
         parse_common::parsed_update_data *parsed_data;       ///< Parsed data structure
@@ -150,7 +150,7 @@ namespace bgp_msg {
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
 
-        void libParseBGP_MP_link_state_init(libparseBGP_MP_link_state_parsed_data *data,std::string peer_address,parse_common::parsed_update_data *parse_data);
+        void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address,parse_common::parsed_update_data *parse_data);
 
             //       virtual ~MPLinkState();
 
@@ -161,7 +161,7 @@ namespace bgp_msg {
          *
          * \param [in]   nlri           Reference to parsed NLRI struct
          */
-        void libParseBGP_parse_reach_link_state(libparseBGP_MP_link_state_parsed_data *data, mp_reach_nlri &nlri);
+        void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_reach_nlri &nlri);
 
         /**
          * MP UnReach Link State NLRI parse
@@ -170,7 +170,7 @@ namespace bgp_msg {
          *
          * \param [in]   nlri           Reference to parsed NLRI struct
          */
-        void libParseBGP_parse_unreach_link_state(libparseBGP_MP_link_state_parsed_data *data, mp_unreach_nlri &nlri);
+        void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri);
 
 
 //    private:
@@ -189,7 +189,7 @@ namespace bgp_msg {
          *
          * \returns number of bytes read
          */
-        int parseDescrPrefix(u_char *data, int data_len, prefix_descriptor &info, bool isIPv4);
+        int libParseBGP_mp_link_state_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4);
 
         /**********************************************************************************//*
          * Hash node descriptor info

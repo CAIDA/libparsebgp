@@ -28,23 +28,23 @@ void libParseBGP_addpath_add(libParseBGP_addpath_map &addpath_map, int afi, int 
     //AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
     libParseBGP_addpath_map::iterator iterator = addpath_map.find(libParseBGP_addpath_get_afi_safi_key_string(afi, safi));
     if(iterator == addpath_map.end()) {
-        sendReceiveCodesForSentAndReceivedOpenMessageStructure newStructure;
+        send_receive_codes_for_sent_and_received_open_message_structure new_structure;
 
         if (sent_open) {
-            newStructure.sendReceiveCodeForSentOpenMessage = send_receive;
+            new_structure.send_receive_code_for_sent_open_message = send_receive;
         } else {
-            newStructure.sendReceiveCodeForReceivedOpenMessage = send_receive;
+            new_structure.send_receive_code_for_received_open_message = send_receive;
         }
 
-        addpath_map.insert(std::pair<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure>(
+        addpath_map.insert(std::pair<std::string, send_receive_codes_for_sent_and_received_open_message_structure>(
                 libParseBGP_addpath_get_afi_safi_key_string(afi, safi),
-                newStructure
+                new_structure
         ));
     } else {
         if (sent_open) {
-            iterator->second.sendReceiveCodeForSentOpenMessage = send_receive;
+            iterator->second.send_receive_code_for_sent_open_message = send_receive;
         } else {
-            iterator->second.sendReceiveCodeForReceivedOpenMessage = send_receive;
+            iterator->second.send_receive_code_for_received_open_message = send_receive;
         }
     }
 }
@@ -81,11 +81,11 @@ bool libParseBGP_addpath_is_enabled(libParseBGP_addpath_map &addpath_map, int af
         // Following the rule:
         // add_path_<afi/safi> = true IF (SENT_OPEN has ADD-PATH sent or both) AND (RECV_OPEN has ADD-PATH recv or both)
         return (
-            iterator->second.sendReceiveCodeForSentOpenMessage == bgp_msg::BGP_CAP_ADD_PATH_RECEIVE or
-                    iterator->second.sendReceiveCodeForSentOpenMessage == bgp_msg::BGP_CAP_ADD_PATH_SEND_RECEIVE
+            iterator->second.send_receive_code_for_sent_open_message == bgp_msg::BGP_CAP_ADD_PATH_RECEIVE or
+                    iterator->second.send_receive_code_for_sent_open_message == bgp_msg::BGP_CAP_ADD_PATH_SEND_RECEIVE
             ) and (
-            iterator->second.sendReceiveCodeForReceivedOpenMessage == bgp_msg::BGP_CAP_ADD_PATH_SEND or
-                    iterator->second.sendReceiveCodeForReceivedOpenMessage == bgp_msg::BGP_CAP_ADD_PATH_SEND_RECEIVE
+            iterator->second.send_receive_code_for_received_open_message == bgp_msg::BGP_CAP_ADD_PATH_SEND or
+                    iterator->second.send_receive_code_for_received_open_message == bgp_msg::BGP_CAP_ADD_PATH_SEND_RECEIVE
             );
     }
 }

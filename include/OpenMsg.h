@@ -155,7 +155,7 @@ namespace bgp_msg {
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
      */
-    size_t libParseBGP_parse_open_msg(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
+    size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
                         std::string &bgp_id, std::list<std::string> &capabilities);
 
 
@@ -177,7 +177,7 @@ namespace bgp_msg {
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read
      */
-    size_t libParseBGP_parse_capabilities(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
+    size_t libParseBGP_open_msg_parse_capabilities(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
                              std::list<std::string> &capabilities);
 //};
 

@@ -19,13 +19,13 @@
 //class AddPathDataContainer {
 //private:
 
-    struct sendReceiveCodesForSentAndReceivedOpenMessageStructure {
-        int     sendReceiveCodeForSentOpenMessage;
-        int     sendReceiveCodeForReceivedOpenMessage;
+    struct send_receive_codes_for_sent_and_received_open_message_structure {
+        int     send_receive_code_for_sent_open_message;
+        int     send_receive_code_for_received_open_message;
     };
 
     // Peer related data container. First key is afi safi unique key. Second is structure with Add Path information
-    typedef std::map<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure> libParseBGP_addpath_map;
+    typedef std::map<std::string, send_receive_codes_for_sent_and_received_open_message_structure> libParseBGP_addpath_map;
 
     // Peer related information about Add Path
     //libParseBGP_addpath_map addpath_map;

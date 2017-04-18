@@ -50,7 +50,7 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read
  */
-    size_t libParseBGP_parse_capabilities(libParseBGP_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
+    size_t libParseBGP_open_msg_parse_capabilities(libParseBGP_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
                                           std::list<std::string> &capabilities)
     {
         size_t      read_size   = 0;
@@ -260,7 +260,7 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
-size_t libParseBGP_parse_open_msg(libParseBGP_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
+size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
                              std::string &bgp_id, std::list<std::string> &capabilities) {
     char        bgp_id_char[16];
     size_t      read_size       = 0;
@@ -307,13 +307,13 @@ size_t libParseBGP_parse_open_msg(libParseBGP_open_msg_data *open_msg_data,u_cha
  //                peer_addr.c_str(), open_hdr.param_len, (size - read_size));
 
         // Parse as many capabilities as possible
-        libParseBGP_parse_capabilities(open_msg_data,bufPtr, (size - read_size), openMessageIsSent, asn, capabilities);
+        libParseBGP_open_msg_parse_capabilities(open_msg_data,bufPtr, (size - read_size), openMessageIsSent, asn, capabilities);
 
         read_size += (size - read_size);
 
     } else {
 
-        if (!libParseBGP_parse_capabilities(open_msg_data,bufPtr, open_hdr.param_len, openMessageIsSent, asn, capabilities)) {
+        if (!libParseBGP_open_msg_parse_capabilities(open_msg_data,bufPtr, open_hdr.param_len, openMessageIsSent, asn, capabilities)) {
   //          LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
             return 0;
         }

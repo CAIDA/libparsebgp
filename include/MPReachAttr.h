@@ -73,7 +73,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
+    void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
 
     /**
      * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -87,7 +87,7 @@ namespace bgp_msg {
      * \param [in]   peer_info                  Persistent Peer info pointer
      * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
      */
-    void libParseBGP_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
+    void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                                bmp_message::peer_info *peer_info,
                                        std::list<bgp::prefix_tuple> &prefixes);
 
@@ -104,7 +104,7 @@ namespace bgp_msg {
      * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
      */
     template <typename PREFIX_TUPLE>
-    void libParseBGP_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
+    void libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                                      bmp_message::peer_info *peer_info,
                                             std::list<PREFIX_TUPLE> &prefixes);
 
@@ -121,7 +121,7 @@ namespace bgp_msg {
      * \returns number of bytes read to decode the label(s) and updates string labels
      *
      */
-    static inline uint16_t decodeLabel(u_char *data, uint16_t len, std::string &labels);
+    static inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels);
 
 //private:
     //bool                    debug;                  ///< debug flag to indicate debugging

@@ -121,13 +121,13 @@ namespace bgp_msg {
      * \param [in]   attr_len       Length of the attribute data
      * \param [in]   data           Pointer to the attribute data
      */
-    void libParseBGP_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
+    void libParseBGP_mp_link_state_attr_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
         /*
          * Loop through all TLV's for the attribute
          */
         int tlv_len;
         while (attr_len > 0) {
-            tlv_len = libParseBGP_parse_attr_link_state_tlv(parse_data, attr_len, data);
+            tlv_len = libParseBGP_mp_link_state_attr_parse_attr_link_state_tlv(parse_data, attr_len, data);
             attr_len -= tlv_len;
 
             if (attr_len > 0)
@@ -263,7 +263,7 @@ namespace bgp_msg {
      *
      * \returns length of the TLV attribute parsed (including the tlv header lenght)
      */
-    int libParseBGP_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
+    int libParseBGP_mp_link_state_attr_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
         uint16_t            type;
         uint16_t            len;
         char                ip_char[46];

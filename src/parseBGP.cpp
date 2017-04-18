@@ -775,7 +775,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
 
             data += BGP_MSG_HDR_LEN;
             if (is_local_msg) {
-                read_size = libParseBGP_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, asn, up_event->local_hold_time,local_bgp_id, cap_list);
+                read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
                 if (!read_size) {
                     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
@@ -811,7 +811,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
              */
 
             else {
-                read_size = libParseBGP_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
+                read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
 
                 if (!read_size) {
                     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
@@ -999,7 +999,7 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
     if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = libParseBGP_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
+        read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
@@ -1041,7 +1041,7 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
     if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = libParseBGP_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
+        read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
