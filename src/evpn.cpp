@@ -59,7 +59,7 @@
 
                 uint16_t CE_LACP_port_key;
                 memcpy(&CE_LACP_port_key, data_pointer, 2);
-                bgp::SWAP_BYTES(&CE_LACP_port_key, 2);
+                SWAP_BYTES(&CE_LACP_port_key, 2);
 
                 result << std::dec << (int) CE_LACP_port_key;
 
@@ -78,7 +78,7 @@
 
                 uint16_t root_bridge_priority;
                 memcpy(&root_bridge_priority, data_pointer, 2);
-                bgp::SWAP_BYTES(&root_bridge_priority, 2);
+                SWAP_BYTES(&root_bridge_priority, 2);
 
                 result << std::dec << (int) root_bridge_priority;
 
@@ -97,7 +97,7 @@
 
                 uint32_t local_discriminator_value;
                 memcpy(&local_discriminator_value, data_pointer, 3);
-                bgp::SWAP_BYTES(&local_discriminator_value, 4);
+                SWAP_BYTES(&local_discriminator_value, 4);
                 local_discriminator_value = local_discriminator_value >> 8;
                 result << std::dec << (int) local_discriminator_value;
 
@@ -106,28 +106,28 @@
             case 4: {
                 uint32_t router_id;
                 memcpy(&router_id, data_pointer, 4);
-                bgp::SWAP_BYTES(&router_id, 4);
+                SWAP_BYTES(&router_id, 4);
                 result << std::dec << (int) router_id << " ";
 
                 data_pointer += 4;
 
                 uint32_t local_discriminator_value;
                 memcpy(&local_discriminator_value, data_pointer, 4);
-                bgp::SWAP_BYTES(&local_discriminator_value, 4);
+                SWAP_BYTES(&local_discriminator_value, 4);
                 result << std::dec << (int) local_discriminator_value;
                 break;
             }
             case 5: {
                 uint32_t as_number;
                 memcpy(&as_number, data_pointer, 4);
-                bgp::SWAP_BYTES(&as_number, 4);
+                SWAP_BYTES(&as_number, 4);
                 result << std::dec << (int) as_number << " ";
 
                 data_pointer += 4;
 
                 uint32_t local_discriminator_value;
                 memcpy(&local_discriminator_value, data_pointer, 4);
-                bgp::SWAP_BYTES(&local_discriminator_value, 4);
+                SWAP_BYTES(&local_discriminator_value, 4);
                 result << std::dec << (int) local_discriminator_value;
                 break;
             }
@@ -170,8 +170,8 @@
                 bzero(&assigned_number_subfield, 4);
                 memcpy(&assigned_number_subfield, data_pointer, 4);
 
-                bgp::SWAP_BYTES(&administration_subfield);
-                bgp::SWAP_BYTES(&assigned_number_subfield);
+                SWAP_BYTES(&administration_subfield);
+                SWAP_BYTES(&assigned_number_subfield);
 
                 val_ss << assigned_number_subfield;
 
@@ -195,7 +195,7 @@
                 bzero(&assigned_number_subfield, 2);
                 memcpy(&assigned_number_subfield, data_pointer, 2);
 
-                bgp::SWAP_BYTES(&assigned_number_subfield);
+                SWAP_BYTES(&assigned_number_subfield);
 
                 char administration_subfield_chars[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, administration_subfield, administration_subfield_chars, INET_ADDRSTRLEN);
@@ -219,8 +219,8 @@
                 bzero(&assigned_number_subfield, 2);
                 memcpy(&assigned_number_subfield, data_pointer, 2);
 
-                bgp::SWAP_BYTES(&administration_subfield);
-                bgp::SWAP_BYTES(&assigned_number_subfield);
+                SWAP_BYTES(&administration_subfield);
+                SWAP_BYTES(&assigned_number_subfield);
 
                 val_ss << assigned_number_subfield;
                 *rd_assigned_number = val_ss.str();
@@ -254,7 +254,7 @@
         int         data_read = 0;
 
         while ((data_read + 10 /* min read */) < data_len) {
-            bgp::evpn_tuple tuple;
+            evpn_tuple tuple;
 
             //Cleanup variables in case of not modified
             tuple.mpls_label_1 = 0;
@@ -310,7 +310,7 @@
 
                         //MPLS Label (3 bytes)
                         memcpy(&tuple.mpls_label_1, data_pointer, 3);
-                        bgp::SWAP_BYTES(&tuple.mpls_label_1);
+                        SWAP_BYTES(&tuple.mpls_label_1);
                         tuple.mpls_label_1 >>= 8;
 
                         data_pointer += 3;
@@ -349,7 +349,7 @@
                         data_pointer++;
 
                         // MAC Address (6 byte)
-                        tuple.mac.assign(bgp::parse_mac(data_pointer));
+                        tuple.mac.assign(parse_mac(data_pointer));
                         data_pointer += 6;
 
                         // IP Address Length (1 byte)
@@ -379,7 +379,7 @@
 
                             // MPLS Label1 (3 bytes)
                             memcpy(&tuple.mpls_label_1, data_pointer, 3);
-                            bgp::SWAP_BYTES(&tuple.mpls_label_1);
+                            SWAP_BYTES(&tuple.mpls_label_1);
                             tuple.mpls_label_1 >>= 8;
 
                             data_pointer += 3;
@@ -392,7 +392,7 @@
                             //SELF_DEBUG("%s: parsing second evpn label\n", peer_addr.c_str());
 
                             memcpy(&tuple.mpls_label_2, data_pointer, 3);
-                            bgp::SWAP_BYTES(&tuple.mpls_label_2);
+                            SWAP_BYTES(&tuple.mpls_label_2);
                             tuple.mpls_label_2 >>= 8;
 
                             data_pointer += 3;

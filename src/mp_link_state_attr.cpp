@@ -222,7 +222,7 @@
         if (len == 3) {
             // 3-octet -  20 rightmost bits are used for encoding the label value.
             memcpy(&value_32bit, data, 3);
-            bgp::SWAP_BYTES(&value_32bit, 3);
+            SWAP_BYTES(&value_32bit, 3);
 
             val_ss << value_32bit;
 
@@ -236,7 +236,7 @@
         } else if (len == 4) {
             // 4-octet encoded offset in the SID/Label space advertised by this router using the encodings
             memcpy(&value_32bit, data, 4);
-            bgp::SWAP_BYTES(&value_32bit);
+            SWAP_BYTES(&value_32bit);
 
             val_ss << value_32bit;
 
@@ -274,10 +274,10 @@
         }
 
         memcpy(&type, data, 2);
-        bgp::SWAP_BYTES(&type);
+        SWAP_BYTES(&type);
 
         memcpy(&len, data+2, 2);
-        bgp::SWAP_BYTES(&len);
+        SWAP_BYTES(&len);
 
         data += 4;
 
@@ -336,7 +336,7 @@
                 for (int i=0; i < len; i += 2) {
                     value_16bit = 0;
                     memcpy(&value_16bit, data, 2);
-                    bgp::SWAP_BYTES(&value_16bit);
+                    SWAP_BYTES(&value_16bit);
                     data += 2;
 
                     if (!i)
@@ -388,7 +388,7 @@
                     // 3 bytes for Range
                     value_32bit = 0;
                     memcpy(&value_32bit, data, 3);
-                    bgp::SWAP_BYTES(&value_32bit);
+                    SWAP_BYTES(&value_32bit);
 
                     data += 3;
 
@@ -399,13 +399,13 @@
                     // 2 byte type
                     u_int16_t type;
                     memcpy(&type, data, 2);
-                    bgp::SWAP_BYTES(&type);
+                    SWAP_BYTES(&type);
                     data += 2;
 
                     // 2 byte length
                     u_int16_t sid_label_size = 0;
                     memcpy(&sid_label_size, data, 2);
-                    bgp::SWAP_BYTES(&sid_label_size);
+                    SWAP_BYTES(&sid_label_size);
                     data += 2;
 
                     // Parsing SID/Label Sub-TLV: https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-03#section-2.3.7.2
@@ -413,7 +413,7 @@
 
                         if (sid_label_size == 3 || sid_label_size == 4) {
                             memcpy(&value_32bit, data, sid_label_size);
-                            bgp::SWAP_BYTES(&value_32bit);
+                            SWAP_BYTES(&value_32bit);
 
                             if (sid_label_size == 3) {
                                 value_32bit = value_32bit >> 8;
@@ -447,7 +447,7 @@
                 } else {
                     value_32bit = 0;
                     memcpy(&value_32bit, data, len);
-                    bgp::SWAP_BYTES(&value_32bit, len);
+                    SWAP_BYTES(&value_32bit, len);
                     memcpy(parse_data->parsed_data->ls_attrs[ATTR_LINK_ADMIN_GROUP].data(), &value_32bit, 4);
              //       SELF_DEBUG("%s: bgp-ls: parsed linked admin group attribute: "" 0x%x, len = %d",peer_addr.c_str(), value_32bit, len);
                 }
@@ -457,7 +457,7 @@
                 if (len <= 4) {
                     value_32bit = 0;
                     memcpy(&value_32bit, data, len);
-                    bgp::SWAP_BYTES(&value_32bit, len);
+                    SWAP_BYTES(&value_32bit, len);
                 }
 
                 memcpy(parse_data->parsed_data->ls_attrs[ATTR_LINK_IGP_METRIC].data(), &value_32bit, 4);
@@ -500,12 +500,12 @@
 
                 float_val = 0;
                 memcpy(&float_val, data, len);
-                bgp::SWAP_BYTES(&float_val, len);
+                SWAP_BYTES(&float_val, len);
                 float_val = ieee_float_to_kbps(float_val);
                 memcpy(parse_data->parsed_data->ls_attrs[ATTR_LINK_MAX_LINK_BW].data(), &float_val, 4);
 
                 memcpy(&value_32bit, data, 4);
-                bgp::SWAP_BYTES(&value_32bit);
+                SWAP_BYTES(&value_32bit);
                 //       SELF_DEBUG("%s: bgp-ls: parsed attribute maximum link bandwidth (raw=%x) %u Kbits (len=%d)",
                 //                 peer_addr.c_str(), value_32bit, *(int32_t *)&float_val, len);
                 break;
@@ -518,7 +518,7 @@
                 }
                 float_val = 0;
                 memcpy(&float_val, data, len);
-                bgp::SWAP_BYTES(&float_val, len);
+                SWAP_BYTES(&float_val, len);
                 float_val = ieee_float_to_kbps(float_val);
                 memcpy(parse_data->parsed_data->ls_attrs[ATTR_LINK_MAX_RESV_BW].data(), &float_val, 4);
                 //       SELF_DEBUG("%s: bgp-ls: parsed attribute maximum reserved bandwidth %u Kbits (len=%d)",
@@ -603,7 +603,7 @@
                     break;
                 } else {
                     memcpy(&value_32bit, data, len);
-                    bgp::SWAP_BYTES(&value_32bit, len);
+                    SWAP_BYTES(&value_32bit, len);
                     memcpy(parse_data->parsed_data->ls_attrs[ATTR_LINK_TE_DEF_METRIC].data(), &value_32bit, len);
                     //        SELF_DEBUG("%s: bgp-ls: parsed attribute te default metric 0x%X (len=%d)", peer_addr.c_str(),
                     //                  value_32bit, len);
@@ -627,7 +627,7 @@
                 for (int i=0; i < 32; i += 4) {
                     float_val = 0;
                     memcpy(&float_val, data, 4);
-                    bgp::SWAP_BYTES(&float_val);
+                    SWAP_BYTES(&float_val);
                     float_val = ieee_float_to_kbps(float_val);
 
                     data += 4;
@@ -698,7 +698,7 @@
                 value_32bit = 0;
                 if (len <= 4) {
                     memcpy(&value_32bit, data, len);
-                    bgp::SWAP_BYTES(&value_32bit, len);
+                    SWAP_BYTES(&value_32bit, len);
                 }
 
                 memcpy(parse_data->parsed_data->ls_attrs[ATTR_PREFIX_PREFIX_METRIC].data(), &value_32bit, 4);
@@ -714,7 +714,7 @@
 
                 if (len == 4) {
                     memcpy(&value_32bit, data, len);
-                    bgp::SWAP_BYTES(&value_32bit);
+                    SWAP_BYTES(&value_32bit);
 
                     memcpy(parse_data->parsed_data->ls_attrs[ATTR_PREFIX_ROUTE_TAG].data(), &value_32bit, 4);
 //                    SELF_DEBUG("%s: bgp-ls: parsing prefix route tag attribute %d (len=%d)", peer_addr.c_str(),

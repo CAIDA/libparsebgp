@@ -204,7 +204,7 @@ void libParseBGP_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& bu
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->peer_index_tbl.peer_count, 2) != 2)
         throw "Error in parsing peer count";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->peer_index_tbl.peer_count);
+    SWAP_BYTES(&mrt_parsed_data->peer_index_tbl.peer_count);
 
     while (count < mrt_parsed_data->peer_index_tbl.peer_count) {
         peer_entry *p_entry = new peer_entry;
@@ -256,7 +256,7 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.sequence_number, 4) != 4)
         throw "Error in parsing sequence number";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->rib_entry_hdr.sequence_number);
+    SWAP_BYTES(&mrt_parsed_data->rib_entry_hdr.sequence_number);
 
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.prefix_length, 1) != 1)
         throw "Error in parsing view_name_length";
@@ -277,24 +277,24 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->rib_entry_hdr.entry_count, 2) != 2)
         throw "Error in parsing peer count";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->rib_entry_hdr.entry_count);
+    SWAP_BYTES(&mrt_parsed_data->rib_entry_hdr.entry_count);
 
     while (count < mrt_parsed_data->rib_entry_hdr.entry_count) {
         rib_entry *r_entry = new rib_entry;
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
 
-        bgp::SWAP_BYTES(&r_entry->peer_index);
+        SWAP_BYTES(&r_entry->peer_index);
 
         if ( extract_from_buffer(buffer, buf_len, &r_entry->originated_time, 4) != 4)
             throw "Error in parsing originatedTime";
 
-        bgp::SWAP_BYTES(&r_entry->originated_time);
+        SWAP_BYTES(&r_entry->originated_time);
 
         if ( extract_from_buffer(buffer, buf_len, &r_entry->attribute_len, 2) != 2)
             throw "Error in parsing attribute_len";
 
-        bgp::SWAP_BYTES(&r_entry->attribute_len);
+        SWAP_BYTES(&r_entry->attribute_len);
 
 //        if ( extract_from_buffer(buffer, buf_len, &r_entry->bgp_attribute, r_entry->attribute_len) != r_entry->attribute_len)
 //            throw "Error in parsing bgp_attribute";
@@ -454,10 +454,10 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
                 throw;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg.address_family, 2) != 2)
                 throw;
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.peer_asn);
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.local_asn);
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.interface_index);
-            bgp::SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.address_family);
+            SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.peer_asn);
+            SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.local_asn);
+            SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.interface_index);
+            SWAP_BYTES(&mrt_parsed_data->bgp4mp_mssg.address_family);
             if (mrt_parsed_data->bgp4mp_mssg.address_family == AFI_IPv6)
                 ip_addr_len = 16;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->bgp4mp_mssg.peer_ip, ip_addr_len) != ip_addr_len)
@@ -523,16 +523,16 @@ uint16_t libParseBGP_parse_mrt_parse_common_header(u_char *& buffer, int& buf_le
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->c_hdr, 12) != 12)
         throw "Error in parsing MRT common header";
 
-    bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.len);
-    bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.type);
-    bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.sub_type);
-    bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.time_stamp);
+    SWAP_BYTES(&mrt_parsed_data->c_hdr.len);
+    SWAP_BYTES(&mrt_parsed_data->c_hdr.type);
+    SWAP_BYTES(&mrt_parsed_data->c_hdr.sub_type);
+    SWAP_BYTES(&mrt_parsed_data->c_hdr.time_stamp);
 
     mrt_parsed_data->mrt_len = mrt_parsed_data->c_hdr.len;
     if (mrt_parsed_data->c_hdr.type == mrt_type::BGP4MP_ET || mrt_parsed_data->c_hdr.type == mrt_type::ISIS_ET || mrt_parsed_data->c_hdr.type == mrt_type::OSPFv3_ET) {
         if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->c_hdr.microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
-        bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.microsecond_timestamp);
+        SWAP_BYTES(&mrt_parsed_data->c_hdr.microsecond_timestamp);
         mrt_parsed_data->mrt_len -= 4;
     }
     else

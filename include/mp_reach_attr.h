@@ -83,7 +83,7 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
  */
 void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                            peer_info *peer_info,
-                                   std::list<bgp::prefix_tuple> &prefixes);
+                                   std::list<prefix_tuple> &prefixes);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)

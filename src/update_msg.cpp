@@ -41,19 +41,19 @@
  * \param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
     static void libParseBGP_update_msg_parse_nlri_data_v4(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len,
-                                                          std::list<bgp::prefix_tuple> &prefixes) {
+                                                          std::list<prefix_tuple> &prefixes) {
         u_char       ipv4_raw[4];
         char         ipv4_char[16];
         u_char       addr_bytes;
 
-        bgp::prefix_tuple tuple;
+        prefix_tuple tuple;
 
         if (len <= 0 or data == NULL)
             return;
 
         // TODO: Can extend this to support multicast, but right now we set it to unicast v4
         // Set the type for all to be unicast V4
-        tuple.type = bgp::PREFIX_UNICAST_V4;
+        tuple.type = PREFIX_UNICAST_V4;
         tuple.is_ipv4 = true;
 
         // Loop through all prefixes
@@ -64,10 +64,10 @@
 
             // Parse add-paths if enabled
             //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
-            if (libParseBGP_addpath_is_enabled(update_msg->peer_inf->add_path_capability, bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
+            if (libParseBGP_addpath_is_enabled(update_msg->peer_inf->add_path_capability, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
                 and (len - read_size) >= 4) {
                 memcpy(&tuple.path_id, data, 4);
-                bgp::SWAP_BYTES(&tuple.path_id);
+                SWAP_BYTES(&tuple.path_id);
                 data += 4; read_size += 4;
             } else
                 tuple.path_id = 0;
@@ -147,7 +147,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
     // Get the withdrawn length
     memcpy(&uHdr.withdrawn_len, bufPtr, sizeof(uHdr.withdrawn_len));
     bufPtr += sizeof(uHdr.withdrawn_len); read_size += sizeof(uHdr.withdrawn_len);
-    bgp::SWAP_BYTES(&uHdr.withdrawn_len);
+    SWAP_BYTES(&uHdr.withdrawn_len);
 
     // Set the withdrawn data pointer
     if ((size - read_size) < uHdr.withdrawn_len) {
@@ -163,7 +163,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
     // Get the attributes length
     memcpy(&uHdr.attr_len, bufPtr, sizeof(uHdr.attr_len));
     bufPtr += sizeof(uHdr.attr_len); read_size += sizeof(uHdr.attr_len);
-    bgp::SWAP_BYTES(&uHdr.attr_len);
+    SWAP_BYTES(&uHdr.attr_len);
     //SELF_DEBUG("%s: rtr=%s: Attribute len = %hu", peer_addr.c_str(), router_addr.c_str(), uHdr.attr_len);
 
     // Set the attributes data pointer
@@ -309,7 +309,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                 memcpy(&seg_asn, data, asn_octet_size);  data += asn_octet_size;
                 path_len -= asn_octet_size;                               // Adjust the path length for what was read
 
-                bgp::SWAP_BYTES(&seg_asn, asn_octet_size);
+                SWAP_BYTES(&seg_asn, asn_octet_size);
                 decoded_path.append(" ");
                 std::ostringstream numString;
                 numString << seg_asn;
@@ -372,14 +372,14 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
         // If using RFC6793, the len will be 8 instead of 6
         if (attr_len == 8) { // RFC6793 ASN of 4 octets
             memcpy(&value32bit, data, 4); data += 4;
-            bgp::SWAP_BYTES(&value32bit);
+            SWAP_BYTES(&value32bit);
             std::ostringstream numString;
             numString << value32bit;
             decodeStr.assign(numString.str());
 
         } else if (attr_len == 6) {
             memcpy(&value16bit, data, 2); data += 2;
-            bgp::SWAP_BYTES(&value16bit);
+            SWAP_BYTES(&value16bit);
             std::ostringstream numString;
             numString << value16bit;
             decodeStr.assign(numString.str());
@@ -445,7 +445,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             case ATTR_TYPE_MED : // MED value
             {
                 memcpy(&value32bit, data, 4);
-                bgp::SWAP_BYTES(&value32bit);
+                SWAP_BYTES(&value32bit);
                 std::ostringstream numString;
                 numString << value32bit;
                 parsed_data.attrs[ATTR_TYPE_MED] = numString.str();
@@ -454,7 +454,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             case ATTR_TYPE_LOCAL_PREF : // local pref value
             {
                 memcpy(&value32bit, data, 4);
-                bgp::SWAP_BYTES(&value32bit);
+                SWAP_BYTES(&value32bit);
                 std::ostringstream numString;
                 numString << value32bit;
                 parsed_data.attrs[ATTR_TYPE_LOCAL_PREF] = numString.str();
@@ -499,13 +499,13 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                     // Add entry
                     memcpy(&value16bit, data, 2);
                     data += 2;
-                    bgp::SWAP_BYTES(&value16bit);
+                    SWAP_BYTES(&value16bit);
                     numString << value16bit;
                     numString << ":";
 
                     memcpy(&value16bit, data, 2);
                     data += 2;
-                    bgp::SWAP_BYTES(&value16bit);
+                    SWAP_BYTES(&value16bit);
                     numString << value16bit;
                     decodeStr.append(numString.str());
                 }
@@ -622,7 +622,7 @@ void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update
             //SELF_DEBUG("%s: rtr=%s: extended length path attribute bit set for an entry", peer_addr.c_str(), router_addr.c_str());
 
             memcpy(&attr_len, data, 2); data += 2; read_size += 2;
-            bgp::SWAP_BYTES(&attr_len);
+            SWAP_BYTES(&attr_len);
 
         } else
             attr_len = *data++; read_size++;

@@ -298,7 +298,7 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(bool remove, parsed_data_ls l
  * \param [in] prefixes        Reference to the list<vpn_tuple> of advertised vpns
  * \param [in] attrs           Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<bgp::vpn_tuple> &prefixes,
+static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<vpn_tuple> &prefixes,
                                                   parsed_attrs_map &attrs, vector<obj_vpn> &rib_list) {
     //vector<parseBMP::obj_vpn> rib_list;
     obj_vpn            rib_entry;
@@ -308,10 +308,10 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
     /*
      * Loop through all vpn and add/update them in the DB
      */
-    for (std::list<bgp::vpn_tuple>::iterator it = prefixes.begin();
+    for (std::list<vpn_tuple>::iterator it = prefixes.begin();
          it != prefixes.end();
          it++) {
-        bgp::vpn_tuple &tuple = (*it);
+        vpn_tuple &tuple = (*it);
 
         //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
         //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
@@ -334,10 +334,10 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
         if (rib_entry.is_ipv4) {
             if (tuple.len < 32) {
                 memcpy(&value_32bit, tuple.prefix_bin, 4);
-                bgp::SWAP_BYTES(&value_32bit);
+                SWAP_BYTES(&value_32bit);
 
                 value_32bit |= 0xFFFFFFFF >> tuple.len;
-                bgp::SWAP_BYTES(&value_32bit);
+                SWAP_BYTES(&value_32bit);
                 memcpy(rib_entry.prefix_bcast_bin, &value_32bit, 4);
 
             } else
@@ -351,10 +351,10 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
 
                     // Low order bytes are updated
                     memcpy(&value_64bit, &tuple.prefix_bin[8], 8);
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
 
                     value_64bit |= 0xFFFFFFFFFFFFFFFF >> (tuple.len - 64);
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
                     memcpy(&rib_entry.prefix_bcast_bin[8], &value_64bit, 8);
 
                 } else {
@@ -364,10 +364,10 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
 
                     // High order bypes are updated
                     memcpy(&value_64bit, tuple.prefix_bin, 8);
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
 
                     value_64bit |= 0xFFFFFFFFFFFFFFFF >> tuple.len;
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
                     memcpy(rib_entry.prefix_bcast_bin, &value_64bit, 8);
                 }
             } else
@@ -391,7 +391,7 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
  * \param [in] nlris           Reference to the list<evpn_tuple>
  * \param [in] attrs           Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<bgp::evpn_tuple> &nlris,
+static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<evpn_tuple> &nlris,
                                                  parsed_attrs_map &attrs, vector<obj_evpn> &rib_list) {
 
     //vector<parseBMP::obj_evpn> rib_list;
@@ -400,10 +400,10 @@ static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_da
     /*
      * Loop through all vpn and add/update them in the DB
      */
-    for (std::list<bgp::evpn_tuple>::iterator it = nlris.begin();
+    for (std::list<evpn_tuple>::iterator it = nlris.begin();
          it != nlris.end();
          it++) {
-        bgp::evpn_tuple &tuple = (*it);
+        evpn_tuple &tuple = (*it);
 
         //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
         //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
@@ -442,7 +442,7 @@ static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_da
  * \param  adv_prefixes         Reference to the list<prefix_tuple> of advertised prefixes
  * \param  attrs            Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<bgp::prefix_tuple> &adv_prefixes,
+static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<prefix_tuple> &adv_prefixes,
                                                          parsed_attrs_map &attrs, vector<obj_rib> &rib_list) {
     //vector<parseBMP::obj_rib> rib_list;
     obj_rib                         rib_entry;
@@ -452,10 +452,10 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
     /*
      * Loop through all prefixes and add/update them in the DB
      */
-    for (std::list<bgp::prefix_tuple>::iterator it = adv_prefixes.begin();
+    for (std::list<prefix_tuple>::iterator it = adv_prefixes.begin();
          it != adv_prefixes.end();
          it++) {
-        bgp::prefix_tuple &tuple = (*it);
+        prefix_tuple &tuple = (*it);
 
         //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
         //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
@@ -472,10 +472,10 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
         if (rib_entry.is_ipv4) {
             if (tuple.len < 32) {
                 memcpy(&value_32bit, tuple.prefix_bin, 4);
-                bgp::SWAP_BYTES(&value_32bit);
+                SWAP_BYTES(&value_32bit);
 
                 value_32bit |= 0xFFFFFFFF >> tuple.len;
-                bgp::SWAP_BYTES(&value_32bit);
+                SWAP_BYTES(&value_32bit);
                 memcpy(rib_entry.prefix_bcast_bin, &value_32bit, 4);
 
             } else
@@ -489,10 +489,10 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
 
                     // Low order bytes are updated
                     memcpy(&value_64bit, &tuple.prefix_bin[8], 8);
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
 
                     value_64bit |= 0xFFFFFFFFFFFFFFFF >> (tuple.len - 64);
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
                     memcpy(&rib_entry.prefix_bcast_bin[8], &value_64bit, 8);
 
                 } else {
@@ -502,10 +502,10 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
 
                     // High order bypes are updated
                     memcpy(&value_64bit, tuple.prefix_bin, 8);
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
 
                     value_64bit |= 0xFFFFFFFFFFFFFFFF >> tuple.len;
-                    bgp::SWAP_BYTES(&value_64bit);
+                    SWAP_BYTES(&value_64bit);
                     memcpy(rib_entry.prefix_bcast_bin, &value_64bit, 8);
                 }
             } else
@@ -529,7 +529,7 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
  *
  * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
  */
-static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<bgp::prefix_tuple> &wdrawn_prefixes,
+static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<prefix_tuple> &wdrawn_prefixes,
                                                             vector<obj_rib> &rib_list) {
     //vector<parseBMP::obj_rib> rib_list;
     obj_rib         rib_entry;
@@ -538,11 +538,11 @@ static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bg
      * Loop through all prefixes and add/update them in the DB
      *
      */
-    for (std::list<bgp::prefix_tuple>::iterator it = wdrawn_prefixes.begin();
+    for (std::list<prefix_tuple>::iterator it = wdrawn_prefixes.begin();
          it != wdrawn_prefixes.end();
          it++) {
 
-        bgp::prefix_tuple &tuple = (*it);
+        prefix_tuple &tuple = (*it);
         //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
         //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
         strncpy(rib_entry.prefix, tuple.prefix.c_str(), sizeof(rib_entry.prefix));
@@ -1002,7 +1002,7 @@ u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp
     memcpy(&common_hdr, data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
-    bgp::SWAP_BYTES(&(common_hdr.len));
+    SWAP_BYTES(&(common_hdr.len));
 
     // Update remaining bytes left of the message
     bgp_parsed_data->data_bytes_remaining = common_hdr.len - BGP_MSG_HDR_LEN;

@@ -54,7 +54,7 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
      */
     // Read address family
     memcpy(&nlri.afi, data, 2); data += 2; attr_len -= 2;
-    bgp::SWAP_BYTES(&nlri.afi);                     // change to host order
+    SWAP_BYTES(&nlri.afi);                     // change to host order
 
     nlri.safi = *data++; attr_len--;                // Set the SAFI - 1 octet
     nlri.nlri_data = data;                          // Set pointer position for nlri data
@@ -96,26 +96,26 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
 void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
 
     switch (nlri.afi) {
-        case bgp::BGP_AFI_IPV6 :  // IPv6
+        case BGP_AFI_IPV6 :  // IPv6
             libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
             break;
 
-        case bgp::BGP_AFI_IPV4 : // IPv4
+        case BGP_AFI_IPV4 : // IPv4
             libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
             break;
 
-        case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
+        case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
             libParseBGP_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
             libParseBGP_mp_link_state_parse_unreach_link_state(link_state_parse_data,nlri);
             break;
         }
 
-        case bgp::BGP_AFI_L2VPN :
+        case BGP_AFI_L2VPN :
         {
             // parse by safi
             switch (nlri.safi) {
-                case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
+                case BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
                     libParseBGP_evpn_data *evpn_data;
                     libParseBGP_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
@@ -151,19 +151,19 @@ void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_at
      * Decode based on SAFI
      */
     switch (nlri.safi) {
-        case bgp::BGP_SAFI_UNICAST: // Unicast IP address prefix
+        case BGP_SAFI_UNICAST: // Unicast IP address prefix
 
             // Data is an IP address - parse the address and save it
             libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                 parsed_data.withdrawn);
             break;
 
-        case bgp::BGP_SAFI_NLRI_LABEL: // Labeled unicast
+        case BGP_SAFI_NLRI_LABEL: // Labeled unicast
             libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                      parsed_data.withdrawn);
             break;
 
-        case bgp::BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
+        case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
             libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                      parsed_data.vpn_withdrawn);
 

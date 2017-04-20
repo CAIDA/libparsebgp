@@ -45,12 +45,12 @@
             memcpy(&val_32b, ec_hdr.value, 4);
             memcpy(&val_16b, ec_hdr.value + 4, 2);
 
-            bgp::SWAP_BYTES(&val_16b);
+            SWAP_BYTES(&val_16b);
 
             if (is_global_ipv4) {
                 inet_ntop(AF_INET, &val_32b, ipv4_char, sizeof(ipv4_char));
             } else
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
 
         } else {
             // Two-byte global field
@@ -58,8 +58,8 @@
             memcpy(&val_32b, ec_hdr.value + 2, 4);
 
             // Chagne to host order
-            bgp::SWAP_BYTES(&val_16b);
-            bgp::SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_16b);
+            SWAP_BYTES(&val_32b);
         }
 
         /*
@@ -210,7 +210,7 @@
                 val_ss << flags;
 
                 memcpy(&val_32b, ec_hdr.value + 2, 4);
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
 
                 val_ss << " mac_mob_seq_num=";
                 val_ss << val_32b;
@@ -223,7 +223,7 @@
                 val_ss << flags;
 
                 memcpy(&val_32b, ec_hdr.value + 3, 3);
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
                 val_32b = val_32b >> 8;
 
                 val_ss << " esi_label=";
@@ -232,12 +232,12 @@
             }
             case EXT_EVPN_ES_IMPORT: {
                 val_ss << "es_import=";
-                val_ss << bgp::parse_mac(ec_hdr.value);
+                val_ss << parse_mac(ec_hdr.value);
                 break;
             }
             case EXT_EVPN_ROUTER_MAC: {
                 val_ss << "router_mac=";
-                val_ss << bgp::parse_mac(ec_hdr.value);
+                val_ss << parse_mac(ec_hdr.value);
                 break;
             }
             default: {
@@ -269,7 +269,7 @@
                 u_char poi = ec_hdr.value[0];  // Point of Insertion
                 u_char cid = ec_hdr.value[1];  // Community-ID
                 memcpy(&val_32b, ec_hdr.value + 2, 4);
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
 
                 val_ss << "cost=";
 
@@ -302,7 +302,7 @@
 
             case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
                 memcpy(&val_32b, ec_hdr.value, 4);
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
 
                 val_ss << "ospf-rt=area-" << val_32b << ":";
 
@@ -334,7 +334,7 @@
 
             case EXT_OPAQUE_COLOR :
                 memcpy(&val_32b, ec_hdr.value + 2, 4);
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
 
                 val_ss << "color=" << val_32b;
                 break;
@@ -377,12 +377,12 @@
             memcpy(&val_32b, ec_hdr.value, 4);
             memcpy(&val_16b, ec_hdr.value + 4, 2);
 
-            bgp::SWAP_BYTES(&val_16b);
+            SWAP_BYTES(&val_16b);
 
             if (is_global_ipv4) {
                 inet_ntop(AF_INET, &val_32b, ipv4_char, sizeof(ipv4_char));
             } else
-                bgp::SWAP_BYTES(&val_32b);
+                SWAP_BYTES(&val_32b);
 
         } else {
             // Two-byte global field
@@ -390,8 +390,8 @@
             memcpy(&val_32b, ec_hdr.value + 2, 4);
 
             // Chagne to host order
-            bgp::SWAP_BYTES(&val_16b);
-            bgp::SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_16b);
+            SWAP_BYTES(&val_32b);
         }
 
         switch (ec_hdr.low_type) {
@@ -406,7 +406,7 @@
                 u_char encap_type    = ec_hdr.value[0];
                 u_char ctrl_flags   = ec_hdr.value[1];
                 memcpy(&val_16b, ec_hdr.value + 2, 2);          // Layer 2 MTU
-                bgp::SWAP_BYTES(&val_16b);
+                SWAP_BYTES(&val_16b);
 
                 val_ss << "l2info=";
 
@@ -572,7 +572,7 @@
             return "";
 
         memcpy(&val_16b, ec_hdr.value + 16, 2);
-        bgp::SWAP_BYTES(&val_16b);
+        SWAP_BYTES(&val_16b);
 
         switch (ec_hdr.low_type) {
 

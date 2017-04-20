@@ -59,15 +59,15 @@
         if (len <= 0 or data == NULL)
             return;
 
-        tuple.type = isIPv4 ? bgp::PREFIX_LABEL_UNICAST_V4 : bgp::PREFIX_LABEL_UNICAST_V6;
+        tuple.type = isIPv4 ? PREFIX_LABEL_UNICAST_V4 : PREFIX_LABEL_UNICAST_V6;
         tuple.is_ipv4 = isIPv4;
 
         //bool add_path_enabled = peer_info->add_path_capability.isAddPathEnabled(isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
         //                                                                        bgp::BGP_SAFI_NLRI_LABEL);
-        bool add_path_enabled = libParseBGP_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
-                                                               bgp::BGP_SAFI_NLRI_LABEL);
+        bool add_path_enabled = libParseBGP_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
+                                                               BGP_SAFI_NLRI_LABEL);
 
-        bool isVPN = typeid(bgp::vpn_tuple) == typeid(tuple);
+        bool isVPN = typeid(vpn_tuple) == typeid(tuple);
         uint16_t label_bytes;
 
         // Loop through all prefixes
@@ -76,7 +76,7 @@
             // Only check for add-paths if not mpls/vpn
             if (not isVPN and add_path_enabled and (len - read_size) >= 4) {
                 memcpy(&tuple.path_id, data, 4);
-                bgp::SWAP_BYTES(&tuple.path_id);
+                SWAP_BYTES(&tuple.path_id);
                 data += 4;
                 read_size += 4;
 
@@ -102,7 +102,7 @@
 
             // Parse RD if VPN
             if (isVPN and addr_bytes >= 8) {
-                bgp::vpn_tuple *vtuple = (bgp::vpn_tuple *)&tuple;
+                vpn_tuple *vtuple = (vpn_tuple *)&tuple;
                 libParseBGP_evpn_parse_route_distinguisher(data, &vtuple->rd_type, &vtuple->rd_assigned_number,
                                               &vtuple->rd_administrator_subfield);
                 data += 8;
@@ -152,7 +152,7 @@
          * Decode based on SAFI
          */
         switch (nlri.safi) {
-            case bgp::BGP_SAFI_UNICAST: // Unicast IP address prefix
+            case BGP_SAFI_UNICAST: // Unicast IP address prefix
 
                 // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
                 if (nlri.nh_len > 16)
@@ -168,7 +168,7 @@
                 libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
                 break;
 
-            case bgp::BGP_SAFI_NLRI_LABEL:
+            case BGP_SAFI_NLRI_LABEL:
                 // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
                 if (nlri.nh_len > 16)
                     memcpy(ip_raw, nlri.next_hop, 16);
@@ -183,7 +183,7 @@
                 libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
                 break;
 
-            case bgp::BGP_SAFI_MPLS: {
+            case BGP_SAFI_MPLS: {
 
                 if (isIPv4) {
                     //Next hop encoded in 12 bytes, last 4 bytes = IPv4
@@ -225,23 +225,23 @@
     static void libParseBGP_parse_afi(libParseBGP_mp_reach_attr_parsed_data *parse_data, mp_reach_nlri &nlri, parsed_update_data &parsed_data) {
 
         switch (nlri.afi) {
-            case bgp::BGP_AFI_IPV6 :  // IPv6
+            case BGP_AFI_IPV6 :  // IPv6
                 libParseBGP_mp_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
                 break;
 
-            case bgp::BGP_AFI_IPV4 : // IPv4
+            case BGP_AFI_IPV4 : // IPv4
                 libParseBGP_mp_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
                 break;
 
-            case bgp::BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
+            case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
             {
                 libparseBGP_mp_link_state_parsed_data *data;
-                libParseBGP_mp_link_state_init(data,parse_data->peer_addr, &parsed_data);
+                libParseBGP_mp_link_state_init(data, parse_data->peer_addr, &parsed_data);
                 libParseBGP_mp_link_state_parse_reach_link_state(data,nlri);
                 break;
             }
 
-            case bgp::BGP_AFI_L2VPN :
+            case BGP_AFI_L2VPN :
             {
                 u_char      ip_raw[16];
                 char        ip_char[40];
@@ -260,7 +260,7 @@
 
                 // parse by safi
                 switch (nlri.safi) {
-                    case bgp::BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
+                    case BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                     {
                         libParseBGP_evpn_data *evpn_data;
                         libParseBGP_evpn_init(evpn_data,parse_data->peer_addr, false, &parsed_data);
@@ -303,7 +303,7 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
      */
     // Read address family
     memcpy(&nlri.afi, data, 2); data += 2; attr_len -= 2;
-    bgp::SWAP_BYTES(&nlri.afi);                     // change to host order
+    SWAP_BYTES(&nlri.afi);                     // change to host order
 
     nlri.safi = *data++; attr_len--;                 // Set the SAFI - 1 octet
     nlri.nh_len = *data++; attr_len--;              // Set the next-hop length - 1 octet
@@ -346,23 +346,23 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
  * \param [out]  prefixes               Reference to a list<prefix_tuple> to be updated with entries
  */
 void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                           peer_info * peer_info, std::list<bgp::prefix_tuple> &prefixes) {
+                                           peer_info * peer_info, std::list<prefix_tuple> &prefixes) {
     u_char            ip_raw[16];
     char              ip_char[40];
     u_char            addr_bytes;
-    bgp::prefix_tuple tuple;
+    prefix_tuple tuple;
 
     if (len <= 0 or data == NULL)
         return;
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4/v6
-    tuple.type = isIPv4 ? bgp::PREFIX_UNICAST_V4 : bgp::PREFIX_UNICAST_V6;
+    tuple.type = isIPv4 ? PREFIX_UNICAST_V4 : PREFIX_UNICAST_V6;
     tuple.is_ipv4 = isIPv4;
 
     //bool add_path_enabled = peer_info->add_path_capability.isAddPathEnabled(isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
     //                                                                        bgp::BGP_SAFI_NLRI_LABEL);
-    bool add_path_enabled = libParseBGP_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
-                                                                            bgp::BGP_SAFI_NLRI_LABEL);
+    bool add_path_enabled = libParseBGP_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
+                                                                            BGP_SAFI_NLRI_LABEL);
 
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {
@@ -373,7 +373,7 @@ void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *da
         // Parse add-paths if enabled
         if (add_path_enabled and (len - read_size) >= 4) {
             memcpy(&tuple.path_id, data, 4);
-            bgp::SWAP_BYTES(&tuple.path_id);
+            SWAP_BYTES(&tuple.path_id);
             data += 4; read_size += 4;
         } else
             tuple.path_id = 0;
@@ -442,7 +442,7 @@ inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels) {
         bzero(&label, sizeof(label));
 
         memcpy(&label.data, data_ptr, 3);
-        bgp::SWAP_BYTES(&label.data);     // change to host order
+        SWAP_BYTES(&label.data);     // change to host order
 
         data_ptr += 3;
         read_size += 3;

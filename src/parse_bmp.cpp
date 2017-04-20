@@ -110,7 +110,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(libParseBGP_parse_bmp_parsed_data
             if ((i=extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
                 uint16_t len;
                 memcpy(&len, (buf+16), 2);
-                bgp::SWAP_BYTES(&len);
+                SWAP_BYTES(&len);
                 parsed_msg->bmp_len = len;
 
             } else {
@@ -135,7 +135,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(libParseBGP_parse_bmp_parsed_data
                     //if ((i = Recv(sock, buf, 18, MSG_PEEK | MSG_WAITALL)) == 18) {
                     if ((i = extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
                         memcpy(&parsed_msg->bmp_len, buf + 16, 2);
-                        bgp::SWAP_BYTES(&parsed_msg->bmp_len);
+                        SWAP_BYTES(&parsed_msg->bmp_len);
 
                     } else {
 //                        LOG_ERR("sock=%d: Failed to read peer down BGP message to get length of BMP message", sock);
@@ -222,7 +222,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(libParseBGP_parse_bmp_parsed_data
 
     // Save the advertised timestamp
     uint32_t ts = parsed_msg->c_hdr_old.ts_secs;
-    bgp::SWAP_BYTES(&ts);
+    SWAP_BYTES(&ts);
 
 
     if (ts != 0)
@@ -341,8 +341,8 @@ static void libParseBGP_parse_bmp_parse_peer_hdr(libParseBGP_parse_bmp_parsed_da
 
 
     // Save the advertised timestamp
-    bgp::SWAP_BYTES(&p_hdr.ts_secs);
-    bgp::SWAP_BYTES(&p_hdr.ts_usecs);
+    SWAP_BYTES(&p_hdr.ts_secs);
+    SWAP_BYTES(&p_hdr.ts_usecs);
 
     if (p_hdr.ts_secs != 0) {
         parsed_msg->p_entry.timestamp_secs = p_hdr.ts_secs;
@@ -391,7 +391,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v3(libParseBGP_parse_bmp_parsed_data
 
     //memcpy(&parsed_msg->c_hdr_v3, buffer, BMP_HDRv3_LEN);
     // Change to host order
-    bgp::SWAP_BYTES(&parsed_msg->c_hdr_v3.len);
+    SWAP_BYTES(&parsed_msg->c_hdr_v3.len);
 
     //   SELF_DEBUG("BMP v3: type = %x len=%d", parsed_msg->c_hdr_v3.type, parsed_msg->c_hdr_v3.len);
 
@@ -511,7 +511,7 @@ static bool libParseBGP_parse_bmp_handle_stats_report(libParseBGP_parse_bmp_pars
     parsed_msg->bmp_len -= 4;
 
     // Reverse the bytes and update int
-    bgp::SWAP_BYTES(b, 4);
+    SWAP_BYTES(b, 4);
     memcpy((void*) &stats_cnt, (void*) b, 4);
 
     //   SELF_DEBUG("sock = %d : STATS REPORT Count: %u (%d %d %d %d)",
@@ -534,8 +534,8 @@ static bool libParseBGP_parse_bmp_handle_stats_report(libParseBGP_parse_bmp_pars
         parsed_msg->bmp_len -= 4;
 
         // convert integer from network to host bytes
-        bgp::SWAP_BYTES(&stat_type);
-        bgp::SWAP_BYTES(&stat_len);
+        SWAP_BYTES(&stat_type);
+        SWAP_BYTES(&stat_len);
 
         //       SELF_DEBUG("sock=%d STATS: %lu : TYPE = %u LEN = %u", sock,
         //                   i, stat_type, stat_len);
@@ -548,7 +548,7 @@ static bool libParseBGP_parse_bmp_handle_stats_report(libParseBGP_parse_bmp_pars
                 parsed_msg->bmp_len -= stat_len;
 
                 // convert the bytes from network to host order
-                bgp::SWAP_BYTES(b, stat_len);
+                SWAP_BYTES(b, stat_len);
 
                 // Update the table structure based on the stats counter type
                 switch (stat_type) {
@@ -637,8 +637,8 @@ static void libParseBGP_parse_bmp_handle_init_msg(libParseBGP_parse_bmp_parsed_d
     for (int i=0; i < parsed_msg->bmp_data_len; i += BMP_INIT_MSG_LEN) {
         memcpy(&init_msg, bufPtr, BMP_INIT_MSG_LEN);
         init_msg.info = NULL;
-        bgp::SWAP_BYTES(&init_msg.len);
-        bgp::SWAP_BYTES(&init_msg.type);
+        SWAP_BYTES(&init_msg.len);
+        SWAP_BYTES(&init_msg.type);
 
         bufPtr += BMP_INIT_MSG_LEN;                // Move pointer past the info header
 
@@ -717,8 +717,8 @@ static void libParseBGP_parse_bmp_handle_term_msg(libParseBGP_parse_bmp_parsed_d
     for (int i=0; i < parsed_msg->bmp_data_len; i += BMP_TERM_MSG_LEN) {
         memcpy(&termMsg, bufPtr, BMP_TERM_MSG_LEN);
         termMsg.info = NULL;
-        bgp::SWAP_BYTES(&termMsg.len);
-        bgp::SWAP_BYTES(&termMsg.type);
+        SWAP_BYTES(&termMsg.len);
+        SWAP_BYTES(&termMsg.type);
 
         bufPtr += BMP_TERM_MSG_LEN;                // Move pointer past the info header
 
@@ -749,7 +749,7 @@ static void libParseBGP_parse_bmp_handle_term_msg(libParseBGP_parse_bmp_parsed_d
                 // Get the term reason code from info data (first 2 bytes)
                 uint16_t term_reason;
                 memcpy(&term_reason, termMsg.info, 2);
-                bgp::SWAP_BYTES(&term_reason);
+                SWAP_BYTES(&term_reason);
                 parsed_msg->r_entry.term_reason_code = term_reason;
 
                 switch (term_reason) {
@@ -861,7 +861,7 @@ static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(libParseBGP_parse_bmp_
 
     else if (is_parse_good) {
         bytes_read += 2;
-        bgp::SWAP_BYTES(&parsed_msg->up_event.local_port);
+        SWAP_BYTES(&parsed_msg->up_event.local_port);
     }
 
     // Get the remote port
@@ -870,7 +870,7 @@ static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(libParseBGP_parse_bmp_
 
     else if (is_parse_good) {
         bytes_read += 2;
-        bgp::SWAP_BYTES(&parsed_msg->up_event.remote_port);
+        SWAP_BYTES(&parsed_msg->up_event.remote_port);
     }
 
     // Update bytes read
@@ -931,7 +931,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
 // Read two byte code corresponding to the FSM event
                             uint16_t fsm_event = 0 ;
                             memcpy(&fsm_event, parsed_msg->bmp_data, 2);
-                            bgp::SWAP_BYTES(&fsm_event);
+                            SWAP_BYTES(&fsm_event);
 
                             snprintf(parsed_msg->down_event.error_text, sizeof(parsed_msg->down_event.error_text),
                                     "Local (%s) closed peer (%s) session: fsm_event=%d, No BGP notify message.",

@@ -77,7 +77,7 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
                         case BGP_CAP_4OCTET_ASN :
                             if (cap->len == 4) {
                                 memcpy(&asn, cap_ptr + 2, 4);
-                                bgp::SWAP_BYTES(&asn);
+                                SWAP_BYTES(&asn);
                                 snprintf(capStr, sizeof(capStr), "4 Octet ASN (%d)", BGP_CAP_4OCTET_ASN);
                                 capabilities.push_back(capStr);
                             } else {
@@ -116,7 +116,7 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
                                     memcpy(&data, cap_ptr, 4);
                                     cap_ptr += 4;
 
-                                    bgp::SWAP_BYTES(&data.afi);
+                                    SWAP_BYTES(&data.afi);
 
                                     snprintf(capStr, sizeof(capStr), "ADD Path (%d) : afi=%d safi=%d send/receive=%d",
                                              BGP_CAP_ADD_PATH, data.afi, data.safi, data.send_recieve);
@@ -126,10 +126,10 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
                                     std::string decodeStr(capStr);
                                     decodeStr.append(" : ");
 
-                                    decodeStr.append(bgp::GET_SAFI_STRING_BY_CODE(data.safi));
+                                    decodeStr.append(GET_SAFI_STRING_BY_CODE(data.safi));
                                     decodeStr.append(" ");
 
-                                    decodeStr.append(bgp::GET_AFI_STRING_BY_CODE(data.afi));
+                                    decodeStr.append(GET_AFI_STRING_BY_CODE(data.afi));
                                     decodeStr.append(" ");
 
                                     switch (data.send_recieve) {
@@ -185,7 +185,7 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
                             cap_mpbgp_data data;
                             if (cap->len == sizeof(data)) {
                                 memcpy(&data, (cap_ptr + 2), sizeof(data));
-                                bgp::SWAP_BYTES(&data.afi);
+                                SWAP_BYTES(&data.afi);
 
                                 //                        SELF_DEBUG("%s: supports MPBGP afi = %d safi=%d",peer_addr.c_str(), data.afi, data.safi);
 
@@ -196,9 +196,9 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
 
                                 std::string decodedStr(capStr);
                                 decodedStr.append(" : ");
-                                decodedStr.append(bgp::GET_SAFI_STRING_BY_CODE(data.safi));
+                                decodedStr.append(GET_SAFI_STRING_BY_CODE(data.safi));
                                 decodedStr.append(" ");
-                                decodedStr.append(bgp::GET_AFI_STRING_BY_CODE(data.afi));
+                                decodedStr.append(GET_AFI_STRING_BY_CODE(data.afi));
 
                                 capabilities.push_back(decodedStr);
 
@@ -272,8 +272,8 @@ size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_d
     bufPtr += read_size;                                       // Move pointer past the open header
 
     // Change to host order
-    bgp::SWAP_BYTES(&open_hdr.hold);
-    bgp::SWAP_BYTES(&open_hdr.asn);
+    SWAP_BYTES(&open_hdr.hold);
+    SWAP_BYTES(&open_hdr.asn);
 
     // Update the output params
     holdTime = open_hdr.hold;

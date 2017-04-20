@@ -17,7 +17,7 @@
 #include <cstring>
 #include <sys/types.h>
 
-namespace bgp {
+//namespace bgp {
     #define BGP_MAX_MSG_SIZE        65535                   // Max payload size - Larger than RFC4271 of 4096
     #define BGP_MSG_HDR_LEN         19                      // BGP message header size
     #define BGP_OPEN_MSG_MIN_LEN    29                      // Includes the expected header size
@@ -139,14 +139,35 @@ namespace bgp {
     /**
     * struct is used for l3vpn
     */
-    struct vpn_tuple: prefix_tuple, rd_tuple {
-        // inherits
+    struct vpn_tuple {
+        prefix_type   type;                 ///< Prefix type - RIB type
+        unsigned char len;                  ///< Length of prefix in bits
+        std::string   prefix;               ///< Printed form of the IP address
+        uint8_t       prefix_bin[16];       ///< Prefix in binary form
+        uint32_t      path_id;              ///< Path ID (add path draft-ietf-idr-add-paths-15)
+        bool          is_ipv4;               ///< True if IPv4, false if IPv6
+
+        std::string   labels;               ///< Labels in the format of label, label, ...
+        std::string    rd_administrator_subfield;
+        std::string    rd_assigned_number;
+        uint8_t        rd_type;
     };
 
     /**
     * Struct is used for evpn
     */
-    struct evpn_tuple: prefix_tuple, rd_tuple {
+    struct evpn_tuple {
+        prefix_type   type;                 ///< Prefix type - RIB type
+        unsigned char len;                  ///< Length of prefix in bits
+        std::string   prefix;               ///< Printed form of the IP address
+        uint8_t       prefix_bin[16];       ///< Prefix in binary form
+        uint32_t      path_id;              ///< Path ID (add path draft-ietf-idr-add-paths-15)
+        bool          is_ipv4;               ///< True if IPv4, false if IPv6
+
+        std::string   labels;               ///< Labels in the format of label, label, ...
+        std::string    rd_administrator_subfield;
+        std::string    rd_assigned_number;
+        uint8_t        rd_type;
         std::string     ethernet_segment_identifier;
         std::string     ethernet_tag_id_hex;
         uint8_t         mac_len;
@@ -218,15 +239,15 @@ namespace bgp {
         std::string afi_string;
 
         switch (code) {
-            case bgp::BGP_AFI_IPV4 :
+            case BGP_AFI_IPV4 :
                 afi_string = "IPv4";
                 break;
 
-            case bgp::BGP_AFI_IPV6 :
+            case BGP_AFI_IPV6 :
                 afi_string = "IPv6";
                 break;
 
-            case bgp::BGP_AFI_BGPLS :
+            case BGP_AFI_BGPLS :
                 afi_string = "BGP-LS";
                 break;
 
@@ -246,55 +267,55 @@ namespace bgp {
         std::string safi_string;
 
         switch (code) {
-            case bgp::BGP_SAFI_UNICAST : // Unicast IP forwarding
+            case BGP_SAFI_UNICAST : // Unicast IP forwarding
                 safi_string = "Unicast";
                 break;
 
-            case bgp::BGP_SAFI_MULTICAST : // Multicast IP forwarding
+            case BGP_SAFI_MULTICAST : // Multicast IP forwarding
                 safi_string = "Multicast";
                 break;
 
-            case bgp::BGP_SAFI_NLRI_LABEL : // NLRI with MPLS Labels
+            case BGP_SAFI_NLRI_LABEL : // NLRI with MPLS Labels
                 safi_string = "Labeled Unicast";
                 break;
 
-            case bgp::BGP_SAFI_MCAST_VPN : // MCAST VPN
+            case BGP_SAFI_MCAST_VPN : // MCAST VPN
                 safi_string = "MCAST VPN";
                 break;
 
-            case bgp::BGP_SAFI_VPLS : // VPLS
+            case BGP_SAFI_VPLS : // VPLS
                 safi_string = "VPLS";
                 break;
 
-            case bgp::BGP_SAFI_MDT : // BGP MDT
+            case BGP_SAFI_MDT : // BGP MDT
                 safi_string = "BGP MDT";
                 break;
 
-            case bgp::BGP_SAFI_4over6 : // BGP 4over6
+            case BGP_SAFI_4over6 : // BGP 4over6
                 safi_string = "BGP 4over6";
                 break;
 
-            case bgp::BGP_SAFI_6over4 : // BGP 6over4
+            case BGP_SAFI_6over4 : // BGP 6over4
                 safi_string = "BGP 6over4";
                 break;
 
-            case bgp::BGP_SAFI_EVPN : // BGP EVPNs
+            case BGP_SAFI_EVPN : // BGP EVPNs
                 safi_string = "BGP EVPNs";
                 break;
 
-            case bgp::BGP_SAFI_BGPLS : // BGP-LS
+            case BGP_SAFI_BGPLS : // BGP-LS
                 safi_string = "BGP-LS";
                 break;
 
-            case bgp::BGP_SAFI_MPLS : // MPLS-Labeled VPN
+            case BGP_SAFI_MPLS : // MPLS-Labeled VPN
                 safi_string = "MPLS-Labeled VPN";
                 break;
 
-            case bgp::BGP_SAFI_MCAST_MPLS_VPN : // Multicast BGP/MPLS VPN
+            case BGP_SAFI_MCAST_MPLS_VPN : // Multicast BGP/MPLS VPN
                 safi_string = "Multicast BGP/MPLS VPN";
                 break;
 
-            case bgp::BGP_SAFI_RT_CONSTRAINS : // Route target constrains
+            case BGP_SAFI_RT_CONSTRAINS : // Route target constrains
                 safi_string = "RT constrains";
                 break;
 
@@ -302,6 +323,6 @@ namespace bgp {
         return safi_string;
     }
 
-}
+//}
 
 #endif /* BGPCOMMON_H */

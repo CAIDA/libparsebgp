@@ -53,11 +53,11 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
         return data_len;
     }
 
-    memcpy(&type, data, 2);
-    bgp::SWAP_BYTES(&type);
+        memcpy(&type, data, 2);
+        SWAP_BYTES(&type);
 
-    memcpy(&len, data+2, 2);
-    bgp::SWAP_BYTES(&len);
+        memcpy(&len, data+2, 2);
+        SWAP_BYTES(&len);
 
     //SELF_DEBUG("%s: bgp-ls: Parsing node descriptor type %d len %d", peer_addr.c_str(), type, len);
 
@@ -78,7 +78,7 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
             }
 
             memcpy(&info.asn, data, 4);
-            bgp::SWAP_BYTES(&info.asn);
+            SWAP_BYTES(&info.asn);
             data_read += 4;
 
             //       SELF_DEBUG("%s: bgp-ls: Node descriptor AS = %u", peer_addr.c_str(), info.asn);
@@ -95,9 +95,9 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
             }
 
 
-            memcpy(&info.bgp_ls_id, data, 4);
-            bgp::SWAP_BYTES(&info.bgp_ls_id);
-            data_read += 4;
+                memcpy(&info.bgp_ls_id, data, 4);
+                SWAP_BYTES(&info.bgp_ls_id);
+                data_read += 4;
 
             //     SELF_DEBUG("%s: bgp-ls: Node descriptor BGP-LS ID = %08X", peer_addr.c_str(), info.bgp_ls_id);
             break;
@@ -248,9 +248,9 @@ static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *p
     uint16_t len;
 
     memcpy(&type, data, 2);
-    bgp::SWAP_BYTES(&type);
+    SWAP_BYTES(&type);
     memcpy(&len, data + 2, 2);
-    bgp::SWAP_BYTES(&len);
+    SWAP_BYTES(&len);
     data_len -= 4;
     data += 4;
 
@@ -312,10 +312,10 @@ int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &in
     }
 
     memcpy(&type, data, 2);
-    bgp::SWAP_BYTES(&type);
+    SWAP_BYTES(&type);
 
     memcpy(&len, data+2, 2);
-    bgp::SWAP_BYTES(&len);
+    SWAP_BYTES(&len);
 
     if (len > data_len - 4) {
         //LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
@@ -333,8 +333,8 @@ int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &in
                 break;
             }
 
-            memcpy(&info.local_id, data, 4); bgp::SWAP_BYTES(&info.local_id);
-            memcpy(&info.remote_id, data+4, 4); bgp::SWAP_BYTES(&info.remote_id);
+            memcpy(&info.local_id, data, 4); SWAP_BYTES(&info.local_id);
+            memcpy(&info.remote_id, data+4, 4); SWAP_BYTES(&info.remote_id);
             data_read += 8;
 
             //SELF_DEBUG("%s: bgp-ls: Link descriptor ID local = %08x remote = %08x", peer_addr.c_str(), info.local_id, info.remote_id);
@@ -357,7 +357,7 @@ int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &in
                 break;
             }
 
-            memcpy(&info.mt_id, data, len); bgp::SWAP_BYTES(&info.mt_id);
+            memcpy(&info.mt_id, data, len); SWAP_BYTES(&info.mt_id);
             info.mt_id >>= 16;          // MT ID is 16 bits
             data_read += len;
 
@@ -485,9 +485,9 @@ static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *p
         bzero(&info, sizeof(info));
 
         memcpy(&type, data, 2);
-        bgp::SWAP_BYTES(&type);
+        SWAP_BYTES(&type);
         memcpy(&len, data + 2, 2);
-        bgp::SWAP_BYTES(&len);
+        SWAP_BYTES(&len);
         data_len -= 4;
         data += 4;
 
@@ -579,11 +579,11 @@ int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
         return data_len;
     }
 
-    memcpy(&type, data, 2);
-    bgp::SWAP_BYTES(&type);
+        memcpy(&type, data, 2);
+        SWAP_BYTES(&type);
 
-    memcpy(&len, data + 2, 2);
-    bgp::SWAP_BYTES(&len);
+        memcpy(&len, data + 2, 2);
+        SWAP_BYTES(&len);
 
     if (len > data_len - 4) {
         //    LOG_NOTICE("%s: bgp-ls: failed to parse prefix descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
@@ -618,14 +618,14 @@ int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
             if (is_ipv4) {
                 inet_ntop(AF_INET, info.prefix, ip_char, sizeof(ip_char));
 
-                // Get the broadcast/ending IP address
-                if (info.prefix_len < 32) {
-                    memcpy(&value_32bit, info.prefix, 4);
-                    bgp::SWAP_BYTES(&value_32bit);
+                    // Get the broadcast/ending IP address
+                    if (info.prefix_len < 32) {
+                        memcpy(&value_32bit, info.prefix, 4);
+                        SWAP_BYTES(&value_32bit);
 
-                    value_32bit |= 0xFFFFFFFF >> info.prefix_len;
-                    bgp::SWAP_BYTES(&value_32bit);
-                    memcpy(info.prefix_bcast, &value_32bit, 4);
+                        value_32bit |= 0xFFFFFFFF >> info.prefix_len;
+                        SWAP_BYTES(&value_32bit);
+                        memcpy(info.prefix_bcast, &value_32bit, 4);
 
                 } else
                     memcpy(info.prefix_bcast, info.prefix, sizeof(info.prefix_bcast));
@@ -640,30 +640,30 @@ int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
                         // High order bytes are left alone
                         memcpy(info.prefix_bcast, info.prefix, 8);
 
-                        // Low order bytes are updated
-                        memcpy(&value_64bit, &info.prefix[8], 8);
-                        bgp::SWAP_BYTES(&value_64bit);
+                            // Low order bytes are updated
+                            memcpy(&value_64bit, &info.prefix[8], 8);
+                            SWAP_BYTES(&value_64bit);
 
-                        value_64bit |= 0xFFFFFFFFFFFFFFFF >> (info.prefix_len - 64);
-                        bgp::SWAP_BYTES(&value_64bit);
-                        memcpy(&info.prefix_bcast[8], &value_64bit, 8);
+                            value_64bit |= 0xFFFFFFFFFFFFFFFF >> (info.prefix_len - 64);
+                            SWAP_BYTES(&value_64bit);
+                            memcpy(&info.prefix_bcast[8], &value_64bit, 8);
 
-                    } else {
-                        // Low order types are all ones
-                        value_64bit = 0xFFFFFFFFFFFFFFFF;
-                        memcpy(&info.prefix_bcast[8], &value_64bit, 8);
+                        } else {
+                            // Low order types are all ones
+                            value_64bit = 0xFFFFFFFFFFFFFFFF;
+                            memcpy(&info.prefix_bcast[8], &value_64bit, 8);
 
                         // High order bypes are updated
                         memcpy(&value_64bit, info.prefix, 8);
-                        bgp::SWAP_BYTES(&value_64bit);
+                        SWAP_BYTES(&value_64bit);
 
-                        value_64bit |= 0xFFFFFFFFFFFFFFFF >> info.prefix_len;
-                        bgp::SWAP_BYTES(&value_64bit);
-                        memcpy(info.prefix_bcast, &value_64bit, 8);
-                    }
-                } else
-                    memcpy(info.prefix_bcast, info.prefix, sizeof(info.prefix_bcast));
-            }
+                            value_64bit |= 0xFFFFFFFFFFFFFFFF >> info.prefix_len;
+                            SWAP_BYTES(&value_64bit);
+                            memcpy(info.prefix_bcast, &value_64bit, 8);
+                        }
+                    } else
+                        memcpy(info.prefix_bcast, info.prefix, sizeof(info.prefix_bcast));
+                }
 
             //       SELF_DEBUG("%s: bgp-ls: prefix ip_reach_info: prefix = %s/%d", peer_addr.c_str(),ip_char, info.prefix_len);
             break;
@@ -682,8 +682,8 @@ int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
                 break;
             }
 
-            memcpy(&info.mt_id, data, len); bgp::SWAP_BYTES(&info.mt_id);
-            info.mt_id >>= 16;          // MT ID is 16 bits
+                memcpy(&info.mt_id, data, len); SWAP_BYTES(&info.mt_id);
+                info.mt_id >>= 16;          // MT ID is 16 bits
 
             data_read += len;
 
@@ -769,12 +769,12 @@ static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data 
     uint16_t type;
     uint16_t len;
 
-    memcpy(&type, data, 2);
-    bgp::SWAP_BYTES(&type);
-    memcpy(&len, data + 2, 2);
-    bgp::SWAP_BYTES(&len);
-    data_len -= 4;
-    data += 4;
+        memcpy(&type, data, 2);
+        SWAP_BYTES(&type);
+        memcpy(&len, data + 2, 2);
+        SWAP_BYTES(&len);
+        data_len -= 4;
+        data += 4;
 
     if (len > data_len) {
         //        LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
@@ -846,16 +846,16 @@ static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_par
 
         //SELF_DEBUG("NLRI read=%d total = %d", nlri_len_read, len);
 
-        /*
-         * Parse the NLRI TLV
-         */
-        memcpy(&nlri_type, data, 2);
-        data += 2;
-        bgp::SWAP_BYTES(&nlri_type);
+            /*
+             * Parse the NLRI TLV
+             */
+            memcpy(&nlri_type, data, 2);
+            data += 2;
+            SWAP_BYTES(&nlri_type);
 
-        memcpy(&nlri_len, data, 2);
-        data += 2;
-        bgp::SWAP_BYTES(&nlri_len);
+            memcpy(&nlri_len, data, 2);
+            data += 2;
+            SWAP_BYTES(&nlri_len);
 
         nlri_len_read += 4;
 
@@ -870,9 +870,9 @@ static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_par
         uint8_t          proto_id;
         uint64_t         id;
 
-        proto_id = *data;
-        memcpy(&id, data + 1, sizeof(id));
-        bgp::SWAP_BYTES(&id);
+            proto_id = *data;
+            memcpy(&id, data + 1, sizeof(id));
+            SWAP_BYTES(&id);
 
         // Update read NLRI attribute, current TLV length and data pointer
         nlri_len_read += 9; nlri_len -= 9; data += 9;
@@ -936,14 +936,14 @@ void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_
 
     data->parsed_data->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
-    /*
-     * Decode based on SAFI
-     */
-    switch (nlri.safi) {
-        case bgp::BGP_SAFI_BGPLS: // Unicast BGP-LS
-            //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
-            libParseBGP_parse_link_state_nlri_data(data, nlri.nlri_data, nlri.nlri_len);
-            break;
+        /*
+         * Decode based on SAFI
+         */
+        switch (nlri.safi) {
+            case BGP_SAFI_BGPLS: // Unicast BGP-LS
+                //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
+                libParseBGP_parse_link_state_nlri_data(data, nlri.nlri_data, nlri.nlri_len);
+                break;
 
         default :
             //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
@@ -963,14 +963,14 @@ void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_
 void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_state_parsed_data *data,mp_unreach_nlri &nlri) {
     data->ls_data = &data->parsed_data->ls_withdrawn;
 
-    /*
-     * Decode based on SAFI
-     */
-    switch (nlri.safi) {
-        case bgp::BGP_SAFI_BGPLS: // Unicast BGP-LS
-            //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
-            libParseBGP_parse_link_state_nlri_data(data,nlri.nlri_data, nlri.nlri_len);
-            break;
+        /*
+         * Decode based on SAFI
+         */
+        switch (nlri.safi) {
+            case BGP_SAFI_BGPLS: // Unicast BGP-LS
+                //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
+                libParseBGP_parse_link_state_nlri_data(data,nlri.nlri_data, nlri.nlri_len);
+                break;
 
         default :
             //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
