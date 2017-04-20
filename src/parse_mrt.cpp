@@ -32,29 +32,6 @@ libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int 
     return mrt_parsed_data;
 }
 
-/**
- * Constructor for class
- *
- * \note
- *  This class will allocate via 'new' the bgp_peers variables
- *        as needed.  The calling method/class/function should check each var
- *        in the structure for non-NULL pointers.  Non-NULL pointers need to be
- *        freed with 'delete'
- *
- * \param [in]     logPtr      Pointer to existing Logger for app logging
- * \param [in,out] peer_entry  Pointer to the peer entry
- */
-/*parseMRT::parseMRT() {
-    mrt_len = 0;
-    mrt_data_len = 0;
-}
-
-*//*
- * Destructor for class
- *//*
-parseMRT::~parseMRT() {
-    // clean up
-}*/
 
 // Analogous to constructor of class
 void libParseBGP_parse_mrt_init(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data){
@@ -62,7 +39,6 @@ void libParseBGP_parse_mrt_init(libParseBGP_parse_mrt_parsed_data *mrt_parsed_da
     mrt_parsed_data->mrt_data_len = 0;
 }
 
-//bool parseMRT::parseMsg(u_char *&buffer, int& buf_len)
 bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data)
 {
     //bool rval = true;
@@ -184,11 +160,6 @@ void libParseBGP_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libPar
     bgp_msg::libParseBGP_update_msg_data u_msg;
     bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
     bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
-    //bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
-    //uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
-    //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
-    //parseBgpAttributes(buffer, buf_len); //TODO
-//    delete u_msg;
 }
 
 void libParseBGP_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
@@ -337,7 +308,6 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         mrt_parsed_data->rib_entry_hdr.rib_entries.push_back(*r_entry);
-//        delete u_msg;
         delete r_entry;
         count++;
     }
@@ -387,13 +357,10 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
         bgp_msg::libParseBGP_update_msg_data u_msg;
         bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
         bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
-        //bgp_msg::UpdateMsg * uMsg = new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
-        //uMsg->parseAttributes(mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
-        //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
+                //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         mrt_parsed_data->rib_entry_hdr.rib_entries.push_back(*r_entry);
-//        delete u_msg;
-        delete r_entry;
+       delete r_entry;
         count++;
     }
 }

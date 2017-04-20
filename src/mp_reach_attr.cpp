@@ -27,10 +27,6 @@ namespace bgp_msg {
  * \param [in]     peer_info                Persistent Peer info pointer
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
-/*MPReachAttr::MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug)
-    : logger{logPtr}, peer_info{peer_info}, debug{enable_debug} {
-        this->peer_addr = peerAddr;
-}*/
 
     void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peerAddr,
                                         bmp_message::peer_info *peer_info)
@@ -39,8 +35,6 @@ namespace bgp_msg {
         parse_data->peer_addr = peerAddr;
     }
 
-//MPReachAttr::~MPReachAttr() {
-//}
 
     /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)

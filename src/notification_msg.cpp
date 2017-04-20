@@ -12,22 +12,6 @@
 
 namespace bgp_msg {
 
-/**
- * Constructor for class
- *
- * \details Handles bgp notification messages
- *
- * \param [in]     logPtr       Pointer to existing Logger for app logging
- * \param [in]     enable_debug Debug true to enable, false to disable
- */
-//NotificationMsg::NotificationMsg() {
-    //logger = logPtr;
-    //debug = enable_debug;
-//}
-
-//NotificationMsg::~NotificationMsg() {
-
-//}
 
 /**
  * Parses a notification message stored in a byte parsed_msg.error_textfer

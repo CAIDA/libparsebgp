@@ -10,7 +10,6 @@
 #define MPUNREACHATTR_H_
 
 #include "bgp_common.h"
-//#include "Logger.h"
 #include <list>
 #include <string>
 
@@ -27,8 +26,6 @@ namespace bgp_msg {
  * \details This class parses MP_UNREACH attributes.
  *          It can be extended to create attributes messages.
  */
-//class MPUnReachAttr {
-//public:
 
     /**
      * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
@@ -57,7 +54,6 @@ namespace bgp_msg {
     void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
                                            bmp_message::peer_info *peer_info);
 
-//    virtual ~MPUnReachAttr();
 
     /**
      * Parse the MP_UNREACH NLRI attribute data
@@ -72,10 +68,6 @@ namespace bgp_msg {
      *
      */
     void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
-
-//private:
-    //bool                    debug;              ///< debug flag to indicate debugging
-    //Logger                  *logger;            ///< Logging class pointer
 
     /**
      * MP UnReach NLRI parse based on AFI
@@ -98,7 +90,6 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      */
     void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
-//};
 
 } /* namespace bgp_msg */
 

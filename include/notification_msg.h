@@ -10,7 +10,6 @@
 #ifndef NOTIFICATIONMSG_H_
 #define NOTIFICATIONMSG_H_
 
-//#include "Logger.h"
 #include "bgp_common.h"
 
 namespace bgp_msg {
@@ -100,23 +99,6 @@ namespace bgp_msg {
          char         error_text[255];           ///< Decoded notification message
      };
 
-/**
- * \class   NotificationMsg
- *
- * \brief   BGP notification message parser
- * \details This class parses a BGP notification message.  It can be extended to create messages.
- *          message.
- */
-//class NotificationMsg {
-//public:
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp notification messages
-     *
-     */
-    //NotificationMsg();
-    //virtual ~NotificationMsg();
 
     /**
      * Parses a notification message stored in a byte buffer
@@ -132,12 +114,6 @@ namespace bgp_msg {
      * \return True if error, false if no error reading/parsing the notification message
      */
     bool libParseBGP_notification_parse_notify(u_char *data, size_t size, parsed_notify_msg &parsed_msg);
-
-//private:
-    //bool             debug;                           ///< debug flag to indicate debugging
-    //Logger           *logger;                         ///< Logging class pointer
-
-//};
 
 } /* namespace bgp_msg */
 

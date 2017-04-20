@@ -41,8 +41,6 @@
 using namespace std;
 
 namespace bmp_message {
-//class parseBMP {
-//public:
     /**
      * BMP common header types
      */
@@ -125,9 +123,6 @@ namespace bmp_message {
         obj_peer_up_event up_event;
         obj_stats_report stats;
         parsed_bgp_msg bgp_msg;
-//private:
-        //bool            debug;                      ///< debug flag to indicate debugging
-        // Logger          *logger;                    ///< Logging class pointer
 
         char bmp_type;                   ///< The BMP message type
         uint32_t bmp_len;                    ///< Length of the BMP message - does not include the common header size
@@ -216,42 +211,7 @@ namespace bmp_message {
     } __attribute__ ((__packed__));
 
 
-    /**
-     * BMP message buffer (normally only contains the BGP message)
-     *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.
-     *      Complete BGP message is read, otherwise error is generated.
-     */
-    //u_char      bmp_data[BMP_PACKET_BUF_SIZE + 1];
-    //size_t      bmp_data_len;              ///< Length/size of data in the data buffer
-
-    /**
-     * BMP packet buffer - This is a copy of the BMP packet.
-     *
-     * Only BMPv3 messages get stored in the packet buffer since it wasn't until
-     * BMPv3 that the length was specified.
-     *
-     * Length of packet is the common header message length (bytes)
-     */
-    //u_char      bmp_packet[BMP_PACKET_BUF_SIZE + 1];
-    //size_t      bmp_packet_len;
-
-    /**
-     * Constructor for class
-     *
-     * \note
-     *  This class will allocate via 'new' the bgp_peers variables
-     *        as needed.  The calling method/class/function should check each var
-     *        in the structure for non-NULL pointers.  Non-NULL pointers need to be
-     *        freed with 'delete'
-     *
-     * \param [in]     logPtr      Pointer to existing Logger for app logging
-     * \param [in,out] peer_entry  Pointer to the peer entry
-     */
-    //parseBMP();
-
-    // destructor
-    //virtual ~parseBMP();
-}
+    }
     /**
      * Read messages from buffer
      *
@@ -261,165 +221,11 @@ namespace bmp_message {
      * \param [in]  buf_len       length of the buffer
      * \return true if more to read, false if the connection is done/closed
      */
-    //bool parseMsg(int read_fd);
-    bool libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer,
-                                         int &buf_len);
-    /**
-     * Recv wrapper for recv() to enable packet buffering
-     */
-    //ssize_t Recv(int sockfd, void *buf, size_t len, int flags);
+    uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer,
+                                         int buf_len);
 
-    /**
-     * Process the incoming BMP message
-     *
-     * \returns
-     *      returns the BMP message type. A type of >= 0 is normal,
-     *      < 0 indicates an error
-     *
-     * \param [in] sock     Socket to read the BMP message from
-     *
-     * throws (const char *) on error.   String will detail error message.
-     */
-    //char handleMessage(int sock);
-    //char libParseBGP_parse_bmp_handle_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
+    //typedef std::map<std::string, bmp_message::peer_info>::iterator peer_info_map_iter;
 
-    /**
-     * Parse and return back the stats report
-     *
-     * \param [in]  sock        Socket to read the stats message from
-     * \param [out] stats       Reference to stats report data
-     *
-     * \return true if error, false if no error
-     */
-    //bool handleStatsReport(int sock);
-    //bool libParseBGP_parse_bmp_handle_stats_report(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * handle the initiation message and udpate the router entry
-     *
-     * \param [in]     sock        Socket to read the init message from
-     * \param [in/out] r_entry     Already defined router entry reference (will be updated)
-     */
-    //void handleInitMsg(int sock);
-    //void libParseBGP_parse_bmp_handle_init_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * handle the termination message, router entry will be updated
-     *
-     * \param [in]     sock        Socket to read the term message from
-     * \param [in/out] r_entry     Already defined router entry reference (will be updated)
-     */
-    //void handleTermMsg(int sock);
-    //void libParseBGP_parse_bmp_handle_term_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-    /**
-     * Buffer remaining BMP message
-     *
-     * \details This method will read the remaining amount of BMP data and store it in the instance variable bmp_data.
-     *          Normally this is used to store the BGP message so that it can be parsed.
-     *
-     * \param [in]  sock       Socket to read the message from
-     *
-     * \returns true if successfully parsed the bmp peer down header, false otherwise
-     */
-    //void bufferBMPMessage(int sock);
-    //void libParseBGP_parse_bmp_buffer_bmp_message(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * Parse the v3 peer down BMP header
-     *
-     *      This method will update the db peer_down_event struct with BMP header info.
-     *
-     * \param [in]  sock       Socket to read the message from
-     * \param [out] down_event Reference to the peer down event storage (will be updated with bmp info)
-     *
-     * \returns true if successfully parsed the bmp peer down header, false otherwise
-     */
-    //bool parsePeerDownEventHdr(int sock);
-    //bool libParseBGP_parse_bmp_parse_peer_down_event_hdr(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * Parse the v3 peer up BMP header
-     *
-     *      This method will update the db peer_up_event struct with BMP header info.
-     *
-     * \param [in]  sock     Socket to read the message from
-     * \param [out] up_event Reference to the peer up event storage (will be updated with bmp info)
-     *
-     * \returns true if successfully parsed the bmp peer up header, false otherwise
-     */
-    //bool parsePeerUpEventHdr(int sock);
-    //bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * get current BMP message type
-     */
-    //char libParseBGP_parse_bmp_get_bmp_type(libParseBGP_parse_bmp_parsed_data *parsed_msg);
-
-    /**
-     * get current BMP message length
-     *
-     * The length returned does not include the version 3 common header length
-     */
-    //uint32_t libParseBGP_parse_bmp_get_bmp_length(libParseBGP_parse_bmp_parsed_data *parsed_msg);
-
-    // Debug methods
-//    void enableDebug();
-//    void disableDebug();
-
-    /*parse_common::obj_bgp_peer p_entry;         ///< peer table entry - will be updated with BMP info
-    parse_common::obj_router r_entry;
-    parse_common::obj_peer_down_event down_event;
-    parse_common::obj_peer_up_event up_event;
-    parse_common::obj_stats_report stats;
-    parse_common::parsed_bgp_msg bgp_msg;
-//private:
-    //bool            debug;                      ///< debug flag to indicate debugging
-   // Logger          *logger;                    ///< Logging class pointer
-
-    char            bmp_type;                   ///< The BMP message type
-    uint32_t        bmp_len;                    ///< Length of the BMP message - does not include the common header size
-
-    // Storage for the byte converted strings - This must match the MsgBusInterface bgp_peer struct
-    char peer_addr[40];                         ///< Printed format of the peer address (Ipv4 and Ipv6)
-    char peer_as[32];                           ///< Printed format of the peer ASN
-    char peer_rd[32];                           ///< Printed format of the peer RD
-    char peer_bgp_id[16];                       ///< Printed format of the peer bgp ID
-    std::map<std::string, peer_info> peer_info_map;*/
-    typedef std::map<std::string, bmp_message::peer_info>::iterator peer_info_map_iter;
-
-    /**
-     * Parse v1 and v2 BMP header
-     *
-     * \details
-     *      v2 uses the same common header, but adds the Peer Up message type.
-     *
-     * \param [in]  sock        Socket to read the message from
-     */
-    //void parseBMPv2(int sock);
-    //void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * Parse v3 BMP header
-     *
-     * \details
-     *      v3 has a different header structure and changes the peer
-     *      header format.
-     *
-     * \param [in]  sock        Socket to read the message from
-     */
-    //void parseBMPv3(int sock);
-    //void libParseBGP_parse_bmp_parse_bmp_v3(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-    /**
-     * Parse the v3 peer header
-     *
-     * \param [in]  sock        Socket to read the message from
-     */
-    //void parsePeerHdr(int sock);
-    //void libParseBGP_parse_bmp_parse_peer_hdr(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len);
-
-//};
-
-bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *&buffer, int &buf_len);
+bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len);
 
 #endif /* PARSEBMP_H_ */

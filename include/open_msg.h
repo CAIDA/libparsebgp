@@ -10,8 +10,6 @@
 #ifndef OPENMSG_H_
 #define OPENMSG_H_
 
-//#include "bgp_common.h"
-
 #include <list>
 #include "parse_bmp.h"
 #include "add_path_data_container.h"
@@ -25,9 +23,7 @@ namespace bgp_msg {
  * \details This class parses a BGP open message.  It can be extended to create messages.
  *          message.
  */
-//class OpenMsg {
-//public:
-   /**
+ /**
      * Defines the BGP capabilities
      *      http://www.iana.org/assignments/capability-codes/capability-codes.xhtml
      */
@@ -136,7 +132,6 @@ namespace bgp_msg {
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
      void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data, std::string peerAddr, bmp_message::peer_info *peer_info);
-//    virtual ~OpenMsg();
 
     /**
      * Parses an open message
@@ -159,9 +154,6 @@ namespace bgp_msg {
                         std::string &bgp_id, std::list<std::string> &capabilities);
 
 
-//private:
-    //bool                    debug;          ///< debug flag to indicate debugging
-
     /**
      * Parses capabilities from buffer
      *
@@ -179,7 +171,6 @@ namespace bgp_msg {
      */
     size_t libParseBGP_open_msg_parse_capabilities(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
                              std::list<std::string> &capabilities);
-//};
 
 } /* namespace bgp */
 

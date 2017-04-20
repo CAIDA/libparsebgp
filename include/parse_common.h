@@ -13,8 +13,6 @@
 #include "bgp_common.h"
 using namespace std;
 
-//class parse_common{
-//public:
     /**
      * OBJECT: routers
      *
@@ -439,6 +437,5 @@ using namespace std;
         std::vector<obj_rib> wdrawn_obj_rib_list;
         bool has_end_of_rib_marker;
     };
-//};
 
 #endif //PARSE_LIB_PARSE_COMMON_H_H

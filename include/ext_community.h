@@ -12,7 +12,6 @@
 #define __EXTCOMMUNITY_H__
 
 #include "bgp_common.h"
-//#include "Logger.h"
 #include <list>
 #include <map>
 #include <string>
@@ -27,9 +26,7 @@ namespace bgp_msg {
  *          It can be extended to create attributes messages.
  *          See http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
  */
-//class ExtCommunity {
-//public:
-    /**
+     /**
      * Defines the BGP Extended communities Types
      *      http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
      */
@@ -150,17 +147,6 @@ namespace bgp_msg {
         u_char      *value;                         ///<
     };
 
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp Extended Communities
-     *
-     * \param [in]     logPtr       Pointer to existing Logger for app logging
-     * \param [in]     pperAddr     Printed form of peer address used for logging
-     * \param [in]     enable_debug Debug true to enable, false to disable
-     */
-    //ExtCommunity(std::string peerAddr);
-    //virtual ~ExtCommunity();
 
     /**
      * Parse the extended communities path attribute (8 byte as per RFC4360)
@@ -189,79 +175,6 @@ namespace bgp_msg {
      *
      */
     void libParseBGP_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data);
-
-//private:
-    //bool             debug;                           ///< debug flag to indicate debugging
-    //Logger           *logger;                         ///< Logging class pointer
-    //std::string      peer_addr;                       ///< Printed form of the peer address for logging
-
-    /**
-     * Decode common Type/Subtypes
-     *
-     * \details
-     *      Decodes the common 2-octet, 4-octet, and IPv4 specific common subtypes.
-     *      Converts to human readable form.
-     *
-     * \param [in]   ec_hdr          Reference to the extended community header
-     * \param [in]   isGlobal4Bytes  True if the global admin field is 4 bytes, false if 2
-     * \param [in]   isGlobalIPv4    True if the global admin field is an IPv4 address, false if not
-     *
-     * \return  Decoded string value
-     */
-    //std::string decodeType_common(const extcomm_hdr &ec_hdr, bool isGlobal4Bytes = false, bool isGlobalIPv4 = false);
-
-    /**
-     * Decode EVPN subtypes
-     *
-     * \details
-     *      Converts to human readable form.
-     *
-     * \param [in]   ec_hdr          Reference to the extended community header
-     *
-     * \return  Decoded string value
-     */
-    //std::string decodeType_EVPN(const extcomm_hdr &ec_hdr);
-
-    /**
-     * Decode Opaque subtypes
-     *
-     * \details
-     *      Converts to human readable form.
-     *
-     * \param [in]   ec_hdr          Reference to the extended community header
-     *
-     * \return  Decoded string value
-     */
-    //std::string decodeType_Opaque(const extcomm_hdr &ec_hdr);
-
-    /**
-     * Decode Generic subtypes
-     *
-     * \details
-     *      Converts to human readable form.
-     *
-     * \param [in]   ec_hdr          Reference to the extended community header
-     * \param [in]   isGlobal4Bytes  True if the global admin field is 4 bytes, false if 2
-     * \param [in]   isGlobalIPv4    True if the global admin field is an IPv4 address, false if not
-     *
-     * \return  Decoded string value
-     */
-    //std::string decodeType_Generic(const extcomm_hdr &ec_hdr,  bool isGlobal4Bytes = false, bool isGlobalIPv4 = false);
-
-    /**
-     * Decode IPv6 Specific Type/Subtypes
-     *
-     * \details
-     *      Decodes the IPv6 specific and 2-octet, 4-octet.  This is pretty much the as common for IPv4,
-     *      but with some differences. Converts to human readable form.
-     *
-     * \param [in]   ec_hdr          Reference to the extended community header
-     *
-     * \return  Decoded string value
-     */
-    //std::string decodeType_IPv6Specific(const extcomm_hdr &ec_hdr);
-
-//};
 
 } /* namespace bgp_msg */
 

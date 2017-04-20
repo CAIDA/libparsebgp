@@ -15,14 +15,9 @@
 #include <sys/types.h>
 #include "mp_reach_attr.h"
 #include "mp_un_reach_attr.h"
-//#include "Logger.h"
-//#include "MsgBusInterface.hpp"
 
 namespace bgp_msg {
 
- //   class MPLinkState {
-
- //   public:
         /**
          * Defines the BGP link state NLRI types
          *      https://tools.ietf.org/html/draft-ietf-idr-ls-distribution-10#section-3.2
@@ -172,10 +167,6 @@ namespace bgp_msg {
         void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri);
 
 
-//    private:
-        //bool             debug;                           ///< debug flag to indicate debugging
-        //Logger           *logger;                         ///< Logging class pointer
-
         /**********************************************************************************//*
          * Parse Prefix Descriptor sub-tlvs
          *
@@ -199,8 +190,6 @@ namespace bgp_msg {
          * \param [out]  hash_bin       Node descriptor information returned/updated
          */
         void genNodeHashId(node_descriptor &info);
-
- //   };
 
 } /* namespace bgp_msg */
 

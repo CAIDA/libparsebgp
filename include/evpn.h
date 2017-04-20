@@ -8,15 +8,8 @@
 #include <arpa/inet.h>
 #include "mp_reach_attr.h"
 #include "mp_un_reach_attr.h"
-//#include "Logger.h"
-//#include "MsgBusInterface.hpp"
 
 namespace bgp_msg {
-
-//    class EVPN {
-//
-//    public:
-
         enum evpn_routes_types {
             EVPN_ROUTE_TYPE_ETHERNET_AUTO_DISCOVERY = 1,
             EVPN_ROUTE_TYPE_MAC_IP_ADVERTISMENT,
@@ -43,24 +36,8 @@ namespace bgp_msg {
          * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
-        //EVPN(Logger *logPtr, std::string peerAddr, bool isUnreach,
-        //     UpdateMsg::parsed_update_data *parsed_data, bool enable_debug);
 
         void libParseBGP_evpn_init(libParseBGP_evpn_data *evpn_data, std::string peerAddr, bool is_unreach, parsed_update_data *parsed_data);
-//        virtual ~EVPN();
-
-        /**
-         * Parse Ethernet Segment Identifier
-         *
-         * \details
-         *      Will parse the Segment Identifier. Based on https://tools.ietf.org/html/rfc7432#section-5
-         *
-         * \param [in/out]  data_pointer  Pointer to the beginning of Route Distinguisher
-         * \param [out]     rd_type                    Reference to RD type.
-         * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
-         * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
-         */
-//        void libParseBGP_parse_ethernet_segment_identifier(libParseBGP_evpn_init *evpn_data, u_char *data_pointer, std::string *parsed_data);
 
         /**
          * Parse Route Distinguisher
@@ -87,15 +64,6 @@ namespace bgp_msg {
          *
          */
         void libParseBGP_evpn_parse_nlri_data(libParseBGP_evpn_data *evpn_data,u_char *data, uint16_t data_len);
-
-
-//    private:
-        //bool             debug;                           ///< debug flag to indicate debugging
-        //Logger           *logger;                         ///< Logging class pointer
-
-
-//    };
-
 }
 
 

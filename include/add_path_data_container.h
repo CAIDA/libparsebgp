@@ -15,10 +15,6 @@
 #include <map>
 #include <memory>
 
-
-//class AddPathDataContainer {
-//private:
-
     struct send_receive_codes_for_sent_and_received_open_message_structure {
         int     send_receive_code_for_sent_open_message;
         int     send_receive_code_for_received_open_message;
@@ -40,11 +36,6 @@
      */
     std::string libParseBGP_addpath_get_afi_safi_key_string(int afi, int safi);
 
-//public:
-//    AddPathDataContainer();
-
-//p    ~AddPathDataContainer();
-
     /**
      * Add Add Path data to persistent storage
      *
@@ -64,8 +55,5 @@
      * \return is enabled
      */
     bool libParseBGP_addpath_is_enabled(libParseBGP_addpath_map &addpath_map, int afi, int safi);
-
-//};
-
 
 #endif //OPENBMP_ADDPATHDATACONTAINER_H

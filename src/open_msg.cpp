@@ -21,13 +21,9 @@ namespace bgp_msg {
  * \param [in]     enable_debug    Debug true to enable, false to disable
  */
 void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::string peer_addr, bmp_message::peer_info *peer_info) {
-        //debug = enable_debug;
         open_msg_data->peer_info = peer_info;
         open_msg_data->peer_addr = peer_addr;
 }
-//
-//OpenMsg::~OpenMsg() {
-//}
 
     /**
  * Parses capabilities from buffer
@@ -318,9 +314,4 @@ size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_d
 
     return read_size;
 }
-
-
-
-
-
 } /* namespace bgp_msg */

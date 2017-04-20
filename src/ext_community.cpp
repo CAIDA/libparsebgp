@@ -17,24 +17,7 @@
 #include "../include/ext_community.h"
 
 namespace bgp_msg {
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp Extended Communities
-     *
-     * \param [in]     logPtr       Pointer to existing Logger for app logging
-     * \param [in]     pperAddr     Printed form of peer address used for logging
-     * \param [in]     enable_debug Debug true to enable, false to disable
-     */
-    /*ExtCommunity::ExtCommunity(std::string peerAddr) {
-        //logger = logPtr;
-        //debug = enable_debug;
-        peer_addr = peerAddr;
-    }
 
-    ExtCommunity::~ExtCommunity() {
-
-    }*/
     /**
      * Decode common Type/Subtypes
      *

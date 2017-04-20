@@ -13,15 +13,11 @@
 #include <cstdint>
 #include <cinttypes>
 #include <sys/types.h>
-//#include "Logger.h"
-//#include "MsgBusInterface.hpp"
 #include "update_msg.h"
 
 namespace bgp_msg {
 
- //   class MPLinkStateAttr {
- //   public:
-        /**
+      /**
          * Node Attribute types
          */
         enum attr_node_types {
@@ -119,7 +115,6 @@ namespace bgp_msg {
 
 
         void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peer_addr,parsed_update_data *parsed_data);
-    //     virtual ~MPLinkStateAttr();
 
 
         /**
@@ -132,10 +127,6 @@ namespace bgp_msg {
          */
         void libParseBGP_mp_link_state_attr_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
 
-
-//    private:
-//        bool             debug;                           ///< debug flag to indicate debugging
-//        Logger           *logger;                         ///< Logging class pointer
 
        #define IEEE_INFINITY         0x7F800000
         #define MINUS_INFINITY        (int32_t)0x80000000L

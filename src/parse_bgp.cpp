@@ -30,42 +30,6 @@
 #include "../include/mp_link_state_attr.h"
 
 using namespace std;
-/**
- * Constructor for class -
- *
- * \details
- *    This class parses the BGP message and updates DB.  The
- *    'mysql_ptr' must be a pointer reference to an open mysql connection.
- *    'peer_entry' must be a pointer to the peer_entry table structure that
- *    has already been populated.
- *
- * \param [in]     logPtr      Pointer to existing Logger for app logging
- * \param [in]     mbus_ptr     Pointer to exiting dB implementation
- * \param [in,out] peer_entry  Pointer to peer entry
- * \param [in]     routerAddr  The router IP address - used for logging
- * \param [in,out] peer_info   Persistent peer information
- */
-//parseBGP::parseBGP(Logger *logPtr, MsgBusInterface *mbus_ptr, MsgBusInterface::obj_bgp_peer *peer_entry, string routerAddr,
-//                   BMPReader::peer_info *peer_info) {
-/*parseBGP::parseBGP(parseBMP::obj_bgp_peer *peer_entry, string routerAddr, parseBMP::peer_info *peer_info) {
-    //debug = false;
-
-    //logger = logPtr;
-
-    data_bytes_remaining = 0;
-    data = NULL;
-
-//    bzero(&common_hdr, sizeof(common_hdr));
-
-    // Set our mysql pointer
-    //this->mbus_ptr = mbus_ptr;
-
-    // Set our peer entry
-    p_entry = peer_entry;
-    p_info = peer_info;
-
-    router_addr = routerAddr;
-}*/
 
 void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
                                 string router_addr, bmp_message::peer_info *peer_info) {
@@ -86,27 +50,6 @@ void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_da
 
     bgp_parsed_data->router_addr = router_addr;
 }
-/*
-parseBGP::parseBGP(char *peer_addr, uint32_t peer_as, bool isIPv4, uint32_t timestamp_secs, uint32_t timestamp_us, parseBMP::peer_info *peer_info) {
-    //debug = false;
-
-    //logger = logPtr;
-
-    data_bytes_remaining = 0;
-    data = NULL;
-
-    // Set our peer entry
-    bzero(&p_entry, sizeof(parseBMP::obj_bgp_peer));
-    //memcpy(&p_entry->peer_addr, peer_addr, sizeof(p_entry->peer_addr));
-    p_entry->isIPv4 = isIPv4;
-    p_entry->peer_as = peer_as;
-    p_entry->timestamp_secs = timestamp_secs;
-    p_entry->timestamp_us = timestamp_us;
-
-    p_info = peer_info;
-
-    router_addr = "";
-}*/
 
 /**
  * Desctructor
@@ -185,9 +128,6 @@ static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_d
 
     //  SELF_DEBUG("%s: adding attributes to message bus", p_entry->peer_addr);
 
-    // Update the DB entry
-    // mbus_ptr->update_baseAttribute(*p_entry, base_attr, mbus_ptr->BASE_ATTR_ACTION_ADD);
-
     // Update the class instance variable path_hash_id
     memcpy(bgp_parsed_data->path_hash_id, bgp_parsed_data->base_attr.hash_id, sizeof(bgp_parsed_data->path_hash_id));
 }
@@ -240,11 +180,6 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
                 memcpy((*it).sr_capabilities_tlv, ls_attrs[bgp_msg::ATTR_NODE_SR_CAPABILITIES].data(), sizeof((*it).sr_capabilities_tlv));
             }
         }
-
-//        if (remove)
-//            mbus_ptr->update_LsNode(*p_entry, base_attr, ls_data.nodes, mbus_ptr->LS_ACTION_DEL);
-//        else
-//            mbus_ptr->update_LsNode(*p_entry, base_attr, ls_data.nodes, mbus_ptr->LS_ACTION_ADD);
     }
 
     if (ls_data.links.size() > 0) {
@@ -312,10 +247,6 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
                 memcpy((*it).peer_adj_sid, ls_attrs[bgp_msg::ATTR_LINK_ADJACENCY_SID].data(), sizeof((*it).peer_adj_sid));
         }
 
-//        if (remove)
-//            mbus_ptr->update_LsLink(*p_entry, base_attr, ls_data.links, mbus_ptr->LS_ACTION_DEL);
-//        else
-//            mbus_ptr->update_LsLink(*p_entry, base_attr, ls_data.links, mbus_ptr->LS_ACTION_ADD);
     }
 
     if (ls_data.prefixes.size() > 0) {
@@ -354,17 +285,7 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_
                 memcpy((*it).sid_tlv, ls_attrs[bgp_msg::ATTR_PREFIX_SID].data(), sizeof((*it).sid_tlv));
         }
 
-//        if (remove)
-//            mbus_ptr->update_LsPrefix(*p_entry, base_attr, ls_data.prefixes, mbus_ptr->LS_ACTION_DEL);
-//        else
-//            mbus_ptr->update_LsPrefix(*p_entry, base_attr, ls_data.prefixes, mbus_ptr->LS_ACTION_ADD);
     }
-
-    // Data stored, no longer needed, purge it
-//    ls_attrs.clear();
-//    ls_data.prefixes.clear();
-//    ls_data.links.clear();
-//    ls_data.nodes.clear();
 }
 /**
  * Update the Database advertised l3vpn
@@ -459,13 +380,6 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
-
-    //if (rib_list.size() > 0) {
-    //    mbus_ptr->update_L3Vpn(*p_entry, rib_list, &base_attr,remove ? mbus_ptr->VPN_ACTION_DEL : mbus_ptr->VPN_ACTION_ADD);
-    //}
-
-    //rib_list.clear();
-    //prefixes.clear();
 }
 
 /**
@@ -515,13 +429,6 @@ static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_da
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
-
-    // Update the DB
-//    if (rib_list.size() > 0)
-//        mbus_ptr->update_eVPN(*p_entry, rib_list, &base_attr,remove ? mbus_ptr->VPN_ACTION_DEL : mbus_ptr->VPN_ACTION_ADD);
-
-    rib_list.clear();
-    nlris.clear();
 }
 
 
@@ -611,13 +518,6 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
-
-    // Update the DB
-    // if (rib_list.size() > 0)
-    //    mbus_ptr->update_unicastPrefix(*p_entry, rib_list, &base_attr, mbus_ptr->UNICAST_PREFIX_ACTION_ADD);
-
-    // rib_list.clear();
-    // adv_prefixes.clear();
 }
 
 /**
@@ -659,13 +559,6 @@ static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bg
         // Add entry to the list
         rib_list.insert(rib_list.end(), rib_entry);
     }
-
-    // Update the DB
-    // if (rib_list.size() > 0)
-    //    mbus_ptr->update_unicastPrefix(*p_entry, rib_list, NULL, mbus_ptr->UNICAST_PREFIX_ACTION_DEL);
-
-    // rib_list.clear();
-    //wdrawn_prefixes.clear();
 }
 
 /**
@@ -1142,11 +1035,3 @@ u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp
 
     return common_hdr.type;
 }
-
-/*void parseBGP::enableDebug() {
-    debug = true;
-}
-
-void parseBGP::disableDebug() {
-    debug = false;
-}*/

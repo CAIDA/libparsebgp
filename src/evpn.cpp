@@ -15,15 +15,10 @@ namespace bgp_msg {
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
     void libParseBGP_evpn_init(libParseBGP_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parsed_update_data *parsed_data) {
-        //logger = logPtr;
-        //debug = enable_debug;
         evpn_data->peer_addr = peerAddr;
         evpn_data->parsed_data = parsed_data;
         evpn_data->is_un_reach = is_un_reach;
     }
-//
-//    EVPN::~EVPN() {
-//    }
 
     /**
      * Parse Ethernet Segment Identifier

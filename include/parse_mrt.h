@@ -31,8 +31,6 @@
 
 using namespace std;
 
-//class parseMRT {
-//public:
     /**
       * MRT Message Types
       */
@@ -356,9 +354,6 @@ struct libParseBGP_parse_mrt_parsed_data {
      */
     uint32_t libParseBGP_parse_mrt_get_mrt_length(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
 
-
-//libParseBGP_parse_mrt_parsed_data parse_mrt_parsed_data;
-//};
 
 //extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
 libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);

@@ -10,17 +10,6 @@
 #include "../include/mp_link_state.h"
 
 namespace bgp_msg {
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp Extended Communities
-     *
-     * \param [in]     logPtr       Pointer to existing Logger for app logging
-     * \param [in]     peerAddr     Printed form of peer address used for logging
-     * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
-     * \param [in]     enable_debug Debug true to enable, false to disable
-     */
-    //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
     void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
         //logger = logPtr;

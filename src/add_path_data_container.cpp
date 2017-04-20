@@ -10,11 +10,6 @@
 #include "../include/add_path_data_container.h"
 #include "../include/open_msg.h"
 
-//AddPathDataContainer::AddPathDataContainer() {
-//}
-
-//AddPathDataContainer::~AddPathDataContainer() {
-//}
 
 /**
  * Add Add Path data to persistent storage

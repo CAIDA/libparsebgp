@@ -20,41 +20,7 @@
 
 namespace bgp_msg {
 
-/**
- * Constructor for class
- *
- * \details Handles bgp update messages
- *
- * \param [in]     logPtr           Pointer to existing Logger for app logging
- * \param [in]     pperAddr         Printed form of peer address used for logging
- * \param [in]     routerAddr       The router IP address - used for logging
- * \param [in,out] peer_info   Persistent peer information
- * \param [in]     enable_debug     Debug true to enable, false to disable
- */
-/*UpdateMsg::UpdateMsg(Logger *logPtr, std::string peerAddr, std::string routerAddr, BMPReader::peer_info *peer_info,
-                     bool enable_debug)
-        : logger(logPtr),
-          debug(enable_debug),
-          peer_info(peer_info) {*/
-/*UpdateMsg::UpdateMsg(std::string peerAddr, std::string routerAddr, parseBMP::peer_info *peer_info)
-        : peer_info(peer_info) {
 
-    this->peer_addr = peerAddr;
-    this->router_addr = routerAddr;
-
-    four_octet_asn = peer_info->recv_four_octet_asn and peer_info->sent_four_octet_asn;
-}
-UpdateMsg::UpdateMsg(std::string peerAddr, parseBMP::peer_info *peer_info)
-        :peer_info(peer_info) {
-
-    this->peer_addr = peerAddr;
-//        this->router_addr = routerAddr;
-
-    four_octet_asn = peer_info->recv_four_octet_asn and peer_info->sent_four_octet_asn;
-}
-
-UpdateMsg::~UpdateMsg() {
-}*/
     void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
                                                std::string router_addr, bmp_message::peer_info *peer_info){
         update_msg->peer_info = peer_info;
@@ -686,5 +652,4 @@ void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update
     }
 
 }
-
 } /* namespace bgp_msg */

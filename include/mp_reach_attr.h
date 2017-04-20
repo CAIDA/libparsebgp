@@ -24,8 +24,6 @@ namespace bgp_msg {
  * \details This class parses MP_REACH attributes.
  *          It can be extended to create attributes messages.
  */
-//class MPReachAttr {
-//public:
     /**
      * struct defines the MP_REACH_NLRI (RFC4760 Section 3)
      */
@@ -55,10 +53,8 @@ namespace bgp_msg {
      * \param [in]     peer_info                Persistent Peer info pointer
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
-    //MPReachAttr(Logger *logPtr, std::string peerAddr, BMPReader::peer_info *peer_info, bool enable_debug=false);
     void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peer_addr, bmp_message::peer_info *peer_info);
 
-//    virtual ~MPReachAttr();
 
     /**
      * Parse the MP_REACH NLRI attribute data
@@ -121,13 +117,6 @@ namespace bgp_msg {
      *
      */
     static inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels);
-
-//private:
-    //bool                    debug;                  ///< debug flag to indicate debugging
-    //Logger                   *logger;               ///< Logging class pointer
-
-
-    //};
 
 } /* namespace bgp_msg */
 

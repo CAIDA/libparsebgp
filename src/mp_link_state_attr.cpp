@@ -98,7 +98,6 @@ namespace bgp_msg {
      * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    //MPLinkStateAttr::MPLinkStateAttr(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
        void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peerAddr,parsed_update_data *parsed_data)
        {
@@ -107,9 +106,6 @@ namespace bgp_msg {
         data->peer_addr = peerAddr;
         data->parsed_data = parsed_data;
         }
-//
-//    MPLinkStateAttr::~MPLinkStateAttr() {
-//    }
 
 
     /**

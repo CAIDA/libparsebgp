@@ -1,11 +1,11 @@
 #include <iostream>
 #include "../include/parse_bmp.h"
 #include <fstream>
-#include <parseMRT.h>
+#include <parse_mrt.h>
 
 using namespace std;
 
-int readFile(ifstream &fin, u_char *array2, int position, int read_size)
+int read_file(ifstream &fin, u_char *array2, int position, int read_size)
 {
     int curr=0;
     char *array = new char[read_size];
@@ -48,7 +48,7 @@ int main() {
     {
         cur++;
         u_char *buffer = new u_char[read_size/3];
-        end_reach = readFile(fin, buffer, 3*position, read_size);
+        end_reach = read_file(fin, buffer, 3*position, read_size);
         msg_read = true;
         len = 1024;
         while(msg_read)
