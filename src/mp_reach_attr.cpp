@@ -29,7 +29,7 @@ namespace bgp_msg {
  */
 
     void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peerAddr,
-                                        bmp_message::peer_info *peer_info)
+                                        peer_info *peer_info)
     {
         parse_data->peer_info=peer_info;
         parse_data->peer_addr = peerAddr;
@@ -50,7 +50,7 @@ namespace bgp_msg {
  */
     template <typename PREFIX_TUPLE>
     void libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                                     bmp_message::peer_info * peer_info, std::list<PREFIX_TUPLE> &prefixes) {
+                                                     peer_info * peer_info, std::list<PREFIX_TUPLE> &prefixes) {
         u_char            ip_raw[16];
         char              ip_char[40];
         int               addr_bytes;
@@ -346,7 +346,7 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
  * \param [out]  prefixes               Reference to a list<prefix_tuple> to be updated with entries
  */
 void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                           bmp_message::peer_info * peer_info, std::list<bgp::prefix_tuple> &prefixes) {
+                                           peer_info * peer_info, std::list<bgp::prefix_tuple> &prefixes) {
     u_char            ip_raw[16];
     char              ip_char[40];
     u_char            addr_bytes;

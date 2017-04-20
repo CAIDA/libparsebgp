@@ -51,7 +51,7 @@ struct libParseBGP_parse_bgp_parsed_data {
     obj_path_attr base_attr;      ///< Base attribute object
 
     string router_addr;    ///< Router IP address - used for logging
-    bmp_message::peer_info *p_info;        ///< Persistent Peer information
+    peer_info *p_info;        ///< Persistent Peer information
 
     unsigned char path_hash_id[16];                  ///< current path hash ID
 };
@@ -73,7 +73,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      * \param [in,out] peer_info   Persistent peer information
      */
     void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
-                                    string router_addr, bmp_message::peer_info *peer_info);
+                                    string router_addr, peer_info *peer_info);
 
 
     u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parsed_bgp_msg *bgp_msg,

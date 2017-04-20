@@ -22,7 +22,7 @@ namespace bgp_msg {
 
 
     void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
-                                               std::string router_addr, bmp_message::peer_info *peer_info){
+                                               std::string router_addr, peer_info *peer_info){
         update_msg->peer_info = peer_info;
         update_msg->peer_addr = peer_addr;
         update_msg->router_addr = router_addr;

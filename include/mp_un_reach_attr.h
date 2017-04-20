@@ -39,7 +39,7 @@ namespace bgp_msg {
 
     struct libParseBGP_mp_un_reach_attr_parse_data {
         std::string peer_addr;          ///< Printed form of the peer address for logging
-        bmp_message::peer_info *peer_info;         ///< Persistent Peer info pointer
+        peer_info *peer_info;         ///< Persistent Peer info pointer
     };
     /**
      * Constructor for class
@@ -52,7 +52,7 @@ namespace bgp_msg {
      * \param [in]     enable_debug             Debug true to enable, false to disable
      */
     void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
-                                           bmp_message::peer_info *peer_info);
+                                           peer_info *peer_info);
 
 
     /**

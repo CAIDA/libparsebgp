@@ -120,7 +120,7 @@ namespace bgp_msg {
 
     struct libParseBGP_open_msg_data{
         std::string             peer_addr;      ///< Printed form of the peer address for logging
-        bmp_message::peer_info    *peer_info;     ///< Persistent Peer info pointer
+        peer_info    *peer_info;     ///< Persistent Peer info pointer
     };
      /**
       * Constructor for class
@@ -131,7 +131,7 @@ namespace bgp_msg {
       * \param [in]     peer_info       Persistent peer information
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
-     void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data, std::string peerAddr, bmp_message::peer_info *peer_info);
+     void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data, std::string peerAddr, peer_info *peer_info);
 
     /**
      * Parses an open message

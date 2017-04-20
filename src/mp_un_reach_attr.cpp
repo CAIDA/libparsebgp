@@ -29,7 +29,7 @@ namespace bgp_msg {
 
     libparseBGP_mp_link_state_parsed_data *link_state_parse_data;
     void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
-                                           bmp_message::peer_info *peer_info) {
+                                           peer_info *peer_info) {
         parse_data->peer_addr = peerAddr;
         parse_data->peer_info = peer_info;
 }

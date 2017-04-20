@@ -64,11 +64,11 @@ namespace bgp_msg {
         std::string peer_addr;                       ///< Printed form of the peer address for logging
         std::string router_addr;                     ///< Router IP address - used for logging
         bool four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
-        bmp_message::peer_info *peer_info;                      ///< Persistent Peer info pointer
+        peer_info *peer_info;                      ///< Persistent Peer info pointer
     };
 
     void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
-                                               std::string router_addr, bmp_message::peer_info *peer_info);
+                                               std::string router_addr, peer_info *peer_info);
 
      /**
       * Parses the update message

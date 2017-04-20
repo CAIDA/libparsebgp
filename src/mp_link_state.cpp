@@ -10,6 +10,17 @@
 #include "../include/mp_link_state.h"
 
 namespace bgp_msg {
+    /**
+     * Constructor for class
+     *
+     * \details Handles bgp Extended Communities
+     *
+     * \param [in]     logPtr       Pointer to existing Logger for app logging
+     * \param [in]     peerAddr     Printed form of peer address used for logging
+     * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
+     * \param [in]     enable_debug Debug true to enable, false to disable
+     */
+    //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
     void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
         //logger = logPtr;
@@ -244,12 +255,12 @@ namespace bgp_msg {
         data += 4;
 
         if (len > data_len) {
-            //         LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
+            //LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
             return;
         }
 
         if (type != NODE_DESCR_LOCAL_DESCR) {
-            //          LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not local descriptor",peer_addr.c_str(), type);
+            //LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not local descriptor",peer_addr.c_str(), type);
             return;
         }
 
@@ -296,7 +307,7 @@ namespace bgp_msg {
         int             data_read = 0;
 
         if (data_len < 4) {
-            //          LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor; too short",peer_addr.c_str());
+            //LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor; too short",peer_addr.c_str());
             return data_len;
         }
 
@@ -307,7 +318,7 @@ namespace bgp_msg {
         bgp::SWAP_BYTES(&len);
 
         if (len > data_len - 4) {
-            //           LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
+            //LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
             return data_len;
         }
 
@@ -317,7 +328,7 @@ namespace bgp_msg {
             case LINK_DESCR_ID:
             {
                 if (len != 8) {
-                    //                LOG_NOTICE("%s: bgp-ls: failed to parse link ID descriptor sub-tlv; too short",peer_addr.c_str());
+                    //LOG_NOTICE("%s: bgp-ls: failed to parse link ID descriptor sub-tlv; too short",peer_addr.c_str());
                     data_read += len;
                     break;
                 }
@@ -326,7 +337,7 @@ namespace bgp_msg {
                 memcpy(&info.remote_id, data+4, 4); bgp::SWAP_BYTES(&info.remote_id);
                 data_read += 8;
 
-                //        SELF_DEBUG("%s: bgp-ls: Link descriptor ID local = %08x remote = %08x", peer_addr.c_str(), info.local_id, info.remote_id);
+                //SELF_DEBUG("%s: bgp-ls: Link descriptor ID local = %08x remote = %08x", peer_addr.c_str(), info.local_id, info.remote_id);
 
                 break;
             }
@@ -334,13 +345,13 @@ namespace bgp_msg {
             case LINK_DESCR_MT_ID:
             {
                 if (len < 2) {
-                    //               LOG_NOTICE("%s: bgp-ls: failed to parse link MT-ID descriptor sub-tlv; too short",peer_addr.c_str());
+                    //LOG_NOTICE("%s: bgp-ls: failed to parse link MT-ID descriptor sub-tlv; too short",peer_addr.c_str());
                     data_read += len;
                     break;
                 }
 
                 if (len > 4) {
-                    //               SELF_DEBUG("%s: bgp-ls: failed to parse link MT-ID descriptor sub-tlv; too long %d",peer_addr.c_str(), len);
+                    //SELF_DEBUG("%s: bgp-ls: failed to parse link MT-ID descriptor sub-tlv; too long %d",peer_addr.c_str(), len);
                     info.mt_id = 0;
                     data_read += len;
                     break;
@@ -350,7 +361,7 @@ namespace bgp_msg {
                 info.mt_id >>= 16;          // MT ID is 16 bits
                 data_read += len;
 
-                //         SELF_DEBUG("%s: bgp-ls: Link descriptor MT-ID = %08x ", peer_addr.c_str(), info.mt_id);
+                //SELF_DEBUG("%s: bgp-ls: Link descriptor MT-ID = %08x ", peer_addr.c_str(), info.mt_id);
 
                 break;
             }
@@ -415,7 +426,7 @@ namespace bgp_msg {
             {
                 info.is_ipv4 = false;
                 if (len != 16) {
-                    //               LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor neighbor IPv6 sub-tlv; too short",peer_addr.c_str());
+                    //LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor neighbor IPv6 sub-tlv; too short",peer_addr.c_str());
                     data_read += len <= data_len ? len : data_len;
                     break;
                 }
@@ -425,7 +436,7 @@ namespace bgp_msg {
                 inet_ntop(AF_INET6, info.nei_addr, ip_char, sizeof(ip_char));
                 data_read += 16;
 
-                //        SELF_DEBUG("%s: bgp-ls: Link descriptor neighbor address = %s", peer_addr.c_str(), ip_char);
+                //SELF_DEBUG("%s: bgp-ls: Link descriptor neighbor address = %s", peer_addr.c_str(), ip_char);
                 break;
             }
 

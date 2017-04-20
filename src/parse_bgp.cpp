@@ -32,7 +32,7 @@
 using namespace std;
 
 void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
-                                string router_addr, bmp_message::peer_info *peer_info) {
+                                string router_addr, peer_info *peer_info) {
     //debug = false;
     //logger = logPtr;
 
@@ -122,14 +122,17 @@ static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_d
         // Skip adding path attributes if next hop is missing
         //    SELF_DEBUG("%s: no next-hop, must be unreach; not sending attributes to message bus", p_entry->peer_addr);
         bzero(bgp_parsed_data->base_attr.next_hop, sizeof(bgp_parsed_data->base_attr.next_hop));
-        bzero(bgp_parsed_data->path_hash_id, sizeof(bgp_parsed_data->path_hash_id));
+        //bzero(bgp_parsed_data->path_hash_id, sizeof(bgp_parsed_data->path_hash_id));
         return;
     }
 
     //  SELF_DEBUG("%s: adding attributes to message bus", p_entry->peer_addr);
 
+    // Update the DB entry
+    // mbus_ptr->update_baseAttribute(*p_entry, base_attr, mbus_ptr->BASE_ATTR_ACTION_ADD);
+
     // Update the class instance variable path_hash_id
-    memcpy(bgp_parsed_data->path_hash_id, bgp_parsed_data->base_attr.hash_id, sizeof(bgp_parsed_data->path_hash_id));
+    //memcpy(bgp_parsed_data->path_hash_id, bgp_parsed_data->base_attr.hash_id, sizeof(bgp_parsed_data->path_hash_id));
 }
 
 /**
@@ -143,8 +146,7 @@ static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_d
  * \param [in] ls_data     Reference to the parsed link state nlri information
  * \param [in] ls_attrs    Reference to the parsed link state attribute information
  */
-static void libParseBGP_parse_bgp_update_db_bgp_ls(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, parsed_data_ls ls_data,
-                                                   parsed_ls_attrs_map &ls_attrs) {
+static void libParseBGP_parse_bgp_update_db_bgp_ls(bool remove, parsed_data_ls ls_data, parsed_ls_attrs_map &ls_attrs) {
     /*
      * Update table entry with attributes based on NLRI
      */
@@ -311,8 +313,8 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
          it++) {
         bgp::vpn_tuple &tuple = (*it);
 
-        memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
-        memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
+        //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
+        //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
 
         rib_entry.rd_type = tuple.rd_type;
         rib_entry.rd_assigned_number = tuple.rd_assigned_number;
@@ -403,8 +405,8 @@ static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_da
          it++) {
         bgp::evpn_tuple &tuple = (*it);
 
-        memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
-        memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
+        //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
+        //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
 
         rib_entry.rd_type = tuple.rd_type;
         rib_entry.rd_assigned_number = tuple.rd_assigned_number;
@@ -455,8 +457,8 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
          it++) {
         bgp::prefix_tuple &tuple = (*it);
 
-        memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
-        memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
+        //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
+        //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
 
         strncpy(rib_entry.prefix, tuple.prefix.c_str(), sizeof(rib_entry.prefix));
 
@@ -541,8 +543,8 @@ static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bg
          it++) {
 
         bgp::prefix_tuple &tuple = (*it);
-        memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
-        memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
+        //memcpy(rib_entry.path_attr_hash_id, bgp_parsed_data->path_hash_id, sizeof(rib_entry.path_attr_hash_id));
+        //memcpy(rib_entry.peer_hash_id, bgp_parsed_data->p_entry->hash_id, sizeof(rib_entry.peer_hash_id));
         strncpy(rib_entry.prefix, tuple.prefix.c_str(), sizeof(rib_entry.prefix));
 
         rib_entry.prefix_len     = tuple.len;
@@ -577,8 +579,8 @@ static void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *b
     /*
      * Update the bgp-ls data
      */
-    libParseBGP_parse_bgp_update_db_bgp_ls(bgp_parsed_data, false, bgp_msg->parsed_data.ls, bgp_msg->parsed_data.ls_attrs);
-    libParseBGP_parse_bgp_update_db_bgp_ls(bgp_parsed_data, true, bgp_msg->parsed_data.ls_withdrawn, bgp_msg->parsed_data.ls_attrs);
+    libParseBGP_parse_bgp_update_db_bgp_ls(false, bgp_msg->parsed_data.ls, bgp_msg->parsed_data.ls_attrs);
+    libParseBGP_parse_bgp_update_db_bgp_ls(true, bgp_msg->parsed_data.ls_withdrawn, bgp_msg->parsed_data.ls_attrs);
 
     /*
      * Update the advertised prefixes (both ipv4 and ipv6)
@@ -892,7 +894,8 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
     if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
+        read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true,
+                                                        up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());

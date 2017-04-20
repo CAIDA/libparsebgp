@@ -14,10 +14,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len) {
+libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len) {
 
     uint8_t read_size;
-    bmp_message::libParseBGP_parse_bmp_parsed_data parsed_data;
+    libParseBGP_parse_bmp_parsed_data parsed_data;
     read_size=libParseBGP_parse_bmp_parse_msg(&parsed_data, buffer, buf_len);
     return parsed_data;
 }
@@ -35,7 +35,7 @@ bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *
  * \param [in,out] peer_entry  Pointer to the peer entry
  */
 
-libParseBGP_parse_bgp_parsed_data pBGP;
+//libParseBGP_parse_bgp_parsed_data pBGP;
 //bool parseBMP::parseMsg(int read_fd)
 
 /**
@@ -51,7 +51,7 @@ libParseBGP_parse_bgp_parsed_data pBGP;
  * \throws String error
  */
 // void parseBMP::bufferBMPMessage(int sock) {
-static void libParseBGP_parse_bmp_buffer_bmp_message(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libParseBGP_parse_bmp_buffer_bmp_message(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     if (parsed_msg->bmp_len <= 0)
         return;
 
@@ -84,8 +84,8 @@ static void libParseBGP_parse_bmp_buffer_bmp_message(bmp_message::libParseBGP_pa
 * \param [in]  sock        Socket to read the message from
 */
 //void parseBMP::parseBMPv2(int sock) {
-static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    struct bmp_message::common_hdr_old c_hdr = { 0 };
+static void libParseBGP_parse_bmp_parse_bmp_v2(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+    parsed_msg->c_hdr_old = { 0 };
     ssize_t i = 0;
     char buf[256] = {0};
 
@@ -93,16 +93,15 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bm
 
     parsed_msg->bmp_len = 0;
 
-
-    if ((i = extract_from_buffer(buffer, buf_len, &c_hdr, BMP_HDRv1v2_LEN))
+    if ((i = extract_from_buffer(buffer, buf_len, &parsed_msg->c_hdr_old, BMP_HDRv1v2_LEN))
         != BMP_HDRv1v2_LEN) {
         //     SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",sock, i);
         throw "ERROR: Cannot read v1/v2 BMP common header.";
     }
 
     // Process the message based on type
-    parsed_msg->bmp_type = c_hdr.type;
-    switch (c_hdr.type) {
+    parsed_msg->bmp_type = parsed_msg->c_hdr_old.type;
+    switch (parsed_msg->c_hdr_old.type) {
         case 0: // Route monitoring
             //          SELF_DEBUG("sock=%d : BMP MSG : route monitor", sock);
 
@@ -159,19 +158,19 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bm
             break;
     }
 
-    //   SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr.peer_type);
+    //   SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr_old.peer_type);
 
-    if (c_hdr.peer_flags & 0x80) { // V flag of 1 means this is IPv6
+    if (parsed_msg->c_hdr_old.peer_flags & 0x80) { // V flag of 1 means this is IPv6
         parsed_msg->p_entry.is_ipv4 = false;
-        inet_ntop(AF_INET6, c_hdr.peer_addr, parsed_msg->peer_addr, sizeof(parsed_msg->peer_addr));
+        inet_ntop(AF_INET6, parsed_msg->c_hdr_old.peer_addr, parsed_msg->peer_addr, sizeof(parsed_msg->peer_addr));
 
         //      SELF_DEBUG("sock=%d : Peer address is IPv6", sock);
 
     } else {
         parsed_msg->p_entry.is_ipv4 = true;
         snprintf(parsed_msg->peer_addr, sizeof(parsed_msg->peer_addr), "%d.%d.%d.%d",
-                 c_hdr.peer_addr[12], c_hdr.peer_addr[13], c_hdr.peer_addr[14],
-                 c_hdr.peer_addr[15]);
+                 parsed_msg->c_hdr_old.peer_addr[12], parsed_msg->c_hdr_old.peer_addr[13], parsed_msg->c_hdr_old.peer_addr[14],
+                 parsed_msg->c_hdr_old.peer_addr[15]);
 
         //       SELF_DEBUG("sock=%d : Peer address is IPv4", sock);
     }
@@ -184,34 +183,34 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bm
 
     // convert the BMP byte messages to human readable strings
     snprintf(parsed_msg->peer_as, sizeof(parsed_msg->peer_as), "0x%04x%04x",
-             c_hdr.peer_as[0] << 8 | c_hdr.peer_as[1],
-             c_hdr.peer_as[2] << 8 | c_hdr.peer_as[3]);
+             parsed_msg->c_hdr_old.peer_as[0] << 8 | parsed_msg->c_hdr_old.peer_as[1],
+             parsed_msg->c_hdr_old.peer_as[2] << 8 | parsed_msg->c_hdr_old.peer_as[3]);
     snprintf(parsed_msg->peer_bgp_id, sizeof(parsed_msg->peer_bgp_id), "%d.%d.%d.%d",
-             c_hdr.peer_bgp_id[0], c_hdr.peer_bgp_id[1], c_hdr.peer_bgp_id[2],
-             c_hdr.peer_bgp_id[3]);
+             parsed_msg->c_hdr_old.peer_bgp_id[0], parsed_msg->c_hdr_old.peer_bgp_id[1], parsed_msg->c_hdr_old.peer_bgp_id[2],
+             parsed_msg->c_hdr_old.peer_bgp_id[3]);
 
     // Format based on the type of RD
-    switch (c_hdr.peer_dist_id[0] << 8 | c_hdr.peer_dist_id[1]) {
+    switch (parsed_msg->c_hdr_old.peer_dist_id[0] << 8 | parsed_msg->c_hdr_old.peer_dist_id[1]) {
         case 1: // admin = 4bytes (IP address), assign number = 2bytes
             snprintf(parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd), "%d.%d.%d.%d:%d",
-                     c_hdr.peer_dist_id[2], c_hdr.peer_dist_id[3],
-                     c_hdr.peer_dist_id[4], c_hdr.peer_dist_id[5],
-                     c_hdr.peer_dist_id[6] << 8 | c_hdr.peer_dist_id[7]);
+                     parsed_msg->c_hdr_old.peer_dist_id[2], parsed_msg->c_hdr_old.peer_dist_id[3],
+                     parsed_msg->c_hdr_old.peer_dist_id[4], parsed_msg->c_hdr_old.peer_dist_id[5],
+                     parsed_msg->c_hdr_old.peer_dist_id[6] << 8 | parsed_msg->c_hdr_old.peer_dist_id[7]);
             break;
         case 2: // admin = 4bytes (ASN), assing number = 2bytes
             snprintf(parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd), "%lu:%d",
-                     (unsigned long) (c_hdr.peer_dist_id[2] << 24
-                                      | c_hdr.peer_dist_id[3] << 16
-                                      | c_hdr.peer_dist_id[4] << 8 | c_hdr.peer_dist_id[5]),
-                     c_hdr.peer_dist_id[6] << 8 | c_hdr.peer_dist_id[7]);
+                     (unsigned long) (parsed_msg->c_hdr_old.peer_dist_id[2] << 24
+                                      | parsed_msg->c_hdr_old.peer_dist_id[3] << 16
+                                      | parsed_msg->c_hdr_old.peer_dist_id[4] << 8 | parsed_msg->c_hdr_old.peer_dist_id[5]),
+                     parsed_msg->c_hdr_old.peer_dist_id[6] << 8 | parsed_msg->c_hdr_old.peer_dist_id[7]);
             break;
         default: // admin = 2 bytes, sub field = 4 bytes
             snprintf(parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd), "%d:%lu",
-                     c_hdr.peer_dist_id[1] << 8 | c_hdr.peer_dist_id[2],
-                     (unsigned long) (c_hdr.peer_dist_id[3] << 24
-                                      | c_hdr.peer_dist_id[4] << 16
-                                      | c_hdr.peer_dist_id[5] << 8 | c_hdr.peer_dist_id[6]
-                                      | c_hdr.peer_dist_id[7]));
+                     parsed_msg->c_hdr_old.peer_dist_id[1] << 8 | parsed_msg->c_hdr_old.peer_dist_id[2],
+                     (unsigned long) (parsed_msg->c_hdr_old.peer_dist_id[3] << 24
+                                      | parsed_msg->c_hdr_old.peer_dist_id[4] << 16
+                                      | parsed_msg->c_hdr_old.peer_dist_id[5] << 8 | parsed_msg->c_hdr_old.peer_dist_id[6]
+                                      | parsed_msg->c_hdr_old.peer_dist_id[7]));
             break;
     }
 
@@ -222,7 +221,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bm
     strncpy(parsed_msg->p_entry.peer_rd, parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd));
 
     // Save the advertised timestamp
-    uint32_t ts = c_hdr.ts_secs;
+    uint32_t ts = parsed_msg->c_hdr_old.ts_secs;
     bgp::SWAP_BYTES(&ts);
 
 
@@ -232,7 +231,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bm
         parsed_msg->p_entry.timestamp_secs = time(NULL);
 
     // Is peer type L3VPN peer or global instance
-    if (c_hdr.type == 1) // L3VPN
+    if (parsed_msg->c_hdr_old.type == 1) // L3VPN
         parsed_msg->p_entry.is_l3vpn = 1;
     else
         // Global Instance
@@ -249,8 +248,8 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(bmp_message::libParseBGP_parse_bm
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parsePeerHdr(int sock) {
-static void libParseBGP_parse_bmp_parse_peer_hdr(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    bmp_message::peer_hdr_v3 p_hdr = {0};
+static void libParseBGP_parse_bmp_parse_peer_hdr(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+    peer_hdr_v3 p_hdr = {0};
     int i;
 
     bzero(&p_hdr, sizeof(p_hdr));
@@ -383,62 +382,62 @@ static void libParseBGP_parse_bmp_parse_peer_hdr(bmp_message::libParseBGP_parse_
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parseBMPv3(int sock) {
-static void libParseBGP_parse_bmp_parse_bmp_v3(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    struct bmp_message::common_hdr_v3 c_hdr = { 0 };
+static void libParseBGP_parse_bmp_parse_bmp_v3(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+    parsed_msg->c_hdr_v3 = { 0 };
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
-    if ((extract_from_buffer(buffer, buf_len, &c_hdr, BMP_HDRv3_LEN)) != BMP_HDRv3_LEN) {
+    if ((extract_from_buffer(buffer, buf_len, &parsed_msg->c_hdr_v3, BMP_HDRv3_LEN)) != BMP_HDRv3_LEN) {
         throw "ERROR: Cannot read v3 BMP common header.";
     }
 
-    //memcpy(&c_hdr, buffer, BMP_HDRv3_LEN);
+    //memcpy(&parsed_msg->c_hdr_v3, buffer, BMP_HDRv3_LEN);
     // Change to host order
-    bgp::SWAP_BYTES(&c_hdr.len);
+    bgp::SWAP_BYTES(&parsed_msg->c_hdr_v3.len);
 
-    //   SELF_DEBUG("BMP v3: type = %x len=%d", c_hdr.type, c_hdr.len);
+    //   SELF_DEBUG("BMP v3: type = %x len=%d", parsed_msg->c_hdr_v3.type, parsed_msg->c_hdr_v3.len);
 
     // Adjust length to remove common header size
-    c_hdr.len -= 1 + BMP_HDRv3_LEN;
+    parsed_msg->c_hdr_v3.len -= 1 + BMP_HDRv3_LEN;
 
-    if (c_hdr.len > BGP_MAX_MSG_SIZE)
+    if (parsed_msg->c_hdr_v3.len > BGP_MAX_MSG_SIZE)
         throw "ERROR: BMP length is larger than max possible BGP size";
 
     // Parse additional headers based on type
-    parsed_msg->bmp_type = c_hdr.type;
-    parsed_msg->bmp_len = c_hdr.len;
+    parsed_msg->bmp_type = parsed_msg->c_hdr_v3.type;
+    parsed_msg->bmp_len = parsed_msg->c_hdr_v3.len;
 
-    switch (c_hdr.type) {
-        case bmp_message::TYPE_ROUTE_MON: // Route monitoring
+    switch (parsed_msg->c_hdr_v3.type) {
+        case TYPE_ROUTE_MON: // Route monitoring
             //          SELF_DEBUG("BMP MSG : route monitor");
             //parsePeerHdr(sock);
             libParseBGP_parse_bmp_parse_peer_hdr(parsed_msg, buffer, buf_len);
             break;
 
-        case bmp_message::TYPE_STATS_REPORT: // Statistics Report
+        case TYPE_STATS_REPORT: // Statistics Report
             //          SELF_DEBUG("BMP MSG : stats report");
             //parsePeerHdr(sock);
             libParseBGP_parse_bmp_parse_peer_hdr(parsed_msg, buffer, buf_len);
             break;
 
-        case bmp_message::TYPE_PEER_UP: // Peer Up notification
+        case TYPE_PEER_UP: // Peer Up notification
         {
             //           SELF_DEBUG("BMP MSG : peer up");
             //parsePeerHdr(sock);
             libParseBGP_parse_bmp_parse_peer_hdr(parsed_msg, buffer, buf_len);
             break;
         }
-        case bmp_message::TYPE_PEER_DOWN: // Peer down notification
+        case TYPE_PEER_DOWN: // Peer down notification
             //           SELF_DEBUG("BMP MSG : peer down");
             //parsePeerHdr(sock);
             libParseBGP_parse_bmp_parse_peer_hdr(parsed_msg, buffer, buf_len);
             break;
 
-        case bmp_message::TYPE_INIT_MSG:
-        case bmp_message::TYPE_TERM_MSG:
+        case TYPE_INIT_MSG:
+        case TYPE_TERM_MSG:
             // Allowed
             break;
 
         default:
-            //         LOG_ERR("ERROR: Unknown BMP message type of %d", c_hdr.type);
+            //         LOG_ERR("ERROR: Unknown BMP message type of %d", parsed_msg->c_hdr_v3.type);
             throw "ERROR: BMP message type is not supported";
             break;
     }
@@ -455,7 +454,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v3(bmp_message::libParseBGP_parse_bm
  *
  * //throws (const  char *) on error.   String will detail error message.
  */
-static char libParseBGP_parse_bmp_handle_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
+static char libParseBGP_parse_bmp_handle_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
     unsigned char ver;
     ssize_t bytes_read;
 
@@ -502,7 +501,7 @@ static char libParseBGP_parse_bmp_handle_msg(bmp_message::libParseBGP_parse_bmp_
  *
  * \return true if error, false if no error
  */
-static bool libParseBGP_parse_bmp_handle_stats_report(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static bool libParseBGP_parse_bmp_handle_stats_report(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     unsigned long stats_cnt = 0; // Number of counter stat objects to follow
     unsigned char b[8];
 
@@ -553,31 +552,31 @@ static bool libParseBGP_parse_bmp_handle_stats_report(bmp_message::libParseBGP_p
 
                 // Update the table structure based on the stats counter type
                 switch (stat_type) {
-                    case bmp_message::STATS_PREFIX_REJ:
+                    case STATS_PREFIX_REJ:
                         memcpy((void*) &parsed_msg->stats.prefixes_rej, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_DUP_PREFIX:
+                    case STATS_DUP_PREFIX:
                         memcpy((void*) &parsed_msg->stats.known_dup_prefixes, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_DUP_WITHDRAW:
+                    case STATS_DUP_WITHDRAW:
                         memcpy((void*) &parsed_msg->stats.known_dup_withdraws, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_INVALID_CLUSTER_LIST:
+                    case STATS_INVALID_CLUSTER_LIST:
                         memcpy((void*) &parsed_msg->stats.invalid_cluster_list, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_INVALID_AS_PATH_LOOP:
+                    case STATS_INVALID_AS_PATH_LOOP:
                         memcpy((void*) &parsed_msg->stats.invalid_as_path_loop, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_INVALID_ORIGINATOR_ID:
+                    case STATS_INVALID_ORIGINATOR_ID:
                         memcpy((void*) &parsed_msg->stats.invalid_originator_id, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_INVALID_AS_CONFED_LOOP:
+                    case STATS_INVALID_AS_CONFED_LOOP:
                         memcpy((void*) &parsed_msg->stats.invalid_as_confed_loop, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_NUM_ROUTES_ADJ_RIB_IN:
+                    case STATS_NUM_ROUTES_ADJ_RIB_IN:
                         memcpy((void*) &parsed_msg->stats.routes_adj_rib_in, (void*) b, stat_len);
                         break;
-                    case bmp_message::STATS_NUM_ROUTES_LOC_RIB:
+                    case STATS_NUM_ROUTES_LOC_RIB:
                         memcpy((void*) &parsed_msg->stats.routes_loc_rib, (void*) b, stat_len);
                         break;
 
@@ -622,8 +621,8 @@ static bool libParseBGP_parse_bmp_handle_stats_report(bmp_message::libParseBGP_p
  * \param [in]     sock        Socket to read the init message from
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
-static void libParseBGP_parse_bmp_handle_init_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    bmp_message::init_msg_v3 init_msg;
+static void libParseBGP_parse_bmp_handle_init_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+    init_msg_v3 init_msg;
     char infoBuf[sizeof(parsed_msg->r_entry.initiate_data)];
     int infoLen;
 
@@ -660,26 +659,26 @@ static void libParseBGP_parse_bmp_handle_init_msg(bmp_message::libParseBGP_parse
          * Save the data based on info type
          */
         switch (init_msg.type) {
-            case bmp_message::INIT_TYPE_FREE_FORM_STRING :
+            case INIT_TYPE_FREE_FORM_STRING :
                 infoLen = sizeof(parsed_msg->r_entry.initiate_data) < (init_msg.len - 1) ? (sizeof(parsed_msg->r_entry.initiate_data) - 1) : init_msg.len;
                 memcpy(parsed_msg->r_entry.initiate_data, init_msg.info, infoLen);
                 //               LOG_INFO("Init message type %hu = %s", init_msg.type, r_entry.initiate_data);
 
                 break;
 
-            case bmp_message::INIT_TYPE_SYSNAME :
+            case INIT_TYPE_SYSNAME :
                 infoLen = sizeof(parsed_msg->r_entry.name) < (init_msg.len - 1) ? (sizeof(parsed_msg->r_entry.name) - 1) : init_msg.len;
                 strncpy((char *)parsed_msg->r_entry.name, init_msg.info, infoLen);
                 //               LOG_INFO("Init message type %hu = %s", init_msg.type, r_entry.name);
                 break;
 
-            case bmp_message::INIT_TYPE_SYSDESCR :
+            case INIT_TYPE_SYSDESCR :
                 infoLen = sizeof(parsed_msg->r_entry.descr) < (init_msg.len - 1) ? (sizeof(parsed_msg->r_entry.descr) - 1) : init_msg.len;
                 strncpy((char *)parsed_msg->r_entry.descr, init_msg.info, infoLen);
                 //               LOG_INFO("Init message type %hu = %s", init_msg.type, r_entry.descr);
                 break;
 
-            case bmp_message::INIT_TYPE_ROUTER_BGP_ID:
+            case INIT_TYPE_ROUTER_BGP_ID:
                 if (init_msg.len != sizeof(in_addr_t)) {
                     //                   LOG_NOTICE("Init message type BGP ID not of IPv4 addr length");
                     break;
@@ -702,8 +701,8 @@ static void libParseBGP_parse_bmp_handle_init_msg(bmp_message::libParseBGP_parse
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
 //void parseBMP::handleTermMsg(int sock) {
-static void libParseBGP_parse_bmp_handle_term_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    bmp_message::term_msg_v3 termMsg;
+static void libParseBGP_parse_bmp_handle_term_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+    term_msg_v3 termMsg;
     char infoBuf[sizeof(parsed_msg->r_entry.term_data)];
     int infoLen;
 
@@ -741,11 +740,11 @@ static void libParseBGP_parse_bmp_handle_term_msg(bmp_message::libParseBGP_parse
          * Save the data based on info type
          */
         switch (termMsg.type) {
-            case bmp_message::TERM_TYPE_FREE_FORM_STRING :
+            case TERM_TYPE_FREE_FORM_STRING :
                 memcpy(parsed_msg->r_entry.term_data, termMsg.info, termMsg.len);
                 break;
 
-            case bmp_message::TERM_TYPE_REASON :
+            case TERM_TYPE_REASON :
             {
                 // Get the term reason code from info data (first 2 bytes)
                 uint16_t term_reason;
@@ -754,25 +753,25 @@ static void libParseBGP_parse_bmp_handle_term_msg(bmp_message::libParseBGP_parse
                 parsed_msg->r_entry.term_reason_code = term_reason;
 
                 switch (term_reason) {
-                    case bmp_message::TERM_REASON_ADMIN_CLOSE :
+                    case TERM_REASON_ADMIN_CLOSE :
                         //                       LOG_INFO("%s BMP session closed by remote administratively", r_entry.ip_addr);
                         snprintf(parsed_msg->r_entry.term_reason_text, sizeof(parsed_msg->r_entry.term_reason_text),
                                  "Remote session administratively closed");
                         break;
 
-                    case bmp_message::TERM_REASON_OUT_OF_RESOURCES:
+                    case TERM_REASON_OUT_OF_RESOURCES:
                         //                       LOG_INFO("%s BMP session closed by remote due to out of resources", r_entry.ip_addr);
                         snprintf(parsed_msg->r_entry.term_reason_text, sizeof(parsed_msg->r_entry.term_reason_text),
                                  "Remote out of resources");
                         break;
 
-                    case bmp_message::TERM_REASON_REDUNDANT_CONN:
+                    case TERM_REASON_REDUNDANT_CONN:
 //                        LOG_INFO("%s BMP session closed by remote due to connection being redundant", r_entry.ip_addr);
                         snprintf(parsed_msg->r_entry.term_reason_text, sizeof(parsed_msg->r_entry.term_reason_text),
                                  "Remote considers connection redundant");
                         break;
 
-                    case bmp_message::TERM_REASON_UNSPECIFIED:
+                    case TERM_REASON_UNSPECIFIED:
                         ///                       LOG_INFO("%s BMP session closed by remote as unspecified", r_entry.ip_addr);
                         snprintf(parsed_msg->r_entry.term_reason_text, sizeof(parsed_msg->r_entry.term_reason_text),
                                  "Remote closed with unspecified reason");
@@ -803,7 +802,7 @@ static void libParseBGP_parse_bmp_handle_term_msg(bmp_message::libParseBGP_parse
  *
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
-static bool libParseBGP_parse_bmp_parse_peer_down_event_hdr(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg,
+static bool libParseBGP_parse_bmp_parse_peer_down_event_hdr(libParseBGP_parse_bmp_parsed_data *parsed_msg,
                                                      unsigned char*& buffer, int& buf_len) {
     char reason;
     //if (Recv(sock, &reason, 1, 0) == 1) {
@@ -833,7 +832,7 @@ static bool libParseBGP_parse_bmp_parse_peer_down_event_hdr(bmp_message::libPars
  *
  * \returns true if successfully parsed the bmp peer up header, false otherwise
  */
-static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg,
+static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(libParseBGP_parse_bmp_parsed_data *parsed_msg,
                                                    unsigned char*& buffer, int& buf_len) {
     unsigned char local_addr[16];
     bool is_parse_good = true;
@@ -889,11 +888,12 @@ static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(bmp_message::libParseB
     return is_parse_good;
 }
 
-uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
+uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
     string peer_info_key;
     int initial_buffer_len = buf_len;
 
     char bmp_type = 0;
+    libParseBGP_parse_bgp_parsed_data pBGP;
 
     try {
         bmp_type = libParseBGP_parse_bmp_handle_msg(parsed_msg, buffer, buf_len);
@@ -908,7 +908,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parse
          *      on the BMP message type.
          */
         switch (bmp_type) {
-            case bmp_message::TYPE_PEER_DOWN : { // Peer down type
+            case TYPE_PEER_DOWN : { // Peer down type
                 if (libParseBGP_parse_bmp_parse_peer_down_event_hdr(parsed_msg, buffer, buf_len)) {
                     //bufferBMPMessage(read_fd);
                     libParseBGP_parse_bmp_buffer_bmp_message(parsed_msg, buffer, buf_len);
@@ -957,7 +957,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parse
                 break;
             }
 
-            case bmp_message::TYPE_PEER_UP : // Peer up type
+            case TYPE_PEER_UP : // Peer up type
             {
                 if (libParseBGP_parse_bmp_parse_peer_up_event_hdr(parsed_msg, buffer, buf_len)) {
                //     LOG_INFO("%s: PEER UP Received, local addr=%s:%hu remote addr=%s:%hu", client->c_ip,up_event.local_ip, up_event.local_port, p_entry.peer_addr, up_event.remote_port);
@@ -976,7 +976,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parse
                 break;
             }
 
-            case bmp_message::TYPE_ROUTE_MON : { // Route monitoring type
+            case TYPE_ROUTE_MON : { // Route monitoring type
                 libParseBGP_parse_bmp_buffer_bmp_message(parsed_msg, buffer, buf_len);
 
                 /*
@@ -990,12 +990,12 @@ uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parse
                 break;
             }
 
-            case bmp_message::TYPE_STATS_REPORT : { // Stats Report
+            case TYPE_STATS_REPORT : { // Stats Report
                 libParseBGP_parse_bmp_handle_stats_report(parsed_msg, buffer, buf_len);
                 break;
             }
 
-            case bmp_message::TYPE_INIT_MSG : { // Initiation Message
+            case TYPE_INIT_MSG : { // Initiation Message
                // LOG_INFO("%s: Init message received with length of %u", client->c_ip, pBMP->getBMPLength());
 
                 libParseBGP_parse_bmp_handle_init_msg(parsed_msg, buffer, buf_len);
@@ -1003,7 +1003,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(bmp_message::libParseBGP_parse_bmp_parse
                 break;
             }
 
-            case bmp_message::TYPE_TERM_MSG : { // Termination Message
+            case TYPE_TERM_MSG : { // Termination Message
                // LOG_INFO("%s: Term message received with length of %u", client->c_ip, pBMP->getBMPLength());
 
                 libParseBGP_parse_bmp_handle_term_msg(parsed_msg, buffer, buf_len);

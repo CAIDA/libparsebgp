@@ -20,7 +20,7 @@ namespace bgp_msg {
  * \param [in]     peer_info       Persistent peer information
  * \param [in]     enable_debug    Debug true to enable, false to disable
  */
-void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::string peer_addr, bmp_message::peer_info *peer_info) {
+void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::string peer_addr, peer_info *peer_info) {
         open_msg_data->peer_info = peer_info;
         open_msg_data->peer_addr = peer_addr;
 }
@@ -250,7 +250,8 @@ void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data,std::str
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
-size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
+size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent,
+                                           uint32_t &asn, uint16_t &holdTime,
                              std::string &bgp_id, std::list<std::string> &capabilities) {
     char        bgp_id_char[16];
     size_t      read_size       = 0;
