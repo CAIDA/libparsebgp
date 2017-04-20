@@ -31,7 +31,7 @@ namespace bgp_msg {
     void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
                                            peer_info *peer_info) {
         parse_data->peer_addr = peerAddr;
-        parse_data->peer_info = peer_info;
+        parse_data->peer_inf = peer_info;
 }
 
 /**
@@ -154,17 +154,17 @@ void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_at
         case bgp::BGP_SAFI_UNICAST: // Unicast IP address prefix
 
             // Data is an IP address - parse the address and save it
-            libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info,
+            libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                 parsed_data.withdrawn);
             break;
 
         case bgp::BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info,
+            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                      parsed_data.withdrawn);
             break;
 
         case bgp::BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info,
+            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                      parsed_data.vpn_withdrawn);
 
             break;

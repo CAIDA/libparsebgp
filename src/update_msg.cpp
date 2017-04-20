@@ -23,7 +23,7 @@ namespace bgp_msg {
 
     void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
                                                std::string router_addr, peer_info *peer_info){
-        update_msg->peer_info = peer_info;
+        update_msg->peer_inf = peer_info;
         update_msg->peer_addr = peer_addr;
         update_msg->router_addr = router_addr;
     }
@@ -64,7 +64,7 @@ namespace bgp_msg {
 
             // Parse add-paths if enabled
             //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
-            if (libParseBGP_addpath_is_enabled(update_msg->peer_info->add_path_capability, bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
+            if (libParseBGP_addpath_is_enabled(update_msg->peer_inf->add_path_capability, bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
                 and (len - read_size) >= 4) {
                 memcpy(&tuple.path_id, data, 4);
                 bgp::SWAP_BYTES(&tuple.path_id);
@@ -248,7 +248,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
          *
          *    This is temporary and can be removed after all implementations are complete with bmp draft 14 or greater.
          */
-        if (not update_msg->peer_info->checked_asn_octet_length and not update_msg->four_octet_asn)
+        if (not update_msg->peer_inf->checked_asn_octet_length and not update_msg->four_octet_asn)
         {
             /*
              * Loop through each path segment
@@ -266,15 +266,15 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
 
             if (path_len != 0) {
                 //LOG_INFO("%s: rtr=%s: Using 2-octet ASN path parsing", peer_addr.c_str(), router_addr.c_str());
-                update_msg->peer_info->using_2_octet_asn = true;
+                update_msg->peer_inf->using_2_octet_asn = true;
             }
 
-            update_msg->peer_info->checked_asn_octet_length = true;         // No more checking needed
+            update_msg->peer_inf->checked_asn_octet_length = true;         // No more checking needed
             path_len = attr_len;                                // Put the path length back to starting value
         }
 
         // Define the octet size by known/detected size
-        char asn_octet_size = (update_msg->peer_info->using_2_octet_asn and not update_msg->four_octet_asn) ? 2 : 4;
+        char asn_octet_size = (update_msg->peer_inf->using_2_octet_asn and not update_msg->four_octet_asn) ? 2 : 4;
 
         /*
          * Loop through each path segment
@@ -300,7 +300,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                 //LOG_NOTICE("%s: rtr=%s: switching encoding size to 2-octet due to parsing failure",
                 //           peer_addr.c_str(), router_addr.c_str());
 
-                update_msg->peer_info->using_2_octet_asn = true;
+                update_msg->peer_inf->using_2_octet_asn = true;
             }
 
             // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
@@ -533,7 +533,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
             {
                 libParseBGP_mp_reach_attr_parsed_data *parse_data;
-                libParseBGP_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_info);
+                libParseBGP_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_inf);
                 libParseBGP_mp_reach_attr_parse_reach_nlri_attr(parse_data, attr_len, data, parsed_data);
                 break;
             }
@@ -541,7 +541,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
             {
                 libParseBGP_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
-                libParseBGP_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_info);
+                libParseBGP_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_inf);
                 libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(mp_un_reach_attr_data, attr_len, data, parsed_data, has_end_of_rib_marker);
                 break;
             }

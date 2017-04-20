@@ -39,7 +39,7 @@ namespace bgp_msg {
 
     struct libParseBGP_mp_un_reach_attr_parse_data {
         std::string peer_addr;          ///< Printed form of the peer address for logging
-        peer_info *peer_info;         ///< Persistent Peer info pointer
+        peer_info *peer_inf;         ///< Persistent Peer info pointer
     };
     /**
      * Constructor for class

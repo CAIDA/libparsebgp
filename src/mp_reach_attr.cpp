@@ -31,7 +31,7 @@ namespace bgp_msg {
     void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peerAddr,
                                         peer_info *peer_info)
     {
-        parse_data->peer_info=peer_info;
+        parse_data->peer_inf=peer_info;
         parse_data->peer_addr = peerAddr;
     }
 
@@ -165,7 +165,7 @@ namespace bgp_msg {
                 parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an IP address - parse the address and save it
-                libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info, parsed_data.advertised);
+                libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
                 break;
 
             case bgp::BGP_SAFI_NLRI_LABEL:
@@ -180,7 +180,7 @@ namespace bgp_msg {
                 parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an Label, IP address tuple parse and save it
-                libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info, parsed_data.advertised);
+                libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
                 break;
 
             case bgp::BGP_SAFI_MPLS: {
@@ -201,7 +201,7 @@ namespace bgp_msg {
 
                 parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
-                libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_info, parsed_data.vpn);
+                libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.vpn);
 
                 break;
             }

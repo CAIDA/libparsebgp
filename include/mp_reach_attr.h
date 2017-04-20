@@ -40,7 +40,7 @@ namespace bgp_msg {
 
     struct libParseBGP_mp_reach_attr_parsed_data {
         std::string peer_addr;              ///< Printed form of the peer address for logging
-        peer_info *peer_info;
+        peer_info *peer_inf;
     };
 
     /**
