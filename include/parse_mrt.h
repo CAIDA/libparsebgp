@@ -14,9 +14,9 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "../include/parseBMP.h"
-#include "../include/parseBGP.h"
-#include "../include/parseUtils.h"
+#include "parse_bmp.h"
+#include "parse_bgp.h"
+#include "parse_utils.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
@@ -124,7 +124,7 @@ using namespace std;
         uint32_t                     originated_time;
         uint16_t                     attribute_len;
         bool                         end_of_rib_marker;
-        parse_common::parsed_update_data parsed_data;
+        parsed_update_data           parsed_data;
     };
 
     //4.3.2
@@ -252,14 +252,14 @@ struct libParseBGP_parse_mrt_parsed_data {
     bgp4mp_msg bgp4mp_mssg;
     bgp4mp_state_change bgp4mp_state_change_msg;
 
-    parse_common::obj_peer_up_event up_event;
-    parse_common::obj_peer_down_event down_event;
+    obj_peer_up_event up_event;
+    obj_peer_down_event down_event;
 
     u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
     int mrt_data_len;              ///< Length/size of data in the data buffer
 
     libParseBGP_parse_bgp_parsed_data pbgp;
-    parse_common::parsed_bgp_msg bgp_msg;
+    parsed_bgp_msg bgp_msg;
 
 //private:
     uint16_t mrt_type;

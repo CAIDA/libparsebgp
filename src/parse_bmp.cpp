@@ -7,8 +7,8 @@
  *
  */
 
-#include "../include/parseBMP.h"
-#include "../include/parseBGP.h"
+#include "../include/parse_bmp.h"
+#include "../include/parse_bgp.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -18,8 +18,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include "../include/bgp_common.h"
-#include "../include/parse_common.h"
 
 bmp_message::libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *&buffer, int &buf_len) {
     //parseBMP pBMP;

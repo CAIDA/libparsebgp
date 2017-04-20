@@ -13,9 +13,8 @@
 #include <cstdint>
 #include <cinttypes>
 #include <sys/types.h>
-
-#include "MPReachAttr.h"
-#include "MPUnReachAttr.h"
+#include "mp_reach_attr.h"
+#include "mp_un_reach_attr.h"
 //#include "Logger.h"
 //#include "MsgBusInterface.hpp"
 
@@ -136,8 +135,8 @@ namespace bgp_msg {
     struct libparseBGP_mp_link_state_parsed_data {
         std::string peer_addr;                       ///< Printed form of the peer address for logging
 
-        parse_common::parsed_update_data *parsed_data;       ///< Parsed data structure
-        parse_common::parsed_data_ls *ls_data;           ///< Parsed LS Data
+        parsed_update_data *parsed_data;       ///< Parsed data structure
+        parsed_data_ls *ls_data;           ///< Parsed LS Data
     };
         /**
          * Constructor for class
@@ -150,7 +149,7 @@ namespace bgp_msg {
          * \param [in]     enable_debug Debug true to enable, false to disable
          */
 
-        void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address,parse_common::parsed_update_data *parse_data);
+        void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address,parsed_update_data *parse_data);
 
             //       virtual ~MPLinkState();
 

@@ -7,9 +7,9 @@
  *
  */
 
-#include "../include/MPUnReachAttr.h"
-#include "../include/MPLinkState.h"
-#include "../include/EVPN.h"
+#include "../include/mp_un_reach_attr.h"
+#include "../include/mp_link_state.h"
+#include "../include/evpn.h"
 
 
 #include <arpa/inet.h>
@@ -52,7 +52,7 @@ namespace bgp_msg {
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
+void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -98,7 +98,7 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parse_common::parsed_update_data &parsed_data) {
+void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
 
     switch (nlri.afi) {
         case bgp::BGP_AFI_IPV6 :  // IPv6
@@ -150,7 +150,7 @@ void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_d
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data,bool isIPv4, mp_unreach_nlri &nlri, parse_common::parsed_update_data &parsed_data) {
+void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data,bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
 
     /*
      * Decode based on SAFI

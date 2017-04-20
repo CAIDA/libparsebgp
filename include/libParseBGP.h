@@ -5,10 +5,10 @@
 #ifndef PARSE_LIB_LIBPARSEBGP_H
 #define PARSE_LIB_LIBPARSEBGP_H
 
-#include "parseBGP.h"
-#include "parseBGP.h"
-#include "parseMRT.h"
-#include "parse_common.h"
+#include "parse_bgp.h"
+#include "parse_bgp.h"
+#include "parse_mrt.h"
+//#include "parse_common.h"
 
 
 

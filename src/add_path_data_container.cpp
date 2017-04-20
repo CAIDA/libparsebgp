@@ -7,8 +7,8 @@
  *
  */
 
-#include "../include/AddPathDataContainer.h"
-#include "../include/OpenMsg.h"
+#include "../include/add_path_data_container.h"
+#include "../include/open_msg.h"
 
 //AddPathDataContainer::AddPathDataContainer() {
 //}

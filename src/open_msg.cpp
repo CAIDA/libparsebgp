@@ -6,13 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "../include/OpenMsg.h"
-#include "../include/AddPathDataContainer.h"
-#include "../include/parseBMP.h"
-#include <string>
-#include <list>
-#include <cstring>
-
+#include "../include/open_msg.h"
 #include <arpa/inet.h>
 
 namespace bgp_msg {

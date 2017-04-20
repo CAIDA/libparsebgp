@@ -9,8 +9,7 @@
 
 #include <arpa/inet.h>
 #include <string>
-
-#include "../include/MPLinkStateAttr.h"
+#include "../include/mp_link_state_attr.h"
 
 namespace bgp_msg {
     /* BGP-LS Node flags : https://tools.ietf.org/html/rfc7752#section-3.3.1.1
@@ -101,7 +100,7 @@ namespace bgp_msg {
      */
     //MPLinkStateAttr::MPLinkStateAttr(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
-       void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peerAddr,parse_common::parsed_update_data *parsed_data)
+       void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peerAddr,parsed_update_data *parsed_data)
        {
         //logger = logPtr;
         //debug = enable_debug;

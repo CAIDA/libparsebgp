@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/parseMRT.h"
+#include "../include/parse_mrt.h"
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -506,8 +506,8 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
 
             peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
 
-            parse_common::obj_bgp_peer p_entry;
-            bzero(&p_entry, sizeof(parse_common::obj_bgp_peer));
+            obj_bgp_peer p_entry;
+            bzero(&p_entry, sizeof(obj_bgp_peer));
             memcpy(&p_entry.peer_addr, mrt_parsed_data->bgp4mp_mssg.peer_ip, sizeof(p_entry.peer_addr));
             p_entry.is_ipv4 = (mrt_parsed_data->bgp4mp_mssg.address_family == AFI_IPv4);
             p_entry.peer_as = mrt_parsed_data->bgp4mp_mssg.peer_asn;

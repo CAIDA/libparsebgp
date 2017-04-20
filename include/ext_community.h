@@ -174,7 +174,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_ext_communities_parse_ext_communities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
+    void libParseBGP_ext_communities_parse_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data);
 
     /**
      * Parse the extended communities path attribute (20 byte as per RFC5701)
@@ -188,7 +188,7 @@ namespace bgp_msg {
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parse_common::parsed_update_data &parsed_data);
+    void libParseBGP_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data);
 
 //private:
     //bool             debug;                           ///< debug flag to indicate debugging

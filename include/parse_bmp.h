@@ -12,8 +12,8 @@
 #define PARSEBMP_H_
 
 #include <string>
-#include "AddPathDataContainer.h"
-#include "parseUtils.h"
+#include "add_path_data_container.h"
+#include "parse_utils.h"
 #include <list>
 #include <vector>
 #include <array>
@@ -119,12 +119,12 @@ namespace bmp_message {
          */
         u_char bmp_packet[BMP_PACKET_BUF_SIZE + 1];
         size_t bmp_packet_len;
-        parse_common::obj_bgp_peer p_entry;         ///< peer table entry - will be updated with BMP info
-        parse_common::obj_router r_entry;
-        parse_common::obj_peer_down_event down_event;
-        parse_common::obj_peer_up_event up_event;
-        parse_common::obj_stats_report stats;
-        parse_common::parsed_bgp_msg bgp_msg;
+        obj_bgp_peer p_entry;         ///< peer table entry - will be updated with BMP info
+        obj_router r_entry;
+        obj_peer_down_event down_event;
+        obj_peer_up_event up_event;
+        obj_stats_report stats;
+        parsed_bgp_msg bgp_msg;
 //private:
         //bool            debug;                      ///< debug flag to indicate debugging
         // Logger          *logger;                    ///< Logging class pointer

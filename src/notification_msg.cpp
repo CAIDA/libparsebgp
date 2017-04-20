@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/NotificationMsg.h"
+#include "../include/notification_msg.h"
 #include <cstring>
 
 namespace bgp_msg {

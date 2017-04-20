@@ -13,11 +13,9 @@
 #include <cstdint>
 #include <cinttypes>
 #include <sys/types.h>
-
-
 //#include "Logger.h"
 //#include "MsgBusInterface.hpp"
-#include "UpdateMsg.h"
+#include "update_msg.h"
 
 namespace bgp_msg {
 
@@ -105,8 +103,7 @@ namespace bgp_msg {
 
     struct libparseBGP_attr_link_state_parsed_data {
         std::string peer_addr;                       ///< Printed form of the peer address for logging
-
-        parse_common::parsed_update_data *parsed_data;       ///< Parsed data structure
+        parsed_update_data *parsed_data;       ///< Parsed data structure
     };
 
     /**
@@ -121,7 +118,7 @@ namespace bgp_msg {
          */
 
 
-        void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peer_addr,parse_common::parsed_update_data *parsed_data);
+        void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peer_addr,parsed_update_data *parsed_data);
     //     virtual ~MPLinkStateAttr();
 
 

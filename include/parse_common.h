@@ -11,11 +11,10 @@
 #include <vector>
 #include <map>
 #include "bgp_common.h"
-
 using namespace std;
 
-class parse_common{
-public:
+//class parse_common{
+//public:
     /**
      * OBJECT: routers
      *
@@ -188,12 +187,37 @@ public:
     };
 
     /// Rib extended with vpn specific fields
-    struct obj_vpn: obj_rib, obj_route_distinguisher {
-        // inherit
+    struct obj_vpn{
+        u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
+        u_char      path_attr_hash_id[16];  ///< path attrs hash_id
+        u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
+        u_char      is_ipv4;                 ///< 0 if IPv6, 1 if IPv4
+        char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
+        u_char      prefix_len;             ///< Length of prefix in bits
+        uint8_t     prefix_bin[16];         ///< Prefix in binary form
+        uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
+        uint32_t    path_id;                ///< Add path ID - zero if not used
+        char        labels[255];            ///< Labels delimited by comma
+        std::string     rd_administrator_subfield;
+        std::string     rd_assigned_number;
+        uint8_t         rd_type;
     };
 
     /// Rib extended with evpn specific fields
-    struct obj_evpn: obj_rib, obj_route_distinguisher {
+    struct obj_evpn{
+        u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
+        u_char      path_attr_hash_id[16];  ///< path attrs hash_id
+        u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
+        u_char      is_ipv4;                 ///< 0 if IPv6, 1 if IPv4
+        char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
+        u_char      prefix_len;             ///< Length of prefix in bits
+        uint8_t     prefix_bin[16];         ///< Prefix in binary form
+        uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
+        uint32_t    path_id;                ///< Add path ID - zero if not used
+        char        labels[255];            ///< Labels delimited by comma
+        std::string     rd_administrator_subfield;
+        std::string     rd_assigned_number;
+        uint8_t         rd_type;
         uint8_t     originating_router_ip_len;
         char        originating_router_ip[46];
         char        ethernet_segment_identifier[255];
@@ -383,7 +407,7 @@ public:
     /**
      * parsed path attributes map
      */
-    std::map<UPDATE_ATTR_TYPES, std::string>            parsed_attrs;
+//    std::map<UPDATE_ATTR_TYPES, std::string>            parsed_attrs;
     typedef std::pair<UPDATE_ATTR_TYPES, std::string>   parsed_attrs_pair;
     typedef std::map<UPDATE_ATTR_TYPES, std::string>    parsed_attrs_map;
 
@@ -415,6 +439,6 @@ public:
         std::vector<obj_rib> wdrawn_obj_rib_list;
         bool has_end_of_rib_marker;
     };
-};
+//};
 
 #endif //PARSE_LIB_PARSE_COMMON_H_H

@@ -10,11 +10,11 @@
 #ifndef OPENMSG_H_
 #define OPENMSG_H_
 
-#include "bgp_common.h"
+//#include "bgp_common.h"
 
 #include <list>
-#include "../include/parseBMP.h"
-#include "../include/AddPathDataContainer.h"
+#include "parse_bmp.h"
+#include "add_path_data_container.h"
 
 namespace bgp_msg {
 

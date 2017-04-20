@@ -2,7 +2,7 @@
 // Created by Induja on 4/6/2017.
 //
 
-#include "../include/parseUtils.h"
+#include "../include/parse_utils.h"
 
 /**
  * Function to extract data from buffer
