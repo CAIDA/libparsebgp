@@ -18,7 +18,7 @@
 #include "../include/mp_un_reach_attr.h"
 #include "../include/mp_link_state_attr.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
 
     void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
@@ -652,4 +652,4 @@ void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update
     }
 
 }
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */

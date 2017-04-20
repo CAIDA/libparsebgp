@@ -14,7 +14,7 @@
 
 #include <arpa/inet.h>
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
 /**
  * Constructor for class
@@ -176,4 +176,4 @@ void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_at
     }
 }
 
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */

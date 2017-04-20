@@ -14,7 +14,7 @@
 #include "parse_bmp.h"
 #include "add_path_data_container.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
 /**
  * \class   OpenMsg
@@ -172,6 +172,6 @@ namespace bgp_msg {
     size_t libParseBGP_open_msg_parse_capabilities(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
                              std::list<std::string> &capabilities);
 
-} /* namespace bgp */
+//} /* namespace bgp */
 
 #endif /* OPENMSG_H_ */

@@ -1,6 +1,6 @@
 #include "../include/evpn.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
     /**
      * Constructor for class
@@ -499,4 +499,4 @@ namespace bgp_msg {
             //           data_read, data_len, len);
         }
     }
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */

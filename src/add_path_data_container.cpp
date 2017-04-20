@@ -76,11 +76,11 @@ bool libParseBGP_addpath_is_enabled(libParseBGP_addpath_map &addpath_map, int af
         // Following the rule:
         // add_path_<afi/safi> = true IF (SENT_OPEN has ADD-PATH sent or both) AND (RECV_OPEN has ADD-PATH recv or both)
         return (
-            iterator->second.send_receive_code_for_sent_open_message == bgp_msg::BGP_CAP_ADD_PATH_RECEIVE or
-                    iterator->second.send_receive_code_for_sent_open_message == bgp_msg::BGP_CAP_ADD_PATH_SEND_RECEIVE
+            iterator->second.send_receive_code_for_sent_open_message == BGP_CAP_ADD_PATH_RECEIVE or
+                    iterator->second.send_receive_code_for_sent_open_message == BGP_CAP_ADD_PATH_SEND_RECEIVE
             ) and (
-            iterator->second.send_receive_code_for_received_open_message == bgp_msg::BGP_CAP_ADD_PATH_SEND or
-                    iterator->second.send_receive_code_for_received_open_message == bgp_msg::BGP_CAP_ADD_PATH_SEND_RECEIVE
+            iterator->second.send_receive_code_for_received_open_message == BGP_CAP_ADD_PATH_SEND or
+                    iterator->second.send_receive_code_for_received_open_message == BGP_CAP_ADD_PATH_SEND_RECEIVE
             );
     }
 }

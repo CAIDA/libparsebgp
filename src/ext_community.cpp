@@ -16,7 +16,7 @@
 #include "../include/update_msg.h"
 #include "../include/ext_community.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
     /**
      * Decode common Type/Subtypes
@@ -655,4 +655,4 @@ namespace bgp_msg {
             }
         }
     }
-}
+//}

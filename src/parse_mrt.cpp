@@ -157,9 +157,9 @@ void libParseBGP_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libPar
         throw "Error in parsing attribute";
 
     peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
-    bgp_msg::libParseBGP_update_msg_data u_msg;
-    bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-    bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+    libParseBGP_update_msg_data u_msg;
+    libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+    libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
 }
 
 void libParseBGP_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
@@ -300,10 +300,10 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
 //            throw "Error in parsing bgp_attribute";
 
         peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
-        bgp_msg::libParseBGP_update_msg_data u_msg;
-        bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-        bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
-        //bgp_msg::UpdateMsg *uMsg= new bgp_msg::UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
+        libParseBGP_update_msg_data u_msg;
+        libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+        libParseBGP_update_msg_parse_attributes(&u_msg, buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
+        //UpdateMsg *uMsg= new UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
         //uMsg->parseAttributes(buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
@@ -354,9 +354,9 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
             throw "Error in parsing local address in IPv4";
 
         peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
-        bgp_msg::libParseBGP_update_msg_data u_msg;
-        bgp_msg::libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-        bgp_msg::libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+        libParseBGP_update_msg_data u_msg;
+        libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+        libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
                 //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         mrt_parsed_data->rib_entry_hdr.rib_entries.push_back(*r_entry);

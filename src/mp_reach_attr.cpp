@@ -15,7 +15,7 @@
 
 #include <arpa/inet.h>
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
 /**
  * Constructor for class
@@ -464,4 +464,4 @@ inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels) {
     return read_size;
 }
 
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */

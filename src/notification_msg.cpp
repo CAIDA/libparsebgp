@@ -10,7 +10,7 @@
 #include "../include/notification_msg.h"
 #include <cstring>
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
 
 /**
@@ -173,4 +173,4 @@ bool libParseBGP_notification_parse_notify(u_char *data, size_t size, parsed_not
 }
 
 
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */

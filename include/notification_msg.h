@@ -12,7 +12,7 @@
 
 #include "bgp_common.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
    /**
      * defines the NOTIFICATION BGP header per RFC4271
@@ -115,6 +115,6 @@ namespace bgp_msg {
      */
     bool libParseBGP_notification_parse_notify(u_char *data, size_t size, parsed_notify_msg &parsed_msg);
 
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */
 
 #endif /* NOTIFICATIONMSG_H_ */

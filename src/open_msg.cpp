@@ -9,7 +9,7 @@
 #include "../include/open_msg.h"
 #include <arpa/inet.h>
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
 /**
  * Constructor for class
@@ -315,4 +315,4 @@ size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_d
 
     return read_size;
 }
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */
