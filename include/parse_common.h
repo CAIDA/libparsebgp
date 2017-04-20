@@ -360,7 +360,7 @@ using namespace std;
         unsigned char    type;
     } __attribute__ ((__packed__));
 
-    enum UPDATE_ATTR_TYPES {
+    enum update_attr_types {
         ATTR_TYPE_ORIGIN=1,
         ATTR_TYPE_AS_PATH,
         ATTR_TYPE_NEXT_HOP,
@@ -407,9 +407,9 @@ using namespace std;
     /**
      * parsed path attributes map
      */
-//    std::map<UPDATE_ATTR_TYPES, std::string>            parsed_attrs;
-    typedef std::pair<UPDATE_ATTR_TYPES, std::string>   parsed_attrs_pair;
-    typedef std::map<UPDATE_ATTR_TYPES, std::string>    parsed_attrs_map;
+//    std::map<update_attr_types, std::string>            parsed_attrs;
+    typedef std::pair<update_attr_types, std::string>   parsed_attrs_pair;
+    typedef std::map<update_attr_types, std::string>    parsed_attrs_map;
 
     // Parsed bgp-ls attributes map
     typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;

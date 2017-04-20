@@ -9,11 +9,6 @@
 
 #include "../include/parse_bmp.h"
 #include "../include/parse_bgp.h"
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <cstring>
-#include <string>
 #include <sys/time.h>
 #include <unistd.h>
 #include <sys/socket.h>

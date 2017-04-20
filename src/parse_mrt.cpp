@@ -72,33 +72,33 @@ bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_
         mrt_type = libParseBGP_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data);
 
         switch (mrt_type) {
-            case MRT_TYPE::OSPFv2 :     //do nothing
-            case MRT_TYPE::OSPFv3 :     //do nothing
-            case MRT_TYPE::OSPFv3_ET : { //do nothing
+            case OSPFv2 :     //do nothing
+            case OSPFv3 :     //do nothing
+            case OSPFv3_ET : { //do nothing
                 break;
             }
 
-            case MRT_TYPE::TABLE_DUMP : {
+            case TABLE_DUMP : {
                 libParseBGP_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
                 libParseBGP_parse_mrt_parse_table_dump(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
                 break;
             }
 
-            case MRT_TYPE::TABLE_DUMP_V2 : {
+            case TABLE_DUMP_V2 : {
                 libParseBGP_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
                 libParseBGP_parse_mrt_parse_table_dump_v2(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
                 break;
             }
 
-            case MRT_TYPE::BGP4MP :
-            case MRT_TYPE::BGP4MP_ET : {
+            case BGP4MP :
+            case BGP4MP_ET : {
                 libParseBGP_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
                 libParseBGP_parse_mrt_parse_bgp4mp(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
                 break;
             }
 
-            case MRT_TYPE::ISIS :
-            case MRT_TYPE::ISIS_ET : {
+            case ISIS :
+            case ISIS_ET : {
                 break;  //do nothing
             }
             default: {
@@ -562,7 +562,7 @@ uint16_t libParseBGP_parse_mrt_parse_common_header(u_char *& buffer, int& buf_le
     bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.time_stamp);
 
     mrt_parsed_data->mrt_len = mrt_parsed_data->c_hdr.len;
-    if (mrt_parsed_data->c_hdr.type == MRT_TYPE::BGP4MP_ET || mrt_parsed_data->c_hdr.type == MRT_TYPE::ISIS_ET || mrt_parsed_data->c_hdr.type == MRT_TYPE::OSPFv3_ET) {
+    if (mrt_parsed_data->c_hdr.type == mrt_type::BGP4MP_ET || mrt_parsed_data->c_hdr.type == mrt_type::ISIS_ET || mrt_parsed_data->c_hdr.type == mrt_type::OSPFv3_ET) {
         if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->c_hdr.microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
         bgp::SWAP_BYTES(&mrt_parsed_data->c_hdr.microsecond_timestamp);

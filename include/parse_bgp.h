@@ -12,8 +12,6 @@
 
 #include <vector>
 #include <list>
-//#include "../include/parseBMP.h"
-//#include "parse_common.h"
 #include "bgp_common.h"
 #include "update_msg.h"
 
@@ -31,7 +29,7 @@ using namespace std;
     /**
      * Below defines the common BGP header per RFC4271
      */
-    enum BGP_MSG_TYPES { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE,
+    enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE,
         BGP_MSG_ROUTE_REFRESH
     };
 

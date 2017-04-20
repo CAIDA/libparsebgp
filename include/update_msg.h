@@ -26,7 +26,7 @@ namespace bgp_msg {
  *
  *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
  */
-//enum UPDATE_ATTR_TYPES {
+//enum update_attr_types {
 //            ATTR_TYPE_ORIGIN=1,
 //            ATTR_TYPE_AS_PATH,
 //            ATTR_TYPE_NEXT_HOP,
@@ -109,8 +109,8 @@ namespace bgp_msg {
         u_char *nlri_ptr;
     };
 //
-//    typedef std::pair<UPDATE_ATTR_TYPES, std::string> parsed_attrs_pair;
-//    typedef std::map<UPDATE_ATTR_TYPES, std::string> parsed_attrs_map;
+//    typedef std::pair<update_attr_types, std::string> parsed_attrs_pair;
+//    typedef std::map<update_attr_types, std::string> parsed_attrs_map;
 
     // Parsed bgp-ls attributes map
     typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
@@ -119,7 +119,7 @@ namespace bgp_msg {
         /**
          * parsed path attributes map
          */
-//        std::map<UPDATE_ATTR_TYPES, std::string> parsed_attrs;
+//        std::map<update_attr_types, std::string> parsed_attrs;
 
         bool debug;                           ///< debug flag to indicate debugging
         //Logger                  *logger;                         ///< Logging class pointer

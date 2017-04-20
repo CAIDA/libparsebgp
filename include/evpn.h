@@ -17,7 +17,7 @@ namespace bgp_msg {
 //
 //    public:
 
-        enum EVPN_ROUTE_TYPES {
+        enum evpn_routes_types {
             EVPN_ROUTE_TYPE_ETHERNET_AUTO_DISCOVERY = 1,
             EVPN_ROUTE_TYPE_MAC_IP_ADVERTISMENT,
             EVPN_ROUTE_TYPE_INCLUSIVE_MULTICAST_ETHERNET_TAG,

@@ -46,7 +46,7 @@ namespace bmp_message {
     /**
      * BMP common header types
      */
-    enum BMP_TYPE {
+    enum bmp_type {
         TYPE_ROUTE_MON = 0, TYPE_STATS_REPORT, TYPE_PEER_DOWN,
         TYPE_PEER_UP, TYPE_INIT_MSG, TYPE_TERM_MSG
     };
@@ -54,7 +54,7 @@ namespace bmp_message {
     /**
      * BMP stats types
      */
-    enum BMP_STATS {
+    enum bmp_stats {
         STATS_PREFIX_REJ = 0, STATS_DUP_PREFIX, STATS_DUP_WITHDRAW, STATS_INVALID_CLUSTER_LIST,
         STATS_INVALID_AS_PATH_LOOP, STATS_INVALID_ORIGINATOR_ID, STATS_INVALID_AS_CONFED_LOOP,
         STATS_NUM_ROUTES_ADJ_RIB_IN, STATS_NUM_ROUTES_LOC_RIB
@@ -63,7 +63,7 @@ namespace bmp_message {
     /**
      * BMP Initiation Message Types
      */
-    enum BMP_INIT_TYPES {
+    enum bmp_init_types {
         INIT_TYPE_FREE_FORM_STRING = 0, INIT_TYPE_SYSDESCR, INIT_TYPE_SYSNAME,
         INIT_TYPE_ROUTER_BGP_ID = 65531
     };
@@ -71,14 +71,14 @@ namespace bmp_message {
     /**
      * BMP Termination Message Types
      */
-    enum BMP_TERM_TYPES {
+    enum bmp_term_types {
         TERM_TYPE_FREE_FORM_STRING = 0, TERM_TYPE_REASON
     };
 
     /**
      * BMP Termination Message reasons for type=1
      */
-    enum BMP_TERM_TYPE1_REASON {
+    enum bmp_term_type1_reason {
         TERM_REASON_ADMIN_CLOSE = 0, TERM_REASON_UNSPECIFIED, TERM_REASON_OUT_OF_RESOURCES,
         TERM_REASON_REDUNDANT_CONN,
         TERM_REASON_OPENBMP_CONN_CLOSED = 65533, TERM_REASON_OPENBMP_CONN_ERR = 65534

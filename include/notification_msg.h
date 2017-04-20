@@ -19,7 +19,7 @@ namespace bgp_msg {
      * defines the NOTIFICATION BGP header per RFC4271
      *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
      */
-    enum NOTIFY_ERROR_CODES { NOTIFY_MSG_HDR_ERR=1, NOTIFY_OPEN_MSG_ERR, NOTIFY_UPDATE_MSG_ERR,
+    enum notify_error_codes { NOTIFY_MSG_HDR_ERR=1, NOTIFY_OPEN_MSG_ERR, NOTIFY_UPDATE_MSG_ERR,
                               NOTIFY_HOLD_TIMER_EXPIRED, NOTIFY_FSM_ERR, NOTIFY_CEASE };
 
 
@@ -27,7 +27,7 @@ namespace bgp_msg {
       * Defines header error codes
       *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
       */
-     enum MSG_HDR_SUBCODES {
+     enum msg_hdr_subcodes {
                  MSG_HDR_CONN_NOT_SYNC=1,
                  MSG_HDR_BAD_MSG_LEN,
                  MSG_HDR_BAD_MSG_TYPE };
@@ -36,7 +36,7 @@ namespace bgp_msg {
       * Defines open error codes
       *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
       */
-     enum OPEN_SUBCODES {
+     enum open_subcodes {
                  OPEN_UNSUPPORTED_VER=1,
                  OPEN_BAD_PEER_AS,
                  OPEN_BAD_BGP_ID,
@@ -47,7 +47,7 @@ namespace bgp_msg {
        * Defines open error codes
        *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
        */
-     enum UPDATE_SUBCODES {
+     enum update_subcodes {
                  UPDATE_MALFORMED_ATTR_LIST=1,
                  UPDATE_UNRECOGNIZED_WELL_KNOWN_ATTR,
                  UPDATE_MISSING_WELL_KNOWN_ATTR,
@@ -61,7 +61,7 @@ namespace bgp_msg {
      /**
       * Per RFC4486 - cease subcodes
       */
-     enum CEASE_SUBCODES {
+     enum cease_subcodes {
                  CEASE_MAX_PREFIXES=1,
                  CEASE_ADMIN_SHUT,
                  CEASE_PEER_DECONFIG,

@@ -63,7 +63,7 @@ namespace bgp {
      * Defines the BGP address-families (AFI)
      *      http://www.iana.org/assignments/address-family-numbers/address-family-numbers.xhtml
      */
-    enum BGP_AFI {
+    enum bgp_afi {
         BGP_AFI_IPV4=1,
         BGP_AFI_IPV6=2,
         BGP_AFI_L2VPN=25,
@@ -74,7 +74,7 @@ namespace bgp {
      * Defines the BGP subsequent address-families (SAFI)
      *      http://www.iana.org/assignments/safi-namespace/safi-namespace.xhtml
      */
-    enum BGP_SAFI {
+    enum bgp_safi {
         BGP_SAFI_UNICAST=1,
         BGP_SAFI_MULTICAST=2,
 
@@ -98,7 +98,7 @@ namespace bgp {
     /**
      * ENUM to define the prefix type used for prefix nlri maps in returned data
      */
-    enum PREFIX_TYPE {
+    enum prefix_type {
                 PREFIX_UNICAST_V4=1,
                 PREFIX_UNICAST_V6,
                 PREFIX_LABEL_UNICAST_V4,
@@ -117,7 +117,7 @@ namespace bgp {
         * len in bits of the IP address prefix
         *      length of 0 indicates a prefix that matches all IP addresses
         */
-        PREFIX_TYPE   type;                 ///< Prefix type - RIB type
+        prefix_type   type;                 ///< Prefix type - RIB type
         unsigned char len;                  ///< Length of prefix in bits
         std::string   prefix;               ///< Printed form of the IP address
         uint8_t       prefix_bin[16];       ///< Prefix in binary form

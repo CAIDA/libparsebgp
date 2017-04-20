@@ -27,7 +27,7 @@ namespace bgp_msg {
          * Defines the BGP link state NLRI types
          *      https://tools.ietf.org/html/draft-ietf-idr-ls-distribution-10#section-3.2
          */
-        enum NLRI_TYPES {
+        enum nlri_types {
             NLRI_TYPE_NODE = 1,                        ///< Node
             NLRI_TYPE_LINK,                             ///< Link
             NLRI_TYPE_IPV4_PREFIX,                      ///< IPv4 Prefix
@@ -37,7 +37,7 @@ namespace bgp_msg {
         /**
          * Defines the NLRI protocol-id values
          */
-        enum NLRI_PROTOCOL_IDS {
+        enum nlri_protocol_ids {
             NLRI_PROTO_ISIS_L1 = 1,                    ///< IS-IS Level 1
             NLRI_PROTO_ISIS_L2,                        ///< IS-IS Level 2
             NLRI_PROTO_OSPFV2,                         ///< OSPFv2
@@ -63,7 +63,7 @@ namespace bgp_msg {
          * Node descriptor Sub-TLV's
          *      Used by both remote and local node descriptors
          */
-        enum NODE_DESCR_SUB_TYPES {
+        enum node_descr_sub_types {
             NODE_DESCR_LOCAL_DESCR              = 256,      ///< Local node descriptor
             NODE_DESCR_REMOTE_DESCR,                        ///< Remote node descriptor
 
@@ -90,7 +90,7 @@ namespace bgp_msg {
         /**
          * Link Descriptor Sub-TLV's
          */
-        enum LINK_DESCR_SUB_TYPES {
+        enum link_descr_sub_types {
             LINK_DESCR_ID                       = 258,      ///< Link Local/Remote Identifiers 22/4 (rfc5307/1.1)
             LINK_DESCR_IPV4_INTF_ADDR,                      ///< IPv4 interface address 22/6 (rfc5305/3.2)
             LINK_DESCR_IPV4_NEI_ADDR,                       ///< IPv4 neighbor address 22/8 (rfc5305/3.3)
@@ -114,7 +114,7 @@ namespace bgp_msg {
         /**
          * Prefix Descriptor Sub-TLV's
          */
-        enum PREFIX_DESCR_SUB_YPTES {
+        enum prefix_descr_sub_types {
             PREFIX_DESCR_MT_ID                  = 263,      ///< Multi-Topology Identifier (len=variable)
             PREFIX_DESCR_OSPF_ROUTE_TYPE,                   ///< OSPF Route Type (len=1)
             PREFIX_DESCR_IP_REACH_INFO                      ///< IP Reachability Information (len=variable)
@@ -123,7 +123,7 @@ namespace bgp_msg {
         /**
          * OSPF Route Types
          */
-        enum OSPF_ROUTE_TYPES {
+        enum ospf_route_types {
             OSPF_RT_INTRA_AREA                  = 1,        ///< Intra-Area
             OSPF_RT_INTER_AREA,                             ///< Inter-Area
             OSPF_RT_EXTERNAL_1,                             ///< External type 1

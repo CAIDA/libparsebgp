@@ -33,7 +33,7 @@ namespace bgp_msg {
      * Defines the BGP Extended communities Types
      *      http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
      */
-    enum EXT_COMM_TYPES {
+    enum ext_comm_types {
 
         // Either Transitive or non-Transitive high order byte Types
         EXT_TYPE_2OCTET_AS = 0,                      ///< Transitive Two-Octet AS-Specific (RFC7153)
@@ -55,7 +55,7 @@ namespace bgp_msg {
     /**
      * Defines the BGP Extended community subtype for EXT_TYPE_TRANS_EVPN
      */
-    enum EXT_COMM_SUBTYPE_EVPN {
+    enum ext_comm_subtype_evpn {
         EXT_EVPN_MAC_MOBILITY=0,                     ///< MAC Mobility (RFC-ietf-l2vpn-evpn-11)
         EXT_EVPN_MPLS_LABEL,                         ///< ESI MPLS Label (RFC-ietf-l2vpn-evpn-11)
         EXT_EVPN_ES_IMPORT,                          ///< ES Import (RFC-ietf-l2vpn-evpn-11)
@@ -66,7 +66,7 @@ namespace bgp_msg {
      * Defines the BGP Extended community subtype for EXT_TYPE_IPV4, EXT_TYPE_4OCTET_AS,
      *  and EXT_TYPE_2OCTET_AS. The subtypes are in common with these.
      */
-    enum EXT_COMM_SUBTYPE_IPV4 {
+    enum ext_comm_subtype_ipv4 {
         EXT_COMMON_ROUTE_TARGET=2,                   ///< Route Target (RFC4360/RFC5668)
         EXT_COMMON_ROUTE_ORIGIN,                     ///< Route Origin (RFC5668/RFC5668)
         EXT_COMMON_GENERIC,                          ///< 4-Octet Generic (draft-ietf-idr-as4octet-extcommon-generic-subtype)
@@ -90,7 +90,7 @@ namespace bgp_msg {
     /**
     * Defines the BGP Extended community subtype for EXT_TYPE_IPV6 (same type as 2OCTET but attribute type is IPv6 ext comm)
     */
-    enum EXT_COMM_SUBTYPE_IPV6 {
+    enum ext_comm_subtype_ipv6 {
         EXT_IPV6_ROUTE_TARGET=2,                    ///< Route Target (RFC5701)
         EXT_IPV6_ROUTE_ORIGIN,                      ///< Route Origin (RFC5701)
 
@@ -108,7 +108,7 @@ namespace bgp_msg {
     /**
      * Defines the BGP Extended community subtype for EXT_TYPE_OPAQUE
      */
-    enum EXT_COMM_SUBTYPE_TRANS_OPAQUE {
+    enum ext_comm_subtype_trans_opaque {
         EXT_OPAQUE_ORIGIN_VALIDATION=0,             ///< BGP Origin Validation State (draft-ietf-sidr-origin-validation-signaling)
         EXT_OPAQUE_COST_COMMUNITY=1,                ///< Cost Community (draft-ietf-idr-custom-decision)
 
@@ -125,7 +125,7 @@ namespace bgp_msg {
      * Defines the BGP Extended community subtype for EXT_TYPE_GENERIC
      *      Experimental Use
      */
-    enum EXT_COMM_SUBTYPE_GENERIC {
+    enum ext_comm_subtype_generic {
         EXT_GENERIC_OSPF_ROUTE_TYPE=0,               ///< OSPF Route Type (deprecated) (RFC4577)
         EXT_GENERIC_OSPF_ROUTER_ID,                  ///< OSPF Router ID (deprecated) (RFC4577)
 

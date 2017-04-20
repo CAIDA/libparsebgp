@@ -31,7 +31,7 @@ namespace bgp_msg {
      * Defines the BGP capabilities
      *      http://www.iana.org/assignments/capability-codes/capability-codes.xhtml
      */
-    enum BGP_CAP_CODES {
+    enum bgp_cap_codes {
             BGP_CAP_MPBGP=1,
             BGP_CAP_ROUTE_REFRESH,
             BGP_CAP_OUTBOUND_FILTER,
@@ -53,7 +53,7 @@ namespace bgp_msg {
      * Defines the Add Path BGP capability's send/recieve code
      *      https://tools.ietf.org/html/rfc7911#section-4
      */
-    enum BGP_CAP_ADD_PATH_SEND_RECEIVE_CODES {
+    enum bgp_cap_add_path_send_receive_codes {
             BGP_CAP_ADD_PATH_RECEIVE=1,
             BGP_CAP_ADD_PATH_SEND=2,
             BGP_CAP_ADD_PATH_SEND_RECEIVE=3

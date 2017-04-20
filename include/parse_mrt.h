@@ -36,25 +36,25 @@ using namespace std;
     /**
       * MRT Message Types
       */
-    enum MRT_TYPE {OSPFv2=11, TABLE_DUMP=12, TABLE_DUMP_V2=13, BGP4MP=16, BGP4MP_ET=17, ISIS=32, ISIS_ET=33, OSPFv3=48, OSPFv3_ET=49};
+    enum mrt_type {OSPFv2=11, TABLE_DUMP=12, TABLE_DUMP_V2=13, BGP4MP=16, BGP4MP_ET=17, ISIS=32, ISIS_ET=33, OSPFv3=48, OSPFv3_ET=49};
 
     /**
       * Table Dump Types
       */
-    enum ADDRESS_FAMILY_TYPES {AFI_IPv4=1,AFI_IPv6};
+    enum address_family_types {AFI_IPv4=1,AFI_IPv6};
 
     /**
       * Table Dump V2 Types
       */
-    enum TABLE_DUMP_V2_TYPES {PEER_INDEX_TABLE=1, RIB_IPV4_UNICAST, RIB_IPV4_MULTICAST, RIB_IPV6_UNICAST, RIB_IPV6_MULTICAST, RIB_GENERIC};
+    enum table_dump_v2_types {PEER_INDEX_TABLE=1, RIB_IPV4_UNICAST, RIB_IPV4_MULTICAST, RIB_IPV6_UNICAST, RIB_IPV6_MULTICAST, RIB_GENERIC};
 
     /**
       * BGP4MP Types
       */
-    enum BGP4MP_TYPES {BGP4MP_STATE_CHANGE=0, BGP4MP_MESSAGE, BGP4MP_MESSAGE_AS4=4, BGP4MP_STATE_CHANGE_AS4, BGP4MP_MESSAGE_LOCAL, BGP4MP_MESSAGE_AS4_LOCAL};
+    enum bgp4mp_types {BGP4MP_STATE_CHANGE=0, BGP4MP_MESSAGE, BGP4MP_MESSAGE_AS4=4, BGP4MP_STATE_CHANGE_AS4, BGP4MP_MESSAGE_LOCAL, BGP4MP_MESSAGE_AS4_LOCAL};
 
 
-    enum STATE_VALUES {Idle=1, Connect, Active, OpenSent, OpenConfirm, Esablished};
+    enum state_values {Idle=1, Connect, Active, OpenSent, OpenConfirm, Esablished};
 
 
 

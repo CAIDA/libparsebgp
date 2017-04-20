@@ -24,7 +24,7 @@ namespace bgp_msg {
         /**
          * Node Attribute types
          */
-        enum ATTR_NODE_TYPES {
+        enum attr_node_types {
             ATTR_NODE_MT_ID                     = 263,    ///< Multi-Topology Identifier (len=variable)
             ATTR_NODE_FLAG                      = 1024,   ///< Node Flag Bits see enum NODE_FLAG_TYPES (len=1)
             ATTR_NODE_OPAQUE,                             ///< Opaque Node Properties (len=variable)
@@ -38,14 +38,14 @@ namespace bgp_msg {
             ATTR_NODE_SR_SRMS_PREF                        ///< SR mapping server preference
         };
 
-        enum SUB_TLV_TYPES {
+        enum sub_tlv_types {
             SUB_TLV_SID_LABEL = 1161    ///<SID/Label Sub-TLV
         };
 
         /**
          * Link Attribute types
          */
-        enum ATTR_LINK_TYPES {
+        enum attr_link_types {
             ATTR_LINK_IPV4_ROUTER_ID_LOCAL      = 1028,         ///< IPv4 Router-ID of local node 134/- (rfc5305/4.3)
             ATTR_LINK_IPV6_ROUTER_ID_LOCAL,                     ///< IPv6 Router-ID of local node 140/- (rfc6119/4.1)
             ATTR_LINK_IPV4_ROUTER_ID_REMOTE,                    ///< IPv4 Router-ID of remote node 134/- (rfc5305/4.3)
