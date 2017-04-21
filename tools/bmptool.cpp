@@ -54,7 +54,7 @@ int main() {
         while(msg_read)
         {
             //parseBMP *p = new parseBMP();
-            bmp_message::libParseBGP_parse_bmp_parsed_data p;
+            libParseBGP_parse_bmp_parsed_data p;
             try {
                 //if (p->parseMsg(buffer, len))
                 p = parse_bmp_wrapper(buffer, len);
