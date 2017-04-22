@@ -99,7 +99,7 @@ struct peer_info {
 /**
  * BMP common header
  */
-struct common_hdr_v3 {
+struct common_hdr_bmp_v_3 {
     // 4 bytes total for the common header
     //u_char      ver;                // 1 byte; BMP version -- Not part of struct since it's read before
 
@@ -131,7 +131,7 @@ struct peer_hdr_v3 {
 /**
 *  BMP headers for older versions (BMPv1)
 */
-struct common_hdr_old {
+struct common_hdr_bmp__old {
     //unsigned char ver;               // 1 byte -- Not part of struct since it's read before
     unsigned char type;                // 1 byte
     unsigned char peer_type;           // 1 byte
@@ -171,8 +171,8 @@ struct libParseBGP_parse_bmp_parsed_data {
     obj_peer_up_event up_event;
     obj_stats_report stats;
     parsed_bgp_msg bgp_msg;
-    common_hdr_v3 c_hdr_v3;
-    common_hdr_old c_hdr_old;
+    common_hdr_bmp_v_3 c_hdr_v3;
+    common_hdr_bmp__old c_hdr_old;
 
     char bmp_type;                   ///< The BMP message type
     uint32_t bmp_len;                    ///< Length of the BMP message - does not include the common header size
@@ -225,5 +225,10 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
 //typedef std::map<std::string, bmp_message::peer_info>::iterator peer_info_map_iter;
 
 libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len);
+
+
+
+
+
 
 #endif /* PARSEBMP_H_ */
