@@ -636,7 +636,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
             //bool rval;
             data += BGP_MSG_HDR_LEN;
 
-            parsed_notify_msg parsed_msg;
+            libparsebgp_notify_msg parsed_msg;
             //NotificationMsg nMsg;
             if (libParseBGP_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg))
             {
@@ -839,7 +839,7 @@ bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *
 
         data += BGP_MSG_HDR_LEN;
 
-        parsed_notify_msg parsed_msg;
+        libparsebgp_notify_msg parsed_msg;
         //NotificationMsg nMsg;
         if ( (rval=libParseBGP_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg)))
         {
