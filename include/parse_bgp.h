@@ -14,7 +14,9 @@
 #include <list>
 #include "bgp_common.h"
 #include "update_msg.h"
-
+#include "parse_common.h"
+#include "open_msg.h"
+#include "notification_msg.h"
 
 using namespace std;
 /**
@@ -24,14 +26,21 @@ using namespace std;
  * \details This class can be used as needed to parse a complete BGP message. This
  *          class will read directly from the socket to read the BGP message.
  */
-  /**
-     * Below defines the common BGP header per RFC4271
-     */
-    enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE,
-        BGP_MSG_ROUTE_REFRESH
+/**
+ * Below defines the common BGP header per RFC4271
+ */
+enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE,
+    BGP_MSG_ROUTE_REFRESH
+};
+
+struct libparsebgp_parse_bgp_parsed_data {
+    common_bgp_hdr c_hdr;
+    union parsed_data {
+        libparsebgp_open_msg_data open_msg;
+        libparsebgp_update_msg_data update_msg;
+        libparsebgp_notify_msg notification_msg;
     };
 
-struct libParseBGP_parse_bgp_parsed_data {
     /**
      * data_bytes_remaining is a counter that starts at the message size and then is
      * decremented as the message is read.
@@ -72,11 +81,11 @@ struct libParseBGP_parse_bgp_parsed_data {
      * \param [in]     routerAddr  The router IP address - used for logging
      * \param [in,out] peer_info   Persistent peer information
      */
-    void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
+    void libparsebgp_parse_bgp_init(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
                                     string router_addr, peer_info *peer_info);
 
 
-    u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parsed_bgp_msg *bgp_msg,
+    u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parsed_bgp_msg *bgp_msg,
                                                     obj_peer_up_event *up_event, obj_peer_down_event *down_event,
                                                     uint32_t asn, bool is_local_msg = false);
 
@@ -92,7 +101,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                              parsed_bgp_msg *bgp_msg);
 
     /**
@@ -108,7 +117,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data,
+    bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data,
                                                  size_t size, obj_peer_down_event *down_event, parsed_bgp_msg *bgp_msg);
 
     /**
@@ -122,7 +131,7 @@ struct libParseBGP_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+    bool libparsebgp_parse_bgp_handle_up_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                                obj_peer_up_event *up_event, parsed_bgp_msg *bgp_msg);
 
     /**
@@ -138,6 +147,6 @@ struct libParseBGP_parse_bgp_parsed_data {
      *
      * \returns BGP message type
      */
-    u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, common_bgp_hdr &common_hdr);
+    u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, common_bgp_hdr &common_hdr);
 
 #endif /* PARSEBGP_H_ */

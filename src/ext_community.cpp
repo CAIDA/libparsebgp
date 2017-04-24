@@ -479,7 +479,7 @@
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_ext_communities_parse_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data) {
+    void libparsebgp_ext_communities_parse_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data) {
 
         std::string decode_str = "";
         extcomm_hdr ec_hdr;
@@ -620,7 +620,7 @@
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libParseBGP_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data) {
+    void libparsebgp_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data) {
         std::string decode_str = "";
         extcomm_hdr ec_hdr;
 

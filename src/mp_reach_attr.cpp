@@ -9,11 +9,7 @@
 
 #include "../include/mp_reach_attr.h"
 #include "../include/mp_link_state.h"
-#include "../include/parse_bmp.h"
 #include "../include/evpn.h"
-#include <typeinfo>
-
-#include <arpa/inet.h>
 
 //namespace bgp_msg {
 
@@ -28,7 +24,7 @@
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
 
-    void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peerAddr,
+    void libparsebgp_mp_reach_attr_init(libparsebgp_mp_reach_attr_parsed_data *parse_data, std::string peerAddr,
                                         peer_info *peer_info)
     {
         parse_data->peer_inf=peer_info;
@@ -49,7 +45,7 @@
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
     template <typename PREFIX_TUPLE>
-    void libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
+    void libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                                      peer_info * peer_info, std::list<PREFIX_TUPLE> &prefixes) {
         u_char            ip_raw[16];
         char              ip_char[40];
@@ -64,7 +60,7 @@
 
         //bool add_path_enabled = peer_info->add_path_capability.isAddPathEnabled(isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
         //                                                                        bgp::BGP_SAFI_NLRI_LABEL);
-        bool add_path_enabled = libParseBGP_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
+        bool add_path_enabled = libparsebgp_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
                                                                BGP_SAFI_NLRI_LABEL);
 
         bool isVPN = typeid(vpn_tuple) == typeid(tuple);
@@ -103,7 +99,7 @@
             // Parse RD if VPN
             if (isVPN and addr_bytes >= 8) {
                 vpn_tuple *vtuple = (vpn_tuple *)&tuple;
-                libParseBGP_evpn_parse_route_distinguisher(data, &vtuple->rd_type, &vtuple->rd_assigned_number,
+                libparsebgp_evpn_parse_route_distinguisher(data, &vtuple->rd_type, &vtuple->rd_assigned_number,
                                               &vtuple->rd_administrator_subfield);
                 data += 8;
                 addr_bytes -= 8;
@@ -142,7 +138,7 @@
 * \param [in]   nlri           Reference to parsed NLRI struct
 * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
 */
-    void libParseBGP_mp_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_reach_attr_parsed_data *parse_data, bool isIPv4, mp_reach_nlri &nlri, parsed_update_data &parsed_data) {
+    void libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_mp_reach_attr_parsed_data *parse_data, bool isIPv4, mp_reach_nlri &nlri, parsed_update_data &parsed_data) {
         u_char      ip_raw[16];
         char        ip_char[40];
 
@@ -165,7 +161,7 @@
                 parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an IP address - parse the address and save it
-                libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
+                libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
                 break;
 
             case BGP_SAFI_NLRI_LABEL:
@@ -180,7 +176,7 @@
                 parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an Label, IP address tuple parse and save it
-                libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
+                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.advertised);
                 break;
 
             case BGP_SAFI_MPLS: {
@@ -201,7 +197,7 @@
 
                 parsed_data.attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
-                libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.vpn);
+                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf, parsed_data.vpn);
 
                 break;
             }
@@ -222,22 +218,22 @@
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-    static void libParseBGP_parse_afi(libParseBGP_mp_reach_attr_parsed_data *parse_data, mp_reach_nlri &nlri, parsed_update_data &parsed_data) {
+    static void libparsebgp_parse_afi(libparsebgp_mp_reach_attr_parsed_data *parse_data, mp_reach_nlri &nlri, parsed_update_data &parsed_data) {
 
         switch (nlri.afi) {
             case BGP_AFI_IPV6 :  // IPv6
-                libParseBGP_mp_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
+                libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
                 break;
 
             case BGP_AFI_IPV4 : // IPv4
-                libParseBGP_mp_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
+                libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
                 break;
 
             case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
             {
-                libparseBGP_mp_link_state_parsed_data *data;
-                libParseBGP_mp_link_state_init(data, parse_data->peer_addr, &parsed_data);
-                libParseBGP_mp_link_state_parse_reach_link_state(data,nlri);
+                libparsebgp_mp_link_state_parsed_data *data;
+                libparsebgp_mp_link_state_init(data, parse_data->peer_addr, &parsed_data);
+                libparsebgp_mp_link_state_parse_reach_link_state(data,nlri);
                 break;
             }
 
@@ -262,9 +258,9 @@
                 switch (nlri.safi) {
                     case BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                     {
-                        libParseBGP_evpn_data *evpn_data;
-                        libParseBGP_evpn_init(evpn_data,parse_data->peer_addr, false, &parsed_data);
-                        libParseBGP_evpn_parse_nlri_data(evpn_data,nlri.nlri_data, nlri.nlri_len);
+                        libparsebgp_evpn_data *evpn_data;
+                        libparsebgp_evpn_init(evpn_data,parse_data->peer_addr, false, &parsed_data);
+                        libparsebgp_evpn_parse_nlri_data(evpn_data,nlri.nlri_data, nlri.nlri_len);
                         break;
                     }
 
@@ -296,7 +292,7 @@
  * \param [in]   data                   Pointer to the attribute data
  * \param [out]  parsed_data            Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data) {
+void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(libparsebgp_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data) {
     mp_reach_nlri nlri;
     /*
      * Set the MP NLRI struct
@@ -327,7 +323,7 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
      * Next-hop and NLRI data depends on the AFI & SAFI
      *  Parse data based on AFI + SAFI
      */
-        libParseBGP_parse_afi(parse_data, nlri, parsed_data);
+        libparsebgp_parse_afi(parse_data, nlri, parsed_data);
 }
 
 
@@ -345,7 +341,7 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<prefix_tuple> to be updated with entries
  */
-void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
+void libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
                                            peer_info * peer_info, std::list<prefix_tuple> &prefixes) {
     u_char            ip_raw[16];
     char              ip_char[40];
@@ -361,7 +357,7 @@ void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *da
 
     //bool add_path_enabled = peer_info->add_path_capability.isAddPathEnabled(isIPv4 ? bgp::BGP_AFI_IPV4 : bgp::BGP_AFI_IPV6,
     //                                                                        bgp::BGP_SAFI_NLRI_LABEL);
-    bool add_path_enabled = libParseBGP_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
+    bool add_path_enabled = libparsebgp_addpath_is_enabled(peer_info->add_path_capability, isIPv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
                                                                             BGP_SAFI_NLRI_LABEL);
 
     // Loop through all prefixes

@@ -14,7 +14,7 @@
 
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    void libParseBGP_evpn_init(libParseBGP_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parsed_update_data *parsed_data) {
+    void libparsebgp_evpn_init(libparsebgp_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parsed_update_data *parsed_data) {
         evpn_data->peer_addr = peerAddr;
         evpn_data->parsed_data = parsed_data;
         evpn_data->is_un_reach = is_un_reach;
@@ -31,7 +31,7 @@
      * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
      * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
      */
-    static void libParseBGP_evpn_parse_ethernet_segment_identifier(libParseBGP_evpn_data *evpn_data, u_char *data_pointer, std::string *parsed_data) {
+    static void libparsebgp_evpn_parse_ethernet_segment_identifier(libparsebgp_evpn_data *evpn_data, u_char *data_pointer, std::string *parsed_data) {
         std::stringstream result;
         uint8_t type = *data_pointer;
 
@@ -150,7 +150,7 @@
      * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
      * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
      */
-    void libParseBGP_evpn_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
+    void libparsebgp_evpn_parse_route_distinguisher(u_char *data_pointer, uint8_t *rd_type, std::string *rd_assigned_number,
                                        std::string *rd_administrator_subfield) {
         std::stringstream   val_ss;
 
@@ -246,7 +246,7 @@
      * \param [in]   data_len               Length of the data in bytes to be read
      *
      */
-    void libParseBGP_evpn_parse_nlri_data(libParseBGP_evpn_data *evpn_data, u_char *data, uint16_t data_len) {
+    void libparsebgp_evpn_parse_nlri_data(libparsebgp_evpn_data *evpn_data, u_char *data, uint16_t data_len) {
         u_char      *data_pointer = data;
         u_char      ip_binary[16];
         int         addr_bytes;
@@ -273,7 +273,7 @@
             int len = *data_pointer;
             data_pointer++;
 
-            libParseBGP_evpn_parse_route_distinguisher(
+            libparsebgp_evpn_parse_route_distinguisher(
                     data_pointer,
                     &tuple.rd_type,
                     &tuple.rd_assigned_number,
@@ -290,7 +290,7 @@
                     if ((data_read + 17 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libParseBGP_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libparsebgp_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         //Ethernet Tag Id (4 bytes), printing in hex.
@@ -324,7 +324,7 @@
                     if ((data_read + 25 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libParseBGP_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libparsebgp_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         // Ethernet Tag ID (4 bytes)
@@ -453,7 +453,7 @@
                     if ((data_read + 11 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libParseBGP_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libparsebgp_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         // IP Address Length (1 bytes)

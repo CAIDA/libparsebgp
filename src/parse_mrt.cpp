@@ -17,11 +17,11 @@
     pMRT.parseMsg(buffer, buf_len);
     return pMRT;
 }*/
-libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len) {
-    libParseBGP_parse_mrt_parsed_data mrt_parsed_data;
+libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len) {
+    libparsebgp_parse_mrt_parsed_data mrt_parsed_data;
     try {
-        libParseBGP_parse_mrt_init(&mrt_parsed_data);
-        if (libParseBGP_parse_mrt_parse_msg(buffer, buf_len, &mrt_parsed_data))
+        libparsebgp_parse_mrt_init(&mrt_parsed_data);
+        if (libparsebgp_parse_mrt_parse_msg(buffer, buf_len, &mrt_parsed_data))
             cout << "Parsed successfully" << endl;
         else
             cout << "Error in parsing" << endl;
@@ -34,18 +34,18 @@ libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int 
 
 
 // Analogous to constructor of class
-void libParseBGP_parse_mrt_init(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data){
+void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data){
     mrt_parsed_data->mrt_len = 0;
     mrt_parsed_data->mrt_data_len = 0;
 }
 
-bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data)
+bool libparsebgp_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data)
 {
     //bool rval = true;
     uint16_t mrt_type = 0;
 
     try {
-        mrt_type = libParseBGP_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data);
+        mrt_type = libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data);
 
         switch (mrt_type) {
             case OSPFv2 :     //do nothing
@@ -55,21 +55,21 @@ bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_
             }
 
             case TABLE_DUMP : {
-                libParseBGP_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
-                libParseBGP_parse_mrt_parse_table_dump(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
+                libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
+                libparsebgp_parse_mrt_parse_table_dump(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
                 break;
             }
 
             case TABLE_DUMP_V2 : {
-                libParseBGP_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
-                libParseBGP_parse_mrt_parse_table_dump_v2(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
+                libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
+                libparsebgp_parse_mrt_parse_table_dump_v2(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
                 break;
             }
 
             case BGP4MP :
             case BGP4MP_ET : {
-                libParseBGP_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
-                libParseBGP_parse_mrt_parse_bgp4mp(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
+                libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len, mrt_parsed_data);
+                libparsebgp_parse_mrt_parse_bgp4mp(mrt_parsed_data->mrt_data, mrt_parsed_data->mrt_data_len, mrt_parsed_data);
                 break;
             }
 
@@ -89,7 +89,7 @@ bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_
     return true;
 }
 
-void libParseBGP_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data)
+void libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data)
 {
     string peer_info_key;
     u_char local_addr[16];
@@ -157,33 +157,33 @@ void libParseBGP_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libPar
         throw "Error in parsing attribute";
 
     peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
-    libParseBGP_update_msg_data u_msg;
-    libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-    libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+    libparsebgp_update_msg_data u_msg;
+    libparsebgp_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+    libparsebgp_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
 }
 
-void libParseBGP_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
+void libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     switch (mrt_parsed_data->c_hdr.sub_type) {
         case PEER_INDEX_TABLE:
-            libParseBGP_parse_mrt_parse_peer_index_table(buffer,buf_len, mrt_parsed_data);
+            libparsebgp_parse_mrt_parse_peer_index_table(buffer,buf_len, mrt_parsed_data);
             break;
 
         case RIB_IPV4_UNICAST:
-            libParseBGP_parse_mrt_parse_rib_unicast(buffer,buf_len, mrt_parsed_data);
+            libparsebgp_parse_mrt_parse_rib_unicast(buffer,buf_len, mrt_parsed_data);
             break;
         case RIB_IPV6_UNICAST:
-            libParseBGP_parse_mrt_parse_rib_unicast(buffer,buf_len, mrt_parsed_data);
+            libparsebgp_parse_mrt_parse_rib_unicast(buffer,buf_len, mrt_parsed_data);
             break;
 
         case RIB_IPV4_MULTICAST: //TO DO: due to lack of multicast data
         case RIB_IPV6_MULTICAST: //TO DO: due to lack of multicast data
         case RIB_GENERIC:
-            libParseBGP_parse_mrt_parse_rib_generic(buffer,buf_len, mrt_parsed_data);
+            libparsebgp_parse_mrt_parse_rib_generic(buffer,buf_len, mrt_parsed_data);
             break;
     }
 }
 
-void libParseBGP_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data)
+void libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data)
 {
     uint16_t count = 0;
     uint8_t  AS_num;
@@ -248,7 +248,7 @@ void libParseBGP_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& bu
     }
 }
 
-void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data)
+void libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data)
 {
     uint16_t count = 0;
     string peer_info_key;
@@ -300,9 +300,9 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
 //            throw "Error in parsing bgp_attribute";
 
         peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
-        libParseBGP_update_msg_data u_msg;
-        libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-        libParseBGP_update_msg_parse_attributes(&u_msg, buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
+        libparsebgp_update_msg_data u_msg;
+        libparsebgp_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+        libparsebgp_update_msg_parse_attributes(&u_msg, buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
         //UpdateMsg *uMsg= new UpdateMsg(mrt_parsed_data->table_dump.peer_ip, &mrt_parsed_data->peer_info_map[peer_info_key]);
         //uMsg->parseAttributes(buffer, r_entry->attribute_len, r_entry->parsed_data, r_entry->end_of_rib_marker);
         //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
@@ -313,8 +313,7 @@ void libParseBGP_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len
     }
 }
 
-void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data)
-{
+void libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     uint16_t count = 0;
     uint8_t  IPlen;
     u_char* local_addr;
@@ -354,9 +353,9 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
             throw "Error in parsing local address in IPv4";
 
         peer_info_key =  mrt_parsed_data->bgp4mp_mssg.peer_ip;
-        libParseBGP_update_msg_data u_msg;
-        libParseBGP_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-        libParseBGP_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
+        libparsebgp_update_msg_data u_msg;
+        libparsebgp_update_msg_init(&u_msg, mrt_parsed_data->table_dump.peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+        libparsebgp_update_msg_parse_attributes(&u_msg, mrt_parsed_data->table_dump.bgp_attribute, mrt_parsed_data->table_dump.attribute_len, mrt_parsed_data->bgp_msg.parsed_data, mrt_parsed_data->bgp_msg.has_end_of_rib_marker);
                 //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
 
         mrt_parsed_data->rib_entry_hdr.rib_entries.push_back(*r_entry);
@@ -365,7 +364,7 @@ void libParseBGP_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len
     }
 }
 
-void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
+void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     string peer_info_key;
     /*switch (c_hdr.subType) {
         case BGP4MP_STATE_CHANGE: {
@@ -482,9 +481,9 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
             p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;
 
             //mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-            libParseBGP_parse_bgp_init(&mrt_parsed_data->pbgp, &p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
+            libparsebgp_parse_bgp_init(&mrt_parsed_data->pbgp, &p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
             uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->bgp4mp_mssg.local_asn : mrt_parsed_data->bgp4mp_mssg.peer_asn;
-            if (libParseBGP_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->pbgp, buffer, mrt_parsed_data->mrt_data_len,
+            if (libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->pbgp, buffer, mrt_parsed_data->mrt_data_len,
                                                          &mrt_parsed_data->bgp_msg, &mrt_parsed_data->up_event, &mrt_parsed_data->down_event,
                                                          asn, mrt_parsed_data->c_hdr.sub_type > 5) == BGP_MSG_OPEN) {
                 mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_mssg.local_asn;
@@ -509,7 +508,7 @@ void libParseBGP_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, lib
  * //throws (const  char *) on error.   String will detail error message.
  */
 
-uint16_t libParseBGP_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
+uint16_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
 
 //    if (extract_from_buffer(buffer, buf_len, &c_hdr.timeStamp, 4) != 4)
 //        throw "Error in parsing MRT common header: timestamp";
@@ -544,7 +543,7 @@ uint16_t libParseBGP_parse_mrt_parse_common_header(u_char *& buffer, int& buf_le
 /**
  * get current MRT message type
  */
-char libParseBGP_parse_mrt_get_mrt_type(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
+char libparsebgp_parse_mrt_get_mrt_type(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     return mrt_parsed_data->mrt_type;
 }
 
@@ -553,7 +552,7 @@ char libParseBGP_parse_mrt_get_mrt_type(libParseBGP_parse_mrt_parsed_data *mrt_p
  *
  * The length returned does not include the common header length
  */
-uint32_t libParseBGP_parse_mrt_get_mrt_length(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
+uint32_t libparsebgp_parse_mrt_get_mrt_length(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     return mrt_parsed_data->mrt_len;
 }
 
@@ -569,7 +568,7 @@ uint32_t libParseBGP_parse_mrt_get_mrt_length(libParseBGP_parse_mrt_parsed_data 
  *
  * \throws String error
  */
-void libParseBGP_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data) {
+void libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     if (mrt_parsed_data->mrt_len <= 0)
         return;
 
@@ -603,10 +602,10 @@ int main() {
     tmp = temp;
     //parseMRT *p = new parseMRT();
     int len = 99;
-    libParseBGP_parse_mrt_parsed_data parsed_data;
+    libparsebgp_parse_mrt_parsed_data parsed_data;
     try {
         parsed_data = parse_mrt_wrapper(tmp, len);
-        //if (p->libParseBGP_parse_mrt_parse_msg(tmp, len))
+        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
             cout << "Hello Ojas and Induja"<<endl;
         //else
         //    cout << "Oh no!"<<endl;

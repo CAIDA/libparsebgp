@@ -11,8 +11,7 @@
 #define OPENMSG_H_
 
 #include <list>
-#include "parse_bmp.h"
-#include "add_path_data_container.h"
+#include "parse_common.h"
 
 //namespace bgp_msg {
 
@@ -118,7 +117,7 @@
     } __attribute__((__packed__));
 
 
-    struct libParseBGP_open_msg_data{
+    struct libparsebgp_open_msg_data{
         std::string             peer_addr;      ///< Printed form of the peer address for logging
         peer_info    *peer_inf;     ///< Persistent Peer info pointer
     };
@@ -131,7 +130,7 @@
       * \param [in]     peer_info       Persistent peer information
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
-     void libParseBGP_open_msg_init(libParseBGP_open_msg_data *open_msg_data, std::string peerAddr, peer_info *peer_info);
+     void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data, std::string peerAddr, peer_info *peer_info);
 
     /**
      * Parses an open message
@@ -150,7 +149,7 @@
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
      */
-    size_t libParseBGP_open_msg_parse_open_msg(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
+    size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
                         std::string &bgp_id, std::list<std::string> &capabilities);
 
 
@@ -169,7 +168,7 @@
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read
      */
-    size_t libParseBGP_open_msg_parse_capabilities(libParseBGP_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
+    size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
                              std::list<std::string> &capabilities);
 
 //} /* namespace bgp */

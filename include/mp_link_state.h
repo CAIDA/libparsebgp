@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <cinttypes>
 #include <sys/types.h>
-#include "mp_reach_attr.h"
 #include "mp_un_reach_attr.h"
 
 //namespace bgp_msg {
@@ -127,7 +126,7 @@
         OSPF_RT_NSSA_2                                  ///< NSSA type 2
     };
 
-struct libparseBGP_mp_link_state_parsed_data {
+struct libparsebgp_mp_link_state_parsed_data {
     std::string peer_addr;                       ///< Printed form of the peer address for logging
 
     parsed_update_data *parsed_data;       ///< Parsed data structure
@@ -144,7 +143,7 @@ struct libparseBGP_mp_link_state_parsed_data {
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
 
-    void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address,parsed_update_data *parse_data);
+    void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address,parsed_update_data *parse_data);
 
         //       virtual ~MPLinkState();
 
@@ -155,7 +154,7 @@ struct libparseBGP_mp_link_state_parsed_data {
      *
      * \param [in]   nlri           Reference to parsed NLRI struct
      */
-    void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_reach_nlri &nlri);
+    void libparsebgp_mp_link_state_parse_reach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_reach_nlri &nlri);
 
     /**
      * MP UnReach Link State NLRI parse
@@ -164,7 +163,7 @@ struct libparseBGP_mp_link_state_parsed_data {
      *
      * \param [in]   nlri           Reference to parsed NLRI struct
      */
-    void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri);
+    void libparsebgp_mp_link_state_parse_unreach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri);
 
 
     /**********************************************************************************//*
@@ -179,7 +178,7 @@ struct libparseBGP_mp_link_state_parsed_data {
      *
      * \returns number of bytes read
      */
-    int libParseBGP_mp_link_state_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4);
+    int libparsebgp_mp_link_state_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4);
 
     /**********************************************************************************//*
      * Hash node descriptor info

@@ -11,6 +11,8 @@
 #include <vector>
 #include <map>
 #include "bgp_common.h"
+#include "add_path_data_container.h"
+
 #include "parse_bmpv1.h"
 using namespace std;
 
@@ -331,6 +333,20 @@ using namespace std;
         uint8_t     ospf_fwd_addr[16];      ///< IPv4/IPv6 OSPF forwarding address
         char        sid_tlv[128];           ///< Prefix-SID TLV
     };
+
+/**
+* Persistent peer information structure
+*
+*   OPEN and other updates can add/change persistent peer information.
+*/
+struct peer_info {
+    bool sent_four_octet_asn;                               ///< Indicates if 4 (true) or 2 (false) octet ASN is being used (sent cap)
+    bool recv_four_octet_asn;                               ///< Indicates if 4 (true) or 2 (false) octet ASN is being used (recv cap)
+    bool using_2_octet_asn;                                 ///< Indicates if peer is using two octet ASN format or not (true=2 octet, false=4 octet)
+    bool checked_asn_octet_length;                          ///< Indicates if the ASN octet length has been checked or not
+    libparsebgp_addpath_map add_path_capability;            ///< Stores data about Add Path capability
+    string peer_group;                                      ///< Peer group name of defined
+};
 
 
 //############################################################################

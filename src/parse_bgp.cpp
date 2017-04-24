@@ -7,31 +7,13 @@
  *
  */
 
-#include "../include/parse_bgp.h"
-#include <iostream>
-#include <cstdlib>
-#include <cstdio>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <cstring>
-#include <string>
-#include <list>
-#include <memory>
-#include <arpa/inet.h>
-#include "../include/mp_link_state_attr.h"
-#include "../include/parse_bmp.h"
-#include <sstream>
 #include <algorithm>
-
-#include "../include/notification_msg.h"
-#include "../include/open_msg.h"
-#include "../include/update_msg.h"
-#include "../include/bgp_common.h"
+#include "../include/parse_bgp.h"
 #include "../include/mp_link_state_attr.h"
 
 using namespace std;
 
-void libParseBGP_parse_bgp_init(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
+void libparsebgp_parse_bgp_init(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
                                 string router_addr, peer_info *peer_info) {
     //debug = false;
     //logger = logPtr;
@@ -63,7 +45,7 @@ parseBGP::~parseBGP() {
  *
  * \param  attrs            Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parsed_attrs_map &attrs) {
+static void libparsebgp_parse_bgp_update_db_attrs(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, parsed_attrs_map &attrs) {
 
     /*
      * Setup the record
@@ -146,7 +128,7 @@ static void libParseBGP_parse_bgp_update_db_attrs(libParseBGP_parse_bgp_parsed_d
  * \param [in] ls_data     Reference to the parsed link state nlri information
  * \param [in] ls_attrs    Reference to the parsed link state attribute information
  */
-static void libParseBGP_parse_bgp_update_db_bgp_ls(bool remove, parsed_data_ls ls_data, parsed_ls_attrs_map &ls_attrs) {
+static void libparsebgp_parse_bgp_update_db_bgp_ls(bool remove, parsed_data_ls ls_data, parsed_ls_attrs_map &ls_attrs) {
     /*
      * Update table entry with attributes based on NLRI
      */
@@ -298,7 +280,7 @@ static void libParseBGP_parse_bgp_update_db_bgp_ls(bool remove, parsed_data_ls l
  * \param [in] prefixes        Reference to the list<vpn_tuple> of advertised vpns
  * \param [in] attrs           Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<vpn_tuple> &prefixes,
+static void libparsebgp_parse_bgp_update_db_l3vpn(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<vpn_tuple> &prefixes,
                                                   parsed_attrs_map &attrs, vector<obj_vpn> &rib_list) {
     //vector<parseBMP::obj_vpn> rib_list;
     obj_vpn            rib_entry;
@@ -391,7 +373,7 @@ static void libParseBGP_parse_bgp_update_db_l3vpn(libParseBGP_parse_bgp_parsed_d
  * \param [in] nlris           Reference to the list<evpn_tuple>
  * \param [in] attrs           Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<evpn_tuple> &nlris,
+static void libparsebgp_parse_bgp_update_db_evpn(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, bool remove, std::list<evpn_tuple> &nlris,
                                                  parsed_attrs_map &attrs, vector<obj_evpn> &rib_list) {
 
     //vector<parseBMP::obj_evpn> rib_list;
@@ -442,7 +424,7 @@ static void libParseBGP_parse_bgp_update_db_evpn(libParseBGP_parse_bgp_parsed_da
  * \param  adv_prefixes         Reference to the list<prefix_tuple> of advertised prefixes
  * \param  attrs            Reference to the parsed attributes map
  */
-static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<prefix_tuple> &adv_prefixes,
+static void libparsebgp_parse_bgp_update_db_adv_prefixes(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, std::list<prefix_tuple> &adv_prefixes,
                                                          parsed_attrs_map &attrs, vector<obj_rib> &rib_list) {
     //vector<parseBMP::obj_rib> rib_list;
     obj_rib                         rib_entry;
@@ -529,7 +511,7 @@ static void libParseBGP_parse_bgp_update_db_adv_prefixes(libParseBGP_parse_bgp_p
  *
  * \param  wdrawn_prefixes         Reference to the list<prefix_tuple> of withdrawn prefixes
  */
-static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, std::list<prefix_tuple> &wdrawn_prefixes,
+static void libparsebgp_parse_bgp_update_db_wdrawn_prefixes(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, std::list<prefix_tuple> &wdrawn_prefixes,
                                                             vector<obj_rib> &rib_list) {
     //vector<parseBMP::obj_rib> rib_list;
     obj_rib         rib_entry;
@@ -570,34 +552,34 @@ static void libParseBGP_parse_bgp_update_db_wdrawn_prefixes(libParseBGP_parse_bg
  *
  * \param  parsed_data          Reference to the parsed update data
  */
-static void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, parsed_bgp_msg *bgp_msg) {
+static void libparsebgp_parse_bgp_update_db(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, parsed_bgp_msg *bgp_msg) {
     /*
      * Update the path attributes
      */
-    libParseBGP_parse_bgp_update_db_attrs(bgp_parsed_data, bgp_msg->parsed_data.attrs);
+    libparsebgp_parse_bgp_update_db_attrs(bgp_parsed_data, bgp_msg->parsed_data.attrs);
 
     /*
      * Update the bgp-ls data
      */
-    libParseBGP_parse_bgp_update_db_bgp_ls(false, bgp_msg->parsed_data.ls, bgp_msg->parsed_data.ls_attrs);
-    libParseBGP_parse_bgp_update_db_bgp_ls(true, bgp_msg->parsed_data.ls_withdrawn, bgp_msg->parsed_data.ls_attrs);
+    libparsebgp_parse_bgp_update_db_bgp_ls(false, bgp_msg->parsed_data.ls, bgp_msg->parsed_data.ls_attrs);
+    libparsebgp_parse_bgp_update_db_bgp_ls(true, bgp_msg->parsed_data.ls_withdrawn, bgp_msg->parsed_data.ls_attrs);
 
     /*
      * Update the advertised prefixes (both ipv4 and ipv6)
      */
-    libParseBGP_parse_bgp_update_db_adv_prefixes(bgp_parsed_data, bgp_msg->parsed_data.advertised, bgp_msg->parsed_data.attrs,
+    libparsebgp_parse_bgp_update_db_adv_prefixes(bgp_parsed_data, bgp_msg->parsed_data.advertised, bgp_msg->parsed_data.attrs,
                                                  bgp_msg->adv_obj_rib_list);
 
-    libParseBGP_parse_bgp_update_db_l3vpn(bgp_parsed_data, false,bgp_msg->parsed_data.vpn, bgp_msg->parsed_data.attrs, bgp_msg->obj_vpn_rib_list);
-    libParseBGP_parse_bgp_update_db_l3vpn(bgp_parsed_data, true,bgp_msg->parsed_data.vpn_withdrawn, bgp_msg->parsed_data.attrs, bgp_msg->obj_vpn_rib_list);
+    libparsebgp_parse_bgp_update_db_l3vpn(bgp_parsed_data, false,bgp_msg->parsed_data.vpn, bgp_msg->parsed_data.attrs, bgp_msg->obj_vpn_rib_list);
+    libparsebgp_parse_bgp_update_db_l3vpn(bgp_parsed_data, true,bgp_msg->parsed_data.vpn_withdrawn, bgp_msg->parsed_data.attrs, bgp_msg->obj_vpn_rib_list);
 
-    libParseBGP_parse_bgp_update_db_evpn(bgp_parsed_data, false, bgp_msg->parsed_data.evpn, bgp_msg->parsed_data.attrs, bgp_msg->obj_evpn_rib_list);
-    libParseBGP_parse_bgp_update_db_evpn(bgp_parsed_data, true, bgp_msg->parsed_data.evpn_withdrawn, bgp_msg->parsed_data.attrs, bgp_msg->obj_evpn_rib_list);
+    libparsebgp_parse_bgp_update_db_evpn(bgp_parsed_data, false, bgp_msg->parsed_data.evpn, bgp_msg->parsed_data.attrs, bgp_msg->obj_evpn_rib_list);
+    libparsebgp_parse_bgp_update_db_evpn(bgp_parsed_data, true, bgp_msg->parsed_data.evpn_withdrawn, bgp_msg->parsed_data.attrs, bgp_msg->obj_evpn_rib_list);
 
     /*
      * Update withdraws (both ipv4 and ipv6)
      */
-    libParseBGP_parse_bgp_update_db_wdrawn_prefixes(bgp_parsed_data, bgp_msg->parsed_data.withdrawn, bgp_msg->wdrawn_obj_rib_list);
+    libparsebgp_parse_bgp_update_db_wdrawn_prefixes(bgp_parsed_data, bgp_msg->parsed_data.withdrawn, bgp_msg->wdrawn_obj_rib_list);
 
 }
 
@@ -609,27 +591,27 @@ static void libParseBGP_parse_bgp_update_db(libParseBGP_parse_bgp_parsed_data *b
  * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns BGP message type
  */
-u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parsed_bgp_msg *bgp_msg,
+u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parsed_bgp_msg *bgp_msg,
                                                 obj_peer_up_event *up_event, obj_peer_down_event *down_event,
                                                 uint32_t asn, bool is_local_msg) {
-    u_char  bgp_msg_type = libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr);
+    u_char  bgp_msg_type = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr);
     switch (bgp_msg_type) {
         case BGP_MSG_UPDATE: {
             int read_size = 0;
             data += BGP_MSG_HDR_LEN;
-            libParseBGP_update_msg_data u_msg;
-            libParseBGP_update_msg_init(&u_msg, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
+            libparsebgp_update_msg_data u_msg;
+            libparsebgp_update_msg_init(&u_msg, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
             //UpdateMsg uMsg(bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
 
             //if ((read_size=u_msg.parseUpdateMsg(data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
-            if ((read_size=libParseBGP_update_msg_parse_update_msg(&u_msg, data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
+            if ((read_size=libparsebgp_update_msg_parse_update_msg(&u_msg, data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
                 //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
                 return true;
             }
 
             bgp_parsed_data->data_bytes_remaining -= read_size;
 
-            libParseBGP_parse_bgp_update_db(bgp_parsed_data, bgp_msg);
+            libparsebgp_parse_bgp_update_db(bgp_parsed_data, bgp_msg);
             break;
         }
         case BGP_MSG_NOTIFICATION: {
@@ -638,7 +620,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
 
             libparsebgp_notify_msg parsed_msg;
             //NotificationMsg nMsg;
-            if (libParseBGP_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg))
+            if (libparsebgp_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg))
             {
                 // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
                 throw "Failed to parse the BGP notification message";
@@ -658,8 +640,8 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
             break;
         }
         case BGP_MSG_OPEN: {
-            libParseBGP_open_msg_data *open_msg_data;
-            libParseBGP_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
+            libparsebgp_open_msg_data *open_msg_data;
+            libparsebgp_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
             list <string>       cap_list;
             string              local_bgp_id, remote_bgp_id;
             size_t              read_size;
@@ -670,7 +652,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
 
             data += BGP_MSG_HDR_LEN;
             if (is_local_msg) {
-                read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, asn, up_event->local_hold_time,local_bgp_id, cap_list);
+                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true, asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
                 if (!read_size) {
                     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
@@ -706,7 +688,7 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
              */
 
             else {
-                read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
+                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
 
                 if (!read_size) {
                     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
@@ -785,23 +767,23 @@ u_char libParseBGP_parse_bgp_parse_msg_from_mrt(libParseBGP_parse_bgp_parsed_dat
  *
  * \returns True if error, false if no error.
  */
-bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                          parsed_bgp_msg *bgp_msg) {
     //UpdateMsg::parsed_update_data parsed_data;
     int read_size = 0;
 
-    if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_UPDATE) {
+    if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_UPDATE) {
         data += BGP_MSG_HDR_LEN;
 
         /*
          * Parse the update message - stored results will be in parsed_data
          */
         //UpdateMsg uMsg(bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
-        libParseBGP_update_msg_data u_msg;
-        libParseBGP_update_msg_init(&u_msg, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
+        libparsebgp_update_msg_data u_msg;
+        libparsebgp_update_msg_init(&u_msg, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
 
         //if ((read_size=uMsg.parseUpdateMsg(data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
-        if ((read_size=libParseBGP_update_msg_parse_update_msg(&u_msg, data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
+        if ((read_size=libparsebgp_update_msg_parse_update_msg(&u_msg, data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
             return true;
         }
@@ -811,7 +793,7 @@ bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_
         /*
          * Update the DB with the update data
          */
-        libParseBGP_parse_bgp_update_db(bgp_parsed_data, bgp_msg);
+        libparsebgp_parse_bgp_update_db(bgp_parsed_data, bgp_msg);
     }
 
     return false;
@@ -830,18 +812,18 @@ bool libParseBGP_parse_bgp_handle_update(libParseBGP_parse_bgp_parsed_data *bgp_
  *
  * \returns True if error, false if no error.
  */
-bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                              obj_peer_down_event *down_event, parsed_bgp_msg *bgp_msg) {
     bool        rval;
 
     // Process the BGP message normally
-    if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_NOTIFICATION) {
+    if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_NOTIFICATION) {
 
         data += BGP_MSG_HDR_LEN;
 
         libparsebgp_notify_msg parsed_msg;
         //NotificationMsg nMsg;
-        if ( (rval=libParseBGP_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg)))
+        if ( (rval=libparsebgp_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg)))
         {
             // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
             throw "Failed to parse the BGP notification message";
@@ -875,10 +857,10 @@ bool libParseBGP_parse_bgp_handle_down_event(libParseBGP_parse_bgp_parsed_data *
  *
  * \returns True if error, false if no error.
  */
-bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+bool libparsebgp_parse_bgp_handle_up_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                            obj_peer_up_event *up_event, parsed_bgp_msg *bgp_msg) {
-    libParseBGP_open_msg_data *open_msg_data;
-    libParseBGP_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
+    libparsebgp_open_msg_data *open_msg_data;
+    libparsebgp_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
     list <string>       cap_list;
     string              local_bgp_id, remote_bgp_id;
     size_t              read_size;
@@ -891,10 +873,10 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
     /*
      * Process the sent open message
      */
-    if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
+    if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true,
+        read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true,
                                                         up_event->local_asn, up_event->local_hold_time,local_bgp_id, cap_list);
 
         if (!read_size) {
@@ -934,10 +916,10 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
      */
     cap_list.clear();
 
-    if (libParseBGP_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
+    if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size, bgp_msg->common_hdr) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
-        read_size = libParseBGP_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
+        read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, up_event->remote_asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
 
         if (!read_size) {
      //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
@@ -987,7 +969,7 @@ bool libParseBGP_parse_bgp_handle_up_event(libParseBGP_parse_bgp_parsed_data *bg
  *
  * \returns BGP message type
  */
-u_char libParseBGP_parse_bgp_parse_header(libParseBGP_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                           common_bgp_hdr &common_hdr) {
     //bzero(&common_hdr, sizeof(common_hdr));
 

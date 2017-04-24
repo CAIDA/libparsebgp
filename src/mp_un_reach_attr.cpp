@@ -11,9 +11,6 @@
 #include "../include/mp_link_state.h"
 #include "../include/evpn.h"
 
-
-#include <arpa/inet.h>
-
 //namespace bgp_msg {
 
 /**
@@ -27,8 +24,8 @@
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
 
-    libparseBGP_mp_link_state_parsed_data *link_state_parse_data;
-    void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
+    libparsebgp_mp_link_state_parsed_data *link_state_parse_data;
+    void libparsebgp_mp_un_reach_attr_init(libparsebgp_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
                                            peer_info *peer_info) {
         parse_data->peer_addr = peerAddr;
         parse_data->peer_inf = peer_info;
@@ -47,7 +44,7 @@
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(libparsebgp_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
     mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -79,7 +76,7 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
          * NLRI data depends on the AFI & SAFI
          *  Parse data based on AFI + SAFI
          */
-        libParseBGP_mp_un_reach_attr_parse_afi(parse_data, nlri, parsed_data);
+        libparsebgp_mp_un_reach_attr_parse_afi(parse_data, nlri, parsed_data);
     }
 }
 
@@ -93,21 +90,21 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
+void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
 
     switch (nlri.afi) {
         case BGP_AFI_IPV6 :  // IPv6
-            libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
+            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
             break;
 
         case BGP_AFI_IPV4 : // IPv4
-            libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
+            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
             break;
 
         case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            libParseBGP_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
-            libParseBGP_mp_link_state_parse_unreach_link_state(link_state_parse_data,nlri);
+            libparsebgp_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
+            libparsebgp_mp_link_state_parse_unreach_link_state(link_state_parse_data,nlri);
             break;
         }
 
@@ -117,9 +114,9 @@ void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_d
             switch (nlri.safi) {
                 case BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    libParseBGP_evpn_data *evpn_data;
-                    libParseBGP_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
-                    libParseBGP_evpn_parse_nlri_data(evpn_data,nlri.nlri_data, nlri.nlri_len);
+                    libparsebgp_evpn_data *evpn_data;
+                    libparsebgp_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
+                    libparsebgp_evpn_parse_nlri_data(evpn_data,nlri.nlri_data, nlri.nlri_len);
                     break;
                 }
 
@@ -145,7 +142,7 @@ void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_d
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data,bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
+void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_mp_un_reach_attr_parse_data *parse_data,bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
 
     /*
      * Decode based on SAFI
@@ -154,17 +151,17 @@ void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_at
         case BGP_SAFI_UNICAST: // Unicast IP address prefix
 
             // Data is an IP address - parse the address and save it
-            libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
+            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                 parsed_data.withdrawn);
             break;
 
         case BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                      parsed_data.withdrawn);
             break;
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
                                                      parsed_data.vpn_withdrawn);
 
             break;

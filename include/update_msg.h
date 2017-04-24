@@ -11,8 +11,7 @@
 #define UPDATEMSG_H_
 
 #include "bgp_common.h"
-#include "add_path_data_container.h"
-#include "parse_bmp.h"
+#include "parse_common.h"
 #include <string>
 #include <list>
 #include <array>
@@ -51,7 +50,7 @@ struct update_bgp_hdr {
 };
 typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
-struct libParseBGP_update_msg_data {
+struct libparsebgp_update_msg_data {
     /**
      * parsed path attributes map
      */
@@ -65,7 +64,7 @@ struct libParseBGP_update_msg_data {
     peer_info *peer_inf;                      ///< Persistent Peer info pointer
 };
 
-void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
+void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
                                            std::string router_addr, peer_info *peer_info);
 
  /**
@@ -81,7 +80,7 @@ void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::s
   *
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
- size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *update_msg, u_char *data, size_t size,
+ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
                                                 parsed_update_data &parsed_data, bool &has_end_of_rib_marker);
 
 /**
@@ -94,7 +93,7 @@ void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::s
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len, parsed_update_data &parsed_data,
+void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len, parsed_update_data &parsed_data,
                      bool &has_end_of_rib_marker);
 
 /* namespace bgp_msg */

@@ -8,9 +8,6 @@
  */
 #include "../include/update_msg.h"
 
-#include <string>
-#include <cstring>
-#include <sstream>
 #include <arpa/inet.h>
 
 #include "../include/ext_community.h"
@@ -21,7 +18,7 @@
 //namespace bgp_msg {
 
 
-    void libParseBGP_update_msg_init(libParseBGP_update_msg_data *update_msg, std::string peer_addr,
+    void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
                                                std::string router_addr, peer_info *peer_info){
         update_msg->peer_inf = peer_info;
         update_msg->peer_addr = peer_addr;
@@ -40,7 +37,7 @@
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
-    static void libParseBGP_update_msg_parse_nlri_data_v4(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len,
+    static void libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len,
                                                           std::list<prefix_tuple> &prefixes) {
         u_char       ipv4_raw[4];
         char         ipv4_char[16];
@@ -64,7 +61,7 @@
 
             // Parse add-paths if enabled
             //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
-            if (libParseBGP_addpath_is_enabled(update_msg->peer_inf->add_path_capability, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
+            if (libparsebgp_addpath_is_enabled(update_msg->peer_inf->add_path_capability, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
                 and (len - read_size) >= 4) {
                 memcpy(&tuple.path_id, data, 4);
                 SWAP_BYTES(&tuple.path_id);
@@ -121,7 +118,7 @@
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *update_msg, u_char *data, size_t size,
+size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
                                                parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
     size_t      read_size       = 0;
     u_char      *bufPtr         = data;
@@ -191,7 +188,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
          */
         //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 withdrawn data", peer_addr.c_str(), router_addr.c_str());
         if (uHdr.withdrawn_len > 0)
-            libParseBGP_update_msg_parse_nlri_data_v4(update_msg, uHdr.withdrawn_ptr, uHdr.withdrawn_len, parsed_data.withdrawn);
+            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, uHdr.withdrawn_ptr, uHdr.withdrawn_len, parsed_data.withdrawn);
 
 
         /* ---------------------------------------------------------
@@ -199,7 +196,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (uHdr.attr_len > 0) {
-            libParseBGP_update_msg_parse_attributes(update_msg, uHdr.attr_ptr, uHdr.attr_len, parsed_data, has_end_of_rib_marker);
+            libparsebgp_update_msg_parse_attributes(update_msg, uHdr.attr_ptr, uHdr.attr_len, parsed_data, has_end_of_rib_marker);
         }
 
         /* ---------------------------------------------------------
@@ -207,7 +204,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
          */
         //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 NLRI data, size = %d", peer_addr.c_str(), router_addr.c_str(), (size - read_size));
         if ((size - read_size) > 0) {
-            libParseBGP_update_msg_parse_nlri_data_v4(update_msg, uHdr.nlri_ptr, (size - read_size), parsed_data.advertised);
+            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, uHdr.nlri_ptr, (size - read_size), parsed_data.advertised);
             read_size = size;
         }
     }
@@ -222,7 +219,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-    static void libParseBGP_update_msg_parse_attr_as_path(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data, parsed_attrs_map &attrs) {
+    static void libparsebgp_update_msg_parse_attr_as_path(libparsebgp_update_msg_data *update_msg, uint16_t attr_len, u_char *data, parsed_attrs_map &attrs) {
         std::string decoded_path;
         int         path_len    = attr_len;
         uint16_t    as_path_cnt = 0;
@@ -361,7 +358,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-    static void libParseBGP_update_msg_parse_attr_aggegator(libParseBGP_update_msg_data *update_msg, uint16_t attr_len, u_char *data,
+    static void libparsebgp_update_msg_parse_attr_aggegator(libparsebgp_update_msg_data *update_msg, uint16_t attr_len, u_char *data,
                                                             parsed_attrs_map &attrs) {
         std::string decodeStr;
         uint32_t    value32bit = 0;
@@ -409,7 +406,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-    static void libParseBGP_update_msg_parse_attr_data(libParseBGP_update_msg_data *update_msg, u_char attr_type, uint16_t attr_len,
+    static void libparsebgp_update_msg_parse_attr_data(libparsebgp_update_msg_data *update_msg, u_char attr_type, uint16_t attr_len,
                                                        u_char *data, parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
         std::string decodeStr       = "";
         u_char      ipv4_raw[4];
@@ -433,7 +430,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                 break;
 
             case ATTR_TYPE_AS_PATH : // AS_PATH
-                libParseBGP_update_msg_parse_attr_as_path(update_msg, attr_len, data, parsed_data.attrs);
+                libparsebgp_update_msg_parse_attr_as_path(update_msg, attr_len, data, parsed_data.attrs);
                 break;
 
             case ATTR_TYPE_NEXT_HOP : // Next hop v4
@@ -465,7 +462,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
                 break;
 
             case ATTR_TYPE_AGGEGATOR : // Aggregator
-                libParseBGP_update_msg_parse_attr_aggegator(update_msg, attr_len, data, parsed_data.attrs);
+                libparsebgp_update_msg_parse_attr_aggegator(update_msg, attr_len, data, parsed_data.attrs);
                 break;
 
             case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
@@ -518,7 +515,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             {
 //                ExtCommunity ec(update_msg->peer_addr);
 //                ec.parseExtCommunities(attr_len, data, parsed_data);
-                libParseBGP_ext_communities_parse_ext_communities(attr_len, data, parsed_data);
+                libparsebgp_ext_communities_parse_ext_communities(attr_len, data, parsed_data);
                 break;
             }
 
@@ -526,23 +523,23 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
             {
 //                ExtCommunity ec6(update_msg->peer_addr);
 //                ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
-                libParseBGP_ext_communities_parse_v6_ext_communities(attr_len, data, parsed_data);
+                libparsebgp_ext_communities_parse_v6_ext_communities(attr_len, data, parsed_data);
                 break;
             }
 
             case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
             {
-                libParseBGP_mp_reach_attr_parsed_data *parse_data;
-                libParseBGP_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_inf);
-                libParseBGP_mp_reach_attr_parse_reach_nlri_attr(parse_data, attr_len, data, parsed_data);
+                libparsebgp_mp_reach_attr_parsed_data *parse_data;
+                libparsebgp_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_inf);
+                libparsebgp_mp_reach_attr_parse_reach_nlri_attr(parse_data, attr_len, data, parsed_data);
                 break;
             }
 
             case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
             {
-                libParseBGP_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
-                libParseBGP_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_inf);
-                libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(mp_un_reach_attr_data, attr_len, data, parsed_data, has_end_of_rib_marker);
+                libparsebgp_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
+                libparsebgp_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_inf);
+                libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(mp_un_reach_attr_data, attr_len, data, parsed_data, has_end_of_rib_marker);
                 break;
             }
 
@@ -553,9 +550,9 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
 
             case ATTR_TYPE_BGP_LS:
             {
-                libparseBGP_attr_link_state_parsed_data *parse_data;
-                libParseBGP_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
-                libParseBGP_mp_link_state_attr_parse_attr_link_state(parse_data, attr_len, data);
+                libparsebgp_attr_link_state_parsed_data *parse_data;
+                libparsebgp_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
+                libparsebgp_mp_link_state_attr_parse_attr_link_state(parse_data, attr_len, data);
                 break;
             }
 
@@ -592,7 +589,7 @@ size_t libParseBGP_update_msg_parse_update_msg(libParseBGP_update_msg_data *upda
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update_msg, u_char *data, uint16_t len,
+void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len,
                                              parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
     /*
      * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
@@ -637,7 +634,7 @@ void libParseBGP_update_msg_parse_attributes(libParseBGP_update_msg_data *update
             /*
              * Parse data based on attribute type
              */
-            libParseBGP_update_msg_parse_attr_data(update_msg, attr_type, attr_len, data, parsed_data, has_end_of_rib_marker);
+            libparsebgp_update_msg_parse_attr_data(update_msg, attr_type, attr_len, data, parsed_data, has_end_of_rib_marker);
             data        += attr_len;
             read_size   += attr_len;
 

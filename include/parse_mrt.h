@@ -17,6 +17,7 @@
 #include "parse_bmp.h"
 #include "parse_bgp.h"
 #include "parse_utils.h"
+#include "parse_common.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
@@ -240,8 +241,21 @@ using namespace std;
         u_char*     bgp_data;
     };
 
-struct libParseBGP_parse_mrt_parsed_data {
+struct libparsebgp_parse_mrt_parsed_data {
     mrt_common_hdr c_hdr;
+    union parsed_data {
+        table_dump_message table_dump;
+        union table_dump_v2 {
+            peer_index_table peer_index_tbl;
+            rib_entry_header rib_entry_hdr;
+            rib_generic_entry_header rib_generic_entry_hdr;
+        };
+        union bgp4mp {
+            bgp4mp_msg bgp4mp_mssg;
+            bgp4mp_state_change bgp4mp_state_change_msg;
+        };
+    };
+
     table_dump_message table_dump;
     peer_index_table peer_index_tbl;
     rib_entry_header rib_entry_hdr;
@@ -256,7 +270,7 @@ struct libParseBGP_parse_mrt_parsed_data {
     u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
     int mrt_data_len;              ///< Length/size of data in the data buffer
 
-    libParseBGP_parse_bgp_parsed_data pbgp;
+    libparsebgp_parse_bgp_parsed_data pbgp;
     parsed_bgp_msg bgp_msg;
 
 //private:
@@ -268,7 +282,7 @@ struct libParseBGP_parse_mrt_parsed_data {
      * Constructor for class
      */
     //parseMRT();
-    void libParseBGP_parse_mrt_init(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /*
      * Destructor
@@ -281,7 +295,7 @@ struct libParseBGP_parse_mrt_parsed_data {
      * \param [in] buffer       Contains the MRT message
      * \param [in] buf_len       Length of buffer
      */
-    bool libParseBGP_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    bool libparsebgp_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Function to parse the MRT common header
@@ -289,49 +303,49 @@ struct libParseBGP_parse_mrt_parsed_data {
      * @param buf_len
      * @return common header type
      */
-    uint16_t libParseBGP_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    uint16_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses remaining MRT message
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses Table Dump message
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_parse_table_dump(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_parse_table_dump(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses Table Dump V2 message
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_parse_table_dump_v2(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_parse_table_dump_v2(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses Peer Index Table message
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_parse_peer_index_table(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_parse_peer_index_table(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses RIB UNICAST message
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_parse_rib_unicast(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_parse_rib_unicast(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * Parses RIB GENERIC message
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_parse_rib_generic(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_parse_rib_generic(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
 
     /**
@@ -339,23 +353,23 @@ struct libParseBGP_parse_mrt_parsed_data {
      * @param buffer
      * @param buf_len
      */
-    void libParseBGP_parse_mrt_parse_bgp4mp(u_char* buffer, int& buf_len, libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    void libparsebgp_parse_mrt_parse_bgp4mp(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
 
     /**
      * get current MRT message type
      */
-    char libParseBGP_parse_mrt_get_mrt_type(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    char libparsebgp_parse_mrt_get_mrt_type(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
     /**
      * get current MRT message length
      *
      * The length returned does not include the common header length
      */
-    uint32_t libParseBGP_parse_mrt_get_mrt_length(libParseBGP_parse_mrt_parsed_data *mrt_parsed_data);
+    uint32_t libparsebgp_parse_mrt_get_mrt_length(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
 
 //extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
-libParseBGP_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);
+libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);
 
 #endif /* PARSEBMP_H_ */

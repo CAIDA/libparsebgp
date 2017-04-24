@@ -13,9 +13,8 @@
 #include <list>
 #include <string>
 
-#include "add_path_data_container.h"
 #include "mp_reach_attr.h"
-#include "parse_bmp.h"
+#include "parse_common.h"
 
 //namespace bgp_msg {
 
@@ -37,7 +36,7 @@ struct mp_unreach_nlri {
     uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
 };
 
-struct libParseBGP_mp_un_reach_attr_parse_data {
+struct libparsebgp_mp_un_reach_attr_parse_data {
     std::string peer_addr;          ///< Printed form of the peer address for logging
     peer_info *peer_inf;         ///< Persistent Peer info pointer
 };
@@ -51,7 +50,7 @@ struct libParseBGP_mp_un_reach_attr_parse_data {
  * \param [in]     peer_info                Persistent Peer info pointer
  * \param [in]     enable_debug             Debug true to enable, false to disable
  */
-void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
+void libparsebgp_mp_un_reach_attr_init(libparsebgp_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
                                        peer_info *peer_info);
 
 
@@ -67,7 +66,7 @@ void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(libparsebgp_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
 
 /**
  * MP UnReach NLRI parse based on AFI
@@ -78,7 +77,7 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
  * \param [in]   nlri           Reference to parsed UnReach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
+void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
 
 /**
  * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
@@ -89,7 +88,7 @@ void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_d
  * \param [in]   nlri           Reference to parsed UnReach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
+void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
 
 //} /* namespace bgp_msg */
 

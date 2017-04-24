@@ -12,7 +12,6 @@
 #define PARSEBMP_H_
 
 #include <string>
-#include "add_path_data_container.h"
 #include "parse_utils.h"
 #include <list>
 #include <vector>
@@ -81,21 +80,6 @@ enum bmp_term_type1_reason {
     TERM_REASON_OPENBMP_CONN_CLOSED = 65533, TERM_REASON_OPENBMP_CONN_ERR = 65534
 };
 
-
-/**
- * Persistent peer information structure
- *
- *   OPEN and other updates can add/change persistent peer information.
- */
-struct peer_info {
-    bool sent_four_octet_asn;                               ///< Indicates if 4 (true) or 2 (false) octet ASN is being used (sent cap)
-    bool recv_four_octet_asn;                               ///< Indicates if 4 (true) or 2 (false) octet ASN is being used (recv cap)
-    bool using_2_octet_asn;                                 ///< Indicates if peer is using two octet ASN format or not (true=2 octet, false=4 octet)
-    bool checked_asn_octet_length;                          ///< Indicates if the ASN octet length has been checked or not
-    libParseBGP_addpath_map add_path_capability;               ///< Stores data about Add Path capability
-    string peer_group;                                      ///< Peer group name of defined
-};
-
 /**
  * BMP common header
  */
@@ -146,7 +130,7 @@ struct common_hdr_bmp__old {
 } __attribute__ ((__packed__));
 
 
-struct libParseBGP_parse_bmp_parsed_data {
+struct libparsebgp_parse_bmp_parsed_data {
     /**
  * BMP message buffer (normally only contains the BGP message)
  *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.
@@ -219,12 +203,12 @@ struct term_msg_v3 {
  * \param [in]  buf_len       length of the buffer
  * \return true if more to read, false if the connection is done/closed
  */
-uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer,
+uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer,
                                      int buf_len);
 
 //typedef std::map<std::string, bmp_message::peer_info>::iterator peer_info_map_iter;
 
-libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len);
+libparsebgp_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len);
 
 
 

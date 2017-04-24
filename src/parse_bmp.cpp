@@ -15,11 +15,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len) {
+libparsebgp_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int buf_len) {
 
     uint8_t read_size;
-    libParseBGP_parse_bmp_parsed_data parsed_data;
-    read_size=libParseBGP_parse_bmp_parse_msg(&parsed_data, buffer, buf_len);
+    libparsebgp_parse_bmp_parsed_data parsed_data;
+    read_size=libparsebgp_parse_bmp_parse_msg(&parsed_data, buffer, buf_len);
     return parsed_data;
 }
 
@@ -36,7 +36,7 @@ libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int b
  * \param [in,out] peer_entry  Pointer to the peer entry
  */
 
-//libParseBGP_parse_bgp_parsed_data pBGP;
+//libparsebgp_parse_bgp_parsed_data pBGP;
 //bool parseBMP::parseMsg(int read_fd)
 
 /**
@@ -52,8 +52,7 @@ libParseBGP_parse_bmp_parsed_data parse_bmp_wrapper(unsigned char *buffer, int b
  * \throws String error
  */
 // void parseBMP::bufferBMPMessage(int sock) {
-static void libparsebgp_parse_bmp_buffer_bmp_message(libParseBGP_parse_bmp_parsed_data *parsed_msg,
-                                                     unsigned char *&buffer, int &buf_len) {
+static void libparsebgp_parse_bmp_buffer_bmp_message(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     if (parsed_msg->bmp_len <= 0)
         return;
 
@@ -86,7 +85,7 @@ static void libparsebgp_parse_bmp_buffer_bmp_message(libParseBGP_parse_bmp_parse
 * \param [in]  sock        Socket to read the message from
 */
 //void parseBMP::parseBMPv2(int sock) {
-static void libParseBGP_parse_bmp_parse_bmp_v2(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     parsed_msg->c_hdr_old = { 0 };
     ssize_t i = 0;
     char buf[256] = {0};
@@ -250,7 +249,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v2(libParseBGP_parse_bmp_parsed_data
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parsePeerHdr(int sock) {
-static void libparsebgp_parse_bmp_parse_peer_hdr(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     peer_hdr_v3 p_hdr = {0};
     int i;
 
@@ -384,7 +383,7 @@ static void libparsebgp_parse_bmp_parse_peer_hdr(libParseBGP_parse_bmp_parsed_da
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parseBMPv3(int sock) {
-static void libParseBGP_parse_bmp_parse_bmp_v3(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     parsed_msg->c_hdr_v3 = { 0 };
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
     if ((extract_from_buffer(buffer, buf_len, &parsed_msg->c_hdr_v3, BMP_HDRv3_LEN)) != BMP_HDRv3_LEN) {
@@ -456,7 +455,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v3(libParseBGP_parse_bmp_parsed_data
  *
  * //throws (const  char *) on error.   String will detail error message.
  */
-static char libParseBGP_parse_bmp_handle_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
+static char libparsebgp_parse_bmp_handle_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
     unsigned char ver;
     ssize_t bytes_read;
 
@@ -478,14 +477,14 @@ static char libParseBGP_parse_bmp_handle_msg(libParseBGP_parse_bmp_parsed_data *
     // check the version
     if (ver == 3) { // draft-ietf-grow-bmp-04 - 07
         //parseBMPv3(sock);
-        libParseBGP_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
+        libparsebgp_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
     }
 
         // Handle the older versions
     else if (ver == 1 || ver == 2) {
         //       SELF_DEBUG("Older BMP version of %d, consider upgrading the router to support BMPv3", ver);
         //parseBMPv2(sock);
-        libParseBGP_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
+        libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
 
     } else
         throw "ERROR: Unsupported BMP message version";
@@ -503,7 +502,7 @@ static char libParseBGP_parse_bmp_handle_msg(libParseBGP_parse_bmp_parsed_data *
  *
  * \return true if error, false if no error
  */
-static bool libParseBGP_parse_bmp_handle_stats_report(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     unsigned long stats_cnt = 0; // Number of counter stat objects to follow
     unsigned char b[8];
 
@@ -623,7 +622,7 @@ static bool libParseBGP_parse_bmp_handle_stats_report(libParseBGP_parse_bmp_pars
  * \param [in]     sock        Socket to read the init message from
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
-static void libParseBGP_parse_bmp_handle_init_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     init_msg_v3 init_msg;
     char infoBuf[sizeof(parsed_msg->r_entry.initiate_data)];
     int infoLen;
@@ -703,7 +702,7 @@ static void libParseBGP_parse_bmp_handle_init_msg(libParseBGP_parse_bmp_parsed_d
  * \param [in/out] r_entry     Already defined router entry reference (will be updated)
  */
 //void parseBMP::handleTermMsg(int sock) {
-static void libParseBGP_parse_bmp_handle_term_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     term_msg_v3 termMsg;
     char infoBuf[sizeof(parsed_msg->r_entry.term_data)];
     int infoLen;
@@ -804,7 +803,7 @@ static void libParseBGP_parse_bmp_handle_term_msg(libParseBGP_parse_bmp_parsed_d
  *
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
-static bool libParseBGP_parse_bmp_parse_peer_down_event_hdr(libParseBGP_parse_bmp_parsed_data *parsed_msg,
+static bool libparsebgp_parse_bmp_parse_peer_down_event_hdr(libparsebgp_parse_bmp_parsed_data *parsed_msg,
                                                      unsigned char*& buffer, int& buf_len) {
     char reason;
     //if (Recv(sock, &reason, 1, 0) == 1) {
@@ -834,7 +833,7 @@ static bool libParseBGP_parse_bmp_parse_peer_down_event_hdr(libParseBGP_parse_bm
  *
  * \returns true if successfully parsed the bmp peer up header, false otherwise
  */
-static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(libParseBGP_parse_bmp_parsed_data *parsed_msg,
+static bool libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parse_bmp_parsed_data *parsed_msg,
                                                    unsigned char*& buffer, int& buf_len) {
     unsigned char local_addr[16];
     bool is_parse_good = true;
@@ -890,15 +889,15 @@ static bool libParseBGP_parse_bmp_parse_peer_up_event_hdr(libParseBGP_parse_bmp_
     return is_parse_good;
 }
 
-uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
+uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
     string peer_info_key;
     int initial_buffer_len = buf_len;
 
     char bmp_type = 0;
-    libParseBGP_parse_bgp_parsed_data pBGP;
+    libparsebgp_parse_bgp_parsed_data pBGP;
 
     try {
-        bmp_type = libParseBGP_parse_bmp_handle_msg(parsed_msg, buffer, buf_len);
+        bmp_type = libparsebgp_parse_bmp_handle_msg(parsed_msg, buffer, buf_len);
 
         if (bmp_type < 4) {
             peer_info_key =  parsed_msg->p_entry.peer_addr;
@@ -911,13 +910,13 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
          */
         switch (bmp_type) {
             case TYPE_PEER_DOWN : { // Peer down type
-                if (libParseBGP_parse_bmp_parse_peer_down_event_hdr(parsed_msg, buffer, buf_len)) {
+                if (libparsebgp_parse_bmp_parse_peer_down_event_hdr(parsed_msg, buffer, buf_len)) {
                     //bufferBMPMessage(read_fd);
                     libparsebgp_parse_bmp_buffer_bmp_message(parsed_msg, buffer, buf_len);
 
 
                     // Prepare the BGP parser
-                    libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
+                    libparsebgp_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
                     // Check if the reason indicates we have a BGP message that follows
                     switch (parsed_msg->down_event.bmp_reason) {
@@ -925,7 +924,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
                             snprintf(parsed_msg->down_event.error_text, sizeof(parsed_msg->down_event.error_text),
                                     "Local close by (%s) for peer (%s) : ", parsed_msg->r_entry.ip_addr,
                                      parsed_msg->p_entry.peer_addr);
-                            libParseBGP_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len,&parsed_msg->down_event,&parsed_msg->bgp_msg);
+                            libparsebgp_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len,&parsed_msg->down_event,&parsed_msg->bgp_msg);
                             break;
                         }
                         case 2 : // Local system close, no bgp notify
@@ -945,7 +944,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
                                     "Remote peer (%s) closed local (%s) session: ", parsed_msg->r_entry.ip_addr,
                                      parsed_msg->p_entry.peer_addr);
 
-                            libParseBGP_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->down_event,&parsed_msg->bgp_msg);
+                            libparsebgp_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->down_event,&parsed_msg->bgp_msg);
                             break;
                         }
                     }
@@ -959,17 +958,17 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
 
             case TYPE_PEER_UP : // Peer up type
             {
-                if (libParseBGP_parse_bmp_parse_peer_up_event_hdr(parsed_msg, buffer, buf_len)) {
+                if (libparsebgp_parse_bmp_parse_peer_up_event_hdr(parsed_msg, buffer, buf_len)) {
                //     LOG_INFO("%s: PEER UP Received, local addr=%s:%hu remote addr=%s:%hu", client->c_ip,up_event.local_ip, up_event.local_port, p_entry.peer_addr, up_event.remote_port);
 
                     libparsebgp_parse_bmp_buffer_bmp_message(parsed_msg, buffer, buf_len);
 
                     // Prepare the BGP parser
-                    libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
+                    libparsebgp_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
 
 // Parse the BGP sent/received open messages
-                    libParseBGP_parse_bgp_handle_up_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->up_event,&parsed_msg->bgp_msg);
+                    libparsebgp_parse_bgp_handle_up_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->up_event,&parsed_msg->bgp_msg);
                 } //else {
                  //   LOG_NOTICE("%s: PEER UP Received but failed to parse the BMP header.", client->c_ip);
                // }
@@ -983,22 +982,22 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
                  * Read and parse the the BGP message from the client.
                  *     parseBGP will update mysql directly
                  */
-                libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
+                libparsebgp_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
-                libParseBGP_parse_bgp_handle_update(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->bgp_msg);
+                libparsebgp_parse_bgp_handle_update(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->bgp_msg);
 
                 break;
             }
 
             case TYPE_STATS_REPORT : { // Stats Report
-                libParseBGP_parse_bmp_handle_stats_report(parsed_msg, buffer, buf_len);
+                libparsebgp_parse_bmp_handle_stats_report(parsed_msg, buffer, buf_len);
                 break;
             }
 
             case TYPE_INIT_MSG : { // Initiation Message
                // LOG_INFO("%s: Init message received with length of %u", client->c_ip, pBMP->getBMPLength());
 
-                libParseBGP_parse_bmp_handle_init_msg(parsed_msg, buffer, buf_len);
+                libparsebgp_parse_bmp_handle_init_msg(parsed_msg, buffer, buf_len);
 
                 break;
             }
@@ -1006,7 +1005,7 @@ uint8_t libParseBGP_parse_bmp_parse_msg(libParseBGP_parse_bmp_parsed_data *parse
             case TYPE_TERM_MSG : { // Termination Message
                // LOG_INFO("%s: Term message received with length of %u", client->c_ip, pBMP->getBMPLength());
 
-                libParseBGP_parse_bmp_handle_term_msg(parsed_msg, buffer, buf_len);
+                libparsebgp_parse_bmp_handle_term_msg(parsed_msg, buffer, buf_len);
 
                // LOG_INFO("Proceeding to disconnect router");
                 break;

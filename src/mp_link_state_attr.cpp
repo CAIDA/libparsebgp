@@ -99,7 +99,7 @@
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
 
-       void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peerAddr,parsed_update_data *parsed_data)
+       void libparsebgp_mp_link_state_attr_init(libparsebgp_attr_link_state_parsed_data *data, std::string peerAddr,parsed_update_data *parsed_data)
        {
         //logger = logPtr;
         //debug = enable_debug;
@@ -116,13 +116,13 @@
      * \param [in]   attr_len       Length of the attribute data
      * \param [in]   data           Pointer to the attribute data
      */
-    void libParseBGP_mp_link_state_attr_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
+    void libparsebgp_mp_link_state_attr_parse_attr_link_state(libparsebgp_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
         /*
          * Loop through all TLV's for the attribute
          */
         int tlv_len;
         while (attr_len > 0) {
-            tlv_len = libParseBGP_mp_link_state_attr_parse_attr_link_state_tlv(parse_data, attr_len, data);
+            tlv_len = libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(parse_data, attr_len, data);
             attr_len -= tlv_len;
 
             if (attr_len > 0)
@@ -258,7 +258,7 @@
      *
      * \returns length of the TLV attribute parsed (including the tlv header lenght)
      */
-    int libParseBGP_mp_link_state_attr_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
+    int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(libparsebgp_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data) {
         uint16_t            type;
         uint16_t            len;
         char                ip_char[46];

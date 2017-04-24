@@ -22,7 +22,7 @@
  */
 //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
-void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
+void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
     //logger = logPtr;
     //debug = enable_debug;
     data->peer_addr = peer_address;
@@ -43,7 +43,7 @@ void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,
  *
  * \returns number of bytes read
  */
-int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int data_len, node_descriptor &info) {
+int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int data_len, node_descriptor &info) {
     uint16_t        type;
     uint16_t        len;
     int             data_read = 0;
@@ -176,7 +176,7 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
  * \return string representation for the protocol that matches the DB enum string value
  *          empty will be returned if invalid/unknown.
  */
-static std::string libParseBGP_mp_link_state_decode_nlri_protocol_id(uint8_t proto_id) {
+static std::string libparsebgp_mp_link_state_decode_nlri_protocol_id(uint8_t proto_id) {
     std::string value = "";
 
     switch (proto_id) {
@@ -224,7 +224,7 @@ static std::string libParseBGP_mp_link_state_decode_nlri_protocol_id(uint8_t pro
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
+static void libparsebgp_parse_nlri_node(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
     obj_ls_node node_tbl;
     bzero(&node_tbl, sizeof(node_tbl));
 
@@ -234,7 +234,7 @@ static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *p
     }
 
     node_tbl.id       = id;
-    snprintf(node_tbl.protocol, sizeof(node_tbl.protocol), "%s", libParseBGP_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
+    snprintf(node_tbl.protocol, sizeof(node_tbl.protocol), "%s", libparsebgp_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
 
     //SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, node_tbl.protocol);
 
@@ -267,7 +267,7 @@ static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *p
     // Parse the local descriptor sub-tlv's
     int data_read;
     while (len > 0) {
-        data_read = libParseBGP_mp_link_state_parse_descr_local_remote_node(data, len, info);
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, len, info);
         len -= data_read;
 
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
@@ -301,7 +301,7 @@ static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *p
  *
  * \returns number of bytes read
  */
-int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &info) {
+int libparsebgp_parse_descr_link(u_char *data, int data_len, link_descriptor &info) {
     uint16_t        type;
     uint16_t        len;
     int             data_read = 0;
@@ -460,7 +460,7 @@ int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &in
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
+static void libparsebgp_parse_nlri_link(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
     obj_ls_link link_tbl;
     bzero(&link_tbl, sizeof(link_tbl));
 
@@ -470,7 +470,7 @@ static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *p
     }
 
     link_tbl.id       = id;
-    snprintf(link_tbl.protocol, sizeof(link_tbl.protocol), "%s", libParseBGP_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
+    snprintf(link_tbl.protocol, sizeof(link_tbl.protocol), "%s", libparsebgp_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
 
     //      SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, link_tbl.protocol);
 
@@ -499,7 +499,7 @@ static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *p
         // Parse the local descriptor sub-tlv's
         int data_read;
         while (len > 0) {
-            data_read = libParseBGP_mp_link_state_parse_descr_local_remote_node(data, len, info);
+            data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, len, info);
             len -= data_read;
 
             // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
@@ -539,7 +539,7 @@ static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *p
     link_descriptor info;
     bzero(&info, sizeof(info));
     while (data_len > 0) {
-        data_read = libParseBGP_parse_descr_link(data, data_len, info);
+        data_read = libparsebgp_parse_descr_link(data, data_len, info);
 
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
@@ -569,7 +569,7 @@ static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *p
  * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
  * \returns number of bytes read
  */
-int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4) {
+int libparsebgp_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4) {
     uint16_t type;
     uint16_t len;
     int data_read = 0;
@@ -746,7 +746,7 @@ int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
  * \param [in]   proto_id       NLRI protocol type id
  * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
  */
-static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
+static void libparsebgp_parse_nlri_prefix(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
     obj_ls_prefix prefix_tbl;
     bzero(&prefix_tbl, sizeof(prefix_tbl));
 
@@ -756,7 +756,7 @@ static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data 
     }
 
     prefix_tbl.id       = id;
-    snprintf(prefix_tbl.protocol, sizeof(prefix_tbl.protocol), "%s", libParseBGP_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
+    snprintf(prefix_tbl.protocol, sizeof(prefix_tbl.protocol), "%s", libparsebgp_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
 
     //    SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, prefix_tbl.protocol);
 
@@ -789,7 +789,7 @@ static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data 
     // Parse the local descriptor sub-tlv's
     int data_read;
     while (len > 0) {
-        data_read = libParseBGP_mp_link_state_parse_descr_local_remote_node(data, len, local_node);
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, len, local_node);
         len -= data_read;
 
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
@@ -806,7 +806,7 @@ static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data 
     prefix_descriptor info;
     bzero(&info, sizeof(info));
     while (data_len > 0) {
-        data_read = libParseBGP_parse_descr_prefix(data, data_len, info, isIPv4);
+        data_read = libparsebgp_parse_descr_prefix(data, data_len, info, isIPv4);
 
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
@@ -836,7 +836,7 @@ static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data 
  * \param [in]   data           Pointer to the NLRI data
  * \param [in]   len            Length of the NLRI data
  */
-static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, uint16_t len) {
+static void libparsebgp_parse_link_state_nlri_data(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, uint16_t len) {
     uint16_t        nlri_type;
     uint16_t        nlri_len;
     uint16_t        nlri_len_read = 0;
@@ -883,22 +883,22 @@ static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_par
         switch (nlri_type) {
             case NLRI_TYPE_NODE:
                 //                  SELF_DEBUG("%s: bgp-ls: parsing NODE NLRI len=%d", peer_addr.c_str(), nlri_len);
-                libParseBGP_parse_nlri_node(parse_data, data, nlri_len, id, proto_id);
+                libparsebgp_parse_nlri_node(parse_data, data, nlri_len, id, proto_id);
                 break;
 
             case NLRI_TYPE_LINK:
                 //                 SELF_DEBUG("%s: bgp-ls: parsing LINK NLRI", peer_addr.c_str());
-                libParseBGP_parse_nlri_link(parse_data, data, nlri_len, id, proto_id);
+                libparsebgp_parse_nlri_link(parse_data, data, nlri_len, id, proto_id);
                 break;
 
             case NLRI_TYPE_IPV4_PREFIX:
                 //               SELF_DEBUG("%s: bgp-ls: parsing IPv4 PREFIX NLRI", peer_addr.c_str());
-                libParseBGP_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, true);
+                libparsebgp_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, true);
                 break;
 
             case NLRI_TYPE_IPV6_PREFIX:
                 //                SELF_DEBUG("%s: bgp-ls: parsing IPv6 PREFIX NLRI", peer_addr.c_str());
-                libParseBGP_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, false);
+                libparsebgp_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, false);
                 break;
 
             default :
@@ -918,7 +918,7 @@ static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_par
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_reach_nlri &nlri) {
+void libparsebgp_mp_link_state_parse_reach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_reach_nlri &nlri) {
     data->ls_data = &data->parsed_data->ls;
 
     // Process the next hop
@@ -942,7 +942,7 @@ void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_
         switch (nlri.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
                 //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
-                libParseBGP_parse_link_state_nlri_data(data, nlri.nlri_data, nlri.nlri_len);
+                libparsebgp_parse_link_state_nlri_data(data, nlri.nlri_data, nlri.nlri_len);
                 break;
 
         default :
@@ -960,7 +960,7 @@ void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_state_parsed_data *data,mp_unreach_nlri &nlri) {
+void libparsebgp_mp_link_state_parse_unreach_link_state(libparsebgp_mp_link_state_parsed_data *data,mp_unreach_nlri &nlri) {
     data->ls_data = &data->parsed_data->ls_withdrawn;
 
         /*
@@ -969,7 +969,7 @@ void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_stat
         switch (nlri.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
                 //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
-                libParseBGP_parse_link_state_nlri_data(data,nlri.nlri_data, nlri.nlri_len);
+                libparsebgp_parse_link_state_nlri_data(data,nlri.nlri_data, nlri.nlri_len);
                 break;
 
         default :
