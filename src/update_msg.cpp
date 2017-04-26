@@ -118,15 +118,14 @@
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
-                                               parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
+size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
     size_t      read_size       = 0;
     u_char      *bufPtr         = data;
 
     // Clear the parsed_data
-    parsed_data.advertised.clear();
-    parsed_data.attrs.clear();
-    parsed_data.withdrawn.clear();
+    update_msg->parsed_data.advertised.clear();
+    update_msg->parsed_data.attrs.clear();
+    update_msg->parsed_data.withdrawn.clear();
 
 
     /* ---------------------------------------------------------
@@ -188,7 +187,7 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
          */
         //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 withdrawn data", peer_addr.c_str(), router_addr.c_str());
         if (uHdr.withdrawn_len > 0)
-            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, uHdr.withdrawn_ptr, uHdr.withdrawn_len, parsed_data.withdrawn);
+            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, uHdr.withdrawn_ptr, uHdr.withdrawn_len, update_msg->parsed_data.withdrawn);
 
 
         /* ---------------------------------------------------------
@@ -196,7 +195,7 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (uHdr.attr_len > 0) {
-            libparsebgp_update_msg_parse_attributes(update_msg, uHdr.attr_ptr, uHdr.attr_len, parsed_data, has_end_of_rib_marker);
+            libparsebgp_update_msg_parse_attributes(update_msg, uHdr.attr_ptr, uHdr.attr_len, update_msg->parsed_data, has_end_of_rib_marker);
         }
 
         /* ---------------------------------------------------------
@@ -204,7 +203,7 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
          */
         //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 NLRI data, size = %d", peer_addr.c_str(), router_addr.c_str(), (size - read_size));
         if ((size - read_size) > 0) {
-            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, uHdr.nlri_ptr, (size - read_size), parsed_data.advertised);
+            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, uHdr.nlri_ptr, (size - read_size), update_msg->parsed_data.advertised);
             read_size = size;
         }
     }

@@ -40,8 +40,8 @@ void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data,std::str
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read
  */
-    size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
-                                          std::list<std::string> &capabilities)
+    size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent,
+                                                   uint32_t &asn, std::list<std::string> &capabilities)
     {
         size_t      read_size   = 0;
         u_char      *bufPtr     = data;
@@ -252,17 +252,18 @@ void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data,std::str
  */
 size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent,
                                            uint32_t &asn, uint16_t &holdTime,
-                             std::string &bgp_id, std::list<std::string> &capabilities) {
+                                           std::string &bgp_id, std::list<std::string> &capabilities) {
     char        bgp_id_char[16];
     size_t      read_size       = 0;
     u_char      *bufPtr         = data;
-    open_bgp_hdr open_hdr       = {0};
+    //open_bgp_hdr open_hdr       = {0};
+
     capabilities.clear();
 
     /*
      * Make sure available size is large enough for an open message
      */
-    if (size < sizeof(open_hdr)) {
+    if (size < sizeof(open_bgp_hdr)) {
     //    LOG_WARN("%s: Cloud not read open message due to buffer having less bytes than open message size", peer_addr.c_str());
         return 0;
     }

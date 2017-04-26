@@ -18,9 +18,9 @@ typedef struct libparsebgp_parsed_mrt{
 }libparsebgp_parsed_mrt;
 
 union libparsebgp_parse_msg{
-    libparsebgp_parsed_bgp parsed_bgp_msg;
-    libparsebgp_parsed_bmp parsed_bmp_msg;
-    libparsebgp_parsed_mrt parsed_mrt_msg;
+    libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
+    libparsebgp_parse_bmp_parsed_data parsed_bmp_msg;
+    libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
 }libparsebgp_parse_msg;
 
 

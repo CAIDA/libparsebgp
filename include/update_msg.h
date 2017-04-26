@@ -62,6 +62,12 @@ struct libparsebgp_update_msg_data {
     std::string router_addr;                     ///< Router IP address - used for logging
     bool four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
     peer_info *peer_inf;                      ///< Persistent Peer info pointer
+
+    parsed_update_data parsed_data;
+    std::vector<obj_vpn> obj_vpn_rib_list;
+    std::vector<obj_evpn> obj_evpn_rib_list;
+    std::vector<obj_rib> adv_obj_rib_list;
+    std::vector<obj_rib> wdrawn_obj_rib_list;
 };
 
 void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
@@ -81,7 +87,7 @@ void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::s
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
  size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
-                                                parsed_update_data &parsed_data, bool &has_end_of_rib_marker);
+                                                bool &has_end_of_rib_marker);
 
 /**
  * Parses the BGP attributes in the update

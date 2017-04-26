@@ -239,39 +239,40 @@ using namespace std;
         char        peer_ip[40];
         char        local_ip[40];
         u_char*     bgp_data;
+        libparsebgp_parse_bgp_parsed_data bgp_msg;
     };
 
 struct libparsebgp_parse_mrt_parsed_data {
     mrt_common_hdr c_hdr;
-    union parsed_data {
+    union parsed_mrt_data {
         table_dump_message table_dump;
-        union table_dump_v2 {
+        union parsed_table_dump_v2 {
             peer_index_table peer_index_tbl;
             rib_entry_header rib_entry_hdr;
             rib_generic_entry_header rib_generic_entry_hdr;
-        };
-        union bgp4mp {
+        }table_dump_v2_msg;
+        union parsed_bgp4mp_msg {
             bgp4mp_msg bgp4mp_mssg;
             bgp4mp_state_change bgp4mp_state_change_msg;
-        };
-    };
+        }bgp4mp;
+    }parsed_data;
 
-    table_dump_message table_dump;
-    peer_index_table peer_index_tbl;
-    rib_entry_header rib_entry_hdr;
-    rib_generic_entry_header rib_generic_entry_hdr;
+//    table_dump_message table_dump;
+//    peer_index_table peer_index_tbl;
+//    rib_entry_header rib_entry_hdr;
+//    rib_generic_entry_header rib_generic_entry_hdr;
 
-    bgp4mp_msg bgp4mp_mssg;
-    bgp4mp_state_change bgp4mp_state_change_msg;
+    //bgp4mp_msg bgp4mp_mssg;
+    //bgp4mp_state_change bgp4mp_state_change_msg;
 
-    obj_peer_up_event up_event;
-    obj_peer_down_event down_event;
+//    obj_peer_up_event up_event;
+//    obj_peer_down_event down_event;
 
     u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
     int mrt_data_len;              ///< Length/size of data in the data buffer
 
-    libparsebgp_parse_bgp_parsed_data pbgp;
-    parsed_bgp_msg bgp_msg;
+//    libparsebgp_parse_bgp_parsed_data pbgp;
+//    parsed_bgp_msg bgp_msg;
 
 //private:
     uint16_t mrt_type;

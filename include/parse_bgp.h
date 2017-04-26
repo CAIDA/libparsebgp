@@ -35,12 +35,18 @@ enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_M
 
 struct libparsebgp_parse_bgp_parsed_data {
     common_bgp_hdr c_hdr;
-    union parsed_data {
+    union parsed_bgp_data {
         libparsebgp_open_msg_data open_msg;
         libparsebgp_update_msg_data update_msg;
         libparsebgp_notify_msg notification_msg;
-    };
+    }parsed_data;
 
+    /*parsed_update_data parsed_update_data;
+    std::vector<obj_vpn> obj_vpn_rib_list;
+    std::vector<obj_evpn> obj_evpn_rib_list;
+    std::vector<obj_rib> adv_obj_rib_list;
+    std::vector<obj_rib> wdrawn_obj_rib_list;*/
+    bool has_end_of_rib_marker;
     /**
      * data_bytes_remaining is a counter that starts at the message size and then is
      * decremented as the message is read.
@@ -62,7 +68,7 @@ struct libparsebgp_parse_bgp_parsed_data {
     string router_addr;    ///< Router IP address - used for logging
     peer_info *p_info;        ///< Persistent Peer information
 
-    unsigned char path_hash_id[16];                  ///< current path hash ID
+    //unsigned char path_hash_id[16];                  ///< current path hash ID
 };
 
 
@@ -85,8 +91,7 @@ struct libparsebgp_parse_bgp_parsed_data {
                                     string router_addr, peer_info *peer_info);
 
 
-    u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, parsed_bgp_msg *bgp_msg,
-                                                    obj_peer_up_event *up_event, obj_peer_down_event *down_event,
+    u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                                     uint32_t asn, bool is_local_msg = false);
 
 
@@ -101,8 +106,7 @@ struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                             parsed_bgp_msg *bgp_msg);
+    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -117,8 +121,7 @@ struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data,
-                                                 size_t size, obj_peer_down_event *down_event, parsed_bgp_msg *bgp_msg);
+    bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
 
     /**
      * Handles the up event by parsing the BGP open messages - Up event will be updated
@@ -147,6 +150,6 @@ struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns BGP message type
      */
-    u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, common_bgp_hdr &common_hdr);
+    u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
 
 #endif /* PARSEBGP_H_ */
