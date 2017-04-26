@@ -350,30 +350,7 @@ struct peer_info {
 
 
 //############################################################################
-    struct common_bgp_hdr {
-        /**
-         * 16-octet field is included for compatibility
-         * All ones (required).
-         */
-        unsigned char    marker[16];
 
-        /**
-         * Total length of the message, including the header in octets
-         *
-         * min length is 19, max is 4096
-         */
-        unsigned short   len;
-        /**
-         * type code of the message
-         *
-         * 1 - OPEN
-         * 2 - UPDATE
-         * 3 - NOTIFICATION
-         * 4 - KEEPALIVE
-         * 5 - ROUTE-REFRESH
-         */
-        unsigned char    type;
-    } __attribute__ ((__packed__));
 
     enum update_attr_types {
         ATTR_TYPE_ORIGIN=1,
@@ -446,7 +423,7 @@ struct peer_info {
     };
 
     struct parsed_bgp_msg{
-        common_bgp_hdr common_hdr;
+        libparsebgp_common_bgp_hdr common_hdr;
         parsed_update_data parsed_data;
         std::vector<obj_vpn> obj_vpn_rib_list;
         std::vector<obj_evpn> obj_evpn_rib_list;

@@ -33,8 +33,33 @@ enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_M
     BGP_MSG_ROUTE_REFRESH
 };
 
+struct libparsebgp_common_bgp_hdr {
+    /**
+     * 16-octet field is included for compatibility
+     * All ones (required).
+     */
+    unsigned char    marker[16];
+
+    /**
+     * Total length of the message, including the header in octets
+     *
+     * min length is 19, max is 4096
+     */
+    unsigned short   len;
+    /**
+     * type code of the message
+     *
+     * 1 - OPEN
+     * 2 - UPDATE
+     * 3 - NOTIFICATION
+     * 4 - KEEPALIVE
+     * 5 - ROUTE-REFRESH
+     */
+    unsigned char    type;
+} __attribute__ ((__packed__));
+
 struct libparsebgp_parse_bgp_parsed_data {
-    common_bgp_hdr c_hdr;
+    libparsebgp_common_bgp_hdr c_hdr;
     union parsed_bgp_data {
         libparsebgp_open_msg_data open_msg;
         libparsebgp_update_msg_data update_msg;

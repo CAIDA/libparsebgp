@@ -5,8 +5,8 @@
 #ifndef PARSE_LIB_PARSE_BMPV1_H
 #define PARSE_LIB_PARSE_BMPV1_H
 #include <iostream>
-#include "notification_msg.h"
-
+//#include "notification_msg.h"
+#include "parse_bgp.h"
 using namespace std;
 /**
  * BMP peer header
@@ -108,7 +108,10 @@ typedef struct libparsebgp_parsed_bmp_peer_up_event {
      */
 typedef struct libparsebgp_parsed_bmp_peer_down_event {
     uint8_t         bmp_reason;         ///< BMP notify reason
-    libparsebgp_notify_msg notify_msg;  ///< BGP notification msg
+    struct libparsebgp_parse_notification{
+        libparsebgp_common_bgp_hdr  c_hdr;
+        libparsebgp_notify_msg      notification_msg;
+    }libparsebgp_parse_notification;
 }libparsebgp_parsed_bmp_peer_down_event;
 
 /**
