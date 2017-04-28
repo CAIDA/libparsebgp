@@ -12,8 +12,6 @@
 #include <map>
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-#include "lib_parse_common.h"
-#include "parse_bmpv1.h"
 using namespace std;
 
     /**

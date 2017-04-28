@@ -5,8 +5,8 @@
 #ifndef PARSE_LIB_LIB_PARSE_COMMON_H_H
 #define PARSE_LIB_LIB_PARSE_COMMON_H_H
 #include "parse_bmpv1.h"
-#include "parse_bgpv1.h"
 #include "parse_mrt.h"
+#include "parse_bgp.h"
 
 
 /////////////////////////////////////////////////////////////////

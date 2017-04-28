@@ -5,9 +5,71 @@
 #ifndef PARSE_LIB_PARSE_BMPV1_H
 #define PARSE_LIB_PARSE_BMPV1_H
 #include <iostream>
+#include "parse_utils.h"
 //#include "notification_msg.h"
 #include "parse_bgp.h"
+
+/*
+ * BMP Header lengths, not counting the version in the common hdr
+ */
+#define BMP_HDRv3_LEN 5             ///< BMP v3 header length, not counting the version
+#define BMP_HDRv1v2_LEN 43
+#define BMP_PEER_HDR_LEN 42         ///< BMP peer header length
+#define BMP_INIT_MSG_LEN 4          ///< BMP init message header length, does not count the info field
+#define BMP_TERM_MSG_LEN 4          ///< BMP term message header length, does not count the info field
+#define BMP_PEER_UP_HDR_LEN 20      ///< BMP peer up event header size not including the recv/sent open param message
+#define BMP_PACKET_BUF_SIZE 68000   ///< Size of the BMP packet buffer (memory)
+
+/**
+ * \class   parseBMP
+ *
+ * \brief   Parser for BMP messages
+ * \details This class can be used as needed to parse BMP messages. This
+ *          class will read directly from the socket to read the BMP message.
+ */
+
 using namespace std;
+
+/**
+ * BMP common header types
+ */
+enum bmp_type {
+    TYPE_ROUTE_MON = 0, TYPE_STATS_REPORT, TYPE_PEER_DOWN,
+    TYPE_PEER_UP, TYPE_INIT_MSG, TYPE_TERM_MSG
+};
+
+/**
+ * BMP stats types
+ */
+enum bmp_stats {
+    STATS_PREFIX_REJ = 0, STATS_DUP_PREFIX, STATS_DUP_WITHDRAW, STATS_INVALID_CLUSTER_LIST,
+    STATS_INVALID_AS_PATH_LOOP, STATS_INVALID_ORIGINATOR_ID, STATS_INVALID_AS_CONFED_LOOP,
+    STATS_NUM_ROUTES_ADJ_RIB_IN, STATS_NUM_ROUTES_LOC_RIB
+};
+
+/**
+ * BMP Initiation Message Types
+ */
+enum bmp_init_types {
+    INIT_TYPE_FREE_FORM_STRING = 0, INIT_TYPE_SYSDESCR, INIT_TYPE_SYSNAME,
+    INIT_TYPE_ROUTER_BGP_ID = 65531
+};
+
+/**
+ * BMP Termination Message Types
+ */
+enum bmp_term_types {
+    TERM_TYPE_FREE_FORM_STRING = 0, TERM_TYPE_REASON
+};
+
+/**
+ * BMP Termination Message reasons for type=1
+ */
+enum bmp_term_type1_reason {
+    TERM_REASON_ADMIN_CLOSE = 0, TERM_REASON_UNSPECIFIED, TERM_REASON_OUT_OF_RESOURCES,
+    TERM_REASON_REDUNDANT_CONN,
+    TERM_REASON_OPENBMP_CONN_CLOSED = 65533, TERM_REASON_OPENBMP_CONN_ERR = 65534
+};
 /**
  * BMP peer header
  */
@@ -51,36 +113,34 @@ struct common_hdr_bmp_v3 {          ///< 6 bytes total length for the common hea
 /**
 * BMP initiation message TLV
 */
-struct init_msg_v3_tlv {
-    uint16_t type;              ///< 2 bytes - Information type
-    uint16_t len;               ///< 2 bytes - Length of the information that follows
-    char *info;                 ///< Information - variable
-
-} __attribute__ ((__packed__));
+typedef struct init_msg_v3_tlv {
+    uint16_t    type;              ///< 2 bytes - Information type
+    uint16_t    len;               ///< 2 bytes - Length of the information that follows
+    char        info[4096];                 ///< Information - variable
+}init_msg_v3_tlv;
 
 /**
 * BMP initiation message: This can contain multiple init - tlvs
 */
 typedef struct libparsebgp_parsed_bmp_init_msg {
-    vector<init_msg_v3_tlv> init_msg_tlvs;
+    list<init_msg_v3_tlv> init_msg_tlvs;
 }libparsebgp_parsed_bmp_init_msg;
 
 /**
  * BMP termination message
  */
-struct term_msg_v3_tlv {
+typedef struct term_msg_v3_tlv {
     uint16_t type;              ///< 2 bytes - Information type
     uint16_t len;               ///< 2 bytes - Length of the information that follows
+    char info[4096];            ///< Information - variable
+}term_msg_v3_tlv;
 
-    char *info;              ///< Information - variable
-
-} __attribute__ ((__packed__));
 /**
 * BMP termination message: This can contain multiple term - tlvs
 */
 typedef struct libparsebgp_parsed_bmp_term_msg {
-    vector<term_msg_v3_tlv> term_msg_tlvs;
-}lib_parse_bgp_parsed_bmp_term_msg;
+    list<term_msg_v3_tlv> term_msg_tlvs;
+}libparsebgp_parsed_bmp_term_msg;
 
 /**
      * OBJECT: peer_up_events
@@ -108,10 +168,7 @@ typedef struct libparsebgp_parsed_bmp_peer_up_event {
      */
 typedef struct libparsebgp_parsed_bmp_peer_down_event {
     uint8_t         bmp_reason;         ///< BMP notify reason
-    struct libparsebgp_parse_notification{
-        libparsebgp_common_bgp_hdr  c_hdr;
-        libparsebgp_notify_msg      notification_msg;
-    }libparsebgp_parse_notification;
+    libparsebgp_parse_bgp_parsed_data notify_msg;
 }libparsebgp_parsed_bmp_peer_down_event;
 
 /**
@@ -120,7 +177,7 @@ typedef struct libparsebgp_parsed_bmp_peer_down_event {
 typedef struct stat_counter {
     uint16_t    stat_type;              ///< 2 bytes - Information type
     uint16_t    stat_len;               ///< 2 bytes - Length of the information that follows
-    char *      stat_data;              ///< Information - variable
+    char        stat_data[8];              ///< Information - variable
 }stat_counter;
 /**
      * OBJECT: stats_reports
@@ -129,7 +186,7 @@ typedef struct stat_counter {
      */
 typedef struct libparsebgp_parsed_bmp_stat_rep {
     uint32_t                stats_count;
-    vector<stat_counter>    total_stats_counter;
+    list<stat_counter>    total_stats_counter;
 }libparsebgp_parsed_bmp_stat_rep;
 
 /**
@@ -141,6 +198,9 @@ typedef struct libparsebgp_parsed_bmp_rm_msg {
 //    lib_parse_bgp_parsed_bgp_update_msg update_msg;
 }libparsebgp_parsed_bmp_rm_msg;
 
+u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];
+size_t bmp_data_len;              ///< Length/size of data in the data buffer
+uint32_t bmp_len;                    ///< Length of the BMP message - does not include the common header size
 
 /**
  * BMP Message Structure

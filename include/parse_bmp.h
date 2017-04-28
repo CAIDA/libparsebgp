@@ -18,67 +18,7 @@
 #include <array>
 #include "parse_common.h"
 
-/*
- * BMP Header lengths, not counting the version in the common hdr
- */
-#define BMP_HDRv3_LEN 5             ///< BMP v3 header length, not counting the version
-#define BMP_HDRv1v2_LEN 43
-#define BMP_PEER_HDR_LEN 42         ///< BMP peer header length
-#define BMP_INIT_MSG_LEN 4          ///< BMP init message header length, does not count the info field
-#define BMP_TERM_MSG_LEN 4          ///< BMP term message header length, does not count the info field
-#define BMP_PEER_UP_HDR_LEN 20      ///< BMP peer up event header size not including the recv/sent open param message
-#define BMP_PACKET_BUF_SIZE 68000   ///< Size of the BMP packet buffer (memory)
-
-/**
- * \class   parseBMP
- *
- * \brief   Parser for BMP messages
- * \details This class can be used as needed to parse BMP messages. This
- *          class will read directly from the socket to read the BMP message.
- */
-
 using namespace std;
-
-/**
- * BMP common header types
- */
-enum bmp_type {
-    TYPE_ROUTE_MON = 0, TYPE_STATS_REPORT, TYPE_PEER_DOWN,
-    TYPE_PEER_UP, TYPE_INIT_MSG, TYPE_TERM_MSG
-};
-
-/**
- * BMP stats types
- */
-enum bmp_stats {
-    STATS_PREFIX_REJ = 0, STATS_DUP_PREFIX, STATS_DUP_WITHDRAW, STATS_INVALID_CLUSTER_LIST,
-    STATS_INVALID_AS_PATH_LOOP, STATS_INVALID_ORIGINATOR_ID, STATS_INVALID_AS_CONFED_LOOP,
-    STATS_NUM_ROUTES_ADJ_RIB_IN, STATS_NUM_ROUTES_LOC_RIB
-};
-
-/**
- * BMP Initiation Message Types
- */
-enum bmp_init_types {
-    INIT_TYPE_FREE_FORM_STRING = 0, INIT_TYPE_SYSDESCR, INIT_TYPE_SYSNAME,
-    INIT_TYPE_ROUTER_BGP_ID = 65531
-};
-
-/**
- * BMP Termination Message Types
- */
-enum bmp_term_types {
-    TERM_TYPE_FREE_FORM_STRING = 0, TERM_TYPE_REASON
-};
-
-/**
- * BMP Termination Message reasons for type=1
- */
-enum bmp_term_type1_reason {
-    TERM_REASON_ADMIN_CLOSE = 0, TERM_REASON_UNSPECIFIED, TERM_REASON_OUT_OF_RESOURCES,
-    TERM_REASON_REDUNDANT_CONN,
-    TERM_REASON_OPENBMP_CONN_CLOSED = 65533, TERM_REASON_OPENBMP_CONN_ERR = 65534
-};
 
 /**
  * BMP common header

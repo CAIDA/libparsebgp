@@ -14,9 +14,11 @@
 #include <list>
 #include "bgp_common.h"
 #include "update_msg.h"
-#include "parse_common.h"
+//#include "parse_common.h"
 #include "open_msg.h"
 #include "notification_msg.h"
+#include "parse_bmpv1.h"
+
 
 using namespace std;
 /**
@@ -33,7 +35,7 @@ enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_M
     BGP_MSG_ROUTE_REFRESH
 };
 
-struct libparsebgp_common_bgp_hdr {
+typedef struct libparsebgp_common_bgp_hdr {
     /**
      * 16-octet field is included for compatibility
      * All ones (required).
@@ -56,9 +58,9 @@ struct libparsebgp_common_bgp_hdr {
      * 5 - ROUTE-REFRESH
      */
     unsigned char    type;
-} __attribute__ ((__packed__));
+}libparsebgp_common_bgp_hdr;
 
-struct libparsebgp_parse_bgp_parsed_data {
+typedef struct libparsebgp_parse_bgp_parsed_data {
     libparsebgp_common_bgp_hdr c_hdr;
     union parsed_bgp_data {
         libparsebgp_open_msg_data open_msg;
@@ -94,7 +96,7 @@ struct libparsebgp_parse_bgp_parsed_data {
     peer_info *p_info;        ///< Persistent Peer information
 
     //unsigned char path_hash_id[16];                  ///< current path hash ID
-};
+}libparsebgp_parse_bgp_parsed_data;
 
 
     /**
@@ -131,7 +133,7 @@ struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
+    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parsed_bmp_rm_msg *bgp_parsed_data, u_char *data, size_t size);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -159,8 +161,7 @@ struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libparsebgp_parse_bgp_handle_up_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                               obj_peer_up_event *up_event, parsed_bgp_msg *bgp_msg);
+    bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event);
 
     /**
      * Parses the BGP common header

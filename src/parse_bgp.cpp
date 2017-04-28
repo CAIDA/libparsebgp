@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "../include/parse_bgp.h"
 #include "../include/mp_link_state_attr.h"
+#include "../include/parse_bmpv1.h"
 
 using namespace std;
 
@@ -780,7 +781,7 @@ u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_dat
  *
  * \returns True if error, false if no error.
  */
-bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size) {
+bool libparsebgp_parse_bgp_handle_update(libparsebgp_parsed_bmp_rm_msg *bgp_parsed_data, u_char *data, size_t size) {
     //UpdateMsg::parsed_update_data parsed_data;
     int read_size = 0;
 
@@ -875,8 +876,7 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *
  *
  * \returns True if error, false if no error.
  */
-bool libparsebgp_parse_bgp_handle_up_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-                                           obj_peer_up_event *up_event) {
+bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
     libparsebgp_open_msg_data *open_msg_data;
     libparsebgp_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
     list <string>       cap_list;
