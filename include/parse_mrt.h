@@ -60,20 +60,19 @@ using namespace std;
     /**
       * MRT common header
       */
-    struct mrt_common_hdr
-    {
+    typedef struct libparsebgp_mrt_common_hdr {
         uint32_t        time_stamp;              ///< 4 byte; timestamp value in seconds
         uint16_t        type;                   ///< 2 byte; type of information contained in message field
         uint16_t        sub_type;                ///< 2 byte; further distinguishing message information
         uint32_t        len;                    ///< 4 byte; length of the message EXCLUDING common header length
         uint32_t        microsecond_timestamp;   ///< 4 byte: timestamp in microseconds
-        u_char*         message;                ///< variable length message
-    };
+//        u_char*         message;                ///< variable length message
+    }libparsebgp_mrt_common_hdr;
 
     /**
       * Table Dump Message format
       */
-    struct table_dump_message{
+    typedef struct libparsebgp_table_dump_message{
         uint16_t    view_number;
         uint16_t    sequence;
         char        prefix[46];
@@ -84,7 +83,7 @@ using namespace std;
         uint16_t    peer_as;
         uint16_t    attribute_len;
         u_char*     bgp_attribute;
-    };
+    }libparsebgp_table_dump_message;
 
 
     /**
@@ -97,8 +96,8 @@ using namespace std;
         uint8_t     peer_type;
         char        peer_bgp_id[4];
         char        peer_ip[46];
-        bool        is_ipv4;
-        bool        as_size; //0 for 16 bits; 1 for 32 bits
+//        bool        is_ipv4;
+//        bool        as_size; //0 for 16 bits; 1 for 32 bits
  //       uint16_t    peer_as16;
         uint32_t    peer_as32;
     };
@@ -106,7 +105,7 @@ using namespace std;
     /**
       * Peer Index Table Message format
       */
-    struct peer_index_table{
+    struct libparsebgp_peer_index_table{
         char                collector_bgp_id[4];
         uint16_t            view_name_length;
         char*               view_name[46]; //doubtful about this setting, will have to confirm
@@ -130,7 +129,7 @@ using namespace std;
     /**
       * RIB Entry Header Message format
       */
-    struct rib_entry_header{
+    struct libparsebgp_rib_entry_header{
         uint32_t        sequence_number;
         uint8_t         prefix_length;
         char            prefix[46];
@@ -142,7 +141,7 @@ using namespace std;
     /**
       * RIB generic entry header
       */
-    struct rib_generic_entry_header{
+    struct libparsebgp_rib_generic_entry_header{
         uint32_t        sequence_number;
         uint16_t        address_family_identifier;
         uint8_t         subsequent_afi;
@@ -154,7 +153,7 @@ using namespace std;
     /**
       * BGP4MP State Change Format
       */
-    struct bgp4mp_state_change{
+    struct libparsebgp_bgp4mp_state_change{
         uint16_t    peer_asn;
         uint16_t    local_asn;
         uint16_t    interface_index;
@@ -231,7 +230,7 @@ using namespace std;
         u_char*     BGP_message;
     };*/
 
-    struct bgp4mp_msg{
+    struct libparsebgp_bgp4mp_msg{
         uint32_t    peer_asn;
         uint32_t    local_asn;
         uint16_t    interface_index;
@@ -242,41 +241,45 @@ using namespace std;
         libparsebgp_parse_bgp_parsed_data bgp_msg;
     };
 
-struct libparsebgp_parse_mrt_parsed_data {
-    mrt_common_hdr c_hdr;
-    union parsed_mrt_data {
-        table_dump_message table_dump;
-        union parsed_table_dump_v2 {
-            peer_index_table peer_index_tbl;
-            rib_entry_header rib_entry_hdr;
-            rib_generic_entry_header rib_generic_entry_hdr;
-        }table_dump_v2_msg;
-        union parsed_bgp4mp_msg {
-            bgp4mp_msg bgp4mp_mssg;
-            bgp4mp_state_change bgp4mp_state_change_msg;
-        }bgp4mp;
-    }parsed_data;
-
-//    table_dump_message table_dump;
-//    peer_index_table peer_index_tbl;
-//    rib_entry_header rib_entry_hdr;
-//    rib_generic_entry_header rib_generic_entry_hdr;
-
-    //bgp4mp_msg bgp4mp_mssg;
-    //bgp4mp_state_change bgp4mp_state_change_msg;
-
-//    obj_peer_up_event up_event;
-//    obj_peer_down_event down_event;
-
-    u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
-    int mrt_data_len;              ///< Length/size of data in the data buffer
+u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
+int mrt_data_len;              ///< Length/size of data in the data buffer
 
 //    libparsebgp_parse_bgp_parsed_data pbgp;
 //    parsed_bgp_msg bgp_msg;
 
 //private:
-    uint16_t mrt_type;
-    uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
+uint16_t mrt_type;
+uint16_t mrt_sub_type;
+uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
+
+union libparsebgp_parsed_table_dump_v2 {
+    libparsebgp_peer_index_table          peer_index_tbl;
+    libparsebgp_rib_entry_header          rib_entry_hdr;
+    libparsebgp_rib_generic_entry_header  rib_generic_entry_hdr;
+}libparsebgp_parsed_table_dump_v2;
+
+struct libparsebgp_parse_mrt_parsed_data {
+    libparsebgp_mrt_common_hdr c_hdr;
+    union libparsebgp_parsed_mrt_data {
+        libparsebgp_table_dump_message table_dump;
+        libparsebgp_parsed_table_dump_v2 table_dump_v2;
+        union libparsebgp_parsed_bgp4mp_msg {
+            libparsebgp_bgp4mp_msg                bgp4mp_mssg;
+            libparsebgp_bgp4mp_state_change       bgp4mp_state_change_msg;
+        }bgp4mp;
+    }parsed_data;
+
+//    libparsebgp_table_dump_message table_dump;
+//    peer_index_table peer_index_tbl;
+//    libparsebgp_rib_entry_header rib_entry_hdr;
+//    libparsebgp_rib_generic_entry_header rib_generic_entry_hdr;
+
+    //libparsebgp_bgp4mp_msg bgp4mp_mssg;
+    //libparsebgp_bgp4mp_state_change bgp4mp_state_change_msg;
+
+//    obj_peer_up_event up_event;
+//    obj_peer_down_event down_event;
+
     std::map<std::string, peer_info> peer_info_map;
 };
     /*
@@ -297,78 +300,6 @@ struct libparsebgp_parse_mrt_parsed_data {
      * \param [in] buf_len       Length of buffer
      */
     bool libparsebgp_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Function to parse the MRT common header
-     * @param buffer
-     * @param buf_len
-     * @return common header type
-     */
-    uint16_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Parses remaining MRT message
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Parses Table Dump message
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_parse_table_dump(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Parses Table Dump V2 message
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_parse_table_dump_v2(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Parses Peer Index Table message
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_parse_peer_index_table(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Parses RIB UNICAST message
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_parse_rib_unicast(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * Parses RIB GENERIC message
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_parse_rib_generic(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-
-    /**
-     * Function to parse MRT of type BGP4MP
-     * @param buffer
-     * @param buf_len
-     */
-    void libparsebgp_parse_mrt_parse_bgp4mp(u_char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-
-    /**
-     * get current MRT message type
-     */
-    char libparsebgp_parse_mrt_get_mrt_type(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-    /**
-     * get current MRT message length
-     *
-     * The length returned does not include the common header length
-     */
-    uint32_t libparsebgp_parse_mrt_get_mrt_length(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
 
 //extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
 libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);
