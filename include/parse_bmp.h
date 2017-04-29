@@ -75,7 +75,7 @@ struct libparsebgp_parse_bmp_parsed_data {
  * BMP message buffer (normally only contains the BGP message)
  *      BMP data message is read into this buffer so that it can be passed to the BGP parser for handling.
  *      Complete BGP message is read, otherwise error is generated.
- */
+ */  libparse
     u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];
     size_t bmp_data_len;              ///< Length/size of data in the data buffer
 

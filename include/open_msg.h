@@ -84,29 +84,29 @@
     /**
      * defines the OPEN BGP header per RFC4271
      */
-    struct open_param {
+    /*struct open_param_hdr {
         u_char       type;                     ///< unambiguously identifies parameters (using RFC5492)
                                                  /*
                                                   * Type value of 2 is optional
-                                                  */
+                                                  *
         u_char       len;                      ///< parameter value length in octets
-    } __attribute__ ((__packed__));
+    } __attribute__ ((__packed__));*/
 
     /**
      * BGP open header
      */
-    struct open_bgp_hdr {
+    /*struct open_bgp_hdr {
         u_char            ver;                 ///< Version, currently 4
         uint16_t          asn;                 ///< 2 byte ASN - AS_TRANS = 23456 to indicate 4-octet ASN
         uint16_t          hold;                ///< 2 byte hold time - can be zero or >= 3 seconds
         uint32_t          bgp_id;              ///< 4 byte bgp id of sender - router_id
         u_char            param_len;           ///< optional parameter length - 0 means no params
-    } __attribute__((__packed__));
+    } __attribute__((__packed__));*/
 
     /**
      * BGP capability header (draft-ietf-idr-dynamic-cap-14)
      */
-    struct cap_bgp_hdr {
+   /* struct cap_bgp_hdr {
         u_char      init_ack : 1;              ///< Revision is being init (0) or ack (1)
         u_char      ack_req  : 1;              ///< request for ack
         u_char      resvered : 5;              ///< unused
@@ -114,15 +114,33 @@
         uint32_t    seq_num;                   ///< match ack to revision
         u_char      cap;                       ///< Capability code
         uint16_t    cap_len;                   ///< Capability length (2 bytes intead of one)
-    } __attribute__((__packed__));
+    } __attribute__((__packed__));*/
 
+    union capability_value {
+        uint32_t asn;
+        cap_add_path_data add_path_data;
+        cap_mpbgp_data mpbgp_data;
+    };
+
+    struct open_capabilities {
+        uint8_t cap_code;
+        uint8_t cap_len;
+        capability_value cap_values;
+    };
+
+    struct open_param {
+        uint8_t param_type;
+        uint8_t param_len;
+        list<open_capabilities> param_values;
+    };
 
     struct libparsebgp_open_msg_data{
-        u_char            ver;                 ///< Version, currently 4
+        uint8_t           ver;                 ///< Version, currently 4
         uint16_t          asn;                 ///< 2 byte ASN - AS_TRANS = 23456 to indicate 4-octet ASN
         uint16_t          hold_time;           ///< 2 byte hold time - can be zero or >= 3 seconds
         uint32_t          bgp_id;              ///< 4 byte bgp id of sender - router_id
-        u_char            param_len;           ///< optional parameter length - 0 means no params
+        uint8_t           opt_param_len;           ///< optional parameter length - 0 means no params
+        open_param        opt_param;           ///< optional parameter
 
         //To remove the following:
         std::string       peer_addr;      ///< Printed form of the peer address for logging
@@ -156,8 +174,7 @@
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
      */
-    size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn, uint16_t &holdTime,
-                        std::string &bgp_id, std::list<std::string> &capabilities);
+    size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
 
 
     /**
@@ -175,8 +192,8 @@
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read
      */
-    size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
-                             std::list<std::string> &capabilities);
+    //size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent, uint32_t &asn,
+    //                         std::list<std::string> &capabilities);
 
 //} /* namespace bgp */
 

@@ -598,7 +598,7 @@ static void libparsebgp_parse_bgp_update_db(libparsebgp_parse_bgp_parsed_data *b
  * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns BGP message type
  */
-u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                                 uint32_t asn, bool is_local_msg) {
     u_char  bgp_msg_type = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size);
     switch (bgp_msg_type) {
@@ -615,7 +615,8 @@ u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_dat
                                                                    bgp_parsed_data->data_bytes_remaining,
                                                                    bgp_parsed_data->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
                 //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
-                return true;
+                //return true;
+                throw "Failed to parse BGP update message";
             }
 
             bgp_parsed_data->data_bytes_remaining -= read_size;
@@ -642,9 +643,6 @@ u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_dat
                 bgp_parsed_data->parsed_data.notification_msg.error_subcode = parsed_msg.error_subcode;
                 strncpy(bgp_parsed_data->parsed_data.notification_msg.error_text, parsed_msg.error_text,
                         sizeof(bgp_parsed_data->parsed_data.notification_msg.error_text));
-                /*down_event->bgp_err_code = parsed_msg.error_code;
-                down_event->bgp_err_subcode = parsed_msg.error_subcode;
-                strncpy(down_event->error_text, parsed_msg.error_text, sizeof(down_event->error_text));*/
             }
             //return rval;
             break;
@@ -656,7 +654,7 @@ u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_dat
             libparsebgp_open_msg_data *open_msg_data;
             libparsebgp_open_msg_init(open_msg_data, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->p_info);
             list <string>       cap_list;
-            string              local_bgp_id, remote_bgp_id;
+//            string              local_bgp_id, remote_bgp_id;
             size_t              read_size;
 
             bgp_parsed_data->p_info->recv_four_octet_asn = false;
@@ -664,74 +662,83 @@ u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_dat
             bgp_parsed_data->p_info->using_2_octet_asn = false;
 
             data += BGP_MSG_HDR_LEN;
-            if (is_local_msg) {
-                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining,
-                                                                true, asn, up_event->local_hold_time,local_bgp_id, cap_list);
+            read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, is_local_msg);
 
-                if (!read_size) {
-                    //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
-                    throw "Failed to read sent open message";
-                }
-
-                data += read_size;                                          // Move the pointer pase the sent open message
-                bgp_parsed_data->data_bytes_remaining -= read_size;
-
-                strncpy(up_event->local_bgp_id, local_bgp_id.c_str(), sizeof(up_event->local_bgp_id));
-
-                // Convert the list to string
-                bzero(up_event->sent_cap, sizeof(up_event->sent_cap));
-
-                string cap_str;
-                for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
-                    if ( it != cap_list.begin())
-                        cap_str.append(", ");
-
-                    // Check for 4 octet ASN support
-                    if ((*it).find("4 Octet ASN") != std::string::npos)
-                        bgp_parsed_data->p_info->sent_four_octet_asn = true;
-
-                    cap_str.append((*it));
-                }
-
-                strncpy(up_event->sent_cap, cap_str.c_str(), sizeof(up_event->sent_cap));
-
+            if (!read_size) {
+                //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
+                throw "Failed to read open message";
             }
 
-            /*
-             * Process the received open message
-             */
+            data += read_size;                                          // Move the pointer pase the sent open message
+            bgp_parsed_data->data_bytes_remaining -= read_size;
 
-            else {
-                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false, asn, up_event->remote_hold_time, remote_bgp_id, cap_list);
-
-                if (!read_size) {
-                    //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
-                    throw "Failed to read received open message";
-                }
-
-                data += read_size;                                          // Move the pointer pase the sent open message
-                bgp_parsed_data->data_bytes_remaining -= read_size;
-
-                strncpy(up_event->remote_bgp_id, remote_bgp_id.c_str(), sizeof(up_event->remote_bgp_id));
-
-                // Convert the list to string
-                bzero(up_event->recv_cap, sizeof(up_event->recv_cap));
-
-                string cap_str;
-                for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
-                    if ( it != cap_list.begin())
-                        cap_str.append(", ");
-
-                    // Check for 4 octet ASN support - reset to false if
-                    if ((*it).find("4 Octet ASN") != std::string::npos)
-                        bgp_parsed_data->p_info->recv_four_octet_asn = true;
-
-                    cap_str.append((*it));
-                }
-
-                strncpy(up_event->recv_cap, cap_str.c_str(), sizeof(up_event->recv_cap));
-
-            }
+//            if (is_local_msg) {
+//                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true);
+//
+//                if (!read_size) {
+//                    //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
+//                    throw "Failed to read sent open message";
+//                }
+//
+//                data += read_size;                                          // Move the pointer pase the sent open message
+//                bgp_parsed_data->data_bytes_remaining -= read_size;
+//
+//                //strncpy(up_event->local_bgp_id, local_bgp_id.c_str(), sizeof(up_event->local_bgp_id));
+//
+//                // Convert the list to string
+//                //bzero(up_event->sent_cap, sizeof(up_event->sent_cap));
+//
+//                string cap_str;
+//                for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
+//                    if ( it != cap_list.begin())
+//                        cap_str.append(", ");
+//
+//                    // Check for 4 octet ASN support
+//                    if ((*it).find("4 Octet ASN") != std::string::npos)
+//                        bgp_parsed_data->p_info->sent_four_octet_asn = true;
+//
+//                    cap_str.append((*it));
+//                }
+//
+//                //strncpy(up_event->sent_cap, cap_str.c_str(), sizeof(up_event->sent_cap));
+//
+//            }
+//
+//            /*
+//             * Process the received open message
+//             */
+//
+//            else {
+//                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, false);
+//
+//                if (!read_size) {
+//                    //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
+//                    throw "Failed to read received open message";
+//                }
+//
+//                data += read_size;                                          // Move the pointer pase the sent open message
+//                bgp_parsed_data->data_bytes_remaining -= read_size;
+//
+//                //strncpy(up_event->remote_bgp_id, remote_bgp_id.c_str(), sizeof(up_event->remote_bgp_id));
+//
+//                // Convert the list to string
+//                //bzero(up_event->recv_cap, sizeof(up_event->recv_cap));
+//
+//                string cap_str;
+//                for (list<string>::iterator it = cap_list.begin(); it != cap_list.end(); it++) {
+//                    if ( it != cap_list.begin())
+//                        cap_str.append(", ");
+//
+//                    // Check for 4 octet ASN support - reset to false if
+//                    if ((*it).find("4 Octet ASN") != std::string::npos)
+//                        bgp_parsed_data->p_info->recv_four_octet_asn = true;
+//
+//                    cap_str.append((*it));
+//                }
+//
+//                //strncpy(up_event->recv_cap, cap_str.c_str(), sizeof(up_event->recv_cap));
+//
+//            }
 
             /*
             data += BGP_MSG_HDR_LEN;
@@ -768,7 +775,7 @@ u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_dat
             throw "BGP message type does not match";
         }
     }
-    return bgp_msg_type;
+    //return bgp_msg_type;
 }
 
 /**

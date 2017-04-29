@@ -118,7 +118,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
                                     string router_addr, peer_info *peer_info);
 
 
-    u_char libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+    void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                                     uint32_t asn, bool is_local_msg = false);
 
 

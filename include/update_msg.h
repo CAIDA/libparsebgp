@@ -50,7 +50,18 @@ struct update_bgp_hdr {
 };
 typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
+struct rfc_prefix_tuple {
+    uint8_t len;
+    char *prefix;
+};
+
 struct libparsebgp_update_msg_data {
+    uint16_t wdrawn_route_len;
+    list<rfc_prefix_tuple> wdrawn_routes;
+    uint16_t total_path_attr_len;
+    <> path_attributes;
+    list<rfc_prefix_tuple> nlri;
+
     /**
      * parsed path attributes map
      */

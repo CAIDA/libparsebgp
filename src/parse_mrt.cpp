@@ -167,7 +167,7 @@ static void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_l
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.local_ip, ip_addr_len) != ip_addr_len)
                 throw;
             /*int bgp_msg_len = mrt_data_len;
-            if (extract_from_buffer(buffer, buf_len, &parsed_data.bgp4mp.libparsebgp_bgp4mp_msg.BGP_message, mrt_data_len) != bgp_msg_len)
+            if (extract_from_buffer(buffer, buf_len, &parsed_data.bgp4mp.bgp4mp_msg.BGP_message, mrt_data_len) != bgp_msg_len)
                 throw;*/
             if (mrt_data_len != buf_len)
                 throw;
@@ -188,12 +188,12 @@ static void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_l
                                        &mrt_parsed_data->peer_info_map[peer_info_key]);
             uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.local_asn :
                            mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_asn;
-            if (libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.bgp_msg, buffer,
-                                                         mrt_data_len, asn, mrt_parsed_data->c_hdr.sub_type > 5) == BGP_MSG_OPEN) {
-                /*mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_mssg.local_asn;
+            libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.bgp_msg, buffer,
+                                                     mrt_data_len, asn, mrt_parsed_data->c_hdr.sub_type > 5); /*{
+                mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_mssg.local_asn;
                 mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_mssg.peer_asn;
-                memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_mssg.local_ip, 40);*/
-            }
+                memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_mssg.local_ip, 40);
+            }*/
             break;
         }
         default: {
