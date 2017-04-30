@@ -10,6 +10,7 @@
 #ifndef OPENMSG_H_
 #define OPENMSG_H_
 
+#include <iostream>
 #include <list>
 #include "parse_common.h"
 
@@ -131,10 +132,10 @@
     struct open_param {
         uint8_t param_type;
         uint8_t param_len;
-        list<open_capabilities> param_values;
+        std::list<open_capabilities> param_values;
     };
 
-    struct libparsebgp_open_msg_data{
+    typedef struct libparsebgp_open_msg_data{
         uint8_t           ver;                 ///< Version, currently 4
         uint16_t          asn;                 ///< 2 byte ASN - AS_TRANS = 23456 to indicate 4-octet ASN
         uint16_t          hold_time;           ///< 2 byte hold time - can be zero or >= 3 seconds
@@ -145,7 +146,7 @@
         //To remove the following:
         std::string       peer_addr;      ///< Printed form of the peer address for logging
         peer_info         *peer_inf;     ///< Persistent Peer info pointer
-    };
+    }libparsebgp_open_msg_data;
      /**
       * Constructor for class
       *

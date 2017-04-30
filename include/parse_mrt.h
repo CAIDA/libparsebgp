@@ -14,7 +14,7 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "parse_bmp.h"
+//#include "parse_bmp.h"
 #include "parse_bgp.h"
 #include "parse_utils.h"
 #include "parse_common.h"
@@ -252,13 +252,13 @@ uint16_t mrt_type;
 uint16_t mrt_sub_type;
 uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
 
-union libparsebgp_parsed_table_dump_v2 {
+typedef union libparsebgp_parsed_table_dump_v2 {
     libparsebgp_peer_index_table          peer_index_tbl;
     libparsebgp_rib_entry_header          rib_entry_hdr;
     libparsebgp_rib_generic_entry_header  rib_generic_entry_hdr;
 }libparsebgp_parsed_table_dump_v2;
 
-struct libparsebgp_parse_mrt_parsed_data {
+typedef struct libparsebgp_parse_mrt_parsed_data {
     libparsebgp_mrt_common_hdr c_hdr;
     union libparsebgp_parsed_mrt_data {
         libparsebgp_table_dump_message table_dump;
@@ -281,7 +281,7 @@ struct libparsebgp_parse_mrt_parsed_data {
 //    obj_peer_down_event down_event;
 
     std::map<std::string, peer_info> peer_info_map;
-};
+}libparsebgp_parse_mrt_parsed_data;
     /*
      * Constructor for class
      */

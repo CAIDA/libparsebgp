@@ -504,25 +504,25 @@ static void libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init_ms
      * Loop through the init message (in buffer) to parse each TLV
      */
     for (int i=0; i < bmp_data_len; i += BMP_INIT_MSG_LEN) {
-        init_msg_v3_tlv init_msg;
+        init_msg_v3_tlv *init_msg;
         memcpy(&init_msg, bufPtr, BMP_INIT_MSG_LEN);
 //        init_msg.info=NULL;
-        memset(init_msg.info, 0, sizeof init_msg.info);
-        SWAP_BYTES(&init_msg.len);
-        SWAP_BYTES(&init_msg.type);
+        memset(init_msg->info, 0, sizeof init_msg->info);
+        SWAP_BYTES(&init_msg->len);
+        SWAP_BYTES(&init_msg->type);
 
         bufPtr += BMP_INIT_MSG_LEN;                // Move pointer past the info header
 
         //       LOG_INFO("Init message type %hu and length %hu parsed", initMsg.type, initMsg.len);
 
-        if (init_msg.len > 0) {
-            info_len = sizeof(init_msg.info) < init_msg.len ? sizeof(init_msg.info) : init_msg.len;
-            bzero(init_msg.info, sizeof(init_msg.info));
-            memcpy(init_msg.info, bufPtr, info_len);
+        if (init_msg->len > 0) {
+            info_len = sizeof(init_msg->info) < init_msg->len ? sizeof(init_msg->info) : init_msg->len;
+            bzero(init_msg->info, sizeof(init_msg->info));
+            memcpy(init_msg->info, bufPtr, info_len);
             bufPtr += info_len;                     // Move pointer past the info data
             i += info_len;                          // Update the counter past the info data
         }
-        parsed_msg->init_msg_tlvs.push_back(init_msg);
+        parsed_msg->init_msg_tlvs.push_back(*init_msg);
         delete init_msg;
 
 
@@ -695,7 +695,7 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
 
     // Loop through each stats object
     for (unsigned long i = 0; i < parsed_msg->stats_count; i++) {
-        stat_counter stat_info;
+        stat_counter *stat_info;
         //if ((Recv(sock, &stat_type, 2, MSG_WAITALL)) != 2)
         if ((extract_from_buffer(buffer, buf_len, &stat_info, 4)) != 4)
             throw "ERROR: Cannot proceed since we cannot read the stats type.";
@@ -706,22 +706,22 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
         bmp_len -= 4;
 
         // convert integer from network to host bytes
-        SWAP_BYTES(&stat_info.stat_type);
-        SWAP_BYTES(&stat_info.stat_len);
+        SWAP_BYTES(&stat_info->stat_type);
+        SWAP_BYTES(&stat_info->stat_len);
 
         //       SELF_DEBUG("sock=%d STATS: %lu : TYPE = %u LEN = %u", sock,
         //                   i, stat_type, stat_len);
 
         // check if this is a 32 bit number  (default)
-        if (stat_info.stat_len == 4 or stat_info.stat_len == 8) {
+        if (stat_info->stat_len == 4 or stat_info->stat_len == 8) {
 
             // Read the stats counter - 32/64 bits
-            if ((extract_from_buffer(buffer, buf_len, b, stat_info.stat_len)) == stat_info.stat_len) {
-                bmp_len -= stat_info.stat_len;
+            if ((extract_from_buffer(buffer, buf_len, b, stat_info->stat_len)) == stat_info->stat_len) {
+                bmp_len -= stat_info->stat_len;
 
                 // convert the bytes from network to host order
-                SWAP_BYTES(b, stat_info.stat_len);
-                memcpy(stat_info.stat_data, b, stat_info.stat_len);
+                SWAP_BYTES(b, stat_info->stat_len);
+                memcpy(stat_info->stat_data, b, stat_info->stat_len);
 
                 // Update the table structure based on the stats counter type
 //                switch (stat_info.stat_type) {
@@ -780,10 +780,10 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
             //         SELF_DEBUG("sock=%d : skipping stats report '%u' because length of '%u' is not expected.",
             //                     sock, stat_type, stat_len);
 
-            while (stat_info.stat_len-- > 0)
+            while (stat_info->stat_len-- > 0)
                 extract_from_buffer(buffer, buf_len, &b[0], 1);
         }
-        parsed_msg->total_stats_counter.push_back(stat_info);
+        parsed_msg->total_stats_counter.push_back(*stat_info);
         delete stat_info;
     }
 
@@ -861,7 +861,7 @@ uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsi
     int initial_buffer_len = buf_len;
 
     char bmp_type = 0;
-    libparsebgp_parse_bgp_parsed_data pBGP;
+//    libparsebgp_parse_bgp_parsed_data pBGP;
 
     try {
         bmp_type = libparsebgp_parse_bmp_handle_msg(parsed_msg, buffer, buf_len);

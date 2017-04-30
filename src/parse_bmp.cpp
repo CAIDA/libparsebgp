@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/parse_bmp.h"
+//#include "../include/parse_bmp.h"
 #include "../include/parse_bgp.h"
 #include "../include/parse_bmpv1.h"
 #include <sys/time.h>
@@ -924,7 +924,7 @@ uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parse
                             snprintf(parsed_msg->down_event.error_text, sizeof(parsed_msg->down_event.error_text),
                                     "Local close by (%s) for peer (%s) : ", parsed_msg->r_entry.ip_addr,
                                      parsed_msg->p_entry.peer_addr);
-                            libparsebgp_parse_bgp_handle_down_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len,&parsed_msg->down_event,&parsed_msg->bgp_msg);
+                            libparsebgp_parse_bgp_handle_down_event(bmp_data, parsed_msg->bmp_data_len,&parsed_msg->down_event,&parsed_msg->bgp_msg);
                             break;
                         }
                         case 2 : // Local system close, no bgp notify
@@ -968,7 +968,7 @@ uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parse
 
 
 // Parse the BGP sent/received open messages
-                    libparsebgp_parse_bgp_handle_up_event(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->up_event,&parsed_msg->bgp_msg);
+                    libparsebgp_parse_bgp_handle_up_event(&pBGP, bmp_data, parsed_msg->bmp_data_len, &parsed_msg->up_event,&parsed_msg->bgp_msg);
                 } //else {
                  //   LOG_NOTICE("%s: PEER UP Received but failed to parse the BMP header.", client->c_ip);
                // }
@@ -984,7 +984,7 @@ uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parse
                  */
                 libparsebgp_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
-                libparsebgp_parse_bgp_handle_update(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->bgp_msg);
+//                libparsebgp_parse_bgp_handle_update(&pBGP, parsed_msg->bmp_data, parsed_msg->bmp_data_len, &parsed_msg->bgp_msg);
 
                 break;
             }

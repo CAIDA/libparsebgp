@@ -23,6 +23,25 @@ union libparsebgp_parse_msg{
     libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
 }libparsebgp_parse_msg;
 
-
+libparsebgp_parse_msg libparsebgp_parse_msg_common_wrapper(u_char* buffer, int& buf_len, int type) {
+    libparsebgp_parse_msg parsed_msg;
+    switch (type) {
+        case MRT_MESSAGE_TYPE: {
+            libparsebgp_parse_mrt_parse_msg(buffer, buf_len, &parsed_msg.parsed_mrt_msg);
+            break;
+        }
+        case BMP_MESSAGE_TYPE: {
+            libparsebgp_parse_bmp_parse_msg(&parsed_msg.parsed_bmp_msg, buffer, buf_len);
+            break;
+        }
+        case BGP_MESSAGE_TYPE: {
+            break;
+        }
+        default: {
+            throw "Type unknown";
+        }
+    }
+    return parsed_msg;
+}
 
 #endif //PARSE_LIB_LIB_PARSE_COMMON_H_H

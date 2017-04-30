@@ -152,13 +152,12 @@ typedef struct libparsebgp_parsed_bmp_term_msg {
      *          allocated by the caller and freed by the caller.
      */
 typedef struct libparsebgp_parsed_bmp_peer_up_event {
-    char        local_ip[40];           ///< IPv4 or IPv6 printed IP address
-    uint16_t    local_port;             ///< Local port number
-    uint16_t    remote_port;            ///< Remote port number
-//    lib_parse_bgp_parsed_bgp_open_msg   send_open_msg;
-//    lib_parse_bgp_parsed_bgp_open_msg   received_open_msg;
-    char        info_data[4096];        ///< Inforamtional data for peer
-
+    char                                local_ip[40];           ///< IPv4 or IPv6 printed IP address
+    uint16_t                            local_port;             ///< Local port number
+    uint16_t                            remote_port;            ///< Remote port number
+    libparsebgp_parse_bgp_parsed_data   sent_open_msg;          ///< sent open message
+    libparsebgp_parse_bgp_parsed_data   received_open_msg;      ///< received open message
+    char                                info_data[4096];        ///< Inforamtional data for peer
 }libparsebgp_parsed_bmp_peer_up_event;
 
 /**

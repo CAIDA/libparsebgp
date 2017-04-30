@@ -420,37 +420,17 @@ struct peer_info {
         std::list<evpn_tuple>    evpn_withdrawn;     ///< List of evpn nlris withdrawn
     };
 
-    struct parsed_bgp_msg{
-        libparsebgp_common_bgp_hdr common_hdr;
-        parsed_update_data parsed_data;
-        std::vector<obj_vpn> obj_vpn_rib_list;
-        std::vector<obj_evpn> obj_evpn_rib_list;
-        std::vector<obj_rib> adv_obj_rib_list;
-        std::vector<obj_rib> wdrawn_obj_rib_list;
-        bool has_end_of_rib_marker;
-    };
+//    struct parsed_bgp_msg{
+//        libparsebgp_common_bgp_hdr common_hdr;
+//        parsed_update_data parsed_data;
+//        std::vector<obj_vpn> obj_vpn_rib_list;
+//        std::vector<obj_evpn> obj_evpn_rib_list;
+//        std::vector<obj_rib> adv_obj_rib_list;
+//        std::vector<obj_rib> wdrawn_obj_rib_list;
+//        bool has_end_of_rib_marker;
+//    };
 
 enum libparsebgp_parse_msg_types {MRT_MESSAGE_TYPE = 1, BMP_MESSAGE_TYPE, BGP_MESSAGE_TYPE};
 
-libparsebgp_parse_msg libparsebgp_parse_msg_common_wrapper(u_char* buffer, int& buf_len, int type) {
-    libparsebgp_parse_msg parsed_msg;
-    switch (type) {
-        case MRT_MESSAGE_TYPE: {
-            libparsebgp_parse_mrt_parse_msg(buffer, buf_len, &parsed_msg.parsed_mrt_msg);
-            break;
-        }
-        case BMP_MESSAGE_TYPE: {
-            libparsebgp_parse_bmp_parse_msg(&parsed_msg.parsed_bmp_msg, buffer, buf_len);
-            break;
-        }
-        case BGP_MESSAGE_TYPE: {
-            break;
-        }
-        default: {
-            throw "Type unknown";
-        }
-    }
-    return parsed_msg;
-}
 
 #endif //PARSE_LIB_PARSE_COMMON_H_H

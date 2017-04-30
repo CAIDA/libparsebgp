@@ -59,7 +59,7 @@ struct libparsebgp_update_msg_data {
     uint16_t wdrawn_route_len;
     list<rfc_prefix_tuple> wdrawn_routes;
     uint16_t total_path_attr_len;
-    <> path_attributes;
+//    <> path_attributes;
     list<rfc_prefix_tuple> nlri;
 
     /**

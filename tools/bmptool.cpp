@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/parse_bmp.h"
+//#include "../include/parse_bmp.h"
 #include <fstream>
 #include <parse_mrt.h>
 
