@@ -21,7 +21,7 @@ libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int 
     libparsebgp_parse_mrt_parsed_data mrt_parsed_data;
     try {
         libparsebgp_parse_mrt_init(&mrt_parsed_data);
-        if (libparsebgp_parse_mrt_parse_msg(buffer, buf_len, &mrt_parsed_data))
+        if (libparsebgp_parse_mrt_parse_msg(&mrt_parsed_data,buffer, buf_len))
             cout << "Parsed successfully" << endl;
         else
             cout << "Error in parsing" << endl;
@@ -150,49 +150,49 @@ static void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_l
         case BGP4MP_MESSAGE_AS4_LOCAL: {
             int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4 || mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4_LOCAL) ? 8 : 4;
             int ip_addr_len = 4;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg, asn_len) != asn_len) //ASNs
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg, asn_len) != asn_len) //ASNs
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.interface_index, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.interface_index, 2) != 2)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.address_family, 2) != 2)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family, 2) != 2)
                 throw;
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_asn);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.local_asn);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.interface_index);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.address_family);
-            if (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.address_family == AFI_IPv6)
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.interface_index);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family);
+            if (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv6)
                 ip_addr_len = 16;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_ip, ip_addr_len) != ip_addr_len)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_addr_len) != ip_addr_len)
                 throw;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.local_ip, ip_addr_len) != ip_addr_len)
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_ip, ip_addr_len) != ip_addr_len)
                 throw;
             /*int bgp_msg_len = mrt_data_len;
             if (extract_from_buffer(buffer, buf_len, &parsed_data.bgp4mp.bgp4mp_msg.BGP_message, mrt_data_len) != bgp_msg_len)
                 throw;*/
             if (mrt_data_len != buf_len)
                 throw;
-            memcpy(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.bgp_data, buffer, mrt_data_len);
+            memcpy(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_data, buffer, mrt_data_len);
 
-            peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_ip;
+            peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip;
 
             obj_bgp_peer p_entry;
             bzero(&p_entry, sizeof(obj_bgp_peer));
-            memcpy(&p_entry.peer_addr, mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_ip, sizeof(p_entry.peer_addr));
-            p_entry.is_ipv4 = (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.address_family == AFI_IPv4);
-            p_entry.peer_as = mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_asn;
+            memcpy(&p_entry.peer_addr, mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip, sizeof(p_entry.peer_addr));
+            p_entry.is_ipv4 = (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv4);
+            p_entry.peer_as = mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn;
             p_entry.timestamp_secs = mrt_parsed_data->c_hdr.time_stamp;
             p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;
 
             //mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-            libparsebgp_parse_bgp_init(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.bgp_msg, &p_entry, "",
+            libparsebgp_parse_bgp_init(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, &p_entry, "",
                                        &mrt_parsed_data->peer_info_map[peer_info_key]);
-            uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.local_asn :
-                           mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_asn;
-            libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.bgp_msg, buffer,
+            uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn :
+                           mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn;
+            libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, buffer,
                                                      mrt_data_len, asn, mrt_parsed_data->c_hdr.sub_type > 5); /*{
-                mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_mssg.local_asn;
-                mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_mssg.peer_asn;
-                memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_mssg.local_ip, 40);
+                mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_msg.local_asn;
+                mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_msg.peer_asn;
+                memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_msg.local_ip, 40);
             }*/
             break;
         }
@@ -302,7 +302,7 @@ static void libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len,
         throw "Error in parsing attribute";
 
 //    //TODO: Need to change this after update message is fixed
-//    peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_ip;
+//    peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip;
 //    libparsebgp_update_msg_data u_msg;
 //    libparsebgp_update_msg_init(&u_msg, table_dump_msg->peer_ip, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
 //    libparsebgp_update_msg_parse_attributes(&u_msg, table_dump_msg->bgp_attribute, table_dump_msg->attribute_len,
@@ -428,7 +428,7 @@ static void libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& 
 //            throw "Error in parsing bgp_attribute";
 
         //TODO: waiting for update to be final
-//        peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_ip; //TODO: Need to change this
+//        peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip; //TODO: Need to change this
 //        libparsebgp_update_msg_data u_msg;
 //        //TODO: peer_ip not present
 //        libparsebgp_update_msg_init(&u_msg, mrt_parsed_data->parsed_data.table_dump_v2_msg.rib_entry_hdr.peer_ip, "",
@@ -487,7 +487,7 @@ static void libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& 
 //            throw "Error in parsing bgp_attribute";
 
         //TODO: waiting for update to be final
-//        peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_mssg.peer_ip; //TODO: Need to change this
+//        peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip; //TODO: Need to change this
 //        libparsebgp_update_msg_data u_msg;
 //        //TODO: peer_ip not present
 //        libparsebgp_update_msg_init(&u_msg, mrt_parsed_data->parsed_data.table_dump_v2_msg.rib_entry_hdr.peer_ip, "",
@@ -524,7 +524,7 @@ static void libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_l
     }
 }
 
-bool libparsebgp_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
+bool libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *&buffer, int& buf_len) {
     //bool rval = true;
     try {
         libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, &mrt_parsed_data->c_hdr);

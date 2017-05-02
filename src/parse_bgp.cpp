@@ -630,7 +630,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
 
             libparsebgp_notify_msg parsed_msg;
             //NotificationMsg nMsg;
-            if (libparsebgp_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, parsed_msg))
+            if (libparsebgp_notification_parse_notify(parsed_msg,data, bgp_parsed_data->data_bytes_remaining))
             {
                 // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
                 throw "Failed to parse the BGP notification message";
@@ -822,7 +822,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
 //}
 //
 /**
- * handle BGP notify event - updates the down event with parsed data
+ * handle  BGP notify event - updates the down event with parsed data
  *
  * \details
  *  The notify message does not directly add to Db, so the calling
@@ -844,7 +844,7 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *
 
         libparsebgp_notify_msg notify_msg;
         //NotificationMsg nMsg;
-        if ( (rval=libparsebgp_notification_parse_notify(data, bgp_parsed_data->data_bytes_remaining, notify_msg)))
+        if ( (rval=libparsebgp_notification_parse_notify(notify_msg,data, bgp_parsed_data->data_bytes_remaining)))
         {
             // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
             throw "Failed to parse the BGP notification message";
@@ -884,8 +884,6 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *
  * \returns True if error, false if no error.
  */
 bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
-    list <string>       cap_list;
-    string              local_bgp_id, remote_bgp_id;
     size_t              read_size;
     /*
      * Process the sent open message
@@ -966,24 +964,37 @@ u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp
 
  //   SELF_DEBUG("%s: rtr=%s: BGP hdr len = %u, type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.len, common_hdr.type);
 
-    /*
-     * Validate the message type as being allowed/accepted
-     */
-    switch (bgp_parsed_data->c_hdr.type) {
-        case BGP_MSG_UPDATE         : // Update Message
-        case BGP_MSG_NOTIFICATION   : // Notification message
-        case BGP_MSG_OPEN           : // OPEN message
-            // Message(s) are allowed - calling method will request further parsing of the bgp message type
+    return bgp_parsed_data->c_hdr.type;
+}
+
+
+
+uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *parsed_bgp_msg, unsigned char *data, uint32_t size){
+    size_t              read_size;
+    bool has_end_of_rib_marker = true;
+    if (libparsebgp_parse_bgp_parse_header(parsed_bgp_msg, data, size) == BGP_MSG_OPEN) {
+        data += BGP_MSG_HDR_LEN;
+    } else throw "Failed to parse bgp header";
+
+    switch (parsed_bgp_msg->c_hdr.type) {
+        case BGP_MSG_UPDATE         :
+            read_size = libparsebgp_update_msg_parse_update_msg(&parsed_bgp_msg->parsed_data.update_msg, data, size, has_end_of_rib_marker);
             break;
 
-        case BGP_MSG_ROUTE_REFRESH: // Route Refresh message
- //           LOG_NOTICE("%s: rtr=%s: Received route refresh, nothing to do with this message currently.",p_entry->peer_addr, router_addr.c_str());
+        case BGP_MSG_NOTIFICATION   : // Notification message
+            read_size = libparsebgp_notification_parse_notify(parsed_bgp_msg->parsed_data.notification_msg, data, size);
+            break;
+        case BGP_MSG_OPEN           :
+            read_size = libparsebgp_open_msg_parse_open_msg(&parsed_bgp_msg->parsed_data.open_msg, data, size, true);
+            break;
+
+        case BGP_MSG_ROUTE_REFRESH  : // Route Refresh message
+            //           LOG_NOTICE("%s: rtr=%s: Received route refresh, nothing to do with this message currently.",p_entry->peer_addr, router_addr.c_str());
             break;
 
         default :
- //           LOG_WARN("%s: rtr=%s: Unsupported BGP message type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.type);
+            //           LOG_WARN("%s: rtr=%s: Unsupported BGP message type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.type);
             break;
     }
-
-    return bgp_parsed_data->c_hdr.type;
+    return read_size;
 }

@@ -25,7 +25,7 @@
  *
  * \return True if error, false if no error reading/parsing the notification message
  */
-bool libparsebgp_notification_parse_notify(u_char *data, size_t size, libparsebgp_notify_msg &parsed_msg) {
+bool libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size) {
     u_char *dataPtr = data;
     size_t read_size = 0;
 

@@ -40,8 +40,7 @@ void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data,std::str
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read
  */
-static size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent)
-{
+static size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
     size_t      read_size   = 0;
     u_char      *bufPtr     = data;
 
