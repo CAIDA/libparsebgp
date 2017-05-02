@@ -394,6 +394,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
     decodeStr.append(ipv4_char);
 
     //attrs[ATTR_TYPE_AGGEGATOR] = decodeStr;
+         path_attrs->attr_value.aggregator = decodeStr;
 }
 /**
  * Parse attribute data based on attribute type
@@ -469,48 +470,51 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
                 break;
 
             case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
-                memcpy(ipv4_raw, data, 4);
-                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-                parsed_data.attrs[ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
+                memcpy(path_attrs->attr_value.ipv4_raw, data, 4);
+//                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
+//                parsed_data.attrs[ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
                 break;
 
             case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
                 // According to RFC 4456, the value is a sequence of cluster id's
-                for (int i=0; i < update_msg->path_attributes.attr_len; i += 4) {
+                for (int i=0; i < path_attrs->attr_len; i += 4) {
                     memcpy(ipv4_raw, data, 4);
                     data += 4;
-                    inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-                    decodeStr.append(ipv4_char);
-                    decodeStr.append(" ");
+//                    inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
+//                    decodeStr.append(ipv4_char);
+//                    decodeStr.append(" ");
+                    path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
                 }
 
-                parsed_data.attrs[ATTR_TYPE_CLUSTER_LIST] = decodeStr;
+//                parsed_data.attrs[ATTR_TYPE_CLUSTER_LIST] = decodeStr;
                 break;
 
             case ATTR_TYPE_COMMUNITIES : // Community list
             {
                 for (int i = 0; i < path_attrs->attr_len; i += 4) {
-                    std::ostringstream numString;
+//                    std::ostringstream numString;
 
                     // Add space between entries
-                    if (i)
-                        decodeStr.append(" ");
+//                    if (i)
+//                        decodeStr.append(" ");
 
                     // Add entry
                     memcpy(&value16bit, data, 2);
                     data += 2;
                     SWAP_BYTES(&value16bit);
-                    numString << value16bit;
-                    numString << ":";
+//                    numString << value16bit;
+//                    numString << ":";
+                    path_attrs->attr_value.attr_type_comm.push_back(value16bit);
 
                     memcpy(&value16bit, data, 2);
                     data += 2;
                     SWAP_BYTES(&value16bit);
-                    numString << value16bit;
-                    decodeStr.append(numString.str());
+//                    numString << value16bit;
+//                    decodeStr.append(numString.str());
+                    path_attrs->attr_value.attr_type_comm.push_back(value16bit);
                 }
 
-                parsed_data.attrs[ATTR_TYPE_COMMUNITIES] = decodeStr;
+//                parsed_data.attrs[ATTR_TYPE_COMMUNITIES] = decodeStr;
 
                 break;
             }
@@ -518,7 +522,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
             {
 //                ExtCommunity ec(update_msg->peer_addr);
 //                ec.parseExtCommunities(attr_len, data, parsed_data);
-                libparsebgp_ext_communities_parse_ext_communities(update_msg->path_attributes.attr_len, data, parsed_data);
+                libparsebgp_ext_communities_parse_ext_communities(path_attrs->attr_len, data, parsed_data);
                 break;
             }
 

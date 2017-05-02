@@ -231,6 +231,6 @@ typedef struct libparsebgp_parsed_bmp{
 
 }libparsebgp_parsed_bmp;
 
-uint8_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *&buffer, int buf_len);
+uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *&buffer, int buf_len);
 
 #endif //PARSE_LIB_PARSE_BMPV1_H

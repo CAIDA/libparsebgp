@@ -76,6 +76,9 @@ typedef struct update_path_attrs {
         u_char                  ipv4_raw[4];
         uint32_t                value32bit;
         uint16_t                value16bit;
+        string                  aggregator;
+        list<u_char[4]>         cluster_list;
+        list<uint16_t>          attr_type_comm;
     }attr_value;
 }update_path_attrs;
 
