@@ -18,7 +18,6 @@ typedef union libparsebgp_parse_msg{
 
 libparsebgp_parse_msg libparsebgp_parse_msg_common_wrapper(u_char* buffer, uint32_t buf_len, int type) {
     libparsebgp_parse_msg parsed_msg;
-    uint32_t read_size;
     switch (type) {
         case MRT_MESSAGE_TYPE: {
             parsed_msg.read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg.parsed_mrt_msg, buffer, buf_len);

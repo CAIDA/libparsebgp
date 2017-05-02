@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <list>
-#include "parse_common.h"
+//#include "parse_common.h"
 
 //namespace bgp_msg {
 

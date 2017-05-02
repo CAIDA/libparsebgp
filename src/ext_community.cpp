@@ -479,12 +479,12 @@
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libparsebgp_ext_communities_parse_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data) {
+    void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char *data) {
 
         std::string decode_str = "";
         extcomm_hdr ec_hdr;
 
-        if ( (attr_len % 8) ) {
+        if ( (path_attrs->attr_len % 8) ) {
             //LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
             return;
         }
@@ -492,7 +492,8 @@
         /*
          * Loop through consecutive entries
          */
-        for (int i = 0; i < attr_len; i += 8) {
+        for (int i = 0; i < path_attrs->attr_len; i += 8) {
+            decode_str = "";
             // Setup extended community header
             ec_hdr.high_type = data[0];
             ec_hdr.low_type  = data[1];
@@ -540,14 +541,15 @@
                 default: break;
                     //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),ec_hdr.high_type, ec_hdr.low_type);
             }
-
             // Move data pointer to next entry
             data += 8;
-            if ((i + 8) < attr_len)
-                decode_str.append(" ");
+//            if ((i + 8) < attr_len)
+//                decode_str.append(" ");
+            ec_hdr.val = decode_str;
+            path_attrs->attr_value.ext_comm.push_back(ec_hdr);
         }
 
-        parsed_data.attrs[ATTR_TYPE_EXT_COMMUNITY] = decode_str;
+//        parsed_data.attrs[ATTR_TYPE_EXT_COMMUNITY] = decode_str;
     }
 
     /**
@@ -620,7 +622,7 @@
      * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
      *
      */
-    void libparsebgp_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data) {
+    void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data) {
         std::string decode_str = "";
         extcomm_hdr ec_hdr;
 
@@ -653,6 +655,8 @@
                     //        ec_hdr.high_type, ec_hdr.low_type);
                     break;
             }
+            ec_hdr.val=decode_str;
+            path_attrs->attr_value.ext_comm.push_back(ec_hdr);
         }
     }
 //}

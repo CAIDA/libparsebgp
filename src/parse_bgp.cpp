@@ -967,8 +967,6 @@ u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp
     return bgp_parsed_data->c_hdr.type;
 }
 
-
-
 uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *parsed_bgp_msg, unsigned char *data, uint32_t size){
     size_t              read_size;
     bool has_end_of_rib_marker = true;
@@ -996,5 +994,5 @@ uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *pars
             //           LOG_WARN("%s: rtr=%s: Unsupported BGP message type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.type);
             break;
     }
-    return read_size;
+    return read_size+BGP_MSG_HDR_LEN;
 }

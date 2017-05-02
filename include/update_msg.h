@@ -12,6 +12,7 @@
 
 #include "bgp_common.h"
 #include "parse_common.h"
+//#include "ext_community.h"
 #include <string>
 #include <list>
 #include <array>
@@ -67,6 +68,19 @@ typedef struct as_path_segment {
     list<uint32_t>  seg_asn;
 }as_path_segment;
 
+/**
+ * Extended Community header
+ *      RFC4360 size is 8 bytes total (6 for value)
+ *      RFC5701 size is 20 bytes total (16 for global admin, 2 for local admin)
+ */
+struct extcomm_hdr {
+    uint8_t      high_type;                      ///< Type high byte
+    uint8_t      low_type;                       ///< Type low byte - subtype
+    u_char       *value;                         ///<
+    string       val;
+};
+
+
 typedef struct update_path_attrs {
     attr_type_tuple attr_type;
     uint16_t        attr_len;
@@ -79,6 +93,7 @@ typedef struct update_path_attrs {
         string                  aggregator;
         list<u_char[4]>         cluster_list;
         list<uint16_t>          attr_type_comm;
+        list<extcomm_hdr>       ext_comm;
     }attr_value;
 }update_path_attrs;
 

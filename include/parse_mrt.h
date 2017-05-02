@@ -257,7 +257,7 @@ typedef union libparsebgp_parsed_table_dump_v2 {
     libparsebgp_rib_generic_entry_header  rib_generic_entry_hdr;
 }libparsebgp_parsed_table_dump_v2;
 
-typedef struct libparsebgp_parse_mrt_parsed_data {
+struct libparsebgp_parse_mrt_parsed_data {
     libparsebgp_mrt_common_hdr c_hdr;
     union libparsebgp_parsed_mrt_data {
         libparsebgp_table_dump_message table_dump;
@@ -298,7 +298,7 @@ void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_da
  * \param [in] buffer       Contains the MRT message
  * \param [in] buf_len       Length of buffer
  */
-bool libparsebgp_parse_mrt_parse_msg(u_char *&buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
 
 //extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
 libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);

@@ -177,8 +177,6 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
      * \returns BGP message type
      */
     u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
-
-uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
-
+uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *parsed_bgp_msg, unsigned char *data, uint32_t size);
 
 #endif /* PARSEBGP_H_ */

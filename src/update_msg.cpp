@@ -522,7 +522,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
             {
 //                ExtCommunity ec(update_msg->peer_addr);
 //                ec.parseExtCommunities(attr_len, data, parsed_data);
-                libparsebgp_ext_communities_parse_ext_communities(path_attrs->attr_len, data, parsed_data);
+                libparsebgp_ext_communities_parse_ext_communities(path_attrs, data);
                 break;
             }
 
@@ -530,7 +530,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
             {
 //                ExtCommunity ec6(update_msg->peer_addr);
 //                ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
-                libparsebgp_ext_communities_parse_v6_ext_communities(update_msg->path_attributes.attr_len, data, parsed_data);
+                libparsebgp_ext_communities_parse_v6_ext_communities(path_attrs, data);
                 break;
             }
 
@@ -557,8 +557,8 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
 
             case ATTR_TYPE_BGP_LS:
             {
-                libparsebgp_attr_link_state_parsed_data *parse_data;
-                libparsebgp_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
+//                libparsebgp_attr_link_state_parsed_data *parse_data;
+//                libparsebgp_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
                 libparsebgp_mp_link_state_attr_parse_attr_link_state(parse_data, update_msg->path_attributes.attr_len, data);
                 break;
             }

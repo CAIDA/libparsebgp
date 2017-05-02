@@ -856,7 +856,7 @@ static bool libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp
     return is_parse_good;
 }
 
-uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *&buffer, int buf_len) {
+uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *buffer, int buf_len) {
     string peer_info_key;
     int initial_buffer_len = buf_len;
 

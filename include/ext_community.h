@@ -15,6 +15,7 @@
 #include <list>
 #include <map>
 #include <string>
+//#include "update_msg.h"
 
 //namespace bgp_msg {
 
@@ -137,18 +138,6 @@ enum ext_comm_subtype_generic {
 };
 
 /**
- * Extended Community header
- *      RFC4360 size is 8 bytes total (6 for value)
- *      RFC5701 size is 20 bytes total (16 for global admin, 2 for local admin)
- */
-struct extcomm_hdr {
-    u_char      high_type;                      ///< Type high byte
-    u_char      low_type;                       ///< Type low byte - subtype
-    u_char      *value;                         ///<
-};
-
-
-/**
  * Parse the extended communities path attribute (8 byte as per RFC4360)
  *
  * \details
@@ -160,7 +149,7 @@ struct extcomm_hdr {
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libparsebgp_ext_communities_parse_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data);
+void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char *data);
 
 /**
  * Parse the extended communities path attribute (20 byte as per RFC5701)
@@ -174,7 +163,7 @@ void libparsebgp_ext_communities_parse_ext_communities(int attr_len, u_char *dat
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libparsebgp_ext_communities_parse_v6_ext_communities(int attr_len, u_char *data, parsed_update_data &parsed_data);
+void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data);
 
 //} /* namespace bgp_msg */
 

@@ -521,11 +521,14 @@ static void libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_l
         case RIB_GENERIC:
             libparsebgp_parse_mrt_parse_rib_generic(buffer,buf_len, &table_dump_v2_msg->rib_generic_entry_hdr);
             break;
+        default:
+            break;
     }
 }
 
-bool libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *&buffer, int& buf_len) {
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *buffer, int buf_len) {
     //bool rval = true;
+    int initial_buffer_len = buf_len;
     try {
         libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, &mrt_parsed_data->c_hdr);
 
@@ -568,7 +571,7 @@ bool libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_pars
         throw str;
     }
 
-    return true;
+    return initial_buffer_len-buf_len;
 }
 
 int main() {
