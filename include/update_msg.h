@@ -48,19 +48,43 @@ struct update_bgp_hdr {
      */
     u_char *nlri_ptr;
 };
+
 typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
-struct rfc_prefix_tuple {
+struct update_prefix_tuple {
     uint8_t len;
-    char *prefix;
+    string prefix;
 };
+
+struct attr_type_tuple {
+    uint8_t attr_flags;
+    uint8_t attr_type_code;
+};
+
+typedef struct as_path_segment {
+    uint8_t         seg_type;
+    uint8_t         seg_len;
+    list<uint32_t>  seg_asn;
+}as_path_segment;
+
+typedef struct update_path_attrs {
+    attr_type_tuple attr_type;
+    uint16_t        attr_len;
+    union attr_value{
+        uint8_t                 origin;
+        list<as_path_segment>   as_path;
+        u_char                  ipv4_raw[4];
+        uint32_t                value32bit;
+        uint16_t                value16bit;
+    }attr_value;
+}update_path_attrs;
 
 struct libparsebgp_update_msg_data {
     uint16_t wdrawn_route_len;
-    list<rfc_prefix_tuple> wdrawn_routes;
+    list<update_prefix_tuple> wdrawn_routes;
     uint16_t total_path_attr_len;
-//    <> path_attributes;
-    list<rfc_prefix_tuple> nlri;
+    list<update_path_attrs> path_attributes;
+    list<update_prefix_tuple> nlri;
 
     /**
      * parsed path attributes map
