@@ -12,6 +12,8 @@
 
 #include "bgp_common.h"
 #include "parse_common.h"
+#include "mp_link_state.h"
+#include "evpn.h"
 //#include "ext_community.h"
 #include <string>
 #include <list>
@@ -52,11 +54,6 @@ struct update_bgp_hdr {
 
 typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
-struct update_prefix_tuple {
-    uint8_t len;
-    string prefix;
-};
-
 struct attr_type_tuple {
     uint8_t attr_flags;
     uint8_t attr_type_code;
@@ -67,6 +64,17 @@ typedef struct as_path_segment {
     uint8_t         seg_len;
     list<uint32_t>  seg_asn;
 }as_path_segment;
+
+/**
+ * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
+ */
+struct mp_unreach_nlri {
+    uint16_t       afi;                 ///< Address Family Identifier
+    uint8_t        safi;                ///< Subsequent Address Family Identifier
+    unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
+    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+    list<update_prefix_tuple> wdrawn_routes;   ///< Withdrawn routes
+};
 
 /**
  * Extended Community header
@@ -94,7 +102,14 @@ typedef struct update_path_attrs {
         list<u_char[4]>         cluster_list;
         list<uint16_t>          attr_type_comm;
         list<extcomm_hdr>       ext_comm;
+        mp_unreach_nlri         mp_unreach_nlri_data;
+        list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
+        list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
+        list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
+        list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
     }attr_value;
+    libparsebgp_mp_link_state_parsed_data mp_ls_data;
+    libparsebgp_evpn_data evpn_data;
 }update_path_attrs;
 
 struct libparsebgp_update_msg_data {
@@ -109,18 +124,18 @@ struct libparsebgp_update_msg_data {
      */
 //        std::map<update_attr_types, std::string> parsed_attrs;
 
-    bool debug;                           ///< debug flag to indicate debugging
-    //Logger                  *logger;                         ///< Logging class pointer
-    std::string peer_addr;                       ///< Printed form of the peer address for logging
-    std::string router_addr;                     ///< Router IP address - used for logging
-    bool four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
-    peer_info *peer_inf;                      ///< Persistent Peer info pointer
+//    bool debug;                           ///< debug flag to indicate debugging
+//    //Logger                  *logger;                         ///< Logging class pointer
+//    std::string peer_addr;                       ///< Printed form of the peer address for logging
+//    std::string router_addr;                     ///< Router IP address - used for logging
+//    bool four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
+//    peer_info *peer_inf;                      ///< Persistent Peer info pointer
 
-    parsed_update_data parsed_data;
-    std::vector<obj_vpn> obj_vpn_rib_list;
-    std::vector<obj_evpn> obj_evpn_rib_list;
-    std::vector<obj_rib> adv_obj_rib_list;
-    std::vector<obj_rib> wdrawn_obj_rib_list;
+//    parsed_update_data parsed_data;
+//    std::vector<obj_vpn> obj_vpn_rib_list;
+//    std::vector<obj_evpn> obj_evpn_rib_list;
+//    std::vector<obj_rib> adv_obj_rib_list;
+//    std::vector<obj_rib> wdrawn_obj_rib_list;
 };
 
 void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,

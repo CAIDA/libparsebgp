@@ -14,6 +14,7 @@
 #include <string>
 
 #include "mp_reach_attr.h"
+#include "update_msg.h"
 #include "parse_common.h"
 
 //namespace bgp_msg {
@@ -25,16 +26,6 @@
  * \details This class parses MP_UNREACH attributes.
  *          It can be extended to create attributes messages.
  */
-
-/**
- * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
- */
-struct mp_unreach_nlri {
-    uint16_t       afi;                 ///< Address Family Identifier
-    unsigned char  safi;                ///< Subsequent Address Family Identifier
-    unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
-    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
-};
 
 struct libparsebgp_mp_un_reach_attr_parse_data {
     std::string peer_addr;          ///< Printed form of the peer address for logging
@@ -66,7 +57,7 @@ void libparsebgp_mp_un_reach_attr_init(libparsebgp_mp_un_reach_attr_parse_data *
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(libparsebgp_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker);
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data, bool &hasEndOfRIBMarker);
 
 /**
  * MP UnReach NLRI parse based on AFI
@@ -77,7 +68,7 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(libparsebgp_mp_un_rea
  * \param [in]   nlri           Reference to parsed UnReach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
+void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_char *data, int len);
 
 /**
  * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6

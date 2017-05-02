@@ -127,6 +127,11 @@
         std::string   labels;               ///< Labels in the format of label, label, ...
     };
 
+
+struct update_prefix_tuple {
+    uint8_t len;
+    std::string prefix;
+};
     /**
     * Struct for Route Distinguisher
     */

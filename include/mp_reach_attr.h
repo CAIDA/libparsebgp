@@ -28,10 +28,10 @@
  */
 struct mp_reach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
-    unsigned char  safi;                ///< Subsequent Address Family Identifier
-    unsigned char  nh_len;              ///< Length of next hop
+    uint8_t        safi;                ///< Subsequent Address Family Identifier
+    uint8_t        nh_len;              ///< Length of next hop
     unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
-    unsigned char  reserved;            ///< Reserved
+    uint8_t        reserved;            ///< Reserved
 
     unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
     uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
@@ -81,9 +81,7 @@ void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(libparsebgp_mp_reach_attr_p
  * \param [in]   peer_info                  Persistent Peer info pointer
  * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
  */
-void libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                           peer_info *peer_info,
-                                   std::list<prefix_tuple> &prefixes);
+void libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -98,9 +96,7 @@ void libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *da
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
 template <typename PREFIX_TUPLE>
-void libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                                 peer_info *peer_info,
-                                        std::list<PREFIX_TUPLE> &prefixes);
+void libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, std::list<PREFIX_TUPLE> &prefixes);
 
 /**
  * Decode label from NLRI data

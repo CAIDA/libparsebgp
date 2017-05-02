@@ -870,9 +870,9 @@ static void libparsebgp_parse_link_state_nlri_data(libparsebgp_mp_link_state_par
         uint8_t          proto_id;
         uint64_t         id;
 
-            proto_id = *data;
-            memcpy(&id, data + 1, sizeof(id));
-            SWAP_BYTES(&id);
+        proto_id = *data;
+        memcpy(&id, data + 1, sizeof(id));
+        SWAP_BYTES(&id);
 
         // Update read NLRI attribute, current TLV length and data pointer
         nlri_len_read += 9; nlri_len -= 9; data += 9;
@@ -960,7 +960,7 @@ void libparsebgp_mp_link_state_parse_reach_link_state(libparsebgp_mp_link_state_
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libparsebgp_mp_link_state_parse_unreach_link_state(libparsebgp_mp_link_state_parsed_data *data,mp_unreach_nlri &nlri) {
+void libparsebgp_mp_link_state_parse_unreach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri) {
     data->ls_data = &data->parsed_data->ls_withdrawn;
 
         /*

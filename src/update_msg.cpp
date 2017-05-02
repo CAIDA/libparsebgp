@@ -544,9 +544,9 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
 
             case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
             {
-                libparsebgp_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
-                libparsebgp_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_inf);
-                libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(mp_un_reach_attr_data, update_msg->path_attributes.attr_len, data, parsed_data, has_end_of_rib_marker);
+//                libparsebgp_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
+//                libparsebgp_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_inf);
+                libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(path_attrs, path_attrs->attr_len, data, has_end_of_rib_marker);
                 break;
             }
 
