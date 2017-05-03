@@ -22,12 +22,12 @@
  */
 //MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
 
-void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
+/*void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
     //logger = logPtr;
     //debug = enable_debug;
     data->peer_addr = peer_address;
     data->parsed_data = parse_data;
-}
+}*/
 
 //    MPLinkState::~MPLinkState() {
 //    }
@@ -224,7 +224,7 @@ static std::string libparsebgp_mp_link_state_decode_nlri_protocol_id(uint8_t pro
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libparsebgp_parse_nlri_node(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
+static void libparsebgp_parse_nlri_node(update_path_attrs *path_attrs, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
     obj_ls_node node_tbl;
     bzero(&node_tbl, sizeof(node_tbl));
 
@@ -287,7 +287,7 @@ static void libparsebgp_parse_nlri_node(libparsebgp_mp_link_state_parsed_data *p
     memcpy(node_tbl.igp_router_id, info.igp_router_id, sizeof(node_tbl.igp_router_id));
 
     // Save the parsed data
-    parse_data->ls_data->nodes.push_back(node_tbl);
+    path_attrs->mp_ls_data.nodes.push_back(node_tbl);
 }
 
 /**********************************************************************************//*
@@ -460,7 +460,7 @@ int libparsebgp_parse_descr_link(u_char *data, int data_len, link_descriptor &in
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libparsebgp_parse_nlri_link(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
+static void libparsebgp_parse_nlri_link(update_path_attrs *path_attrs, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
     obj_ls_link link_tbl;
     bzero(&link_tbl, sizeof(link_tbl));
 
@@ -555,7 +555,7 @@ static void libparsebgp_parse_nlri_link(libparsebgp_mp_link_state_parsed_data *p
     memcpy(link_tbl.intf_addr, info.intf_addr, sizeof(link_tbl.intf_addr));
     memcpy(link_tbl.nei_addr, info.nei_addr, sizeof(link_tbl.nei_addr));
 
-    parse_data->ls_data->links.push_back(link_tbl);
+    path_attrs->mp_ls_data.links.push_back(link_tbl);
 }
 
 /**********************************************************************************//*
@@ -746,7 +746,7 @@ int libparsebgp_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
  * \param [in]   proto_id       NLRI protocol type id
  * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
  */
-static void libparsebgp_parse_nlri_prefix(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
+static void libparsebgp_parse_nlri_prefix(update_path_attrs *path_attrs, u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
     obj_ls_prefix prefix_tbl;
     bzero(&prefix_tbl, sizeof(prefix_tbl));
 
@@ -826,7 +826,7 @@ static void libparsebgp_parse_nlri_prefix(libparsebgp_mp_link_state_parsed_data 
     memcpy(prefix_tbl.prefix_bcast_bin, info.prefix_bcast, sizeof(prefix_tbl.prefix_bcast_bin));
     memcpy(prefix_tbl.ospf_route_type, info.ospf_route_type, sizeof(prefix_tbl.ospf_route_type));
 
-    parse_data->ls_data->prefixes.push_back(prefix_tbl);
+    path_attrs->mp_ls_data.prefixes.push_back(prefix_tbl);
 }
 /**********************************************************************************//*
  * Parses Link State NLRI data
@@ -836,7 +836,7 @@ static void libparsebgp_parse_nlri_prefix(libparsebgp_mp_link_state_parsed_data 
  * \param [in]   data           Pointer to the NLRI data
  * \param [in]   len            Length of the NLRI data
  */
-static void libparsebgp_parse_link_state_nlri_data(libparsebgp_mp_link_state_parsed_data *parse_data, u_char *data, uint16_t len) {
+static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t len) {
     uint16_t        nlri_type;
     uint16_t        nlri_len;
     uint16_t        nlri_len_read = 0;
@@ -883,22 +883,22 @@ static void libparsebgp_parse_link_state_nlri_data(libparsebgp_mp_link_state_par
         switch (nlri_type) {
             case NLRI_TYPE_NODE:
                 //                  SELF_DEBUG("%s: bgp-ls: parsing NODE NLRI len=%d", peer_addr.c_str(), nlri_len);
-                libparsebgp_parse_nlri_node(parse_data, data, nlri_len, id, proto_id);
+                libparsebgp_parse_nlri_node(path_attrs, data, nlri_len, id, proto_id);
                 break;
 
             case NLRI_TYPE_LINK:
                 //                 SELF_DEBUG("%s: bgp-ls: parsing LINK NLRI", peer_addr.c_str());
-                libparsebgp_parse_nlri_link(parse_data, data, nlri_len, id, proto_id);
+                libparsebgp_parse_nlri_link(path_attrs, data, nlri_len, id, proto_id);
                 break;
 
             case NLRI_TYPE_IPV4_PREFIX:
                 //               SELF_DEBUG("%s: bgp-ls: parsing IPv4 PREFIX NLRI", peer_addr.c_str());
-                libparsebgp_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, true);
+                libparsebgp_parse_nlri_prefix(path_attrs, data, nlri_len, id, proto_id, true);
                 break;
 
             case NLRI_TYPE_IPV6_PREFIX:
                 //                SELF_DEBUG("%s: bgp-ls: parsing IPv6 PREFIX NLRI", peer_addr.c_str());
-                libparsebgp_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, false);
+                libparsebgp_parse_nlri_prefix(path_attrs, data, nlri_len, id, proto_id, false);
                 break;
 
             default :
@@ -918,31 +918,31 @@ static void libparsebgp_parse_link_state_nlri_data(libparsebgp_mp_link_state_par
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libparsebgp_mp_link_state_parse_reach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_reach_nlri &nlri) {
-    data->ls_data = &data->parsed_data->ls;
+void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, unsigned char *next_hop, unsigned char *nlri_data) {
+    //data->ls_data = &data->parsed_data->ls;
 
     // Process the next hop
     // Next-hop is an IPv6 address - Change/set the next-hop attribute in parsed data to use this next-hop
     u_char ip_raw[16];
     char ip_char[40];
 
-    if (nlri.nh_len == 4) {
-        memcpy(ip_raw, nlri.next_hop, nlri.nh_len);
+    if (path_attrs->attr_value.mp_reach_nlri_data.nh_len == 4) {
+        memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
         inet_ntop(AF_INET, ip_raw, ip_char, sizeof(ip_char));
-    } else if (nlri.nh_len > 4) {
-        memcpy(ip_raw, nlri.next_hop, nlri.nh_len);
+    } else if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 4) {
+        memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
         inet_ntop(AF_INET6, ip_raw, ip_char, sizeof(ip_char));
     }
 
-    data->parsed_data->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+    path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
         /*
          * Decode based on SAFI
          */
-        switch (nlri.safi) {
+        switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
                 //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
-                libparsebgp_parse_link_state_nlri_data(data, nlri.nlri_data, nlri.nlri_len);
+                libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, path_attrs->attr_value.mp_reach_nlri_data.nlri_len);
                 break;
 
         default :
@@ -960,16 +960,16 @@ void libparsebgp_mp_link_state_parse_reach_link_state(libparsebgp_mp_link_state_
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libparsebgp_mp_link_state_parse_unreach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri) {
-    data->ls_data = &data->parsed_data->ls_withdrawn;
+void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char *nlri_data, int len) {
+    //data->ls_data = &data->parsed_data->ls_withdrawn;
 
         /*
          * Decode based on SAFI
          */
-        switch (nlri.safi) {
+        switch (path_attrs->attr_value.mp_unreach_nlri_data.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
                 //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
-                libparsebgp_parse_link_state_nlri_data(data,nlri.nlri_data, nlri.nlri_len);
+                libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, len);
                 break;
 
         default :

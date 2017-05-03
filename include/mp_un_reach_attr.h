@@ -14,7 +14,7 @@
 #include <string>
 
 #include "mp_reach_attr.h"
-#include "update_msg.h"
+//#include "update_msg.h"
 #include "parse_common.h"
 
 //namespace bgp_msg {
@@ -79,7 +79,7 @@ void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_cha
  * \param [in]   nlri           Reference to parsed UnReach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_mp_un_reach_attr_parse_data *parse_data, bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data);
+void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_unreach_nlri &nlri, u_char *data, int len);
 
 //} /* namespace bgp_msg */
 

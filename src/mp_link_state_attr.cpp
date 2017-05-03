@@ -99,6 +99,7 @@
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
 
+/*
        void libparsebgp_mp_link_state_attr_init(libparsebgp_attr_link_state_parsed_data *data, std::string peerAddr,parsed_update_data *parsed_data)
        {
         //logger = logPtr;
@@ -106,6 +107,7 @@
         data->peer_addr = peerAddr;
         data->parsed_data = parsed_data;
         }
+*/
 
 
     /**
@@ -291,8 +293,8 @@
 
         //        SELF_DEBUG("%s: bgp-ls: parsed node flags %s %x (len=%d)", peer_addr.c_str(), flags.c_str(), *data, len);
 
-                path_attrs->attr_value.ls_attrs[ATTR_NODE_FLAG].fill(0);
-                strncpy((char *)path_attrs->attr_value.ls_attrs[ATTR_NODE_FLAG].data(), flags.c_str(), flags.size());
+                path_attrs->ls_attrs[ATTR_NODE_FLAG].fill(0);
+                strncpy((char *)path_attrs->ls_attrs[ATTR_NODE_FLAG].data(), flags.c_str(), flags.size());
             }
             break;
 
@@ -302,8 +304,8 @@
                     break;
                 }
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), data, 4);
-                inet_ntop(AF_INET, path_attrs->attr_value.ls_attrs[ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), ip_char, sizeof(ip_char));
+                memcpy(path_attrs->ls_attrs[ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), data, 4);
+                inet_ntop(AF_INET, path_attrs->ls_attrs[ATTR_NODE_IPV4_ROUTER_ID_LOCAL].data(), ip_char, sizeof(ip_char));
 
     //            SELF_DEBUG("%s: bgp-ls: parsed local IPv4 router id attribute: addr = %s", peer_addr.c_str(), ip_char);
                 break;
@@ -314,16 +316,16 @@
                     break;
                 }
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), data, 16);
-                inet_ntop(AF_INET6, path_attrs->attr_value.ls_attrs[ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), ip_char, sizeof(ip_char));
+                memcpy(path_attrs->ls_attrs[ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), data, 16);
+                inet_ntop(AF_INET6, path_attrs->ls_attrs[ATTR_NODE_IPV6_ROUTER_ID_LOCAL].data(), ip_char, sizeof(ip_char));
 
       //          SELF_DEBUG("%s: bgp-ls: parsed local IPv6 router id attribute: addr = %s", peer_addr.c_str(), ip_char);
                 break;
 
             case ATTR_NODE_ISIS_AREA_ID:
                 if (len <= 8)
-                    memcpy(path_attrs->attr_value.ls_attrs[ATTR_NODE_ISIS_AREA_ID].data(), data, len);
-                    path_attrs->attr_value.ls_attrs[ATTR_NODE_ISIS_AREA_ID].data()[8] = len;
+                    memcpy(path_attrs->ls_attrs[ATTR_NODE_ISIS_AREA_ID].data(), data, len);
+                    path_attrs->ls_attrs[ATTR_NODE_ISIS_AREA_ID].data()[8] = len;
 
     //            SELF_DEBUG("%s: bgp-ls: parsed node ISIS area id %x (len=%d)", peer_addr.c_str(), value_32bit, len);
                 break;
@@ -345,13 +347,13 @@
                         val_ss << ", " << value_16bit;
                 }
 
-                strncpy((char *)path_attrs->attr_value.ls_attrs[ATTR_NODE_MT_ID].data(), val_ss.str().data(), val_ss.str().length()+1);
+                strncpy((char *)path_attrs->ls_attrs[ATTR_NODE_MT_ID].data(), val_ss.str().data(), val_ss.str().length()+1);
                 // LOG_INFO("%s: bgp-ls: parsed node MT_ID %s (len=%d)", peer_addr.c_str(), val_ss.str().c_str(), len);
                 break;
 
             case ATTR_NODE_NAME:
-                path_attrs->attr_value.ls_attrs[ATTR_NODE_NAME].fill(0);
-                strncpy((char *)path_attrs->attr_value.ls_attrs[ATTR_NODE_NAME].data(), (char *)data, len);
+                path_attrs->ls_attrs[ATTR_NODE_NAME].fill(0);
+                strncpy((char *)path_attrs->ls_attrs[ATTR_NODE_NAME].data(), (char *)data, len);
 
         //        SELF_DEBUG("%s: bgp-ls: parsed node name attribute: name = %s", peer_addr.c_str(),parsed_data->ls_attrs[ATTR_NODE_NAME].data());
                 break;
@@ -366,10 +368,10 @@
                 // https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.1.1
 
                 // Decode flags
-                if (strcmp(path_attrs->attr_value.ls.nodes.front().protocol, "IS-IS") >= 0) {
+                if (strcmp(path_attrs->ls.nodes.front().protocol, "IS-IS") >= 0) {
                     val_ss << parse_flags_to_string(*data, LS_FLAGS_SR_CAP_ISIS, sizeof(LS_FLAGS_SR_CAP_ISIS));
 
-                } else if (strcmp(path_attrs->attr_value.ls.nodes.front().protocol, "OSPF") >= 0) {
+                } else if (strcmp(path_attrs->ls.nodes.front().protocol, "OSPF") >= 0) {
 
                     // TODO: Add flags for OSPF... Currently not defined in https://tools.ietf.org/html/draft-ietf-ospf-ospfv3-segment-routing-extensions-07#section-3
                     val_ss << int(*data);   //this->parse_flags_to_string(*data, LS_FLAGS_SR_CAP_OSPF, sizeof(LS_FLAGS_SR_CAP_OSPF));
@@ -436,7 +438,7 @@
                 }
         //        SELF_DEBUG("%s: bgp-ls: parsed node sr capabilities (len=%d) %s", peer_addr.c_str(), len, val_ss.str().c_str());
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_NODE_SR_CAPABILITIES].data(), val_ss.str().data(), val_ss.str().length());
+                memcpy(path_attrs->ls_attrs[ATTR_NODE_SR_CAPABILITIES].data(), val_ss.str().data(), val_ss.str().length());
                 break;
             }
 
@@ -448,7 +450,7 @@
                     value_32bit = 0;
                     memcpy(&value_32bit, data, len);
                     SWAP_BYTES(&value_32bit, len);
-                    memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_ADMIN_GROUP].data(), &value_32bit, 4);
+                    memcpy(path_attrs->ls_attrs[ATTR_LINK_ADMIN_GROUP].data(), &value_32bit, 4);
              //       SELF_DEBUG("%s: bgp-ls: parsed linked admin group attribute: "" 0x%x, len = %d",peer_addr.c_str(), value_32bit, len);
                 }
                 break;
@@ -460,7 +462,7 @@
                     SWAP_BYTES(&value_32bit, len);
                 }
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_IGP_METRIC].data(), &value_32bit, 4);
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_IGP_METRIC].data(), &value_32bit, 4);
 
       //          SELF_DEBUG("%s: bgp-ls: parsed link IGP metric attribute: metric = %u", peer_addr.c_str(), value_32bit);
                 break;
@@ -472,8 +474,8 @@
                     break;
                 }
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_IPV4_ROUTER_ID_REMOTE].data(), data, 4);
-                inet_ntop(AF_INET, path_attrs->attr_value.ls_attrs[ATTR_LINK_IPV4_ROUTER_ID_REMOTE].data(), ip_char, sizeof(ip_char));
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_IPV4_ROUTER_ID_REMOTE].data(), data, 4);
+                inet_ntop(AF_INET, path_attrs->ls_attrs[ATTR_LINK_IPV4_ROUTER_ID_REMOTE].data(), ip_char, sizeof(ip_char));
 
                 //         SELF_DEBUG("%s: bgp-ls: parsed remote IPv4 router id attribute: addr = %s", peer_addr.c_str(), ip_char);
                 break;
@@ -485,8 +487,8 @@
                     break;
                 }
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), data, 16);
-                inet_ntop(AF_INET6, path_attrs->attr_value.ls_attrs[ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), ip_char, sizeof(ip_char));
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), data, 16);
+                inet_ntop(AF_INET6, path_attrs->ls_attrs[ATTR_LINK_IPV6_ROUTER_ID_REMOTE].data(), ip_char, sizeof(ip_char));
 
                 //    SELF_DEBUG("%s: bgp-ls: parsed remote IPv6 router id attribute: addr = %s", peer_addr.c_str(), ip_char);
                 break;
@@ -502,7 +504,7 @@
                 memcpy(&float_val, data, len);
                 SWAP_BYTES(&float_val, len);
                 float_val = ieee_float_to_kbps(float_val);
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_MAX_LINK_BW].data(), &float_val, 4);
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_MAX_LINK_BW].data(), &float_val, 4);
 
                 memcpy(&value_32bit, data, 4);
                 SWAP_BYTES(&value_32bit);
@@ -520,7 +522,7 @@
                 memcpy(&float_val, data, len);
                 SWAP_BYTES(&float_val, len);
                 float_val = ieee_float_to_kbps(float_val);
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_MAX_RESV_BW].data(), &float_val, 4);
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_MAX_RESV_BW].data(), &float_val, 4);
                 //       SELF_DEBUG("%s: bgp-ls: parsed attribute maximum reserved bandwidth %u Kbits (len=%d)",
                 //          peer_addr.c_str(), *(uint32_t *)&float_val, len);
                 break;
@@ -536,8 +538,8 @@
                 break;
 
             case ATTR_LINK_NAME: {
-                path_attrs->attr_value.ls_attrs[ATTR_LINK_NAME].fill(0);
-                strncpy((char *)path_attrs->attr_value.ls_attrs[ATTR_LINK_NAME].data(), (char *)data, len);
+                path_attrs->ls_attrs[ATTR_LINK_NAME].fill(0);
+                strncpy((char *)path_attrs->ls_attrs[ATTR_LINK_NAME].data(), (char *)data, len);
 
                 //       SELF_DEBUG("%s: bgp-ls: parsing link name attribute: name = %s",
                 //            peer_addr.c_str(), parsed_data->ls_attrs[ATTR_LINK_NAME].data());
@@ -548,15 +550,15 @@
                 val_ss.str(std::string());
 
                 // There can be more than one adj sid, append as list
-                if (strlen((char *)path_attrs->attr_value.ls_attrs[ATTR_LINK_ADJACENCY_SID].data()) > 0)
+                if (strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()) > 0)
                     val_ss << ", ";
 
                 // Decode flags
-                if (strcmp(path_attrs->attr_value.ls.links.front().protocol, "IS-IS") >= 0) {
+                if (strcmp(path_attrs->ls.links.front().protocol, "IS-IS") >= 0) {
                     val_ss << parse_flags_to_string(*data,
                                                           LS_FLAGS_PEER_ADJ_SID_ISIS, sizeof(LS_FLAGS_PEER_ADJ_SID_ISIS));
 
-                } else if (strcmp(path_attrs->attr_value.ls.links.front().protocol, "OSPF") >= 0) {
+                } else if (strcmp(path_attrs->ls.links.front().protocol, "OSPF") >= 0) {
                     val_ss << parse_flags_to_string(*data,
                                                           LS_FLAGS_PEER_ADJ_SID_OSPF, sizeof(LS_FLAGS_PEER_ADJ_SID_OSPF));
                 }
@@ -577,10 +579,10 @@
 
                 //      SELF_DEBUG("%s: bgp-ls: parsed sr link adjacency segment identifier %s", peer_addr.c_str(), val_ss.str().c_str());
 
-                strncat((char *)path_attrs->attr_value.ls_attrs[ATTR_LINK_ADJACENCY_SID].data(),
+                strncat((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data(),
                         val_ss.str().c_str(),
-                        path_attrs->attr_value.ls_attrs[ATTR_LINK_ADJACENCY_SID].size() -
-                                strlen((char *)path_attrs->attr_value.ls_attrs[ATTR_LINK_ADJACENCY_SID].data()));
+                        path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].size() -
+                                strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()));
                 break;
             }
 
@@ -595,7 +597,7 @@
                 // Per rfc7752 Section 3.3.2.3, this is supposed to be 4 bytes, but some implementations have this <=4.
 
                 if (len == 0) {
-                    memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_TE_DEF_METRIC].data(), &value_32bit, len);
+                    memcpy(path_attrs->ls_attrs[ATTR_LINK_TE_DEF_METRIC].data(), &value_32bit, len);
                     break;
                 } else if (len > 4) {
                     //        LOG_NOTICE("%s: bgp-ls: failed to parse attribute TE default metric sub-tlv; too long %d",
@@ -604,7 +606,7 @@
                 } else {
                     memcpy(&value_32bit, data, len);
                     SWAP_BYTES(&value_32bit, len);
-                    memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_TE_DEF_METRIC].data(), &value_32bit, len);
+                    memcpy(path_attrs->ls_attrs[ATTR_LINK_TE_DEF_METRIC].data(), &value_32bit, len);
                     //        SELF_DEBUG("%s: bgp-ls: parsed attribute te default metric 0x%X (len=%d)", peer_addr.c_str(),
                     //                  value_32bit, len);
                 }
@@ -640,7 +642,7 @@
 
                 //    SELF_DEBUG("%s: bgp-ls: parsed unresvered bandwidth: %s", peer_addr.c_str(), val_ss.str().c_str());
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_UNRESV_BW].data(), val_ss.str().data(), val_ss.str().length());
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_UNRESV_BW].data(), val_ss.str().data(), val_ss.str().length());
 
                 break;
             }
@@ -672,7 +674,7 @@
                 //    SELF_DEBUG("%s: bgp-ls: parsed link peer node SID: %s (len=%d) %x", peer_addr.c_str(),
                 //               val_ss.str().c_str(), len, (data+4));
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_LINK_PEER_EPE_NODE_SID].data(), val_ss.str().data(), val_ss.str().length());
+                memcpy(path_attrs->ls_attrs[ATTR_LINK_PEER_EPE_NODE_SID].data(), val_ss.str().data(), val_ss.str().length());
                 break;
 
             case ATTR_LINK_PEER_EPE_SET_SID:
@@ -701,7 +703,7 @@
                     SWAP_BYTES(&value_32bit, len);
                 }
 
-                memcpy(path_attrs->attr_value.ls_attrs[ATTR_PREFIX_PREFIX_METRIC].data(), &value_32bit, 4);
+                memcpy(path_attrs->ls_attrs[ATTR_PREFIX_PREFIX_METRIC].data(), &value_32bit, 4);
                 //    SELF_DEBUG("%s: bgp-ls: parsing prefix metric attribute: metric = %u", peer_addr.c_str(), value_32bit);
                 break;
 
@@ -716,7 +718,7 @@
                     memcpy(&value_32bit, data, len);
                     SWAP_BYTES(&value_32bit);
 
-                    memcpy(path_attrs->attr_value.ls_attrs[ATTR_PREFIX_ROUTE_TAG].data(), &value_32bit, 4);
+                    memcpy(path_attrs->ls_attrs[ATTR_PREFIX_ROUTE_TAG].data(), &value_32bit, 4);
 //                    SELF_DEBUG("%s: bgp-ls: parsing prefix route tag attribute %d (len=%d)", peer_addr.c_str(),
 //                             value_32bit, len);
                 }
@@ -736,18 +738,18 @@
                 val_ss.str(std::string());
 
                 // There can be more than one prefix_sid, append as list
-                if (strlen((char *)path_attrs->attr_value.ls_attrs[ATTR_PREFIX_SID].data()) > 0)
+                if (strlen((char *)path_attrs->ls_attrs[ATTR_PREFIX_SID].data()) > 0)
                     val_ss << ", ";
 
                 // Package structure:
                 // https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.3.1
 
                 // Decode flags
-                if (strcmp(path_attrs->attr_value.ls.prefixes.front().protocol, "IS-IS") >= 0) {
+                if (strcmp(path_attrs->ls.prefixes.front().protocol, "IS-IS") >= 0) {
                     val_ss << parse_flags_to_string(*data,
                                                     LS_FLAGS_PREFIX_SID_ISIS, sizeof(LS_FLAGS_PREFIX_SID_ISIS));
 
-                } else if (strcmp(path_attrs->attr_value.ls.prefixes.front().protocol, "OSPF") >= 0) {
+                } else if (strcmp(path_attrs->ls.prefixes.front().protocol, "OSPF") >= 0) {
                     val_ss << parse_flags_to_string(*data,
                                                     LS_FLAGS_PREFIX_SID_OSPF, sizeof(LS_FLAGS_PREFIX_SID_OSPF));
                 }
@@ -775,10 +777,10 @@
                 // Parse the sid/value
                 val_ss << parse_sid_value(data, len - 4);
 
-                strncat((char *)path_attrs->attr_value.ls_attrs[ATTR_PREFIX_SID].data(),
+                strncat((char *)path_attrs->ls_attrs[ATTR_PREFIX_SID].data(),
                         val_ss.str().c_str(),
-                        path_attrs->attr_value.ls_attrs[ATTR_PREFIX_SID].size() -
-                                strlen((char *)path_attrs->attr_value.ls_attrs[ATTR_PREFIX_SID].data()));
+                        path_attrs->ls_attrs[ATTR_PREFIX_SID].size() -
+                                strlen((char *)path_attrs->ls_attrs[ATTR_PREFIX_SID].data()));
 
                 //    SELF_DEBUG("%s: bgp-ls: parsed sr prefix segment identifier  flags = %x len=%d : %s",
                 //               peer_addr.c_str(), *(data - 4), len, val_ss.str().c_str());

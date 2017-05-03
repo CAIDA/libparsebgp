@@ -12,9 +12,6 @@
 
 #include "bgp_common.h"
 #include "parse_common.h"
-#include "mp_link_state.h"
-#include "evpn.h"
-//#include "ext_community.h"
 #include <string>
 #include <list>
 #include <array>
@@ -52,6 +49,7 @@ struct update_bgp_hdr {
     u_char *nlri_ptr;
 };
 
+/*
 typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
 struct attr_type_tuple {
@@ -65,9 +63,11 @@ typedef struct as_path_segment {
     list<uint32_t>  seg_asn;
 }as_path_segment;
 
+*/
 /**
  * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
- */
+ *//*
+
 struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
@@ -76,11 +76,24 @@ struct mp_unreach_nlri {
     list<update_prefix_tuple> wdrawn_routes;   ///< Withdrawn routes
 };
 
+struct mp_reach_nlri {
+    uint16_t       afi;                 ///< Address Family Identifier
+    uint8_t        safi;                ///< Subsequent Address Family Identifier
+    uint8_t        nh_len;              ///< Length of next hop
+    //unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
+    uint8_t        reserved;            ///< Reserved
+
+    //unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
+    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+};
+
+*/
 /**
  * Extended Community header
  *      RFC4360 size is 8 bytes total (6 for value)
  *      RFC5701 size is 20 bytes total (16 for global admin, 2 for local admin)
- */
+ *//*
+
 struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
@@ -90,9 +103,11 @@ struct extcomm_hdr {
 
 typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
+*/
 /**
      * Parsed data structure for BGP-LS
-     */
+     *//*
+
 struct parsed_data_ls {
     std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
     std::list<obj_ls_link>   links;        ///< List of link state links
@@ -113,18 +128,22 @@ typedef struct update_path_attrs {
         list<uint16_t>          attr_type_comm;
         list<extcomm_hdr>       ext_comm;
         mp_unreach_nlri         mp_unreach_nlri_data;
-        list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
+        mp_reach_nlri           mp_reach_nlri_data;
         list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
         list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
         list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
-        parsed_ls_attrs_map        ls_attrs;
-        parsed_data_ls                ls;                 ///< REACH: Link state parsed data
-        parsed_data_ls                ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
+        parsed_ls_attrs_map     ls_attrs;
+        parsed_data_ls          ls;                 ///< REACH: Link state parsed data
+        parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
     }attr_value;
-    libparsebgp_mp_link_state_parsed_data mp_ls_data;
+    parsed_attrs_map            attrs;
+    list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
+    std::list<update_prefix_tuple>  advertised;
+    parsed_data_ls mp_ls_data;
     libparsebgp_evpn_data evpn_data;
     libparsebgp_addpath_map add_path_map;
 }update_path_attrs;
+*/
 
 struct libparsebgp_update_msg_data {
     uint16_t wdrawn_route_len;
@@ -181,8 +200,7 @@ void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::s
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len, parsed_update_data &parsed_data,
-                     bool &has_end_of_rib_marker);
+void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len, bool &has_end_of_rib_marker);
 
 /* namespace bgp_msg */
 

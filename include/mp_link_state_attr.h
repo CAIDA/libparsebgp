@@ -97,10 +97,10 @@
         ATTR_PREFIX_SID                                     ///< Prefix-SID TLV (len=variable)
     };
 
-struct libparsebgp_attr_link_state_parsed_data {
+/*struct libparsebgp_attr_link_state_parsed_data {
     std::string peer_addr;                       ///< Printed form of the peer address for logging
     parsed_update_data *parsed_data;       ///< Parsed data structure
-};
+};*/
 
 /**
      * Constructor for class

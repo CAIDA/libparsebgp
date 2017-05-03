@@ -27,7 +27,7 @@
 /**
  * struct defines the MP_REACH_NLRI (RFC4760 Section 3)
  */
-struct mp_reach_nlri {
+/*struct mp_reach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     uint8_t        nh_len;              ///< Length of next hop
@@ -36,7 +36,7 @@ struct mp_reach_nlri {
 
     unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
     uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
-};
+};*/
 
 struct libparsebgp_mp_reach_attr_parsed_data {
     std::string peer_addr;              ///< Printed form of the peer address for logging

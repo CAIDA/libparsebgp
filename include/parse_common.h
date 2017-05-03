@@ -397,10 +397,99 @@ struct peer_info {
     // Parsed bgp-ls attributes map
     typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
-    /**
-     * Parsed update data - decoded data from complete update parse
+typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
+
+struct attr_type_tuple {
+    uint8_t attr_flags;
+    uint8_t attr_type_code;
+};
+
+typedef struct as_path_segment {
+    uint8_t         seg_type;
+    uint8_t         seg_len;
+    list<uint32_t>  seg_asn;
+}as_path_segment;
+
+/**
+ * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
+ */
+struct mp_unreach_nlri {
+    uint16_t       afi;                 ///< Address Family Identifier
+    uint8_t        safi;                ///< Subsequent Address Family Identifier
+    unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
+    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+    list<update_prefix_tuple> wdrawn_routes;   ///< Withdrawn routes
+};
+
+struct mp_reach_nlri {
+    uint16_t       afi;                 ///< Address Family Identifier
+    uint8_t        safi;                ///< Subsequent Address Family Identifier
+    uint8_t        nh_len;              ///< Length of next hop
+    //unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
+    uint8_t        reserved;            ///< Reserved
+
+    //unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
+    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+};
+
+/**
+ * Extended Community header
+ *      RFC4360 size is 8 bytes total (6 for value)
+ *      RFC5701 size is 20 bytes total (16 for global admin, 2 for local admin)
+ */
+struct extcomm_hdr {
+    uint8_t      high_type;                      ///< Type high byte
+    uint8_t      low_type;                       ///< Type low byte - subtype
+    u_char       *value;                         ///<
+    string       val;
+};
+
+typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
+
+/**
+     * Parsed data structure for BGP-LS
      */
-    struct parsed_update_data {
+struct parsed_data_ls {
+    std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
+    std::list<obj_ls_link>   links;        ///< List of link state links
+    std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+};
+
+struct update_path_attrs {
+    attr_type_tuple attr_type;
+    uint16_t        attr_len;
+    union attr_value{
+        uint8_t                 origin;
+        list<as_path_segment>   as_path;
+        u_char                  ipv4_raw[4];
+        uint32_t                value32bit;
+        uint16_t                value16bit;
+        string                  aggregator;
+        list<u_char[4]>         cluster_list;
+        list<uint16_t>          attr_type_comm;
+        list<extcomm_hdr>       ext_comm;
+        mp_unreach_nlri         mp_unreach_nlri_data;
+        mp_reach_nlri           mp_reach_nlri_data;
+    }attr_value;
+    parsed_attrs_map            attrs;
+    list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
+    std::list<update_prefix_tuple>  advertised;
+    parsed_data_ls mp_ls_data;
+    list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
+    list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
+    list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
+    parsed_ls_attrs_map     ls_attrs;
+    parsed_data_ls          ls;                 ///< REACH: Link state parsed data
+    parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
+    //libparsebgp_evpn_data evpn_data;
+    libparsebgp_addpath_map add_path_map;
+};
+
+
+/**
+ * Parsed update data - decoded data from complete update parse
+ */
+    /*struct parsed_update_data {
         parsed_attrs_map              attrs;              ///< Parsed attrbutes
         std::list<prefix_tuple>  withdrawn;          ///< List of withdrawn prefixes
         std::list<prefix_tuple>  advertised;         ///< List of advertised prefixes
@@ -411,7 +500,7 @@ struct peer_info {
         std::list<vpn_tuple>     vpn_withdrawn;      ///< List of vpn prefixes withdrawn
         std::list<evpn_tuple>    evpn;               ///< List of evpn nlris advertised
         std::list<evpn_tuple>    evpn_withdrawn;     ///< List of evpn nlris withdrawn
-    };
+    };*/
 
 //    struct parsed_bgp_msg{
 //        libparsebgp_common_bgp_hdr common_hdr;

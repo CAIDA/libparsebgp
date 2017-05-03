@@ -106,7 +106,7 @@ void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_cha
         {
 //            libparsebgp_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
             //TODO: Currently mp_ls_data in update_msg, figure out where to put it
-            libparsebgp_mp_link_state_parse_unreach_link_state(&path_attrs->mp_ls_data, path_attrs->attr_value.mp_unreach_nlri_data);
+            libparsebgp_mp_link_state_parse_unreach_link_state(path_attrs, data, len);
             break;
         }
 
@@ -119,7 +119,7 @@ void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_cha
 //                    libparsebgp_evpn_data *evpn_data;
 //                    libparsebgp_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
                     //TODO: Same as above
-                    libparsebgp_evpn_parse_nlri_data(&path_attrs->evpn_data, data, len);
+                    libparsebgp_evpn_parse_nlri_data(path_attrs, data, len, true);
                     break;
                 }
 

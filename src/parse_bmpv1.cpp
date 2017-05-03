@@ -984,7 +984,7 @@ uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, uns
 
 
 // Parse the BGP sent/received open messages
-                    libparsebgp_parse_bgp_handle_up_event(bmp_data, bmp_data_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.);
+                    libparsebgp_parse_bgp_handle_up_event(bmp_data, bmp_data_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg);
                 } //else {
                 //   LOG_NOTICE("%s: PEER UP Received but failed to parse the BMP header.", client->c_ip);
                 // }

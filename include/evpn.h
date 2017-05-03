@@ -6,7 +6,8 @@
 #include <sys/types.h>
 #include <iomanip>
 #include <arpa/inet.h>
-#include "mp_reach_attr.h"
+#include "update_msg.h"
+//#include "mp_reach_attr.h"
 
 //namespace bgp_msg {
 enum evpn_routes_types {
@@ -21,7 +22,7 @@ struct libparsebgp_evpn_data {
     std::string peer_addr;                       ///< Printed form of the peer address for logging
     bool is_un_reach;                       ///< True if MP UNREACH, false if MP REACH
 
-    parsed_update_data *parsed_data;       ///< Parsed data structure
+    //parsed_update_data *parsed_data;       ///< Parsed data structure
 };
 
     /**
@@ -36,7 +37,7 @@ struct libparsebgp_evpn_data {
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
 
-    void libparsebgp_evpn_init(libparsebgp_evpn_data *evpn_data, std::string peerAddr, bool is_unreach, parsed_update_data *parsed_data);
+    //void libparsebgp_evpn_init(libparsebgp_evpn_data *evpn_data, std::string peerAddr, bool is_unreach, parsed_update_data *parsed_data);
 
     /**
      * Parse Route Distinguisher
@@ -62,7 +63,7 @@ struct libparsebgp_evpn_data {
      * \param [in]   data_len               Length of the data in bytes to be read
      *
      */
-    void libparsebgp_evpn_parse_nlri_data(libparsebgp_evpn_data *evpn_data,u_char *data, uint16_t data_len);
+    void libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,u_char *data, uint16_t data_len, bool is_unreach);
 //}
 
 

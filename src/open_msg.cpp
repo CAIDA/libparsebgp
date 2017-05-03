@@ -8,6 +8,7 @@
  */
 #include "../include/open_msg.h"
 #include "../include/bgp_common.h"
+#include "../include/add_path_data_container.h"
 #include <arpa/inet.h>
 
 //namespace bgp_msg {
@@ -21,10 +22,10 @@
  * \param [in]     peer_info       Persistent peer information
  * \param [in]     enable_debug    Debug true to enable, false to disable
  */
-void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data,std::string peer_addr, peer_info *peer_info) {
+/*void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data,std::string peer_addr, peer_info *peer_info) {
     open_msg_data->peer_inf = peer_info;
     open_msg_data->peer_addr = peer_addr;
-}
+}*/
 
     /**
  * Parses capabilities from buffer
@@ -155,10 +156,8 @@ static size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data 
                                         break;
                                 }*/
                                 //TODO: figure out if following is needed
-                                libparsebgp_addpath_add(open_msg_data->peer_inf->add_path_capability, open_cap.cap_values.add_path_data.afi,
-                                                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
-                                //open_msg_data->peer_info->add_path_capability.addAddPath(data.afi, data.safi, data.send_recieve,
-                                //                                                openMessageIsSent);
+                                //libparsebgp_addpath_add(open_msg_data->add_path_capability, open_cap.cap_values.add_path_data.afi,
+                                //                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
                                 open_msg_data->opt_param.param_values.push_back(open_cap);
                                 //capabilities.push_back(decodeStr);
                             }

@@ -628,7 +628,7 @@
 
         //LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
 
-        if ( (attr_len % 20) ) {
+        if ( (path_attrs->attr_len % 20) ) {
             //LOG_NOTICE("%s: Parsing IPv6 extended community len=%d is invalid, expecting divisible by 20", peer_addr.c_str(), attr_len);
             return;
         }
@@ -636,7 +636,7 @@
         /*
          * Loop through consecutive entries
          */
-        for (int i = 0; i < attr_len; i += 20) {
+        for (int i = 0; i < path_attrs->attr_len; i += 20) {
             // Setup extended community header
             ec_hdr.high_type = data[0];
             ec_hdr.low_type = data[1];

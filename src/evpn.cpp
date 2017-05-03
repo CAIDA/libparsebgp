@@ -1,4 +1,8 @@
 #include "../include/evpn.h"
+#include "../include/bgp_common.h"
+#include "../include/update_msg.h"
+#include <list>
+#include <map>
 
 //namespace bgp_msg {
 
@@ -14,11 +18,11 @@
 
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
-    void libparsebgp_evpn_init(libparsebgp_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parsed_update_data *parsed_data) {
+/*    void libparsebgp_evpn_init(libparsebgp_evpn_data *evpn_data, std::string peerAddr, bool is_un_reach, parsed_update_data *parsed_data) {
         evpn_data->peer_addr = peerAddr;
         evpn_data->parsed_data = parsed_data;
         evpn_data->is_un_reach = is_un_reach;
-    }
+    }*/
 
     /**
      * Parse Ethernet Segment Identifier
@@ -31,7 +35,7 @@
      * \param [out]     rd_assigned_number         Reference to Assigned Number subfield
      * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
      */
-    static void libparsebgp_evpn_parse_ethernet_segment_identifier(libparsebgp_evpn_data *evpn_data, u_char *data_pointer, std::string *parsed_data) {
+    static void libparsebgp_evpn_parse_ethernet_segment_identifier(update_path_attrs *path_attrs, u_char *data_pointer, std::string *parsed_data) {
         std::stringstream result;
         uint8_t type = *data_pointer;
 
@@ -246,7 +250,7 @@
      * \param [in]   data_len               Length of the data in bytes to be read
      *
      */
-    void libparsebgp_evpn_parse_nlri_data(libparsebgp_evpn_data *evpn_data, u_char *data, uint16_t data_len) {
+    void libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t data_len, bool is_unreach) {
         u_char      *data_pointer = data;
         u_char      ip_binary[16];
         int         addr_bytes;
@@ -290,7 +294,7 @@
                     if ((data_read + 17 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libparsebgp_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         //Ethernet Tag Id (4 bytes), printing in hex.
@@ -324,7 +328,7 @@
                     if ((data_read + 25 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libparsebgp_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         // Ethernet Tag ID (4 bytes)
@@ -453,7 +457,7 @@
                     if ((data_read + 11 /* expected read size */) <= data_len) {
 
                         // Ethernet Segment Identifier (10 bytes)
-                        libparsebgp_evpn_parse_ethernet_segment_identifier(evpn_data, data_pointer, &tuple.ethernet_segment_identifier);
+                        libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple.ethernet_segment_identifier);
                         data_pointer += 10;
 
                         // IP Address Length (1 bytes)
@@ -490,10 +494,10 @@
                 }
             }
 
-            if (evpn_data->is_un_reach)
-                evpn_data->parsed_data->evpn_withdrawn.push_back(tuple);
+            if (is_unreach)
+                path_attrs->evpn_withdrawn.push_back(tuple);
             else
-                evpn_data->parsed_data->evpn.push_back(tuple);
+                path_attrs->evpn.push_back(tuple);
 
             //SELF_DEBUG("%s: Processed evpn NLRI read %d of %d, nlri len %d", peer_addr.c_str(),
             //           data_read, data_len, len);

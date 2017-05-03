@@ -189,7 +189,7 @@ static void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_l
             uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn :
                            mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn;
             libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, buffer,
-                                                     mrt_data_len, asn, mrt_parsed_data->c_hdr.sub_type > 5); /*{
+                                                     mrt_data_len, mrt_parsed_data->c_hdr.sub_type > 5); /*{
                 mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_msg.local_asn;
                 mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_msg.peer_asn;
                 memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_msg.local_ip, 40);

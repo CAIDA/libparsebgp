@@ -126,12 +126,12 @@
         OSPF_RT_NSSA_2                                  ///< NSSA type 2
     };
 
-struct libparsebgp_mp_link_state_parsed_data {
+/*struct libparsebgp_mp_link_state_parsed_data {
     std::string peer_addr;                       ///< Printed form of the peer address for logging
 
-    parsed_update_data *parsed_data;       ///< Parsed data structure
+    //parsed_update_data *parsed_data;       ///< Parsed data structure
     parsed_data_ls *ls_data;           ///< Parsed LS Data
-};
+};*/
     /**
      * Constructor for class
      *
@@ -143,7 +143,7 @@ struct libparsebgp_mp_link_state_parsed_data {
      * \param [in]     enable_debug Debug true to enable, false to disable
      */
 
-    void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address,parsed_update_data *parse_data);
+    //void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address,parsed_update_data *parse_data);
 
         //       virtual ~MPLinkState();
 
@@ -154,7 +154,7 @@ struct libparsebgp_mp_link_state_parsed_data {
      *
      * \param [in]   nlri           Reference to parsed NLRI struct
      */
-    void libparsebgp_mp_link_state_parse_reach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_reach_nlri &nlri);
+    void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, unsigned char *next_hop, unsigned char *nlri_data);
 
     /**
      * MP UnReach Link State NLRI parse
@@ -163,7 +163,7 @@ struct libparsebgp_mp_link_state_parsed_data {
      *
      * \param [in]   nlri           Reference to parsed NLRI struct
      */
-    void libparsebgp_mp_link_state_parse_unreach_link_state(libparsebgp_mp_link_state_parsed_data *data, mp_unreach_nlri &nlri);
+    void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char *nlri_data, int len);
 
 
     /**********************************************************************************//*
