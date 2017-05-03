@@ -790,6 +790,55 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
     return false;
 }
 
+/**
+ * Handles the up event by parsing the BGP open messages - Up event will be updated
+ *
+ * \details
+ *  This method will read the expected sent and receive open messages.
+ *
+ * \param [in]     data             Pointer to the raw BGP message header
+ * \param [in]     size             length of the data buffer (used to prevent overrun)
+ *
+ * \returns True if error, false if no error.
+ */
+static bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
+    size_t              read_size;
+    /*
+     * Process the sent open message
+     */
+    if (libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
+        data += BGP_MSG_HDR_LEN;
+
+        read_size = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
+
+        if (!read_size) {
+            //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
+            throw "Failed to read sent open message";
+        }
+
+        data += read_size;                                          // Move the pointer pase the sent open message
+        size -= read_size;
+    }
+
+    if (libparsebgp_parse_bgp_parse_header(&up_event->received_open_msg, data, size) == BGP_MSG_OPEN) {
+        data += BGP_MSG_HDR_LEN;
+
+        read_size = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg,data, size, false);
+
+        if (!read_size) {
+            //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
+            throw "Failed to read received open message";
+        }
+
+        data += read_size;                                          // Move the pointer pase the sent open message
+        size -= read_size;
+
+    } else {
+        //      LOG_ERR("%s: rtr=%s: BGP message type is not BGP OPEN, cannot parse the open message",p_entry->peer_addr, router_addr.c_str());
+        throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
+    }
+    return false;
+}
 
 /**
  * Parse the v3 peer up BMP header
@@ -935,7 +984,7 @@ uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, uns
 
 
 // Parse the BGP sent/received open messages
-                    libparsebgp_parse_bgp_handle_up_event(bmp_data, bmp_data_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg);
+                    libparsebgp_parse_bgp_handle_up_event(bmp_data, bmp_data_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.);
                 } //else {
                 //   LOG_NOTICE("%s: PEER UP Received but failed to parse the BMP header.", client->c_ip);
                 // }
@@ -951,7 +1000,7 @@ uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, uns
                  */
 //                libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
-                libparsebgp_parse_bgp_handle_update(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg,bmp_data, bmp_data_len);
+                libparsebgp_parse_bgp_handle_update(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len);
 
                 break;
             }

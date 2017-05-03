@@ -10,7 +10,6 @@
 #include <algorithm>
 #include "../include/parse_bgp.h"
 #include "../include/mp_link_state_attr.h"
-#include "../include/parse_bmpv1.h"
 
 using namespace std;
 
@@ -553,42 +552,42 @@ static void libparsebgp_parse_bgp_update_db_wdrawn_prefixes(libparsebgp_parse_bg
  *
  * \param  parsed_data          Reference to the parsed update data
  */
-static void libparsebgp_parse_bgp_update_db(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data) {
-    /*
-     * Update the path attributes
-     */
-    libparsebgp_parse_bgp_update_db_attrs(bgp_parsed_data, bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs);
-
-    /*
-     * Update the bgp-ls data
-     */
-    libparsebgp_parse_bgp_update_db_bgp_ls(false, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls_attrs);
-    libparsebgp_parse_bgp_update_db_bgp_ls(true, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls_withdrawn, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls_attrs);
-
-    /*
-     * Update the advertised prefixes (both ipv4 and ipv6)
-     */
-    libparsebgp_parse_bgp_update_db_adv_prefixes(bgp_parsed_data, bgp_parsed_data->parsed_data.update_msg.parsed_data.advertised,
-                                                 bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs,
-                                                 bgp_parsed_data->parsed_data.update_msg.adv_obj_rib_list);
-
-    libparsebgp_parse_bgp_update_db_l3vpn(bgp_parsed_data, false,bgp_parsed_data->parsed_data.update_msg.parsed_data.vpn,
-                                          bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_vpn_rib_list);
-    libparsebgp_parse_bgp_update_db_l3vpn(bgp_parsed_data, true,bgp_parsed_data->parsed_data.update_msg.parsed_data.vpn_withdrawn,
-                                          bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_vpn_rib_list);
-
-    libparsebgp_parse_bgp_update_db_evpn(bgp_parsed_data, false, bgp_parsed_data->parsed_data.update_msg.parsed_data.evpn,
-                                         bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_evpn_rib_list);
-    libparsebgp_parse_bgp_update_db_evpn(bgp_parsed_data, true, bgp_parsed_data->parsed_data.update_msg.parsed_data.evpn_withdrawn,
-                                         bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_evpn_rib_list);
-
-    /*
-     * Update withdraws (both ipv4 and ipv6)
-     */
-    libparsebgp_parse_bgp_update_db_wdrawn_prefixes(bgp_parsed_data, bgp_parsed_data->parsed_data.update_msg.parsed_data.withdrawn,
-                                                    bgp_parsed_data->parsed_data.update_msg.wdrawn_obj_rib_list);
-
-}
+//static void libparsebgp_parse_bgp_update_db(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data) {
+//    /*
+//     * Update the path attributes
+//     */
+//    libparsebgp_parse_bgp_update_db_attrs(bgp_parsed_data, bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs);
+//
+//    /*
+//     * Update the bgp-ls data
+//     */
+//    libparsebgp_parse_bgp_update_db_bgp_ls(false, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls_attrs);
+//    libparsebgp_parse_bgp_update_db_bgp_ls(true, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls_withdrawn, bgp_parsed_data->parsed_data.update_msg.parsed_data.ls_attrs);
+//
+//    /*
+//     * Update the advertised prefixes (both ipv4 and ipv6)
+//     */
+//    libparsebgp_parse_bgp_update_db_adv_prefixes(bgp_parsed_data, bgp_parsed_data->parsed_data.update_msg.parsed_data.advertised,
+//                                                 bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs,
+//                                                 bgp_parsed_data->parsed_data.update_msg.adv_obj_rib_list);
+//
+//    libparsebgp_parse_bgp_update_db_l3vpn(bgp_parsed_data, false,bgp_parsed_data->parsed_data.update_msg.parsed_data.vpn,
+//                                          bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_vpn_rib_list);
+//    libparsebgp_parse_bgp_update_db_l3vpn(bgp_parsed_data, true,bgp_parsed_data->parsed_data.update_msg.parsed_data.vpn_withdrawn,
+//                                          bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_vpn_rib_list);
+//
+//    libparsebgp_parse_bgp_update_db_evpn(bgp_parsed_data, false, bgp_parsed_data->parsed_data.update_msg.parsed_data.evpn,
+//                                         bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_evpn_rib_list);
+//    libparsebgp_parse_bgp_update_db_evpn(bgp_parsed_data, true, bgp_parsed_data->parsed_data.update_msg.parsed_data.evpn_withdrawn,
+//                                         bgp_parsed_data->parsed_data.update_msg.parsed_data.attrs, bgp_parsed_data->parsed_data.update_msg.obj_evpn_rib_list);
+//
+//    /*
+//     * Update withdraws (both ipv4 and ipv6)
+//     */
+//    libparsebgp_parse_bgp_update_db_wdrawn_prefixes(bgp_parsed_data, bgp_parsed_data->parsed_data.update_msg.parsed_data.withdrawn,
+//                                                    bgp_parsed_data->parsed_data.update_msg.wdrawn_obj_rib_list);
+//
+//}
 
 /**
  * parse BGP messages in MRT
@@ -598,7 +597,7 @@ static void libparsebgp_parse_bgp_update_db(libparsebgp_parse_bgp_parsed_data *b
  * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns BGP message type
  */
-void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+//void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
                                                 uint32_t asn, bool is_local_msg) {
     u_char  bgp_msg_type = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size);
     switch (bgp_msg_type) {
@@ -621,7 +620,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
 
             bgp_parsed_data->data_bytes_remaining -= read_size;
 
-            libparsebgp_parse_bgp_update_db(bgp_parsed_data);
+//            libparsebgp_parse_bgp_update_db(bgp_parsed_data);
             break;
         }
         case BGP_MSG_NOTIFICATION: {
@@ -788,39 +787,39 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
  *
  * \returns True if error, false if no error.
  */
-//bool libparsebgp_parse_bgp_handle_update(libparsebgp_parsed_bmp_rm_msg *bgp_parsed_data, u_char *data, size_t size) {
-//    //UpdateMsg::parsed_update_data parsed_data;
-//    int read_size = 0;
-//
-//    if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size) == BGP_MSG_UPDATE) {
-//        data += BGP_MSG_HDR_LEN;
-//
-//        /*
-//         * Parse the update message - stored results will be in parsed_data
-//         */
-//        //UpdateMsg uMsg(bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
-//        //libparsebgp_update_msg_data u_msg;
+bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *update_msg, u_char *data, size_t size) {
+    //UpdateMsg::parsed_update_data parsed_data;
+    int read_size = 0;
+
+    if (libparsebgp_parse_bgp_parse_header(update_msg, data, size) == BGP_MSG_UPDATE) {
+        data += BGP_MSG_HDR_LEN;
+
+        /*
+         * Parse the update message - stored results will be in parsed_data
+         */
+        //UpdateMsg uMsg(bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
+        //libparsebgp_update_msg_data u_msg;
 //        libparsebgp_update_msg_init(&bgp_parsed_data->parsed_data.update_msg, bgp_parsed_data->p_entry->peer_addr,
 //                                    bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
-//
-//        //if ((read_size=uMsg.parseUpdateMsg(data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
-//        if ((read_size=libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data->parsed_data.update_msg, data, bgp_parsed_data->data_bytes_remaining,
-//                                                               bgp_parsed_data->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
-//            //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
-//            return true;
-//        }
-//
-//        bgp_parsed_data->data_bytes_remaining -= read_size;
-//
-//        /*
-//         * Update the DB with the update data
-//         */
+
+        //if ((read_size=uMsg.parseUpdateMsg(data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
+        if ((read_size=libparsebgp_update_msg_parse_update_msg(&update_msg->parsed_data.update_msg, data, update_msg->data_bytes_remaining,
+                                                               update_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
+            //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
+            return true;
+        }
+
+        update_msg->data_bytes_remaining -= read_size;
+
+        /*
+         * Update the DB with the update data
+         */
 //        libparsebgp_parse_bgp_update_db(bgp_parsed_data);
-//    }
-//
-//    return false;
-//}
-//
+    }
+
+    return false;
+}
+
 /**
  * handle  BGP notify event - updates the down event with parsed data
  *
@@ -870,56 +869,6 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *
     }
 
     return rval;
-}
-
-/**
- * Handles the up event by parsing the BGP open messages - Up event will be updated
- *
- * \details
- *  This method will read the expected sent and receive open messages.
- *
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- *
- * \returns True if error, false if no error.
- */
-bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
-    size_t              read_size;
-    /*
-     * Process the sent open message
-     */
-    if (libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
-        data += BGP_MSG_HDR_LEN;
-
-        read_size = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
-
-        if (!read_size) {
-            //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
-            throw "Failed to read sent open message";
-        }
-
-        data += read_size;                                          // Move the pointer pase the sent open message
-        size -= read_size;
-    }
-
-    if (libparsebgp_parse_bgp_parse_header(&up_event->received_open_msg, data, size) == BGP_MSG_OPEN) {
-        data += BGP_MSG_HDR_LEN;
-
-        read_size = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg,data, size, false);
-
-        if (!read_size) {
-     //       LOG_ERR("%s: rtr=%s: Failed to read sent open message", p_entry->peer_addr, router_addr.c_str());
-            throw "Failed to read received open message";
-        }
-
-        data += read_size;                                          // Move the pointer pase the sent open message
-        size -= read_size;
-
-    } else {
-  //      LOG_ERR("%s: rtr=%s: BGP message type is not BGP OPEN, cannot parse the open message",p_entry->peer_addr, router_addr.c_str());
-        throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
-    }
-    return false;
 }
 
 /**

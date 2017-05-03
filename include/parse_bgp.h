@@ -17,7 +17,7 @@
 //#include "parse_common.h"
 #include "open_msg.h"
 #include "notification_msg.h"
-#include "parse_bmpv1.h"
+//#include "parse_bmpv1.h"
 
 
 using namespace std;
@@ -133,7 +133,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parsed_bmp_rm_msg *bgp_parsed_data, u_char *data, size_t size);
+    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *update_msg, u_char *data, size_t size);
 
     /**
      * handle BGP notify event - updates the down event with parsed data
@@ -149,19 +149,6 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
      * \returns True if error, false if no error.
      */
     bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
-
-    /**
-     * Handles the up event by parsing the BGP open messages - Up event will be updated
-     *
-     * \details
-     *  This method will read the expected sent and receive open messages.
-     *
-     * \param [in]     data             Pointer to the raw BGP message header
-     * \param [in]     size             length of the data buffer (used to prevent overrun)
-     *
-     * \returns True if error, false if no error.
-     */
-    bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event);
 
     /**
      * Parses the BGP common header

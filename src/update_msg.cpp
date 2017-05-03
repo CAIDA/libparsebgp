@@ -17,13 +17,13 @@
 
 //namespace bgp_msg {
 
-
-    void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
-                                               std::string router_addr, peer_info *peer_info){
-        update_msg->peer_inf = peer_info;
-        update_msg->peer_addr = peer_addr;
-        update_msg->router_addr = router_addr;
-    }
+//
+//    void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
+//                                               std::string router_addr, peer_info *peer_info){
+//        update_msg->peer_inf = peer_info;
+//        update_msg->peer_addr = peer_addr;
+//        update_msg->router_addr = router_addr;
+//    }
 
 
 /**
@@ -37,8 +37,7 @@
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
-    static void libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len,
-                                                          std::list<update_prefix_tuple> &prefixes) {
+static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes) {
         u_char       ipv4_raw[4];
         char         ipv4_char[16];
         u_char       addr_bytes;
@@ -62,12 +61,13 @@
 
             // Parse add-paths if enabled
             //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
-            if (libparsebgp_addpath_is_enabled(update_msg->peer_inf->add_path_capability, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
-                and (len - read_size) >= 4) {
-                //memcpy(&tuple.path_id, data, 4);
-                //SWAP_BYTES(&tuple.path_id);
-                //data += 4; read_size += 4;
-            } //else
+            //TODO: check with Alistair if this is important
+//            if (libparsebgp_addpath_is_enabled(update_msg->peer_inf->add_path_capability, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
+//                and (len - read_size) >= 4) {
+//                //memcpy(&tuple.path_id, data, 4);
+//                //SWAP_BYTES(&tuple.path_id);
+//                //data += 4; read_size += 4;
+//            } //else
                 //tuple.path_id = 0;
 
             // set the address in bits length
@@ -125,9 +125,9 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
     u_char      *bufPtr         = data;
 
     // Clear the parsed_data
-    update_msg->parsed_data.advertised.clear();
-    update_msg->parsed_data.attrs.clear();
-    update_msg->parsed_data.withdrawn.clear();
+//    update_msg->parsed_data.advertised.clear();
+//    update_msg->parsed_data.attrs.clear();
+//    update_msg->parsed_data.withdrawn.clear();
 
     /* ---------------------------------------------------------
      * Parse and setup the update header struct
@@ -189,14 +189,14 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
          */
         //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 withdrawn data", peer_addr.c_str(), router_addr.c_str());
         if (update_msg->wdrawn_route_len > 0)
-            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, withdrawn_ptr, update_msg->wdrawn_route_len, update_msg->wdrawn_routes);
+            libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len, update_msg->wdrawn_routes);
 
         /* ---------------------------------------------------------
          * Parse the attributes
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (update_msg->total_path_attr_len > 0) {
-            libparsebgp_update_msg_parse_attributes(update_msg, attr_ptr, update_msg->total_path_attr_len, update_msg->parsed_data, has_end_of_rib_marker);
+            libparsebgp_update_msg_parse_attributes(update_msg, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker);
         }
 
         /* ---------------------------------------------------------
@@ -204,7 +204,7 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
          */
         //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 NLRI data, size = %d", peer_addr.c_str(), router_addr.c_str(), (size - read_size));
         if ((size - read_size) > 0) {
-            libparsebgp_update_msg_parse_nlri_data_v4(update_msg, nlri_ptr, (size - read_size), update_msg->nlri);
+            libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri);
             read_size = size;
         }
     }
@@ -408,8 +408,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-    static void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data,
-                                                       parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
+static void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker) {
         std::string decodeStr       = "";
         u_char      ipv4_raw[4];
         char        ipv4_char[16];
@@ -536,9 +535,9 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
 
             case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
             {
-                libparsebgp_mp_reach_attr_parsed_data *parse_data;
-                libparsebgp_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_inf);
-                libparsebgp_mp_reach_attr_parse_reach_nlri_attr(parse_data, update_msg->path_attributes.attr_len, data, parsed_data);
+//                libparsebgp_mp_reach_attr_parsed_data *parse_data;
+//                libparsebgp_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_inf);
+                libparsebgp_mp_reach_attr_parse_reach_nlri_attr(path_attrs, path_attrs->attr_len, data);
                 break;
             }
 
@@ -559,7 +558,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
             {
 //                libparsebgp_attr_link_state_parsed_data *parse_data;
 //                libparsebgp_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
-                libparsebgp_mp_link_state_attr_parse_attr_link_state(parse_data, update_msg->path_attributes.attr_len, data);
+                libparsebgp_mp_link_state_attr_parse_attr_link_state(path_attrs, path_attrs->attr_len, data);
                 break;
             }
 
@@ -596,8 +595,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len,
-                                             parsed_update_data &parsed_data, bool &has_end_of_rib_marker) {
+void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len, bool &has_end_of_rib_marker) {
     /*
      * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
      */
@@ -645,7 +643,7 @@ void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update
             /*
              * Parse data based on attribute type
              */
-            libparsebgp_update_msg_parse_attr_data(&path_attrs, data, parsed_data, has_end_of_rib_marker);
+            libparsebgp_update_msg_parse_attr_data(&path_attrs, data, has_end_of_rib_marker);
             data += path_attrs.attr_len;
             read_size += path_attrs.attr_len;
 

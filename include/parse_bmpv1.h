@@ -193,7 +193,7 @@ typedef struct libparsebgp_parsed_bmp_stat_rep {
      * Stats Report schema
      */
 typedef struct libparsebgp_parsed_bmp_rm_msg {
-//    lib_parse_bgp_parsed_bgp_update_msg update_msg;
+    libparsebgp_parse_bgp_parsed_data update_msg;
 }libparsebgp_parsed_bmp_rm_msg;
 
 u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];

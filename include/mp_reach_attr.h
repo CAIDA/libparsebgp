@@ -12,7 +12,8 @@
 #include "bgp_common.h"
 #include <list>
 #include <string>
-#include "parse_common.h"
+#include "update_msg.h"
+//#include "parse_common.h"
 
 //namespace bgp_msg {
 
@@ -67,7 +68,7 @@ void libparsebgp_mp_reach_attr_init(libparsebgp_mp_reach_attr_parsed_data *parse
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(libparsebgp_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data);
+void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)

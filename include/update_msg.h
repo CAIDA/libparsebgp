@@ -88,6 +88,16 @@ struct extcomm_hdr {
     string       val;
 };
 
+typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
+
+/**
+     * Parsed data structure for BGP-LS
+     */
+struct parsed_data_ls {
+    std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
+    std::list<obj_ls_link>   links;        ///< List of link state links
+    std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+};
 
 typedef struct update_path_attrs {
     attr_type_tuple attr_type;
@@ -107,9 +117,13 @@ typedef struct update_path_attrs {
         list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
         list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
         list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
+        parsed_ls_attrs_map        ls_attrs;
+        parsed_data_ls                ls;                 ///< REACH: Link state parsed data
+        parsed_data_ls                ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
     }attr_value;
     libparsebgp_mp_link_state_parsed_data mp_ls_data;
     libparsebgp_evpn_data evpn_data;
+    libparsebgp_addpath_map add_path_map;
 }update_path_attrs;
 
 struct libparsebgp_update_msg_data {

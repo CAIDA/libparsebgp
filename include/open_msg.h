@@ -145,7 +145,7 @@
 
         //To remove the following:
         std::string       peer_addr;      ///< Printed form of the peer address for logging
-        peer_info         *peer_inf;     ///< Persistent Peer info pointer
+//        peer_info         *peer_inf;     ///< Persistent Peer info pointer
     }libparsebgp_open_msg_data;
      /**
       * Constructor for class
@@ -156,7 +156,7 @@
       * \param [in]     peer_info       Persistent peer information
       * \param [in]     enable_debug    Debug true to enable, false to disable
       */
-     void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data, std::string peerAddr, peer_info *peer_info);
+//     void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data, std::string peerAddr, peer_info *peer_info);
 
     /**
      * Parses an open message

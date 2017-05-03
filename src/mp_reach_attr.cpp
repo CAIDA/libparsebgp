@@ -291,7 +291,7 @@
  * \param [in]   data                   Pointer to the attribute data
  * \param [out]  parsed_data            Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(libparsebgp_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data) {
+void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data) {
     mp_reach_nlri nlri;
     /*
      * Set the MP NLRI struct

@@ -386,14 +386,7 @@ struct peer_info {
                 ATTR_TYPE_INTERNAL_AS_COUNT=9000,        // AS path count - number of AS's
         ATTR_TYPE_INTERNAL_AS_ORIGIN             // The AS that originated the entry
     };
-    /**
-     * Parsed data structure for BGP-LS
-     */
-    struct parsed_data_ls {
-        std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
-        std::list<obj_ls_link>   links;        ///< List of link state links
-        std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
-    };
+
     /**
      * parsed path attributes map
      */

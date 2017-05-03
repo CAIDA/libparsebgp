@@ -7,6 +7,7 @@
  *
  */
 #include "../include/open_msg.h"
+#include "../include/bgp_common.h"
 #include <arpa/inet.h>
 
 //namespace bgp_msg {
