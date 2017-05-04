@@ -8,11 +8,13 @@
 #include "parse_mrt.h"
 #include "parse_bgp.h"
 
+enum libparsebgp_parse_msg_types {MRT_MESSAGE_TYPE = 1, BMP_MESSAGE_TYPE, BGP_MESSAGE_TYPE};
+
 
 typedef union libparsebgp_parse_msg{
-    uint32 read_size;
+    uint32_t read_size;
     libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
-    libparsebgp_parse_bmp_parsed_data parsed_bmp_msg;
+    libparsebgp_parsed_bmp_parsed_data parsed_bmp_msg;
     libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
 }libparsebgp_parse_msg;
 

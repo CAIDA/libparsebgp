@@ -17,20 +17,20 @@
     pMRT.parseMsg(buffer, buf_len);
     return pMRT;
 }*/
-libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len) {
-    libparsebgp_parse_mrt_parsed_data mrt_parsed_data;
-    try {
-        libparsebgp_parse_mrt_init(&mrt_parsed_data);
-        if (libparsebgp_parse_mrt_parse_msg(&mrt_parsed_data,buffer, buf_len))
-            cout << "Parsed successfully" << endl;
-        else
-            cout << "Error in parsing" << endl;
-    }
-    catch (char const *str) {
-        throw str;
-    }
-    return mrt_parsed_data;
-}
+//libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len) {
+//    libparsebgp_parse_mrt_parsed_data mrt_parsed_data;
+//    try {
+//        libparsebgp_parse_mrt_init(&mrt_parsed_data);
+//        if (libparsebgp_parse_mrt_parse_msg(&mrt_parsed_data,buffer, buf_len))
+//            cout << "Parsed successfully" << endl;
+//        else
+//            cout << "Error in parsing" << endl;
+//    }
+//    catch (char const *str) {
+//        throw str;
+//    }
+//    return mrt_parsed_data;
+//}
 
 /**
  * Buffer remaining BMP message
@@ -223,7 +223,7 @@ static void libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf
     SWAP_BYTES(&mrt_parsed_hdr->time_stamp);
 
     mrt_len = mrt_parsed_hdr->len;
-    if (mrt_parsed_hdr->type == mrt_type::BGP4MP_ET || mrt_parsed_hdr->type == mrt_type::ISIS_ET || mrt_parsed_hdr->type == mrt_type::OSPFv3_ET) {
+    if (mrt_parsed_hdr->type == BGP4MP_ET || mrt_parsed_hdr->type == ISIS_ET || mrt_parsed_hdr->type == OSPFv3_ET) {
         if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
         SWAP_BYTES(&mrt_parsed_hdr->microsecond_timestamp);
@@ -591,17 +591,17 @@ int main() {
     tmp = temp;
     //parseMRT *p = new parseMRT();
     int len = 99;
-    libparsebgp_parse_mrt_parsed_data mrt_data;
-    try {
-        mrt_data = parse_mrt_wrapper(tmp, len);
-        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
-            cout << "Hello Ojas and Induja"<<endl;
-        //else
-        //    cout << "Oh no!"<<endl;
-    }
-    catch (char const *str) {
-        cout << "Crashed!" << str <<endl;
-    }
+//    libparsebgp_parse_mrt_parsed_data mrt_data;
+//    try {
+//        mrt_data = parse_mrt_wrapper(tmp, len);
+//        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
+//            cout << "Hello Ojas and Induja"<<endl;
+//        //else
+//        //    cout << "Oh no!"<<endl;
+//    }
+//    catch (char const *str) {
+//        cout << "Crashed!" << str <<endl;
+//    }
 //    cout << "Peer Address" << int(.peer_index_tbl.peer_entries.begin()->peer_type);
    //cout<<"Peer Address "<<int(p->peer_index_table.peer_entries.begin()->peer_type);
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;

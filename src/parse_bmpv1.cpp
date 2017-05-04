@@ -183,7 +183,7 @@ TODO:
 *
 * \param [in]  sock        Socket to read the message from
 */
-//static void libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp *parsed_msg, unsigned char*& buffer, int& buf_len) {
+//static void libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
 //    parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old = { 0 };
 //    size_t i;
 //    char buf[256] = {0};
@@ -352,7 +352,7 @@ TODO:
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parseBMPv3(int sock) {
-static void libParseBGP_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static void libParseBGP_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3 = { 0 };
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
 
@@ -427,7 +427,7 @@ static void libParseBGP_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp *parsed_ms
  *
  * //throws (const  char *) on error.   String will detail error message.
  */
-static char libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *&buffer, int &buf_len) {
+static char libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
     uint8_t     ver;
     ssize_t     bytes_read;
     uint8_t     bmp_type;
@@ -905,7 +905,7 @@ static bool libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp
     return is_parse_good;
 }
 
-uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *buffer, int buf_len) {
+uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len) {
     string peer_info_key;
     int initial_buffer_len = buf_len;
 

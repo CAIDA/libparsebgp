@@ -482,7 +482,7 @@ static void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs
 //                    inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
 //                    decodeStr.append(ipv4_char);
 //                    decodeStr.append(" ");
-                    path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
+//                    path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
                 }
 
 //                parsed_data.attrs[ATTR_TYPE_CLUSTER_LIST] = decodeStr;
@@ -615,8 +615,9 @@ void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update
     /*
      * Iterate through all attributes and parse them
      */
+    update_path_attrs path_attrs;
+
     for (int read_size=0;  read_size < len; read_size += 2) {
-        update_path_attrs path_attrs;
         path_attrs.attr_type.attr_flags = *data++;
         path_attrs.attr_type.attr_type_code = *data++;
 
@@ -656,6 +657,7 @@ void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update
             return;
         }
         update_msg->path_attributes.push_back(path_attrs);
+//        delete path_attrs;
     }
 
 }

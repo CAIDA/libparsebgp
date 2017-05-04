@@ -17,7 +17,7 @@
 //#include "parse_bmp.h"
 #include "parse_bgp.h"
 #include "parse_utils.h"
-#include "parse_common.h"
+//#include "parse_common.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 

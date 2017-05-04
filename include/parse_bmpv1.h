@@ -203,7 +203,7 @@ uint32_t bmp_len;                    ///< Length of the BMP message - does not i
 /**
  * BMP Message Structure
  */
-typedef struct libparsebgp_parsed_bmp{
+typedef struct libparsebgp_parsed_bmp_parsed_data{
     /**
      *  Union of BMP common header
      */
@@ -228,8 +228,8 @@ typedef struct libparsebgp_parsed_bmp{
 
 //    uint32_t bmp_len;                    ///< Length of the BMP message - does not include the common header size
 
-}libparsebgp_parsed_bmp;
+}libparsebgp_parsed_bmp_parsed_data;
 
-uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp *parsed_msg, unsigned char *buffer, int buf_len);
+uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
 
 #endif //PARSE_LIB_PARSE_BMPV1_H

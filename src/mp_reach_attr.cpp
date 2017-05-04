@@ -50,7 +50,7 @@
         char              ip_char[40];
         int               addr_bytes;
         PREFIX_TUPLE      tuple;
-
+        string            label;
         if (len <= 0 or data == NULL)
             return;
 
@@ -89,7 +89,7 @@
                 ++addr_bytes;
 
             if (isVPN) {
-                label_bytes = decode_label(data, addr_bytes, tuple.labels);
+                label_bytes = decode_label(data, addr_bytes, label);
 
                 tuple.len -= (8 * label_bytes);      // Update prefix len to not include the label(s)
                 data += label_bytes;               // move data pointer past labels
