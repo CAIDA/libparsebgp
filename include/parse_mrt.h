@@ -163,72 +163,6 @@ struct libparsebgp_bgp4mp_state_change{
     uint16_t    new_state;
 };
 
-/**
-  * BGP4MP Message Format
-  *
-struct bgp4mp_message{
-    uint16_t    peer_asn;
-    uint16_t    local_asn;
-    uint16_t    interface_index;
-    uint16_t    address_family;
-    char        peer_ip[40];
-    char        local_ip[40];
-    u_char*     BGP_message;
-};
-
-/**
-  * BGP4MP Message_AS4 Format
-  *
-struct BGP4MP_message_AS4{
-    uint32_t    peer_AS_number;
-    uint32_t    local_AS_number;
-    uint16_t    interface_index;
-    uint16_t    address_family;
-    char        peer_IP[40];
-    char        local_IP[40];
-    u_char*     BGP_message;
-};
-
-/**
-  * BGP4MP State Change AS4 Format
-  *
-struct BGP4MP_state_change_AS4{
-    uint32_t    peer_AS_number;
-    uint32_t    local_AS_number;
-    uint16_t    interface_index;
-    uint16_t    address_family;
-    char        peer_IP[40];
-    char        local_IP[40];
-    uint16_t    old_state;
-    uint16_t    new_state;
-};
-
-/**
-  * BGP4MP Message Local Format
-  *
-struct BGP4MP_message_local{
-    uint16_t    peer_AS_number;
-    uint16_t    local_AS_number;
-    uint16_t    interface_index;
-    uint16_t    address_family;
-    char        peer_IP[40];
-    char        local_IP[40];
-    u_char*     BGP_message;
-};
-
-/**
-  * BGP4MP Message AS4 Local Format
-  *
-struct BGP4MP_message_AS4_local{
-    uint32_t    peer_AS_number;
-    uint32_t    local_AS_number;
-    uint16_t    interface_index;
-    uint16_t    address_family;
-    char        peer_IP[40];
-    char        local_IP[40];
-    u_char*     BGP_message;
-};*/
-
 struct libparsebgp_bgp4mp_msg{
     uint32_t    peer_asn;
     uint32_t    local_asn;
@@ -236,7 +170,7 @@ struct libparsebgp_bgp4mp_msg{
     uint16_t    address_family;
     char        peer_ip[40];
     char        local_ip[40];
-    u_char*     bgp_data;
+    //u_char*     bgp_data;
     libparsebgp_parse_bgp_parsed_data bgp_msg;
 };
 
@@ -250,7 +184,7 @@ int mrt_data_len;              ///< Length/size of data in the data buffer
 uint16_t mrt_type;
 uint16_t mrt_sub_type;
 uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
-
+//union needed
 struct libparsebgp_parsed_table_dump_v2 {
     libparsebgp_peer_index_table          peer_index_tbl;
     libparsebgp_rib_entry_header          rib_entry_hdr;
@@ -259,9 +193,11 @@ struct libparsebgp_parsed_table_dump_v2 {
 
 struct libparsebgp_parse_mrt_parsed_data {
     libparsebgp_mrt_common_hdr c_hdr;
+    //union needed:
     struct libparsebgp_parsed_mrt_data {
         libparsebgp_table_dump_message table_dump;
         libparsebgp_parsed_table_dump_v2 table_dump_v2;
+        //union needed
         struct libparsebgp_parsed_bgp4mp_msg {
             libparsebgp_bgp4mp_msg                bgp4mp_msg;
             libparsebgp_bgp4mp_state_change       bgp4mp_state_change_msg;
@@ -298,7 +234,7 @@ void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_da
  * \param [in] buffer       Contains the MRT message
  * \param [in] buf_len       Length of buffer
  */
-uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *&buffer, int &buf_len);
 
 //extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
 libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);

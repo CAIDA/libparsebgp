@@ -143,8 +143,8 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
 
     // Get the withdrawn length
     memcpy(&update_msg->wdrawn_route_len, bufPtr, sizeof(update_msg->wdrawn_route_len));
-    bufPtr += sizeof(update_msg->wdrawn_route_len); read_size += sizeof(update_msg->wdrawn_route_len);
     SWAP_BYTES(&update_msg->wdrawn_route_len);
+    bufPtr += sizeof(update_msg->wdrawn_route_len); read_size += sizeof(update_msg->wdrawn_route_len);
 
     // Set the withdrawn data pointer
     if ((size - read_size) < update_msg->wdrawn_route_len) {
@@ -160,8 +160,8 @@ size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upda
 
     // Get the attributes length
     memcpy(&update_msg->total_path_attr_len, bufPtr, sizeof(update_msg->total_path_attr_len));
-    bufPtr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len);
     SWAP_BYTES(&update_msg->total_path_attr_len);
+    bufPtr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len);
     //SELF_DEBUG("%s: rtr=%s: Attribute len = %hu", peer_addr.c_str(), router_addr.c_str(), update_msg->total_path_attr_len);
 
     // Set the attributes data pointer

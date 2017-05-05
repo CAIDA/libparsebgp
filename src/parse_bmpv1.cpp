@@ -810,7 +810,7 @@ static bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, lib
     /*
      * Process the sent open message
      */
-    if (libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
+    if (libparsebgp_parse_bgp_parse_header(up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
         read_size = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
@@ -824,7 +824,7 @@ static bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, lib
         size -= read_size;
     }
 
-    if (libparsebgp_parse_bgp_parse_header(&up_event->received_open_msg, data, size) == BGP_MSG_OPEN) {
+    if (libparsebgp_parse_bgp_parse_header(up_event->received_open_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
 
         read_size = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg,data, size, false);
@@ -943,7 +943,7 @@ uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *par
 //                            snprintf(parsed_msg->down_event.error_text, sizeof(parsed_msg->down_event.error_text),
 //                                     "Local close by (%s) for peer (%s) : ", parsed_msg->r_entry.ip_addr,
 //                                     parsed_msg->p_entry.peer_addr);
-                            libparsebgp_parse_bgp_handle_down_event(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
+                            libparsebgp_parse_bgp_handle_down_event(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
                             break;
                         }
                         case 2 : // Local system close, no bgp notify
@@ -963,7 +963,7 @@ uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *par
 //                                     "Remote peer (%s) closed local (%s) session: ", parsed_msg->r_entry.ip_addr,
 //                                     parsed_msg->p_entry.peer_addr);
 
-                            libparsebgp_parse_bgp_handle_down_event(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
+                            libparsebgp_parse_bgp_handle_down_event(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
                             break;
                         }
                     }
@@ -1005,7 +1005,7 @@ uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *par
                  */
 //                libParseBGP_parse_bgp_init(&pBGP, &parsed_msg->p_entry, (char *)parsed_msg->r_entry.ip_addr, &parsed_msg->peer_info_map[peer_info_key]);
 
-                libparsebgp_parse_bgp_handle_update(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len);
+                libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len);
 
                 break;
             }

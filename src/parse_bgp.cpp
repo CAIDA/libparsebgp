@@ -597,7 +597,7 @@ static void libparsebgp_parse_bgp_update_db_wdrawn_prefixes(libparsebgp_parse_bg
  * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns BGP message type
  */
-void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
+void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
                                                bool is_local_msg) {
     u_char  bgp_msg_type = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size);
     switch (bgp_msg_type) {
@@ -607,13 +607,13 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
             /*libparsebgp_update_msg_init(&bgp_parsed_data->parsed_data.update_msg, bgp_parsed_data->p_entry->peer_addr, bgp_parsed_data->router_addr,
                                         bgp_parsed_data->p_info);*/
 
-            if ((read_size=libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data->parsed_data.update_msg, data,
-                                                                   bgp_parsed_data->data_bytes_remaining,
-                                                                   bgp_parsed_data->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
+            if ((read_size=libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data.parsed_data.update_msg, data,
+                                                                   bgp_parsed_data.data_bytes_remaining,
+                                                                   bgp_parsed_data.has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
                 throw "Failed to parse BGP update message";
             }
 
-            bgp_parsed_data->data_bytes_remaining -= read_size;
+            bgp_parsed_data.data_bytes_remaining -= read_size;
 
 //            libparsebgp_parse_bgp_update_db(bgp_parsed_data);
             break;
@@ -623,18 +623,18 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
             data += BGP_MSG_HDR_LEN;
 
             libparsebgp_notify_msg parsed_msg;
-            if (libparsebgp_notification_parse_notify(parsed_msg,data, bgp_parsed_data->data_bytes_remaining))
+            if (libparsebgp_notification_parse_notify(parsed_msg,data, bgp_parsed_data.data_bytes_remaining))
             {
                 throw "Failed to parse the BGP notification message";
             }
             else {
                 data += 2;                                                 // Move pointer past notification message
-                bgp_parsed_data->data_bytes_remaining -= 2;
+                bgp_parsed_data.data_bytes_remaining -= 2;
 
-                bgp_parsed_data->parsed_data.notification_msg.error_code = parsed_msg.error_code;
-                bgp_parsed_data->parsed_data.notification_msg.error_subcode = parsed_msg.error_subcode;
-                strncpy(bgp_parsed_data->parsed_data.notification_msg.error_text, parsed_msg.error_text,
-                        sizeof(bgp_parsed_data->parsed_data.notification_msg.error_text));
+                bgp_parsed_data.parsed_data.notification_msg.error_code = parsed_msg.error_code;
+                bgp_parsed_data.parsed_data.notification_msg.error_subcode = parsed_msg.error_subcode;
+                strncpy(bgp_parsed_data.parsed_data.notification_msg.error_text, parsed_msg.error_text,
+                        sizeof(bgp_parsed_data.parsed_data.notification_msg.error_text));
             }
             break;
         }
@@ -653,7 +653,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
 //            bgp_parsed_data->p_info->using_2_octet_asn = false;
 
             data += BGP_MSG_HDR_LEN;
-            read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, is_local_msg);
+            read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data.data_bytes_remaining, is_local_msg);
 
             if (!read_size) {
                 //       LOG_ERR("%s: rtr=%s: Failed to read sent open message",  p_entry->peer_addr, router_addr.c_str());
@@ -661,7 +661,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
             }
 
             data += read_size;                                          // Move the pointer pase the sent open message
-            bgp_parsed_data->data_bytes_remaining -= read_size;
+            bgp_parsed_data.data_bytes_remaining -= read_size;
 
 //            if (is_local_msg) {
 //                read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data->data_bytes_remaining, true);
@@ -779,7 +779,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
  *
  * \returns True if error, false if no error.
  */
-bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *update_msg, u_char *data, size_t size) {
+bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &update_msg, u_char *data, size_t size) {
     //UpdateMsg::parsed_update_data parsed_data;
     int read_size = 0;
 
@@ -795,13 +795,13 @@ bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *upda
 //                                    bgp_parsed_data->router_addr, bgp_parsed_data->p_info);
 
         //if ((read_size=uMsg.parseUpdateMsg(data, bgp_parsed_data->data_bytes_remaining, bgp_msg->parsed_data, bgp_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
-        if ((read_size=libparsebgp_update_msg_parse_update_msg(&update_msg->parsed_data.update_msg, data, update_msg->data_bytes_remaining,
-                                                               update_msg->has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
+        if ((read_size=libparsebgp_update_msg_parse_update_msg(&update_msg.parsed_data.update_msg, data, update_msg.data_bytes_remaining,
+                                                               update_msg.has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
             return true;
         }
 
-        update_msg->data_bytes_remaining -= read_size;
+        update_msg.data_bytes_remaining -= read_size;
 
         /*
          * Update the DB with the update data
@@ -825,7 +825,7 @@ bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *upda
  *
  * \returns True if error, false if no error.
  */
-bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size) {
+bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
     bool        rval;
 
     // Process the BGP message normally
@@ -835,19 +835,19 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *
 
         libparsebgp_notify_msg notify_msg;
         //NotificationMsg nMsg;
-        if ( (rval=libparsebgp_notification_parse_notify(notify_msg,data, bgp_parsed_data->data_bytes_remaining)))
+        if ( (rval=libparsebgp_notification_parse_notify(notify_msg,data, bgp_parsed_data.data_bytes_remaining)))
         {
             // LOG_ERR("%s: rtr=%s: Failed to parse the BGP notification message", p_entry->peer_addr, router_addr.c_str());
             throw "Failed to parse the BGP notification message";
         }
         else {
             data += 2;                                                 // Move pointer past notification message
-            bgp_parsed_data->data_bytes_remaining -= 2;
+            bgp_parsed_data.data_bytes_remaining -= 2;
 
-            bgp_parsed_data->parsed_data.notification_msg.error_code = notify_msg.error_code;
-            bgp_parsed_data->parsed_data.notification_msg.error_subcode = notify_msg.error_subcode;
-            strncpy(bgp_parsed_data->parsed_data.notification_msg.error_text, notify_msg.error_text,
-                    sizeof(bgp_parsed_data->parsed_data.notification_msg.error_text));
+            bgp_parsed_data.parsed_data.notification_msg.error_code = notify_msg.error_code;
+            bgp_parsed_data.parsed_data.notification_msg.error_subcode = notify_msg.error_subcode;
+            strncpy(bgp_parsed_data.parsed_data.notification_msg.error_text, notify_msg.error_text,
+                    sizeof(bgp_parsed_data.parsed_data.notification_msg.error_text));
             /*
             down_event->bgp_err_code = notify_msg.error_code;
             down_event->bgp_err_subcode = notify_msg.error_subcode;
@@ -876,7 +876,7 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *
  *
  * \returns BGP message type
  */
-u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size) {
+u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size) {
     //bzero(&common_hdr, sizeof(common_hdr));
 
     /*
@@ -887,13 +887,14 @@ u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp
         return 0;
     }
 
-    memcpy(&bgp_parsed_data->c_hdr, data, BGP_MSG_HDR_LEN);
+    memcpy(&bgp_parsed_data.c_hdr, data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
-    SWAP_BYTES(&(bgp_parsed_data->c_hdr.len));
+    SWAP_BYTES(&(bgp_parsed_data.c_hdr.len));
+    SWAP_BYTES(&(bgp_parsed_data.c_hdr.type));
 
     // Update remaining bytes left of the message
-    bgp_parsed_data->data_bytes_remaining = bgp_parsed_data->c_hdr.len - BGP_MSG_HDR_LEN;
+    bgp_parsed_data.data_bytes_remaining = bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN;
 
     /*
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer
@@ -905,26 +906,26 @@ u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data *bgp
 
  //   SELF_DEBUG("%s: rtr=%s: BGP hdr len = %u, type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.len, common_hdr.type);
 
-    return bgp_parsed_data->c_hdr.type;
+    return bgp_parsed_data.c_hdr.type;
 }
 
-uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *parsed_bgp_msg, unsigned char *data, uint32_t size){
+uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &parsed_bgp_msg, unsigned char *&data, uint32_t size){
     size_t              read_size;
     bool has_end_of_rib_marker = true;
     if (libparsebgp_parse_bgp_parse_header(parsed_bgp_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
     } else throw "Failed to parse bgp header";
 
-    switch (parsed_bgp_msg->c_hdr.type) {
+    switch (parsed_bgp_msg.c_hdr.type) {
         case BGP_MSG_UPDATE         :
-            read_size = libparsebgp_update_msg_parse_update_msg(&parsed_bgp_msg->parsed_data.update_msg, data, size, has_end_of_rib_marker);
+            read_size = libparsebgp_update_msg_parse_update_msg(&parsed_bgp_msg.parsed_data.update_msg, data, size, has_end_of_rib_marker);
             break;
 
         case BGP_MSG_NOTIFICATION   : // Notification message
-            read_size = libparsebgp_notification_parse_notify(parsed_bgp_msg->parsed_data.notification_msg, data, size);
+            read_size = libparsebgp_notification_parse_notify(parsed_bgp_msg.parsed_data.notification_msg, data, size);
             break;
         case BGP_MSG_OPEN           :
-            read_size = libparsebgp_open_msg_parse_open_msg(&parsed_bgp_msg->parsed_data.open_msg, data, size, true);
+            read_size = libparsebgp_open_msg_parse_open_msg(&parsed_bgp_msg.parsed_data.open_msg, data, size, true);
             break;
 
         case BGP_MSG_ROUTE_REFRESH  : // Route Refresh message

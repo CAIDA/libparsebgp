@@ -89,6 +89,7 @@
                 ++addr_bytes;
 
             if (isVPN) {
+                //TODO: Remove label and put tuple.label instead
                 label_bytes = decode_label(data, addr_bytes, label);
 
                 tuple.len -= (8 * label_bytes);      // Update prefix len to not include the label(s)

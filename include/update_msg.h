@@ -431,7 +431,7 @@ typedef std::map<update_attr_types, std::string>    parsed_attrs_map;
 // Parsed bgp-ls attributes map
 typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
-typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
+//typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
 
 struct attr_type_tuple {
     uint8_t attr_flags;

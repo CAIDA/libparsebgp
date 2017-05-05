@@ -169,27 +169,28 @@ static void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_l
             /*int bgp_msg_len = mrt_data_len;
             if (extract_from_buffer(buffer, buf_len, &parsed_data.bgp4mp.bgp4mp_msg.BGP_message, mrt_data_len) != bgp_msg_len)
                 throw;*/
-            if (mrt_data_len != buf_len)
-                throw;
-            memcpy(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_data, buffer, mrt_data_len);
+            /*if (mrt_data_len != buf_len)
+                throw;*/
+            //unsigned char *bgp_data;
+            //memcpy(&bgp_data, buffer, buf_len);
 
-            peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip;
+            //peer_info_key =  mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip;
 
-            obj_bgp_peer p_entry;
+            /*obj_bgp_peer p_entry;
             bzero(&p_entry, sizeof(obj_bgp_peer));
             memcpy(&p_entry.peer_addr, mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip, sizeof(p_entry.peer_addr));
             p_entry.is_ipv4 = (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv4);
             p_entry.peer_as = mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn;
             p_entry.timestamp_secs = mrt_parsed_data->c_hdr.time_stamp;
-            p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;
+            p_entry.timestamp_us = mrt_parsed_data->c_hdr.microsecond_timestamp;*/
 
             //mrt_parsed_data->pbgp = new parseBGP(&p_entry, "", &mrt_parsed_data->peer_info_map[peer_info_key]);
-            libparsebgp_parse_bgp_init(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, &p_entry, "",
-                                       &mrt_parsed_data->peer_info_map[peer_info_key]);
-            uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn :
-                           mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn;
-            libparsebgp_parse_bgp_parse_msg_from_mrt(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, buffer,
-                                                     mrt_data_len, mrt_parsed_data->c_hdr.sub_type > 5); /*{
+            //libparsebgp_parse_bgp_init(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, &p_entry, "",
+            //                           &mrt_parsed_data->peer_info_map[peer_info_key]);
+            //uint32_t asn = (mrt_parsed_data->c_hdr.sub_type > 5) ? mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn :
+            //               mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn;
+            libparsebgp_parse_bgp_parse_msg_from_mrt(mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, buffer,
+                                                     buf_len, mrt_parsed_data->c_hdr.sub_type > 5); /*{
                 mrt_parsed_data->up_event.local_asn = mrt_parsed_data->bgp4mp_msg.local_asn;
                 mrt_parsed_data->up_event.remote_asn = mrt_parsed_data->bgp4mp_msg.peer_asn;
                 memcpy(&mrt_parsed_data->up_event.local_ip, mrt_parsed_data->bgp4mp_msg.local_ip, 40);
@@ -212,27 +213,27 @@ static void libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_l
  * //throws (const  char *) on error.   String will detail error message.
  */
 
-static void libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_mrt_common_hdr *mrt_parsed_hdr) {
+static void libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_mrt_common_hdr &mrt_parsed_hdr) {
 
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr, 12) != 12)
         throw "Error in parsing MRT common header";
 
-    SWAP_BYTES(&mrt_parsed_hdr->len);
-    SWAP_BYTES(&mrt_parsed_hdr->type);
-    SWAP_BYTES(&mrt_parsed_hdr->sub_type);
-    SWAP_BYTES(&mrt_parsed_hdr->time_stamp);
+    SWAP_BYTES(&mrt_parsed_hdr.len);
+    SWAP_BYTES(&mrt_parsed_hdr.type);
+    SWAP_BYTES(&mrt_parsed_hdr.sub_type);
+    SWAP_BYTES(&mrt_parsed_hdr.time_stamp);
 
-    mrt_len = mrt_parsed_hdr->len;
-    if (mrt_parsed_hdr->type == BGP4MP_ET || mrt_parsed_hdr->type == ISIS_ET || mrt_parsed_hdr->type == OSPFv3_ET) {
-        if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->microsecond_timestamp, 4) != 4)
+    mrt_len = mrt_parsed_hdr.len;
+    if (mrt_parsed_hdr.type == BGP4MP_ET || mrt_parsed_hdr.type == ISIS_ET || mrt_parsed_hdr.type == OSPFv3_ET) {
+        if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr.microsecond_timestamp, 4) != 4)
             throw "Error in parsing MRT Common header: microsecond timestamp";
-        SWAP_BYTES(&mrt_parsed_hdr->microsecond_timestamp);
+        SWAP_BYTES(&mrt_parsed_hdr.microsecond_timestamp);
         mrt_len -= 4;
     }
     else
-        mrt_parsed_hdr->microsecond_timestamp = 0;
+        mrt_parsed_hdr.microsecond_timestamp = 0;
 
-    mrt_sub_type = mrt_parsed_hdr->sub_type;
+    mrt_sub_type = mrt_parsed_hdr.sub_type;
 }
 
 static void libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libparsebgp_table_dump_message *table_dump_msg) {
@@ -526,11 +527,11 @@ static void libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_l
     }
 }
 
-uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *buffer, int buf_len) {
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *&buffer, int &buf_len) {
     //bool rval = true;
     int initial_buffer_len = buf_len;
     try {
-        libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, &mrt_parsed_data->c_hdr);
+        libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data->c_hdr);
 
         switch (mrt_parsed_data->c_hdr.type) {
             case OSPFv2 :     //do nothing
@@ -575,33 +576,34 @@ uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_
 }
 
 int main() {
-    /*u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
-            0x00, 0x00, 0x19, 0x2f, 0x00, 0x00, 0x00, 0x01, 0x67, 0xf7, 0x03, 0x2d, 0x80, 0xdf, 0x33, 0x66,
-            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-            0x00, 0x43, 0x02, 0x00, 0x04, 0x18, 0xa8, 0xb5, 0x24, 0x00, 0x24, 0x40, 0x01, 0x01, 0x00, 0x40,
-            0x02, 0x16, 0x02, 0x05, 0x00, 0x00, 0xe4, 0x8f, 0x00, 0x00, 0x1b, 0x1b, 0x00, 0x04, 0x01, 0xbd,
-            0x00, 0x00, 0x6e, 0xb7, 0x00, 0x04, 0x05, 0x73, 0x40, 0x03, 0x04, 0x67, 0xf7, 0x03, 0x2d, 0x18,
-            0xbf, 0x05, 0xaa};*/
-    u_char temp[] = {0x58, 0x67, 0xb5, 0x31, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x07, 0x2c,
-                     0x00, 0x00, 0x31, 0x6e, 0x00, 0x00, 0x00, 0x02, 0x2a, 0x01, 0x02, 0xa8, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x01, 0x06, 0x7c, 0x02, 0xe8, 0x00, 0x02, 0xff, 0xff,
-                     0x00, 0x00, 0x00, 0x04, 0x00, 0x28, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-                     0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x13, 0x04};
+    u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
+                     0x00, 0x00, 0x19, 0x2f, 0x00, 0x00, 0x00, 0x01, 0x67, 0xf7, 0x03, 0x2d, 0x80, 0xdf, 0x33, 0x66,
+                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                     0x00, 0x43, 0x02, 0x00, 0x04, 0x18, 0xa8, 0xb5, 0x24, 0x00, 0x24, 0x40, 0x01, 0x01, 0x00, 0x40,
+                     0x02, 0x16, 0x02, 0x05, 0x00, 0x00, 0xe4, 0x8f, 0x00, 0x00, 0x1b, 0x1b, 0x00, 0x04, 0x01, 0xbd,
+                     0x00, 0x00, 0x6e, 0xb7, 0x00, 0x04, 0x05, 0x73, 0x40, 0x03, 0x04, 0x67, 0xf7, 0x03, 0x2d, 0x18,
+                     0xbf, 0x05, 0xaa};
+    /*u_char temp[] = {0x58, 0x67, 0xb5, 0x31, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x07, 0x2c,
+                     0x00, 0x00, 0x31, 0x6e, 0x00, 0x00, 0x00, 0x02, 0x2a, 0x01, 0x02, 0xa8, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x01, 0x06, 0x7c, 0x02, 0xe8, 0x00, 0x02,
+                     0xff, 0xff, 0x00, 0x00, 0x00, 0x04, 0x00, 0x28, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x13, 0x04};*/
     u_char *tmp;
     tmp = temp;
     //parseMRT *p = new parseMRT();
     int len = 99;
-//    libparsebgp_parse_mrt_parsed_data mrt_data;
-//    try {
-//        mrt_data = parse_mrt_wrapper(tmp, len);
-//        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
-//            cout << "Hello Ojas and Induja"<<endl;
-//        //else
-//        //    cout << "Oh no!"<<endl;
-//    }
-//    catch (char const *str) {
-//        cout << "Crashed!" << str <<endl;
-//    }
+    libparsebgp_parse_mrt_parsed_data mrt_data;
+    try {
+        int read_size = libparsebgp_parse_mrt_parse_msg(&mrt_data, tmp, len);
+        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
+            cout << "Hello Ojas and Induja"<<endl;
+        cout << read_size;
+        //else
+        //    cout << "Oh no!"<<endl;
+    }
+    catch (char const *str) {
+        cout << "Crashed!" << str <<endl;
+    }
 //    cout << "Peer Address" << int(.peer_index_tbl.peer_entries.begin()->peer_type);
    //cout<<"Peer Address "<<int(p->peer_index_table.peer_entries.begin()->peer_type);
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
