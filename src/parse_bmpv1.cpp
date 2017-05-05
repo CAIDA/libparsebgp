@@ -52,10 +52,10 @@ static void libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, int
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parsePeerHdr(int sock) {
-static void libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 *parsed_peer_header, unsigned char *&buffer,
+static void libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 &parsed_peer_header, unsigned char *&buffer,
                                                  int &buf_len) {
-    parsed_peer_header = {0};
-    bzero(&parsed_peer_header, sizeof(parsed_peer_header));
+//    parsed_peer_header = {0};
+//    bzero(&parsed_peer_header, sizeof(parsed_peer_header));
 
     /*if ((i = Recv(sock, &p_hdr, BMP_PEER_HDR_LEN, MSG_WAITALL))
         != BMP_PEER_HDR_LEN) {
@@ -67,8 +67,7 @@ static void libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 
     }
 
     // Adjust the common header length to remove the peer header (as it's been read)
-TODO:
-//    parsed_peer_header->bmp_len -= BMP_PEER_HDR_LEN;
+    bmp_len -= BMP_PEER_HDR_LEN;
 
     //   SELF_DEBUG("parsePeerHdr: sock=%d : Peer Type is %d", sock,p_hdr.peer_type);
 
@@ -144,8 +143,9 @@ TODO:
 //
 
     // Save the advertised timestamp
-    SWAP_BYTES(&parsed_peer_header->ts_secs);
-    SWAP_BYTES(&parsed_peer_header->ts_usecs);
+    SWAP_BYTES(&parsed_peer_header.peer_as);
+    SWAP_BYTES(&parsed_peer_header.ts_secs);
+    SWAP_BYTES(&parsed_peer_header.ts_usecs);
 
 //    if (p_hdr.ts_secs != 0) {
 //        parsed_peer_header->p_entry.timestamp_secs = p_hdr.ts_secs;
@@ -352,8 +352,9 @@ TODO:
  * \param [in]  sock        Socket to read the message from
  */
 //void parseBMP::parseBMPv3(int sock) {
-static void libParseBGP_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3 = { 0 };
+static void libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *&parsed_msg, unsigned char *&buffer,
+                                               int &buf_len) {
+//    parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3 = { 0 };
     //   SELF_DEBUG("Parsing BMP version 3 (rfc7854)");
 
     if ((extract_from_buffer(buffer, buf_len, &parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len, 4)) != 4) {
@@ -369,9 +370,9 @@ static void libParseBGP_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_dat
     //   SELF_DEBUG("BMP v3: type = %x len=%d", parsed_msg->c_hdr_v3.type, parsed_msg->c_hdr_v3.len);
 
     // Adjust length to remove common header size
-    parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len -= 1 + BMP_HDRv3_LEN;
+    bmp_len = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len - 1 - BMP_HDRv3_LEN;
 
-    if (parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len > BGP_MAX_MSG_SIZE)
+    if (bmp_len > BGP_MAX_MSG_SIZE)
         throw "ERROR: BMP length is larger than max possible BGP size";
 
 //    // Parse additional headers based on type
@@ -382,26 +383,26 @@ static void libParseBGP_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_dat
         case TYPE_ROUTE_MON: // Route monitoring
             //          SELF_DEBUG("BMP MSG : route monitor");
             //parsePeerHdr(sock);
-            libparsebgp_parse_bmp_parse_peer_hdr(&parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
+            libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
             break;
 
         case TYPE_STATS_REPORT: // Statistics Report
             //          SELF_DEBUG("BMP MSG : stats report");
             //parsePeerHdr(sock);
-            libparsebgp_parse_bmp_parse_peer_hdr(&parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
+            libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
             break;
 
         case TYPE_PEER_UP: // Peer Up notification
         {
             //           SELF_DEBUG("BMP MSG : peer up");
             //parsePeerHdr(sock);
-            libparsebgp_parse_bmp_parse_peer_hdr(&parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
+            libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
             break;
         }
         case TYPE_PEER_DOWN: // Peer down notification
             //           SELF_DEBUG("BMP MSG : peer down");
             //parsePeerHdr(sock);
-            libparsebgp_parse_bmp_parse_peer_hdr(&parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
+            libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
             break;
 
         case TYPE_INIT_MSG:
@@ -442,7 +443,7 @@ static char libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp_parsed_data 
     if (ver == 3) { // draft-ietf-grow-bmp-04 - 07
         //parseBMPv3(sock);
         parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver = ver;
-        libParseBGP_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
+        libparsebgp_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
         bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type;
     }
 
@@ -450,8 +451,9 @@ static char libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp_parsed_data 
     else if (ver == 1 || ver == 2) {
         //       SELF_DEBUG("Older BMP version of %d, consider upgrading the router to support BMPv3", ver);
         //parseBMPv2(sock);
-//        libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
-        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
+        //TODO:
+        //libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
+        //parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
 
     } else
         throw "ERROR: Unsupported BMP message version";
@@ -681,7 +683,7 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
         throw "ERROR:  Cannot proceed since we cannot read the stats counter";
 
     bmp_len -= 4;
-
+    SWAP_BYTES(&parsed_msg->stats_count);
 //    // Reverse the bytes and update int
 //    SWAP_BYTES(b, 4);
 //    memcpy((void*) &parsed_msg->stats_count, (void*) b, 4);
@@ -695,7 +697,9 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
 
     // Loop through each stats object
     for (unsigned long i = 0; i < parsed_msg->stats_count; i++) {
-        stat_counter *stat_info;
+        stat_counter stat_info;
+        bzero(&stat_info, sizeof(stat_counter));
+        bzero(b,8);
         //if ((Recv(sock, &stat_type, 2, MSG_WAITALL)) != 2)
         if ((extract_from_buffer(buffer, buf_len, &stat_info, 4)) != 4)
             throw "ERROR: Cannot proceed since we cannot read the stats type.";
@@ -706,22 +710,22 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
         bmp_len -= 4;
 
         // convert integer from network to host bytes
-        SWAP_BYTES(&stat_info->stat_type);
-        SWAP_BYTES(&stat_info->stat_len);
+        SWAP_BYTES(&stat_info.stat_type);
+        SWAP_BYTES(&stat_info.stat_len);
 
         //       SELF_DEBUG("sock=%d STATS: %lu : TYPE = %u LEN = %u", sock,
         //                   i, stat_type, stat_len);
 
         // check if this is a 32 bit number  (default)
-        if (stat_info->stat_len == 4 or stat_info->stat_len == 8) {
+        if (stat_info.stat_len == 4 or stat_info.stat_len == 8) {
 
             // Read the stats counter - 32/64 bits
-            if ((extract_from_buffer(buffer, buf_len, b, stat_info->stat_len)) == stat_info->stat_len) {
-                bmp_len -= stat_info->stat_len;
+            if ((extract_from_buffer(buffer, buf_len, b, stat_info.stat_len)) == stat_info.stat_len) {
+                bmp_len -= stat_info.stat_len;
 
                 // convert the bytes from network to host order
-                SWAP_BYTES(b, stat_info->stat_len);
-                memcpy(stat_info->stat_data, b, stat_info->stat_len);
+                SWAP_BYTES(b, stat_info.stat_len);
+                memcpy(stat_info.stat_data, b, stat_info.stat_len);
 
                 // Update the table structure based on the stats counter type
 //                switch (stat_info.stat_type) {
@@ -780,11 +784,11 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
             //         SELF_DEBUG("sock=%d : skipping stats report '%u' because length of '%u' is not expected.",
             //                     sock, stat_type, stat_len);
 
-            while (stat_info->stat_len-- > 0)
+            while (stat_info.stat_len-- > 0)
                 extract_from_buffer(buffer, buf_len, &b[0], 1);
         }
-        parsed_msg->total_stats_counter.push_back(*stat_info);
-        delete stat_info;
+        parsed_msg->total_stats_counter.push_back(stat_info);
+//        delete stat_info;
     }
 
     return false;
@@ -905,10 +909,11 @@ static bool libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp
     return is_parse_good;
 }
 
-uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len) {
+uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
     string peer_info_key;
     int initial_buffer_len = buf_len;
-
+    bzero(bmp_data, sizeof(bmp_data));
+    bmp_len=0;
     char bmp_type = 0;
 //    libparsebgp_parse_bgp_parsed_data pBGP;
 

@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
         include/lib_parse_common.h
-#        include/parse_common.h
         include/mp_link_state_attr.h
         include/mp_link_state.h
         include/add_path_data_container.h

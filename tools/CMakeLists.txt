@@ -15,5 +15,5 @@ add_library(parse SHARED ${SOURCES})
 # not really necessary in this example. Use "sudo make install" to apply
 install(TARGETS parse DESTINATION parselib_shared/)
 
-add_executable(libtest bmptool.cpp)
+add_executable(libtest lib_parse_bgp_tool.cpp)
 target_link_libraries(libtest parse)

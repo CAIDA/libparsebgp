@@ -77,7 +77,7 @@ struct libparsebgp_parsed_peer_hdr_v3 {
     uint8_t         peer_flags;           ///< 1 byte
     unsigned char   peer_dist_id[8];      ///< 8 byte peer route distinguisher
     unsigned char   peer_addr[16];        ///< 16 bytes
-    uint32_t        peer_as;           ///< 4 byte
+    uint32_t        peer_as;              ///< 4 byte
     unsigned char   peer_bgp_id[4];       ///< 4 byte peer bgp id
     uint32_t        ts_secs;              ///< 4 byte timestamp in seconds
     uint32_t        ts_usecs;             ///< 4 byte timestamp microseconds
@@ -151,7 +151,7 @@ typedef struct libparsebgp_parsed_bmp_term_msg {
      *          allocated by the caller and freed by the caller.
      */
 typedef struct libparsebgp_parsed_bmp_peer_up_event {
-    char                                local_ip[40];           ///< IPv4 or IPv6 printed IP address
+    char                                local_ip[16];           ///< IPv4 or IPv6 printed IP address
     uint16_t                            local_port;             ///< Local port number
     uint16_t                            remote_port;            ///< Remote port number
     libparsebgp_parse_bgp_parsed_data   sent_open_msg;          ///< sent open message
@@ -207,7 +207,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
     /**
      *  Union of BMP common header
      */
-    union libparsebgp_parsed_bmp_hdr {
+    struct libparsebgp_parsed_bmp_hdr {
         common_hdr_bmp_v3 c_hdr_v3;
         common_hdr_bmp_old c_hdr_old;
     }libparsebgp_parsed_bmp_hdr;
@@ -217,7 +217,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
     /**
      *  Union of BMP Message
      */
-    union libparsebgp_parsed_bmp_msg{
+    struct libparsebgp_parsed_bmp_msg{
         libparsebgp_parsed_bmp_init_msg           parsed_init_msg;
         libparsebgp_parsed_bmp_term_msg           parsed_term_msg;
         libparsebgp_parsed_bmp_peer_up_event      parsed_peer_up_event_msg;
@@ -230,6 +230,6 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
 
 }libparsebgp_parsed_bmp_parsed_data;
 
-uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
+uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len);
 
 #endif //PARSE_LIB_PARSE_BMPV1_H

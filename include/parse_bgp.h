@@ -62,7 +62,7 @@ typedef struct libparsebgp_common_bgp_hdr {
 
 typedef struct libparsebgp_parse_bgp_parsed_data {
     libparsebgp_common_bgp_hdr c_hdr;
-    union parsed_bgp_data {
+    struct parsed_bgp_data {
         libparsebgp_open_msg_data open_msg;
         libparsebgp_update_msg_data update_msg;
         libparsebgp_notify_msg notification_msg;
