@@ -9,7 +9,6 @@
 
 #include <algorithm>
 #include "../include/parse_bgp.h"
-#include "../include/mp_link_state_attr.h"
 
 using namespace std;
 
@@ -62,7 +61,7 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
         }
         case BGP_MSG_OPEN: {
             libparsebgp_open_msg_data *open_msg_data;
-            size_t              read_size;
+            int              read_size;
 
             data += BGP_MSG_HDR_LEN;
             read_size = libparsebgp_open_msg_parse_open_msg(open_msg_data,data, bgp_parsed_data.data_bytes_remaining, is_local_msg);
@@ -296,7 +295,7 @@ u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp
 }
 
 uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &parsed_bgp_msg, unsigned char *data, uint32_t size){
-    size_t              read_size;
+    int read_size;
     bool has_end_of_rib_marker = true;
     if (libparsebgp_parse_bgp_parse_header(parsed_bgp_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
@@ -322,5 +321,5 @@ uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &pars
             //           LOG_WARN("%s: rtr=%s: Unsupported BGP message type = %d", p_entry->peer_addr, router_addr.c_str(), common_hdr.type);
             break;
     }
-    return read_size+BGP_MSG_HDR_LEN;
+    return read_size + BGP_MSG_HDR_LEN;
 }

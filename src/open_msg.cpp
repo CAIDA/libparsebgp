@@ -25,16 +25,9 @@
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read
  */
-static size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
-    size_t      read_size   = 0;
+static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
+    int      read_size   = 0;
     u_char      *bufPtr     = data;
-
-    /*
-     * Loop through the capabilities (will set the 4 byte ASN)
-     */
-    char        capStr[200];
-    //open_param_hdr  *param;
-    //cap_param   *cap;
 
     for (int i=0; i < size; ) {
         //param = (open_param_hdr *)bufPtr;
@@ -238,9 +231,9 @@ static size_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data 
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
-size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
+int libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
     char        bgp_id_char[16];
-    size_t      read_size       = 0;
+    int      read_size       = 0;
     u_char      *bufPtr         = data;
     int         buf_size = size;
 //    open_bgp_hdr open_hdr       = {0};

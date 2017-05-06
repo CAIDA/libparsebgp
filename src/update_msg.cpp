@@ -120,8 +120,8 @@ static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
-    size_t      read_size       = 0;
+int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
+    int      read_size       = 0;
     u_char      *bufPtr         = data;
 
     // Clear the parsed_data

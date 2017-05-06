@@ -19,7 +19,7 @@ set(SOURCE_FILES
         include/update_msg.h
         include/parse_utils.h
         include/parse_mrt.h
-        include/parse_bmpv1.h
+        include/parse_bmp.h
         include/libParseBGP.h
         src/mp_link_state.cpp
         src/mp_link_state_attr.cpp
@@ -31,7 +31,7 @@ set(SOURCE_FILES
         src/notification_msg.cpp
         src/open_msg.cpp
         src/parse_bgp.cpp
-        src/parse_bmpv1.cpp
+        src/parse_bmp.cpp
         src/update_msg.cpp
         src/parse_utils.cpp
         src/parse_mrt.cpp

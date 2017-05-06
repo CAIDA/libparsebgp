@@ -527,7 +527,7 @@ static void libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_l
     }
 }
 
-uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *buffer, int buf_len) {
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, u_char *buffer, int buf_len) {
     //bool rval = true;
     int initial_buffer_len = buf_len;
     try {

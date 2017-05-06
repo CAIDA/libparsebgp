@@ -25,25 +25,29 @@
  *
  * \return True if error, false if no error reading/parsing the notification message
  */
-bool libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size) {
+int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size) {
     u_char *dataPtr = data;
-    size_t read_size = 0;
+    int read_size = 0;
 
     // Reset the storage buffer for parsed data
     bzero(&parsed_msg, sizeof(parsed_msg));
 
-    if (read_size < size)
+    if (read_size < size) {
         parsed_msg.error_code = *dataPtr++, size++;
+        read_size++;
+    }
     else {
         //LOG_ERR("Could not read the BGP error code from notify message");
-        return true;
+        return -1;
     }
 
-    if (read_size < size)
-        parsed_msg.error_subcode = *dataPtr++,size++;
+    if (read_size < size) {
+        parsed_msg.error_subcode = *dataPtr++, size++;
+        read_size++;
+    }
     else {
         //LOG_ERR("Could not read the BGP sub code from notify message");
-        return true;
+        return -1;
     }
 
     // Update the error text to be meaningful
@@ -168,7 +172,7 @@ bool libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u
         }
     }
 
-    return false;
+    return read_size;
 }
 
 

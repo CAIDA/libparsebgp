@@ -7,6 +7,6 @@
 #include <iostream>
 #include <cstring>
 
-ssize_t  extract_from_buffer (unsigned char*& buffer, int &buf_len, void *output_buf, int output_len);
+uint32_t extract_from_buffer (unsigned char*& buffer, int &buf_len, void *output_buf, int output_len);
 
 #endif //PARSE_LIB_PARSEUTILS_H

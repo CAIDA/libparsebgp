@@ -142,10 +142,6 @@
         unsigned char     bgp_id[4];           ///< 4 byte bgp id of sender - router_id
         uint8_t           opt_param_len;       ///< optional parameter length - 0 means no params
         std::list<open_param>  opt_param;           ///< optional parameter
-
-        //To remove the following:
-        std::string       peer_addr;      ///< Printed form of the peer address for logging
-//        peer_info         *peer_inf;     ///< Persistent Peer info pointer
     }libparsebgp_open_msg_data;
      /**
       * Constructor for class
@@ -175,7 +171,7 @@
      *
      * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
      */
-    size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
+    int libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
 
 
     /**

@@ -68,12 +68,6 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
         libparsebgp_update_msg_data update_msg;
         libparsebgp_notify_msg notification_msg;
     }parsed_data;
-
-    /*parsed_update_data parsed_update_data;
-    std::vector<obj_vpn> obj_vpn_rib_list;
-    std::vector<obj_evpn> obj_evpn_rib_list;
-    std::vector<obj_rib> adv_obj_rib_list;
-    std::vector<obj_rib> wdrawn_obj_rib_list;*/
     bool has_end_of_rib_marker;
     /**
      * data_bytes_remaining is a counter that starts at the message size and then is
@@ -81,22 +75,12 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
      *
      * This is used to ensure no buffer overruns on bgp data buffer
      */
-    unsigned int data_bytes_remaining;
+    int data_bytes_remaining;
 
     /**
      * BGP data buffer for the raw BGP message to be parsed
      */
     unsigned char *data;                             ///< Pointer to the data buffer for the raw BGP message
-
-    //common_bgp_hdr common_hdr;                       ///< Current/last pased bgp common header
-
-    obj_bgp_peer *p_entry;       ///< peer table entry - will be updated with BMP info
-    obj_path_attr base_attr;      ///< Base attribute object
-
-    string router_addr;    ///< Router IP address - used for logging
-    peer_info *p_info;        ///< Persistent Peer information
-
-    //unsigned char path_hash_id[16];                  ///< current path hash ID
 }libparsebgp_parse_bgp_parsed_data;
 
 

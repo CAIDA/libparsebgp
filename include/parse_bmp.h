@@ -197,9 +197,9 @@ typedef struct libparsebgp_parsed_bmp_rm_msg {
 }libparsebgp_parsed_bmp_rm_msg;
 
 u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];
-size_t bmp_data_len;              ///< Length/size of data in the data buffer
+uint32_t bmp_data_len;              ///< Length/size of data in the data buffer
 uint32_t bmp_len;                    ///< Length of the BMP message - does not include the common header size
-
+uint8_t     bmp_type;
 /**
  * BMP Message Structure
  */
@@ -228,6 +228,6 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
 
 }libparsebgp_parsed_bmp_parsed_data;
 
-uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len);
+int libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len);
 
 #endif //PARSE_LIB_PARSE_BMPV1_H

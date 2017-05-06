@@ -12,63 +12,12 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-//#include "parse_common.h"
 #include <string>
 #include <list>
 #include <array>
 #include <map>
 
 using namespace std;
-/**
- * Update header - defined in RFC4271
- */
-struct update_bgp_hdr {
-    /**
-     * indicates the total len of withdrawn routes field in octets.
-     */
-    uint16_t withdrawn_len;
-
-    /**
-     * Withdrawn routes data pointer
-     */
-    u_char *withdrawn_ptr;
-
-    /**
-     * Total length of the path attributes field in octets
-     *
-     * A value of 0 indicates NLRI nor path attrs are present
-     */
-    uint16_t attr_len;
-
-    /**
-     * Attribute data pointer
-     */
-    u_char *attr_ptr;
-
-    /**
-     * NLRI data pointer
-     */
-    u_char *nlri_ptr;
-};
-
-
-
-struct obj_router {
-    u_char      hash_id[16];            ///< Router hash ID of name and src_addr
-    uint16_t    hash_type;              ///< Router hash type  0:IP, 1:router_name, 2:bgp_id
-    u_char      name[255];              ///< BMP router sysName (initiation Type=2)
-    u_char      descr[255];             ///< BMP router sysDescr (initiation Type=1)
-    u_char      ip_addr[46];            ///< BMP router source IP address in printed form
-    char        bgp_id[16];             ///< BMP Router bgp-id
-    uint32_t    asn;                    ///< BMP router ASN
-    uint16_t    term_reason_code;       ///< BMP termination reason code
-    char        term_reason_text[255];  ///< BMP termination reason text decode string
-
-    char        term_data[4096];        ///< Type=0 String termination info data
-    char        initiate_data[4096];    ///< Type=0 String initiation info data
-    uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
-    uint32_t    timestamp_us;           ///< Timestamp microseconds
-};
 
 /**
      * OBJECT: bgp_peers
@@ -91,177 +40,6 @@ struct obj_bgp_peer {
     uint32_t    timestamp_us;           ///< Timestamp microseconds
 };
 
-/**
- * OBJECT: peer_down_events
- *
- * Peer Down Events schema
- */
-struct obj_peer_down_event {
-    u_char          bmp_reason;         ///< BMP notify reason
-    u_char          bgp_err_code;       ///< BGP notify error code
-    u_char          bgp_err_subcode;    ///< BGP notify error sub code
-    char            error_text[255];    ///< BGP error text string
-};
-
-/**
- * OBJECT: path_attrs
- *
- * Prefix Path attributes table schema
- */
-struct obj_path_attr {
-
-    /**
-     * Path hash
-     */
-    u_char      hash_id[16];
-    char        origin[16];             ///< bgp origin as string name
-
-    /**
-     * as_path.
-     */
-    std::string as_path;
-
-    uint16_t    as_path_count;          ///< Count of AS PATH's in the path (includes all in AS-SET)
-
-    uint32_t    origin_as;              ///< Origin ASN
-    bool        nexthop_isIPv4;         ///< True if IPv4, false if IPv6
-    char        next_hop[40];           ///< Next-hop IP in printed form
-    char        aggregator[40];         ///< Aggregator IP in printed form
-    bool        atomic_agg;             ///< 0=false, 1=true for atomic_aggregate
-
-    uint32_t    med;                    ///< bgp MED
-    uint32_t    local_pref;             ///< bgp local pref
-
-    /**
-     * standard community list.
-     */
-    std::string community_list;
-
-    /**
-     * extended community list.
-     */
-    std::string  ext_community_list;
-
-    /**
-     * cluster list.
-     */
-    std::string cluster_list;
-
-    char        originator_id[16];      ///< Originator ID in printed form
-};
-
-/**
- * OBJECT: peer_up_events
- *
- * Peer Up Events schema
- *
- * \note    open_params are the decoded values in string/text format; e.g. "attr=value ..."
- *          Numeric values are converted to printed form.   The buffer itself is
- *          allocated by the caller and freed by the caller.
- */
-struct obj_peer_up_event {
-    char        info_data[4096];        ///< Inforamtional data for peer
-    char        local_ip[40];           ///< IPv4 or IPv6 printed IP address
-    uint16_t    local_port;             ///< Local port number
-    uint32_t    local_asn;              ///< Local ASN for peer
-    uint16_t    local_hold_time;        ///< BGP hold time
-    char        local_bgp_id[16];       ///< Local BGP ID in printed form
-    uint32_t    remote_asn;             ///< Remote ASN for peer
-    uint16_t    remote_port;            ///< Remote port number
-    uint16_t    remote_hold_time;       ///< BGP hold time
-    char        remote_bgp_id[16];      ///< Remote Peer BGP ID in printed form
-
-    char        sent_cap[4096];         ///< Received Open param capabilities
-    char        recv_cap[4096];         ///< Received Open param capabilities
-};
-
-
-/**
-     * OBJECT: stats_reports
-     *
-     * Stats Report schema
-     */
-struct obj_stats_report {
-    uint32_t        prefixes_rej;           ///< type=0 Prefixes rejected
-    uint32_t        known_dup_prefixes;     ///< type=1 known duplicate prefixes
-    uint32_t        known_dup_withdraws;    ///< type=2 known duplicate withdraws
-    uint32_t        invalid_cluster_list;   ///< type=3 Updates invalid by cluster lists
-    uint32_t        invalid_as_path_loop;   ///< type=4 Updates invalid by as_path loop
-    uint32_t        invalid_originator_id;  ///< type=5 Invalid due to originator_id
-    uint32_t        invalid_as_confed_loop; ///< type=6 Invalid due to as_confed loop
-    uint64_t        routes_adj_rib_in;      ///< type=7 Number of routes in adj-rib-in
-    uint64_t        routes_loc_rib;         ///< type=8 number of routes in loc-rib
-};
-
-
-/**
- * OBJECT: rib
- *
- * Prefix rib table schema
- */
-struct obj_rib {
-    u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
-    u_char      path_attr_hash_id[16];  ///< path attrs hash_id
-    u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
-    u_char      is_ipv4;                 ///< 0 if IPv6, 1 if IPv4
-    char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
-    u_char      prefix_len;             ///< Length of prefix in bits
-    uint8_t     prefix_bin[16];         ///< Prefix in binary form
-    uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
-    uint32_t    path_id;                ///< Add path ID - zero if not used
-    char        labels[255];            ///< Labels delimited by comma
-};
-
-/// Rib extended with Route Distinguisher
-struct obj_route_distinguisher {
-    std::string     rd_administrator_subfield;
-    std::string     rd_assigned_number;
-    uint8_t         rd_type;
-};
-
-/// Rib extended with vpn specific fields
-struct obj_vpn{
-    u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
-    u_char      path_attr_hash_id[16];  ///< path attrs hash_id
-    u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
-    u_char      is_ipv4;                 ///< 0 if IPv6, 1 if IPv4
-    char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
-    u_char      prefix_len;             ///< Length of prefix in bits
-    uint8_t     prefix_bin[16];         ///< Prefix in binary form
-    uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
-    uint32_t    path_id;                ///< Add path ID - zero if not used
-    char        labels[255];            ///< Labels delimited by comma
-    std::string     rd_administrator_subfield;
-    std::string     rd_assigned_number;
-    uint8_t         rd_type;
-};
-
-/// Rib extended with evpn specific fields
-struct obj_evpn{
-    u_char      hash_id[16];            ///< hash of attr hash prefix, and prefix len
-    u_char      path_attr_hash_id[16];  ///< path attrs hash_id
-    u_char      peer_hash_id[16];       ///< BGP peer hash ID, need it here for withdraw routes support
-    u_char      is_ipv4;                ///< 0 if IPv6, 1 if IPv4
-    char        prefix[46];             ///< IPv4/IPv6 prefix in printed form
-    u_char      prefix_len;             ///< Length of prefix in bits
-    uint8_t     prefix_bin[16];         ///< Prefix in binary form
-    uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
-    uint32_t    path_id;                ///< Add path ID - zero if not used
-    char        labels[255];            ///< Labels delimited by comma
-    std::string     rd_administrator_subfield;
-    std::string     rd_assigned_number;
-    uint8_t         rd_type;
-    uint8_t     originating_router_ip_len;
-    char        originating_router_ip[46];
-    char        ethernet_segment_identifier[255];
-    char        ethernet_tag_id_hex[16];
-    uint8_t     mac_len;
-    char        mac[255];
-    uint8_t     ip_len;
-    char        ip[46];
-    int         mpls_label_1;
-    int         mpls_label_2;
-};
 
 /**
  * OBJECT: ls_node
@@ -431,8 +209,6 @@ typedef std::map<update_attr_types, std::string>    parsed_attrs_map;
 // Parsed bgp-ls attributes map
 typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
-//typedef std::map<uint16_t, std::array<uint8_t, 255>> parsed_ls_attrs_map;
-
 struct attr_type_tuple {
     uint8_t attr_flags;
     uint8_t attr_type_code;
@@ -528,26 +304,6 @@ struct libparsebgp_update_msg_data {
     list <update_path_attrs> path_attributes;
     list <update_prefix_tuple> nlri;
 };
-    /**
-     * parsed path attributes map
-     */
-//        std::map<update_attr_types, std::string> parsed_attrs;
-
-//    bool debug;                           ///< debug flag to indicate debugging
-//    //Logger                  *logger;                         ///< Logging class pointer
-//    std::string peer_addr;                       ///< Printed form of the peer address for logging
-//    std::string router_addr;                     ///< Router IP address - used for logging
-//    bool four_octet_asn;                  ///< Indicates true if 4 octets or false if 2
-//    peer_info *peer_inf;                      ///< Persistent Peer info pointer
-
-//    parsed_update_data parsed_data;
-//    std::vector<obj_vpn> obj_vpn_rib_list;
-//    std::vector<obj_evpn> obj_evpn_rib_list;
-//    std::vector<obj_rib> adv_obj_rib_list;
-//    std::vector<obj_rib> wdrawn_obj_rib_list;
-
-void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
-                                           std::string router_addr, peer_info *peer_info);
 
  /**
   * Parses the update message
@@ -562,7 +318,7 @@ void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::s
   *
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
- size_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
+ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
                                                 bool &has_end_of_rib_marker);
 
 /**
@@ -576,7 +332,5 @@ void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::s
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
 void libparsebgp_update_msg_parse_attributes(libparsebgp_update_msg_data *update_msg, u_char *data, uint16_t len, bool &has_end_of_rib_marker);
-
-/* namespace bgp_msg */
 
 #endif /* UPDATEMSG_H_ */

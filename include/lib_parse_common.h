@@ -4,7 +4,7 @@
 
 #ifndef PARSE_LIB_LIB_PARSE_COMMON_H_H
 #define PARSE_LIB_LIB_PARSE_COMMON_H_H
-#include "parse_bmpv1.h"
+#include "parse_bmp.h"
 #include "parse_mrt.h"
 #include "parse_bgp.h"
 
@@ -12,7 +12,7 @@ enum libparsebgp_parse_msg_types {MRT_MESSAGE_TYPE = 1, BMP_MESSAGE_TYPE, BGP_ME
 
 
 struct libparsebgp_parse_msg{
-    uint32_t read_size;
+    int read_size;
     libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
     libparsebgp_parsed_bmp_parsed_data parsed_bmp_msg;
     libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
