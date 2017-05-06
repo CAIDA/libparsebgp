@@ -8,27 +8,9 @@
  */
 #include "../include/open_msg.h"
 #include "../include/bgp_common.h"
-#include "../include/add_path_data_container.h"
-#include <arpa/inet.h>
 #include "../include/parse_utils.h"
 
-//namespace bgp_msg {
-
 /**
- * Constructor for class
- *
- * \details Handles bgp open messages
- *
- * \param [in]     peerAddr        Printed form of peer address used for logging
- * \param [in]     peer_info       Persistent peer information
- * \param [in]     enable_debug    Debug true to enable, false to disable
- */
-/*void libparsebgp_open_msg_init(libparsebgp_open_msg_data *open_msg_data,std::string peer_addr, peer_info *peer_info) {
-    open_msg_data->peer_inf = peer_info;
-    open_msg_data->peer_addr = peer_addr;
-}*/
-
-    /**
  * Parses capabilities from buffer
  *
  * \details
@@ -331,4 +313,3 @@ size_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_d
 
     return read_size;
 }
-//} /* namespace bgp_msg */

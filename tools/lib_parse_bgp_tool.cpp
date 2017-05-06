@@ -1,5 +1,4 @@
 #include <iostream>
-//#include "../include/parse_bmp.h"
 #include <fstream>
 #include "../include/lib_parse_common.h"
 

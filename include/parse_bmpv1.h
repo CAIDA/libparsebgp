@@ -226,8 +226,6 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
         libparsebgp_parsed_bmp_stat_rep           parsed_stat_rep;
     }libparsebgp_parsed_bmp_msg;
 
-//    uint32_t bmp_len;                    ///< Length of the BMP message - does not include the common header size
-
 }libparsebgp_parsed_bmp_parsed_data;
 
 uint32_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len);
