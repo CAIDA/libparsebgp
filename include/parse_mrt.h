@@ -234,7 +234,7 @@ void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_da
  * \param [in] buffer       Contains the MRT message
  * \param [in] buf_len       Length of buffer
  */
-uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *&buffer, int &buf_len);
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
 
 //extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
 libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);

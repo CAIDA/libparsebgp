@@ -671,8 +671,8 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
 static bool libparsebgp_parse_bgp_handle_up_event(unsigned char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
     size_t              read_size;
     /*
-     * Process the sent open message
-     */
+    * Process the sent open message
+    */
     if (libparsebgp_parse_bgp_parse_header(up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
         size -= BGP_MSG_HDR_LEN;

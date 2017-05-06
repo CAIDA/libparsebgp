@@ -265,7 +265,7 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &
  *
  * \returns BGP message type
  */
-u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size) {
+u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
     /*
      * Error out if data size is not large enough for common header
      */
@@ -295,7 +295,7 @@ u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp
     return bgp_parsed_data.c_hdr.type;
 }
 
-uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &parsed_bgp_msg, unsigned char *&data, uint32_t size){
+uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &parsed_bgp_msg, unsigned char *data, uint32_t size){
     size_t              read_size;
     bool has_end_of_rib_marker = true;
     if (libparsebgp_parse_bgp_parse_header(parsed_bgp_msg, data, size) == BGP_MSG_OPEN) {

@@ -30,7 +30,7 @@ libparsebgp_parse_msg libparsebgp_parse_msg_common_wrapper(u_char* buffer, uint3
             break;
         }
         case BGP_MESSAGE_TYPE: {
-            parsed_msg.read_size=libparsebgp_parse_bgp_parse_msg(&parsed_msg.parsed_bgp_msg, buffer, buf_len);
+            parsed_msg.read_size=libparsebgp_parse_bgp_parse_msg(parsed_msg.parsed_bgp_msg, buffer, buf_len);
             break;
         }
         default: {

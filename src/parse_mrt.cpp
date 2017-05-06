@@ -527,7 +527,7 @@ static void libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_l
     }
 }
 
-uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *&buffer, int &buf_len) {
+uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data,u_char *buffer, int buf_len) {
     //bool rval = true;
     int initial_buffer_len = buf_len;
     try {
@@ -593,17 +593,17 @@ int main() {
     //parseMRT *p = new parseMRT();
     int len = 99;
     libparsebgp_parse_mrt_parsed_data mrt_data;
-    try {
-        int read_size = libparsebgp_parse_mrt_parse_msg(&mrt_data, tmp, len);
-        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
-            cout << "Hello Ojas and Induja"<<endl;
-        cout << read_size;
-        //else
-        //    cout << "Oh no!"<<endl;
-    }
-    catch (char const *str) {
-        cout << "Crashed!" << str <<endl;
-    }
+//    try {
+//        int read_size = libparsebgp_parse_mrt_parse_msg(&mrt_data, tmp, len);
+//        //if (p->libparsebgp_parse_mrt_parse_msg(tmp, len))
+//            cout << "Hello Ojas and Induja"<<endl;
+//        cout << read_size;
+//        //else
+//        //    cout << "Oh no!"<<endl;
+//    }
+//    catch (char const *str) {
+//        cout << "Crashed!" << str <<endl;
+//    }
 //    cout << "Peer Address" << int(.peer_index_tbl.peer_entries.begin()->peer_type);
    //cout<<"Peer Address "<<int(p->peer_index_table.peer_entries.begin()->peer_type);
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
