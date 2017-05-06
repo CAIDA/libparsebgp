@@ -139,9 +139,9 @@
         uint8_t           ver;                 ///< Version, currently 4
         uint16_t          asn;                 ///< 2 byte ASN - AS_TRANS = 23456 to indicate 4-octet ASN
         uint16_t          hold_time;           ///< 2 byte hold time - can be zero or >= 3 seconds
-        uint32_t          bgp_id;              ///< 4 byte bgp id of sender - router_id
-        uint8_t           opt_param_len;           ///< optional parameter length - 0 means no params
-        open_param        opt_param;           ///< optional parameter
+        unsigned char     bgp_id[4];           ///< 4 byte bgp id of sender - router_id
+        uint8_t           opt_param_len;       ///< optional parameter length - 0 means no params
+        std::list<open_param>  opt_param;           ///< optional parameter
 
         //To remove the following:
         std::string       peer_addr;      ///< Printed form of the peer address for logging

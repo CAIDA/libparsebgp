@@ -805,13 +805,14 @@ static bool libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_sta
  *
  * \returns True if error, false if no error.
  */
-static bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
+static bool libparsebgp_parse_bgp_handle_up_event(unsigned char *data, size_t size, libparsebgp_parsed_bmp_peer_up_event *up_event) {
     size_t              read_size;
     /*
      * Process the sent open message
      */
     if (libparsebgp_parse_bgp_parse_header(up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
+        size -= BGP_MSG_HDR_LEN;
 
         read_size = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
 
@@ -826,7 +827,7 @@ static bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, lib
 
     if (libparsebgp_parse_bgp_parse_header(up_event->received_open_msg, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
-
+        size -= BGP_MSG_HDR_LEN;
         read_size = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg,data, size, false);
 
         if (!read_size) {
@@ -855,7 +856,7 @@ static bool libparsebgp_parse_bgp_handle_up_event(u_char *data, size_t size, lib
  * \returns true if successfully parsed the bmp peer up header, false otherwise
  */
 static bool libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp_peer_up_event *parsed_msg, unsigned char*& buffer, int& buf_len) {
-    unsigned char local_addr[16];
+//    unsigned char local_addr[16];
     bool is_parse_good = true;
     int bytes_read = 0;
 
