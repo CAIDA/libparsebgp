@@ -186,7 +186,7 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (update_msg->total_path_attr_len > 0) {
-            libparsebgp_update_msg_parse_attributes(&update_msg->path_attributes, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker);
+            libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker);
         }
 
         /* ---------------------------------------------------------
@@ -290,7 +290,8 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
 //        }
 
         // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
-        for (; as_segment.seg_len > 0; as_segment.seg_len--) {
+        int seg_len = as_segment.seg_len;
+        for (; seg_len > 0; seg_len--) {
             uint32_t seg_asn;
             seg_asn = 0;
             memcpy(&seg_asn, data, asn_octet_size);  data += asn_octet_size;
@@ -585,7 +586,7 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_update_msg_parse_attributes(list <update_path_attrs> *update_msg, u_char *data, uint16_t len, bool &has_end_of_rib_marker) {
+void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
     /*
      * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
      */
@@ -605,49 +606,49 @@ void libparsebgp_update_msg_parse_attributes(list <update_path_attrs> *update_ms
     /*
      * Iterate through all attributes and parse them
      */
-    update_path_attrs *path_attrs;
+    update_path_attrs path_attrs;
 
     for (int read_size=0;  read_size < len; read_size += 2) {
-        path_attrs->attr_type.attr_flags = *data++;
-        path_attrs->attr_type.attr_type_code = *data++;
+        path_attrs.attr_type.attr_flags = *data++;
+        path_attrs.attr_type.attr_type_code = *data++;
 
         // Check if the length field is 1 or two bytes
-        if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
+        if (ATTR_FLAG_EXTENDED(path_attrs.attr_type.attr_flags)) {
             //SELF_DEBUG("%s: rtr=%s: extended length path attribute bit set for an entry", peer_addr.c_str(), router_addr.c_str());
 
-            memcpy(&path_attrs->attr_len, data, 2);
+            memcpy(&path_attrs.attr_len, data, 2);
             data += 2;
             read_size += 2;
-            SWAP_BYTES(&path_attrs->attr_len);
+            SWAP_BYTES(&path_attrs.attr_len);
 
         } else
-            path_attrs->attr_len = *data++;
+            path_attrs.attr_len = *data++;
         read_size++;
 
         //SELF_DEBUG("%s: rtr=%s: attribute type = %d len_sz = %d",
         //       peer_addr.c_str(), router_addr.c_str(), attr_type, attr_len);
 
         // Get the attribute data, if we have any; making sure to not overrun buffer
-        if (path_attrs->attr_len > 0 and (read_size + path_attrs->attr_len) <= len) {
+        if (path_attrs.attr_len > 0 and (read_size + path_attrs.attr_len) <= len) {
             // Data pointer is currently at the data position of the attribute
 
             /*
              * Parse data based on attribute type
              */
-            libparsebgp_update_msg_parse_attr_data(path_attrs, data, has_end_of_rib_marker);
-            data += path_attrs->attr_len;
-            read_size += path_attrs->attr_len;
+            libparsebgp_update_msg_parse_attr_data(&path_attrs, data, has_end_of_rib_marker);
+            data += path_attrs.attr_len;
+            read_size += path_attrs.attr_len;
 
             //SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
             //            attr_type, attr_len);
 
-        } else if (path_attrs->attr_len) {
+        } else if (path_attrs.attr_len) {
             //LOG_NOTICE("%s: rtr=%s: Attribute data len of %hu is larger than available data in update message of %hu",
             //        peer_addr.c_str(), router_addr.c_str(), attr_len, (len - read_size));
             return;
         }
-        update_msg->push_back(*path_attrs);
-        delete path_attrs;
+        update_msg.push_back(path_attrs);
+        //delete path_attrs;
     }
 
 }

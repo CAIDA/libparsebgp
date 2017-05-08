@@ -45,7 +45,7 @@ typedef struct libparsebgp_common_bgp_hdr {
      *
      * min length is 19, max is 4096
      */
-    uint16_t  len;
+    unsigned short   len;
     /**
      * type code of the message
      *
@@ -55,7 +55,7 @@ typedef struct libparsebgp_common_bgp_hdr {
      * 4 - KEEPALIVE
      * 5 - ROUTE-REFRESH
      */
-    uint8_t   type;
+    unsigned char    type;
 }libparsebgp_common_bgp_hdr;
 
 typedef struct libparsebgp_parse_bgp_parsed_data {
@@ -101,7 +101,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
                                     string router_addr, peer_info *peer_info);
 
 
-    void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
+    uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
                                                   bool is_local_msg = true);
 
 
@@ -147,6 +147,6 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
      * \returns BGP message type
      */
     u_char libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size);
-uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &parsed_bgp_msg, unsigned char *data, uint32_t size);
+//uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &parsed_bgp_msg, unsigned char *data, uint32_t size);
 
 #endif /* PARSEBGP_H_ */

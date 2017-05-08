@@ -18,7 +18,7 @@ struct libparsebgp_parse_msg{
     libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
 };
 
-libparsebgp_parse_msg libparsebgp_parse_msg_common_wrapper(u_char* buffer, uint32_t buf_len, int type) {
+libparsebgp_parse_msg libparsebgp_parse_msg_common_wrapper(u_char* buffer, int buf_len, int type) {
     libparsebgp_parse_msg parsed_msg;
     switch (type) {
         case MRT_MESSAGE_TYPE: {
