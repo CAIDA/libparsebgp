@@ -7,23 +7,11 @@
  *
  */
 #include "../include/update_msg.h"
-
 #include <arpa/inet.h>
-
 #include "../include/ext_community.h"
 #include "../include/mp_reach_attr.h"
 #include "../include/mp_un_reach_attr.h"
 #include "../include/mp_link_state_attr.h"
-
-//namespace bgp_msg {
-
-//
-//    void libparsebgp_update_msg_init(libparsebgp_update_msg_data *update_msg, std::string peer_addr,
-//                                               std::string router_addr, peer_info *peer_info){
-//        update_msg->peer_inf = peer_info;
-//        update_msg->peer_addr = peer_addr;
-//        update_msg->router_addr = router_addr;
-//    }
 
 
 /**
@@ -134,7 +122,8 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
     // Get the withdrawn length
     memcpy(&update_msg->wdrawn_route_len, bufPtr, sizeof(update_msg->wdrawn_route_len));
     SWAP_BYTES(&update_msg->wdrawn_route_len);
-    bufPtr += sizeof(update_msg->wdrawn_route_len); read_size += sizeof(update_msg->wdrawn_route_len);
+    bufPtr += sizeof(update_msg->wdrawn_route_len);
+    read_size += sizeof(update_msg->wdrawn_route_len);
 
     // Set the withdrawn data pointer
     if ((size - read_size) < update_msg->wdrawn_route_len) {
@@ -402,8 +391,6 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
 void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker) {
         std::string decodeStr       = "";
         u_char      ipv4_raw[4];
-        char        ipv4_char[16];
-        uint32_t    value32bit;
         uint16_t    value16bit;
 
         /*

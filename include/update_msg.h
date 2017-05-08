@@ -282,7 +282,7 @@ struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
-    parsed_attrs_map            attrs;
+    parsed_attrs_map        attrs;
     list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
     std::list<update_prefix_tuple>  advertised;
     parsed_data_ls          mp_ls_data;
@@ -298,11 +298,11 @@ struct update_path_attrs {
 
 
 struct libparsebgp_update_msg_data {
-    uint16_t wdrawn_route_len;
-    list <update_prefix_tuple> wdrawn_routes;
-    uint16_t total_path_attr_len;
-    list <update_path_attrs> path_attributes;
-    list <update_prefix_tuple> nlri;
+    uint16_t                    wdrawn_route_len;
+    list <update_prefix_tuple>  wdrawn_routes;
+    uint16_t                    total_path_attr_len;
+    list <update_path_attrs>    path_attributes;
+    list <update_prefix_tuple>  nlri;
 };
 
  /**

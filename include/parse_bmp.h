@@ -87,16 +87,16 @@ struct libparsebgp_parsed_peer_hdr_v3 {
 *  BMP headers for older versions (BMPv1)
 */
 struct common_hdr_bmp_old {
-    //uint8_t ver;                 ///< 1 byte -- Not part of struct since it's read before
     uint8_t         type;                ///< 1 byte
     uint8_t         peer_type;            ///< 1 byte
     uint8_t         peer_flags;           ///< 1 byte
-    unsigned char peer_dist_id[8];     ///< 8 byte peer distinguisher
-    unsigned char peer_addr[16];       ///< 16 bytes
-    uint32_t        peer_as[4];          ///< 4 byte
-    unsigned char peer_bgp_id[4];      ///< 4 byte peer bgp id
-    unsigned long ts_secs : 32;        ///< 4 byte timestamp in seconds
-    unsigned long ts_usecs : 32;       ///< 4 byte timestamp microseconds
+    unsigned char   peer_dist_id[8];     ///< 8 byte peer distinguisher
+    unsigned char   peer_addr[16];       ///< 16 bytes
+    uint32_t        peer_as;          ///< 4 byte
+    unsigned char   peer_bgp_id[4];      ///< 4 byte peer bgp id
+    uint32_t        ts_secs ;        ///< 4 byte timestamp in seconds
+    uint32_t        ts_usecs ;       ///< 4 byte timestamp microseconds
+    uint8_t         ver;                 ///< 1 byte -- At last since it's read before
 } __attribute__ ((__packed__));
 
 /**
