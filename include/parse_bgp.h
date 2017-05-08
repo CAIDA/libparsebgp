@@ -116,7 +116,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
      *
      * \returns True if error, false if no error.
      */
-    bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &update_msg, u_char *data, size_t size);
+    int libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &update_msg, u_char *data, size_t size);
 
     /**
      * handle BGP notify event - updates the down event with parsed data

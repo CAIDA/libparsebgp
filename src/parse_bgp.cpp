@@ -190,20 +190,20 @@ void libparsebgp_parse_bgp_parse_msg_from_mrt(libparsebgp_parse_bgp_parsed_data 
  *
  * \returns True if error, false if no error.
  */
-bool libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &update_msg, u_char *data, size_t size) {
+int libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &update_msg, u_char *data, size_t size) {
     int read_size = 0;
 
     if (libparsebgp_parse_bgp_parse_header(update_msg, data, size) == BGP_MSG_UPDATE) {
         data += BGP_MSG_HDR_LEN;
-
+        read_size+=BGP_MSG_HDR_LEN;
        if ((read_size=libparsebgp_update_msg_parse_update_msg(&update_msg.parsed_data.update_msg, data, update_msg.data_bytes_remaining,
                                                                update_msg.has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
             //LOG_NOTICE("%s: rtr=%s: Failed to parse the update message, read %d expected %d", p_entry->peer_addr, router_addr.c_str(), read_size, (size - read_size));
-            return true;
+            throw "error in parsing update msg";
         }
-        update_msg.data_bytes_remaining -= read_size;
+        read_size+=(size - BGP_MSG_HDR_LEN);
     }
-    return false;
+    return read_size;
 }
 
 /**

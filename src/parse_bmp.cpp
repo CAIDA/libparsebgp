@@ -74,163 +74,70 @@ static int libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 &
 *
 * \param [in]  sock        Socket to read the message from
 */
-//static void libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
-//    parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old = { 0 };
-//    size_t i;
-//    char buf[256] = {0};
-//
-////    SELF_DEBUG("parseBMP: sock=%d: Reading %d bytes", sock, BMP_HDRv1v2_LEN);
-//
-////    parsed_msg->bmp_len = 0;
-//
-//    if (extract_from_buffer(buffer, buf_len, &parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old, BMP_HDRv1v2_LEN)
-//        != BMP_HDRv1v2_LEN) {
-//        //     SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",sock, i);
-//        throw "ERROR: Cannot read v1/v2 BMP common header.";
-//    }
-//
-//    // Process the message based on type
-//    //parsed_msg->bmp_type = parsed_msg->c_hdr_old.type;
-//    switch (parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type) {
-//        case 0: // Route monitoring
-//            //          SELF_DEBUG("sock=%d : BMP MSG : route monitor", sock);
-//
-//            // Get the length of the remaining message by reading the BGP length
-//            //if ((i=Recv(sock, buf, 18, MSG_PEEK | MSG_WAITALL)) == 18) {
-//            if ((i=extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
-//                uint16_t len;
-//                memcpy(&len, (buf+16), 2);
-//                SWAP_BYTES(&len);
-//                parsed_msg->bmp_len = len;
-//
-//            } else {
-////                LOG_ERR("sock=%d: Failed to read BGP message to get length of BMP message", sock);
-//                throw "Failed to read BGP message for BMP length";
-//            }
-//            break;
-//
-//        case 1: // Statistics Report
-//            //           SELF_DEBUG("sock=%d : BMP MSG : stats report", sock);
-////            LOG_INFO("sock=%d : BMP MSG : stats report", sock);
-//            break;
-//
-//        case 2: // Peer down notification
-////            LOG_INFO("sock=%d: BMP MSG: Peer down", sock);
-//
-//            // Get the length of the remaining message by reading the BGP length
-//            if ((i=extract_from_buffer(buffer, buf_len, buf, 1)) != 1) {
-//
-//                // Is there a BGP message
-//                if (buf[0] == 1 or buf[0] == 3) {
-//                    //if ((i = Recv(sock, buf, 18, MSG_PEEK | MSG_WAITALL)) == 18) {
-//                    if ((i = extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
-//                        memcpy(&parsed_msg->bmp_len, buf + 16, 2);
-//                        SWAP_BYTES(&parsed_msg->bmp_len);
-//
-//                    } else {
-////                        LOG_ERR("sock=%d: Failed to read peer down BGP message to get length of BMP message", sock);
-//                        throw "Failed to read BGP message for BMP length";
-//                    }
-//                }
-//            } else {
-////                LOG_ERR("sock=%d: Failed to read peer down reason", sock);
-//                throw "Failed to read BMP peer down reason";
-//            }
-//
-//            //           SELF_DEBUG("sock=%d : BMP MSG : peer down", sock);
-//            break;
-//
-//        case 3: // Peer Up notification
-////            LOG_ERR("sock=%d: Peer UP not supported with older BMP version since no one has implemented it", sock);
-//
-//            //           SELF_DEBUG("sock=%d : BMP MSG : peer up", sock);
-//            throw "ERROR: Will need to add support for peer up if it's really used.";
-//            break;
-//    }
-//
-////    //   SELF_DEBUG("sock=%d : Peer Type is %d", sock, c_hdr_old.peer_type);
-////
-////    if (parsed_msg->c_hdr_old.peer_flags & 0x80) { // V flag of 1 means this is IPv6
-////        parsed_msg->p_entry.is_ipv4 = false;
-////        inet_ntop(AF_INET6, parsed_msg->c_hdr_old.peer_addr, parsed_msg->peer_addr, sizeof(parsed_msg->peer_addr));
-////
-////        //      SELF_DEBUG("sock=%d : Peer address is IPv6", sock);
-////
-////    } else {
-////        parsed_msg->p_entry.is_ipv4 = true;
-////        snprintf(parsed_msg->peer_addr, sizeof(parsed_msg->peer_addr), "%d.%d.%d.%d",
-////                 parsed_msg->c_hdr_old.peer_addr[12], parsed_msg->c_hdr_old.peer_addr[13], parsed_msg->c_hdr_old.peer_addr[14],
-////                 parsed_msg->c_hdr_old.peer_addr[15]);
-////
-////        //       SELF_DEBUG("sock=%d : Peer address is IPv4", sock);
-////    }
-//
-//    /* if (c_hdr.peer_flags & 0x40) { // L flag of 1 means this is Loc-RIP and not Adj-RIB-In
-//         //       SELF_DEBUG("sock=%d : Msg is for Loc-RIB", sock);
-//     } else {
-//         //      SELF_DEBUG("sock=%d : Msg is for Adj-RIB-In", sock);
-//     }*/
-//
-//    // convert the BMP byte messages to human readable strings
-//    snprintf(parsed_msg->peer_as, sizeof(parsed_msg->peer_as), "0x%04x%04x",
-//             parsed_msg->c_hdr_old.peer_as[0] << 8 | parsed_msg->c_hdr_old.peer_as[1],
-//             parsed_msg->c_hdr_old.peer_as[2] << 8 | parsed_msg->c_hdr_old.peer_as[3]);
-//    snprintf(parsed_msg->peer_bgp_id, sizeof(parsed_msg->peer_bgp_id), "%d.%d.%d.%d",
-//             parsed_msg->c_hdr_old.peer_bgp_id[0], parsed_msg->c_hdr_old.peer_bgp_id[1], parsed_msg->c_hdr_old.peer_bgp_id[2],
-//             parsed_msg->c_hdr_old.peer_bgp_id[3]);
-//
-//    // Format based on the type of RD
-//    switch (parsed_msg->c_hdr_old.peer_dist_id[0] << 8 | parsed_msg->c_hdr_old.peer_dist_id[1]) {
-//        case 1: // admin = 4bytes (IP address), assign number = 2bytes
-//            snprintf(parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd), "%d.%d.%d.%d:%d",
-//                     parsed_msg->c_hdr_old.peer_dist_id[2], parsed_msg->c_hdr_old.peer_dist_id[3],
-//                     parsed_msg->c_hdr_old.peer_dist_id[4], parsed_msg->c_hdr_old.peer_dist_id[5],
-//                     parsed_msg->c_hdr_old.peer_dist_id[6] << 8 | parsed_msg->c_hdr_old.peer_dist_id[7]);
-//            break;
-//        case 2: // admin = 4bytes (ASN), assing number = 2bytes
-//            snprintf(parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd), "%lu:%d",
-//                     (unsigned long) (parsed_msg->c_hdr_old.peer_dist_id[2] << 24
-//                                      | parsed_msg->c_hdr_old.peer_dist_id[3] << 16
-//                                      | parsed_msg->c_hdr_old.peer_dist_id[4] << 8 | parsed_msg->c_hdr_old.peer_dist_id[5]),
-//                     parsed_msg->c_hdr_old.peer_dist_id[6] << 8 | parsed_msg->c_hdr_old.peer_dist_id[7]);
-//            break;
-//        default: // admin = 2 bytes, sub field = 4 bytes
-//            snprintf(parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd), "%d:%lu",
-//                     parsed_msg->c_hdr_old.peer_dist_id[1] << 8 | parsed_msg->c_hdr_old.peer_dist_id[2],
-//                     (unsigned long) (parsed_msg->c_hdr_old.peer_dist_id[3] << 24
-//                                      | parsed_msg->c_hdr_old.peer_dist_id[4] << 16
-//                                      | parsed_msg->c_hdr_old.peer_dist_id[5] << 8 | parsed_msg->c_hdr_old.peer_dist_id[6]
-//                                      | parsed_msg->c_hdr_old.peer_dist_id[7]));
-//            break;
-//    }
-//
-//    // Update the MySQL peer entry struct
-//    strncpy(parsed_msg->p_entry.peer_addr, parsed_msg->peer_addr, sizeof(parsed_msg->peer_addr));
-//    parsed_msg->p_entry.peer_as = strtoll(parsed_msg->peer_as, NULL, 16);
-//    strncpy(parsed_msg->p_entry.peer_bgp_id, parsed_msg->peer_bgp_id, sizeof(parsed_msg->peer_bgp_id));
-//    strncpy(parsed_msg->p_entry.peer_rd, parsed_msg->peer_rd, sizeof(parsed_msg->peer_rd));
-//
-//    // Save the advertised timestamp
-//    uint32_t ts = parsed_msg->c_hdr_old.ts_secs;
-//    SWAP_BYTES(&ts);
-//
-//
-//    if (ts != 0)
-//        parsed_msg->p_entry.timestamp_secs = ts;
-//    else
-//        parsed_msg->p_entry.timestamp_secs = time(NULL);
-//
-//    // Is peer type L3VPN peer or global instance
-//    if (parsed_msg->c_hdr_old.type == 1) // L3VPN
-//        parsed_msg->p_entry.is_l3vpn = 1;
-//    else
-//        // Global Instance
-//        parsed_msg->p_entry.is_l3vpn = 0;
+static int libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+    int read_size=0;
+    size_t i;
+    char buf[256] = {0};
 
-    //   SELF_DEBUG("sock=%d : Peer Address = %s", sock, peer_addr);
-//    SELF_DEBUG("sock=%d : Peer AS = (%x-%x)%x:%x", sock, c_hdr.peer_as[0], c_hdr.peer_as[1], c_hdr.peer_as[2], c_hdr.peer_as[3]);
-//    //   SELF_DEBUG("sock=%d : Peer RD = %s", sock, peer_rd);
-//}
+    bmp_len = 0;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old, BMP_HDRv1v2_LEN)
+        != BMP_HDRv1v2_LEN) {
+        //     SELF_DEBUG("sock=%d: Couldn't read all bytes, read %zd bytes",sock, i);
+        throw "ERROR: Cannot read v1/v2 BMP common header.";
+    }
+    read_size+=BMP_HDRv1v2_LEN;
+
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.peer_as);
+
+    // Save the advertised timestamp
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ts_secs);
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ts_usecs);
+
+
+    // Process the message based on type
+    switch (parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type) {
+        case 0: // Route monitoring
+
+            // Get the length of the remaining message by reading the BGP length
+            if ((i=extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
+                uint16_t len;
+                memcpy(&len, (buf+16), 2);
+                SWAP_BYTES(&len);
+                bmp_len = len;
+                read_size+=i;
+
+            } else {
+                throw "Failed to read BGP message for BMP length";
+            }
+            break;
+
+        case 1: // Statistics Report
+            break;
+
+        case 2: // Peer down notification
+            // Get the length of the remaining message by reading the BGP length
+            if ((i=extract_from_buffer(buffer, buf_len, buf, 1)) != 1) {
+
+                // Is there a BGP message
+                if (buf[0] == 1 or buf[0] == 3) {
+                    if ((i = extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
+                        memcpy(&bmp_len, buf + 16, 2);
+                        SWAP_BYTES(&bmp_len);
+                        read_size+=i;
+                    } else
+                        throw "Failed to read BGP message for BMP length";
+                }
+            } else
+                throw "Failed to read BMP peer down reason";
+            break;
+
+        case 3: // Peer Up notification
+            throw "ERROR: Will need to add support for peer up if it's really used.";
+    }
+
+    return read_size;
+}
 
 
 /**
@@ -268,23 +175,9 @@ static int libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data
 
     switch (parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type) {
         case TYPE_ROUTE_MON: // Route monitoring
-            //          SELF_DEBUG("BMP MSG : route monitor");
-            read_size+=libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
-            break;
-
         case TYPE_STATS_REPORT: // Statistics Report
-            //          SELF_DEBUG("BMP MSG : stats report");
-            read_size+=libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
-            break;
-
         case TYPE_PEER_UP: // Peer Up notification
-        {
-            //           SELF_DEBUG("BMP MSG : peer up");
-            read_size+=libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
-            break;
-        }
         case TYPE_PEER_DOWN: // Peer down notification
-            //           SELF_DEBUG("BMP MSG : peer down");
             read_size+=libparsebgp_parse_bmp_parse_peer_hdr(parsed_msg->libparsebgp_parsed_peer_hdr, buffer, buf_len);
             break;
 
@@ -330,15 +223,13 @@ static int libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp_parsed_data *
 
         // Handle the older versions
     else if (ver == 1 || ver == 2) {
-        //       SELF_DEBUG("Older BMP version of %d, consider upgrading the router to support BMPv3", ver);
         //TODO:
-        //libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
-        //parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
+        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver=ver;
+        read_size+=libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
+        bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
 
     } else
         throw "ERROR: Unsupported BMP message version";
-
-    //   SELF_DEBUG("BMP version = %d\n", ver);
 
     return read_size;
 }
@@ -754,7 +645,7 @@ int libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_m
 
             case TYPE_ROUTE_MON : { // Route monitoring type
                 libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
-                libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len);
+                read_size+=libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len);
                 break;
             }
 

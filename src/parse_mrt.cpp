@@ -354,6 +354,8 @@ static int libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& b
             addr_bytes)
         throw "Error in parsing prefix";
 
+    read_size+=addr_bytes;
+
     switch (mrt_sub_type) {
         case RIB_IPV4_UNICAST:
             inet_ntop(AF_INET, local_addr, rib_entry_data->prefix,
@@ -374,6 +376,7 @@ static int libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& b
         if (extract_from_buffer(buffer, buf_len, &r_entry, 8) != 8)
             throw "Error in parsing peer Index";
         read_size+=8;
+
         SWAP_BYTES(&r_entry->peer_index);
         SWAP_BYTES(&r_entry->originated_time);
         SWAP_BYTES(&r_entry->attribute_len);
@@ -402,6 +405,7 @@ static int libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& b
 
     if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr->entry_count, 2) != 2)
         throw "Error in parsing peer count";
+    read_size+=2;
 
     SWAP_BYTES(&rib_gen_entry_hdr->entry_count);
 
@@ -409,6 +413,7 @@ static int libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& b
         rib_entry *r_entry = new rib_entry;
         if (extract_from_buffer(buffer, buf_len, &r_entry, 8) != 8)
             throw "Error in parsing peer Index";
+        read_size+=8;
 
         SWAP_BYTES(&r_entry->peer_index);
         SWAP_BYTES(&r_entry->originated_time);
@@ -470,7 +475,7 @@ int libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parse
 
             case TABLE_DUMP_V2 : {
                 libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-                libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump_v2);
+                read_size+=libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump_v2);
                 break;
             }
 
@@ -480,7 +485,6 @@ int libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parse
                 libparsebgp_parse_mrt_parse_bgp4mp(mrt_data, mrt_data_len, mrt_parsed_data);
                 break;
             }
-
             case ISIS :
             case ISIS_ET : {
                 break;  //do nothing
