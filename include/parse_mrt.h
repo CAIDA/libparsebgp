@@ -14,10 +14,8 @@
 #include <string>
 #include <list>
 #include <vector>
-//#include "parse_bmp.h"
 #include "parse_bgp.h"
 #include "parse_utils.h"
-//#include "parse_common.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
@@ -72,16 +70,16 @@ typedef struct libparsebgp_mrt_common_hdr {
   * Table Dump Message format
   */
 typedef struct libparsebgp_table_dump_message{
-    uint16_t    view_number;
-    uint16_t    sequence;
-    char        prefix[46];
-    uint8_t     prefix_len;
-    uint8_t     status;
-    uint32_t    originated_time;
-    char        peer_ip[46];
-    uint16_t    peer_as;
-    uint16_t    attribute_len;
-    u_char*     bgp_attribute;
+    uint16_t            view_number;
+    uint16_t            sequence;
+    char                prefix[16];
+    uint8_t             prefix_len;
+    uint8_t             status;
+    uint32_t            originated_time;
+    char                peer_ip[16];
+    uint16_t            peer_as;
+    uint16_t            attribute_len;
+    update_path_attrs   bgp_attrs;
 }libparsebgp_table_dump_message;
 
 
@@ -94,11 +92,8 @@ typedef struct libparsebgp_table_dump_message{
 struct peer_entry{
     uint8_t     peer_type;
     char        peer_bgp_id[4];
-    char        peer_ip[46];
-//        bool        is_ipv4;
-//        bool        as_size; //0 for 16 bits; 1 for 32 bits
-//       uint16_t    peer_as16;
-    uint32_t    peer_as32;
+    char        peer_ip[16];
+    uint32_t    peer_as;
 };
 
 /**
@@ -107,7 +102,7 @@ struct peer_entry{
 struct libparsebgp_peer_index_table{
     char                collector_bgp_id[4];
     uint16_t            view_name_length;
-    char*               view_name[46]; //doubtful about this setting, will have to confirm
+    char*               view_name[1024]; // it is in utf8 format
     uint16_t            peer_count;
     list<peer_entry>    peer_entries;
 };
@@ -121,7 +116,7 @@ struct rib_entry{
     uint32_t                     originated_time;
     uint16_t                     attribute_len;
     bool                         end_of_rib_marker;
-    //parsed_update_data           parsed_data;
+    update_path_attrs            bgp_attrs;
 };
 
 //4.3.2
@@ -177,13 +172,11 @@ struct libparsebgp_bgp4mp_msg{
 u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
 int mrt_data_len;              ///< Length/size of data in the data buffer
 
-//    libparsebgp_parse_bgp_parsed_data pbgp;
-//    parsed_bgp_msg bgp_msg;
 
-//private:
 uint16_t mrt_type;
 uint16_t mrt_sub_type;
 uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
+
 //union needed
 struct libparsebgp_parsed_table_dump_v2 {
     libparsebgp_peer_index_table          peer_index_tbl;
@@ -203,30 +196,7 @@ struct libparsebgp_parse_mrt_parsed_data {
             libparsebgp_bgp4mp_state_change       bgp4mp_state_change_msg;
         }bgp4mp;
     }parsed_data;
-
-//    libparsebgp_table_dump_message table_dump;
-//    peer_index_table peer_index_tbl;
-//    libparsebgp_rib_entry_header rib_entry_hdr;
-//    libparsebgp_rib_generic_entry_header rib_generic_entry_hdr;
-
-//    libparsebgp_bgp4mp_msg bgp4mp_msg;
-//    libparsebgp_bgp4mp_state_change bgp4mp_state_change_msg;
-
-//    obj_peer_up_event up_event;
-//    obj_peer_down_event down_event;
-
-    std::map<std::string, peer_info> peer_info_map;
 };
-/*
- * Constructor for class
- */
-//parseMRT();
-void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-/*
- * Destructor
- */
-//~parseMRT();
 
 /**
  * Function to parse MRT message
@@ -234,9 +204,6 @@ void libparsebgp_parse_mrt_init(libparsebgp_parse_mrt_parsed_data *mrt_parsed_da
  * \param [in] buffer       Contains the MRT message
  * \param [in] buf_len       Length of buffer
  */
-uint32_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
-
-//extern "C" parseMRT parseMRTwrapper(unsigned char *buffer, int buf_len);
-libparsebgp_parse_mrt_parsed_data parse_mrt_wrapper(unsigned char *&buffer, int &buf_len);
+int libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
 
 #endif /* PARSEBMP_H_ */

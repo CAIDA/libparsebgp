@@ -14,10 +14,8 @@
 #include <list>
 #include "bgp_common.h"
 #include "update_msg.h"
-//#include "parse_common.h"
 #include "open_msg.h"
 #include "notification_msg.h"
-//#include "parse_bmpv1.h"
 
 
 using namespace std;
