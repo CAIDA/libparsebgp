@@ -6,8 +6,8 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "../include/update_msg.h"
 #include <arpa/inet.h>
+#include "../include/update_msg.h"
 #include "../include/ext_community.h"
 #include "../include/mp_reach_attr.h"
 #include "../include/mp_un_reach_attr.h"
@@ -26,73 +26,73 @@
  * \param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
 static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes) {
-        u_char       ipv4_raw[4];
-        char         ipv4_char[16];
-        int          addr_bytes;
+    u_char       ipv4_raw[4];
+    char         ipv4_char[16];
+    int          addr_bytes;
 
-        //prefix_tuple tuple;
-        update_prefix_tuple prefix_tuple;
+    //prefix_tuple tuple;
+    update_prefix_tuple prefix_tuple;
 
-        if (len <= 0 or data == NULL)
-            return;
+    if (len <= 0 or data == NULL)
+        return;
 
-        // TODO: Can extend this to support multicast, but right now we set it to unicast v4
-        // Set the type for all to be unicast V4
-        //tuple.type = PREFIX_UNICAST_V4;
-        //tuple.is_ipv4 = true;
+    // TODO: Can extend this to support multicast, but right now we set it to unicast v4
+    // Set the type for all to be unicast V4
+    //tuple.type = PREFIX_UNICAST_V4;
+    //tuple.is_ipv4 = true;
 
-        // Loop through all prefixes
-        for (size_t read_size=0; read_size < len; read_size++) {
+    // Loop through all prefixes
+    for (size_t read_size=0; read_size < len; read_size++) {
 
-            //bzero(ipv4_raw, sizeof(ipv4_raw));
-            //bzero(tuple.prefix_bin, sizeof(tuple.prefix_bin));
+        //bzero(ipv4_raw, sizeof(ipv4_raw));
+        //bzero(tuple.prefix_bin, sizeof(tuple.prefix_bin));
 
-            // Parse add-paths if enabled
-            //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
-            //TODO: check with Alistair if this is important
+        // Parse add-paths if enabled
+        //if (update_msg->peer_info->add_path_capability.isAddPathEnabled(bgp::BGP_AFI_IPV4, bgp::BGP_SAFI_UNICAST)
+        //TODO: check with Alistair if this is important
 //            if (libparsebgp_addpath_is_enabled(update_msg->peer_inf->add_path_capability, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
 //                and (len - read_size) >= 4) {
 //                //memcpy(&tuple.path_id, data, 4);
 //                //SWAP_BYTES(&tuple.path_id);
 //                //data += 4; read_size += 4;
 //            } //else
-                //tuple.path_id = 0;
+            //tuple.path_id = 0;
 
-            // set the address in bits length
-            //tuple.len = *data++;
-            prefix_tuple.len = *data++;
+        // set the address in bits length
+        //tuple.len = *data++;
+        prefix_tuple.len = *data++;
 
-            // Figure out how many bytes the bits requires
-            addr_bytes = prefix_tuple.len / 8;
-            if (prefix_tuple.len % 8)
-                ++addr_bytes;
+        // Figure out how many bytes the bits requires
+        addr_bytes = prefix_tuple.len / 8;
+        if (prefix_tuple.len % 8)
+            ++addr_bytes;
 
-            //SELF_DEBUG("%s: rtr=%s: Reading NLRI data prefix bits=%d bytes=%d", peer_addr.c_str(),
-            //           router_addr.c_str(), tuple.len, addr_bytes);
+        //SELF_DEBUG("%s: rtr=%s: Reading NLRI data prefix bits=%d bytes=%d", peer_addr.c_str(),
+        //           router_addr.c_str(), tuple.len, addr_bytes);
 
-            if (addr_bytes <= 4) {
-                memcpy(ipv4_raw, data, addr_bytes);
-                read_size += addr_bytes;
-                data += addr_bytes;
+        if (addr_bytes <= 4) {
+            memcpy(ipv4_raw, data, addr_bytes);
+            read_size += addr_bytes;
+            data += addr_bytes;
 
-                // Convert the IP to string printed format
-                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-                prefix_tuple.prefix.assign(ipv4_char);
-                //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
-                //           router_addr.c_str(), ipv4_char, tuple.len);
+            // Convert the IP to string printed format
+            inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
+            prefix_tuple.prefix.assign(ipv4_char);
+            //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
+            //           router_addr.c_str(), ipv4_char, tuple.len);
 
-                // set the raw/binary address
-                //memcpy(tuple.prefix_bin, ipv4_raw, sizeof(ipv4_raw));
+            // set the raw/binary address
+            //memcpy(tuple.prefix_bin, ipv4_raw, sizeof(ipv4_raw));
 
-                // Add tuple to prefix list
-                prefixes.push_back(prefix_tuple);
+            // Add tuple to prefix list
+            prefixes.push_back(prefix_tuple);
 
-            } else if (addr_bytes > 4) {
-                //LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",
-                //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
-            }
+        } else if (addr_bytes > 4) {
+            //LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",
+            //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
         }
     }
+}
 
 
 /**
@@ -199,7 +199,6 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
 static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs, u_char *data) {
-//    std::string decoded_path;
     int         path_len    = path_attrs->attr_len;
     uint16_t    as_path_cnt = 0;
     as_path_segment as_segment;
@@ -630,8 +629,6 @@ void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg
             //            attr_type, attr_len);
 
         } else if (path_attrs.attr_len) {
-            //LOG_NOTICE("%s: rtr=%s: Attribute data len of %hu is larger than available data in update message of %hu",
-            //        peer_addr.c_str(), router_addr.c_str(), attr_len, (len - read_size));
             return;
         }
         update_msg.push_back(path_attrs);

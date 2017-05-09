@@ -70,16 +70,16 @@ typedef struct libparsebgp_mrt_common_hdr {
   * Table Dump Message format
   */
 typedef struct libparsebgp_table_dump_message{
-    uint16_t            view_number;
-    uint16_t            sequence;
-    char                prefix[16];
-    uint8_t             prefix_len;
-    uint8_t             status;
-    uint32_t            originated_time;
-    char                peer_ip[16];
-    uint16_t            peer_as;
-    uint16_t            attribute_len;
-    update_path_attrs   bgp_attrs;
+    uint16_t                view_number;
+    uint16_t                sequence;
+    char                    prefix[16];
+    uint8_t                 prefix_len;
+    uint8_t                 status;
+    uint32_t                originated_time;
+    char                    peer_ip[16];
+    uint16_t                peer_as;
+    uint16_t                attribute_len;
+    list<update_path_attrs> bgp_attrs;
 }libparsebgp_table_dump_message;
 
 
@@ -116,7 +116,7 @@ struct rib_entry{
     uint32_t                     originated_time;
     uint16_t                     attribute_len;
     bool                         end_of_rib_marker;
-    update_path_attrs            bgp_attrs;
+    list<update_path_attrs>      bgp_attrs;
 };
 
 //4.3.2

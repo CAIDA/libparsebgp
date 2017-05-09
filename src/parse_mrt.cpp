@@ -197,8 +197,10 @@ static int libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, 
     read_size+=4;
 
     bool has_end_of_rib_marker;
-    libparsebgp_update_msg_parse_attr_data(&table_dump_msg->bgp_attrs, buffer, has_end_of_rib_marker);
-    read_size += table_dump_msg->bgp_attrs.attr_len;
+    libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker);
+    read_size += table_dump_msg->attribute_len;
+    buf_len-=table_dump_msg->attribute_len;
+
     return read_size;
 }
 
@@ -265,46 +267,60 @@ static int libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffer, i
 
 static int libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, libparsebgp_rib_entry_header *rib_entry_data) {
     uint16_t count = 0;
-    string peer_info_key;
-    int addr_bytes;
+    int addr_bytes=0;
     int read_size=0;
 
-    if (extract_from_buffer(buffer, buf_len, &rib_entry_data, 5) != 5)
+    if (extract_from_buffer(buffer, buf_len, &rib_entry_data->sequence_number, 4) != 4)
         throw "Error in parsing sequence number";
+
+    if (extract_from_buffer(buffer, buf_len, &rib_entry_data->prefix_length, 1) != 1)
+        throw "Error in parsing sequence number";
+
     SWAP_BYTES(&rib_entry_data->sequence_number);
     read_size+=5;
 
-    addr_bytes = rib_entry_data->prefix_length/8;
-    if (rib_entry_data->prefix_length % 8)
-        ++addr_bytes;
-    u_char local_addr[addr_bytes];
+    if (rib_entry_data->prefix_length>0) {
+        addr_bytes = rib_entry_data->prefix_length / 8;
+        if (rib_entry_data->prefix_length % 8)
+            ++addr_bytes;
+        u_char local_addr[addr_bytes];
 
 
-    if (extract_from_buffer(buffer, buf_len, &local_addr, addr_bytes) !=
+        if (extract_from_buffer(buffer, buf_len, &local_addr, addr_bytes) !=
             addr_bytes)
-        throw "Error in parsing prefix";
+            throw "Error in parsing prefix";
 
-    read_size+=addr_bytes;
+        read_size += addr_bytes;
 
-    switch (mrt_sub_type) {
-        case RIB_IPV4_UNICAST:
-            inet_ntop(AF_INET, local_addr, rib_entry_data->prefix,
-                      sizeof(rib_entry_data->prefix));
-            break;
-        case RIB_IPV6_UNICAST:
-            inet_ntop(AF_INET6, local_addr, rib_entry_data->prefix,
-                      sizeof(rib_entry_data->prefix));
-            break;
+        switch (mrt_sub_type) {
+            case RIB_IPV4_UNICAST:
+                inet_ntop(AF_INET, local_addr, rib_entry_data->prefix,
+                          sizeof(rib_entry_data->prefix));
+                break;
+            case RIB_IPV6_UNICAST:
+                inet_ntop(AF_INET6, local_addr, rib_entry_data->prefix,
+                          sizeof(rib_entry_data->prefix));
+                break;
+        }
     }
     if (extract_from_buffer(buffer, buf_len, &rib_entry_data->entry_count, 2) != 2)
         throw "Error in parsing peer count";
 
+    read_size+=2;
     SWAP_BYTES(&rib_entry_data->entry_count);
 
     while (count < rib_entry_data->entry_count) {
-        rib_entry *r_entry = new rib_entry;
-        if (extract_from_buffer(buffer, buf_len, &r_entry, 8) != 8)
+        rib_entry *r_entry = new rib_entry();
+
+        if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
+
+        if (extract_from_buffer(buffer, buf_len, &r_entry->originated_time, 4) != 4)
+            throw "Error in parsing originated time";
+
+        if (extract_from_buffer(buffer, buf_len, &r_entry->attribute_len, 2) != 2)
+            throw "Error in parsing attribute len";
+
         read_size+=8;
 
         SWAP_BYTES(&r_entry->peer_index);
@@ -312,8 +328,9 @@ static int libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& b
         SWAP_BYTES(&r_entry->attribute_len);
 
         bool has_end_of_rib_marker;
-        libparsebgp_update_msg_parse_attr_data(&r_entry->bgp_attrs, buffer, has_end_of_rib_marker);
-        read_size += r_entry->bgp_attrs.attr_len;
+        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
+        read_size += r_entry->attribute_len;
+        buf_len-=r_entry->attribute_len;
 
         rib_entry_data->rib_entries.push_back(*r_entry);
         delete r_entry;
@@ -340,9 +357,16 @@ static int libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& b
     SWAP_BYTES(&rib_gen_entry_hdr->entry_count);
 
     while (count < rib_gen_entry_hdr->entry_count) {
-        rib_entry *r_entry = new rib_entry;
-        if (extract_from_buffer(buffer, buf_len, &r_entry, 8) != 8)
+        rib_entry *r_entry = new rib_entry();
+        if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             throw "Error in parsing peer Index";
+
+        if (extract_from_buffer(buffer, buf_len, &r_entry->originated_time, 4) != 4)
+            throw "Error in parsing originated time";
+
+        if (extract_from_buffer(buffer, buf_len, &r_entry->attribute_len, 2) != 2)
+            throw "Error in parsing attribute len";
+
         read_size+=8;
 
         SWAP_BYTES(&r_entry->peer_index);
@@ -350,8 +374,9 @@ static int libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& b
         SWAP_BYTES(&r_entry->attribute_len);
 
         bool has_end_of_rib_marker;
-        libparsebgp_update_msg_parse_attr_data(&r_entry->bgp_attrs, buffer, has_end_of_rib_marker);
-        read_size += r_entry->bgp_attrs.attr_len;
+        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
+        read_size += r_entry->attribute_len;
+        buf_len-=r_entry->attribute_len;
 
         rib_gen_entry_hdr->rib_entries.push_back(*r_entry);
         delete r_entry;
@@ -368,14 +393,12 @@ static int libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_le
             break;
 
         case RIB_IPV4_UNICAST:
-            read_size+=libparsebgp_parse_mrt_parse_rib_unicast(buffer,buf_len, &table_dump_v2_msg->rib_entry_hdr);
-            break;
         case RIB_IPV6_UNICAST:
             read_size+=libparsebgp_parse_mrt_parse_rib_unicast(buffer,buf_len, &table_dump_v2_msg->rib_entry_hdr);
             break;
 
-        case RIB_IPV4_MULTICAST: //TO DO: due to lack of multicast data
-        case RIB_IPV6_MULTICAST: //TO DO: due to lack of multicast data
+        case RIB_IPV4_MULTICAST: //TODO: due to lack of multicast data
+        case RIB_IPV6_MULTICAST: //TODO: due to lack of multicast data
         case RIB_GENERIC:
             read_size+=libparsebgp_parse_mrt_parse_rib_generic(buffer,buf_len, &table_dump_v2_msg->rib_generic_entry_hdr);
             break;
