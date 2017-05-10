@@ -81,26 +81,6 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
     unsigned char *data;                             ///< Pointer to the data buffer for the raw BGP message
 }libparsebgp_parse_bgp_parsed_data;
 
-
-    /**
-     * Constructor for class -
-     *
-     * \details
-     *    This class parses the BGP message and updates DB.  The
-     *    'mysql_ptr' must be a pointer reference to an open mysql connection.
-     *    'peer_entry' must be a pointer to the peer_entry table structure that
-     *    has already been populated.
-     *
-     * \param [in]     logPtr      Pointer to existing Logger for app logging
-     * \param [in]     mbus_ptr     Pointer to exiting dB implementation
-     * \param [in,out] peer_entry  Pointer to peer entry
-     * \param [in]     routerAddr  The router IP address - used for logging
-     * \param [in,out] peer_info   Persistent peer information
-     */
-    void libparsebgp_parse_bgp_init(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, obj_bgp_peer *peer_entry,
-                                    string router_addr, peer_info *peer_info);
-
-
     uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
                                                   bool is_local_msg = true);
 

@@ -12,12 +12,13 @@
 #include <arpa/inet.h>
 
 /**
- * Buffer remaining BMP message
+ * Buffer remaining MRT message
  *
  * \details This method will read the remaining amount of BMP data and store it in the instance variable bmp_data.
  *          Normally this is used to store the BGP message so that it can be parsed.
  *
- * \param [in]  sock       Socket to read the message from
+ * \param buffer    containes the data
+ * \param buf_len   has the length of buffer
  *
  * \returns true if successfully parsed the bmp peer down header, false otherwise
  *

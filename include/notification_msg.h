@@ -72,23 +72,6 @@
      };
 
      /**
-      * BGP notification header (BGP raw message)
-      */
-     struct notify_bgp_hdr {
-         u_char       error_code;                ///< Indicates the type of error
-                                                 ///<   NOTIFY_ERROR_CODES enum for errors
-         u_char       error_subcode;             ///< specific info about the nature of the reported error
-                                                 ///<   values depend on the error code
-         /**
-          * The length of the Data field can be determined from
-          * the message Length field by the following:
-          *
-          *    Message Length = 19(common hdr) + 2(notify hdr) + Data Length
-          *
-          */
-     } __attribute__((__packed__));
-
-     /**
       * Decoded/parsed BGP notification message
       */
      struct libparsebgp_notify_msg {

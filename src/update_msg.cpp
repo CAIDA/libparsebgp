@@ -389,7 +389,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  */
 void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker) {
         std::string decodeStr       = "";
-        u_char      ipv4_raw[4];
+        u_char      *ipv4_raw;
         uint16_t    value16bit;
 
         /*
@@ -413,14 +413,14 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
                 break;
 
             case ATTR_TYPE_NEXT_HOP : // Next hop v4
-                memcpy(path_attrs->attr_value.ipv4_raw, data, 4);
+                memcpy(path_attrs->attr_value.next_hop, data, 4);
 //                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
                 break;
 
             case ATTR_TYPE_MED : // MED value
             {
-                memcpy(&path_attrs->attr_value.value32bit, data, 4);
-                SWAP_BYTES(&path_attrs->attr_value.value32bit);
+                memcpy(&path_attrs->attr_value.med, data, 4);
+                SWAP_BYTES(&path_attrs->attr_value.med);
 //                std::ostringstream numString;
 //                numString << value32bit;
 //                parsed_data.attrs[ATTR_TYPE_MED] = numString.str();
@@ -429,8 +429,8 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
             }
             case ATTR_TYPE_LOCAL_PREF : // local pref value
             {
-                memcpy(&path_attrs->attr_value.value32bit, data, 4);
-                SWAP_BYTES(&path_attrs->attr_value.value32bit);
+                memcpy(&path_attrs->attr_value.local_pref, data, 4);
+                SWAP_BYTES(&path_attrs->attr_value.local_pref);
 //                std::ostringstream numString;
 //                numString << value32bit;
 //                parsed_data.attrs[ATTR_TYPE_LOCAL_PREF] = numString.str();
@@ -446,7 +446,7 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
                 break;
 
             case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
-                memcpy(path_attrs->attr_value.ipv4_raw, data, 4);
+                memcpy(path_attrs->attr_value.originator_id, data, 4);
 //                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
 //                parsed_data.attrs[ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
                 break;
@@ -459,7 +459,7 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
 //                    inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
 //                    decodeStr.append(ipv4_char);
 //                    decodeStr.append(" ");
-//                    path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
+                    path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
                 }
 
 //                parsed_data.attrs[ATTR_TYPE_CLUSTER_LIST] = decodeStr;

@@ -28,7 +28,7 @@
  *
  * \return  Decoded string value
  */
-static std::string decode_type_common(const extcomm_hdr &ec_hdr, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
+static std::string decode_type_common(const extcomm_hdr &ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
     std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
@@ -39,8 +39,8 @@ static std::string decode_type_common(const extcomm_hdr &ec_hdr, bool is_global_
      */
     if (is_global_4bytes) {
         // Four-byte global field
-        memcpy(&val_32b, ec_hdr.value, 4);
-        memcpy(&val_16b, ec_hdr.value + 4, 2);
+        memcpy(&val_32b, value, 4);
+        memcpy(&val_16b, value + 4, 2);
 
         SWAP_BYTES(&val_16b);
 
@@ -51,8 +51,8 @@ static std::string decode_type_common(const extcomm_hdr &ec_hdr, bool is_global_
 
     } else {
         // Two-byte global field
-        memcpy(&val_16b, ec_hdr.value, 2);
-        memcpy(&val_32b, ec_hdr.value + 2, 4);
+        memcpy(&val_16b, value, 2);
+        memcpy(&val_32b, value + 2, 4);
 
         // Chagne to host order
         SWAP_BYTES(&val_16b);
@@ -195,18 +195,18 @@ static std::string decode_type_common(const extcomm_hdr &ec_hdr, bool is_global_
  *
  * \return  Decoded string value
  */
-static std::string decode_type_evpn(const extcomm_hdr &ec_hdr) {
+static std::string decode_type_evpn(const extcomm_hdr &ec_hdr, u_char *value) {
     std::stringstream   val_ss;
     uint32_t            val_32b;
 
     switch(ec_hdr.low_type) {
         case EXT_EVPN_MAC_MOBILITY: {
             val_ss << "mac_mob_flags=";
-            u_char flags = ec_hdr.value[0];
+            u_char flags = value[0];
 
             val_ss << flags;
 
-            memcpy(&val_32b, ec_hdr.value + 2, 4);
+            memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b);
 
             val_ss << " mac_mob_seq_num=";
@@ -215,11 +215,11 @@ static std::string decode_type_evpn(const extcomm_hdr &ec_hdr) {
         }
         case EXT_EVPN_MPLS_LABEL: {
             val_ss << "esi_label_flags=";
-            u_char flags = ec_hdr.value[0];
+            u_char flags = value[0];
 
             val_ss << flags;
 
-            memcpy(&val_32b, ec_hdr.value + 3, 3);
+            memcpy(&val_32b, value + 3, 3);
             SWAP_BYTES(&val_32b);
             val_32b = val_32b >> 8;
 
@@ -229,12 +229,12 @@ static std::string decode_type_evpn(const extcomm_hdr &ec_hdr) {
         }
         case EXT_EVPN_ES_IMPORT: {
             val_ss << "es_import=";
-            val_ss << parse_mac(ec_hdr.value);
+            val_ss << parse_mac(value);
             break;
         }
         case EXT_EVPN_ROUTER_MAC: {
             val_ss << "router_mac=";
-            val_ss << parse_mac(ec_hdr.value);
+            val_ss << parse_mac(value);
             break;
         }
         default: {
@@ -256,16 +256,16 @@ static std::string decode_type_evpn(const extcomm_hdr &ec_hdr) {
  *
  * \return  Decoded string value
  */
-static std::string decode_type_opaque(const extcomm_hdr &ec_hdr) {
+static std::string decode_type_opaque(const extcomm_hdr &ec_hdr, u_char *value) {
     std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
 
     switch(ec_hdr.low_type) {
         case EXT_OPAQUE_COST_COMMUNITY: {
-            u_char poi = ec_hdr.value[0];  // Point of Insertion
-            u_char cid = ec_hdr.value[1];  // Community-ID
-            memcpy(&val_32b, ec_hdr.value + 2, 4);
+            u_char poi = value[0];  // Point of Insertion
+            u_char cid = value[1];  // Community-ID
+            memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b);
 
             val_ss << "cost=";
@@ -298,13 +298,13 @@ static std::string decode_type_opaque(const extcomm_hdr &ec_hdr) {
             break;
 
         case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
-            memcpy(&val_32b, ec_hdr.value, 4);
+            memcpy(&val_32b, value, 4);
             SWAP_BYTES(&val_32b);
 
             val_ss << "ospf-rt=area-" << val_32b << ":";
 
             // Get the route type
-            switch (ec_hdr.value[4]) {
+            switch (value[4]) {
                 case 1: // intra-area routes
                 case 2: // intra-area routes
                     val_ss << "O:";
@@ -324,20 +324,20 @@ static std::string decode_type_opaque(const extcomm_hdr &ec_hdr) {
             }
 
             // Add the options
-            val_ss << (int)ec_hdr.value[5];
+            val_ss << (int)value[5];
 
             break;
         }
 
         case EXT_OPAQUE_COLOR :
-            memcpy(&val_32b, ec_hdr.value + 2, 4);
+            memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b);
 
             val_ss << "color=" << val_32b;
             break;
 
         case EXT_OPAQUE_ENCAP :
-            val_ss << "encap=" << (int)ec_hdr.value[5];
+            val_ss << "encap=" << (int)value[5];
             break;
 
         case EXT_OPAQUE_DEFAULT_GW : // draft-ietf-l2vpn-evpn (value is zero/reserved)
@@ -360,7 +360,7 @@ static std::string decode_type_opaque(const extcomm_hdr &ec_hdr) {
  *
  * \return  Decoded string value
  */
-static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
+static std::string decode_type_generic(const extcomm_hdr &ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
     std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
@@ -371,8 +371,8 @@ static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global
      */
     if (is_global_4bytes) {
         // Four-byte global field
-        memcpy(&val_32b, ec_hdr.value, 4);
-        memcpy(&val_16b, ec_hdr.value + 4, 2);
+        memcpy(&val_32b, value, 4);
+        memcpy(&val_16b, value + 4, 2);
 
         SWAP_BYTES(&val_16b);
 
@@ -383,8 +383,8 @@ static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global
 
     } else {
         // Two-byte global field
-        memcpy(&val_16b, ec_hdr.value, 2);
-        memcpy(&val_32b, ec_hdr.value + 2, 4);
+        memcpy(&val_16b, value, 2);
+        memcpy(&val_32b, value + 2, 4);
 
         // Chagne to host order
         SWAP_BYTES(&val_16b);
@@ -400,9 +400,9 @@ static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global
             break;
 
         case EXT_GENERIC_LAYER2_INFO : {    // rfc4761
-            u_char encap_type    = ec_hdr.value[0];
-            u_char ctrl_flags   = ec_hdr.value[1];
-            memcpy(&val_16b, ec_hdr.value + 2, 2);          // Layer 2 MTU
+            u_char encap_type    = value[0];
+            u_char ctrl_flags   = value[1];
+            memcpy(&val_16b, value + 2, 2);          // Layer 2 MTU
             SWAP_BYTES(&val_16b);
 
             val_ss << "l2info=";
@@ -433,10 +433,10 @@ static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global
             val_ss << "flow-act=";
 
             // TODO: need to validate if byte 0 or 5, using 5 here
-            if (ec_hdr.value[5] & 0x02)             // Terminal action
+            if (value[5] & 0x02)             // Terminal action
                 val_ss << "S";
 
-            if (ec_hdr.value[5] & 0x01)             // Sample and logging enabled
+            if (value[5] & 0x01)             // Sample and logging enabled
                 val_ss << "T";
 
             break;
@@ -458,7 +458,7 @@ static std::string decode_type_generic(const extcomm_hdr &ec_hdr, bool is_global
         }
 
         case EXT_GENERIC_FLOWSPEC_TRAFFIC_REMARK :
-            val_ss << "flow-remark=" << (int)ec_hdr.value[5];
+            val_ss << "flow-remark=" << (int)value[5];
     }
 
     return val_ss.str();
@@ -480,6 +480,7 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
 
     std::string decode_str = "";
     extcomm_hdr ec_hdr;
+    u_char *value;
 
     if ( (path_attrs->attr_len % 8) ) {
         //LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
@@ -494,42 +495,42 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
         // Setup extended community header
         ec_hdr.high_type = data[0];
         ec_hdr.low_type  = data[1];
-        ec_hdr.value     = data + 2;
+        value     = data + 2;
 
         /*
          * Docode the community by type
          */
         switch (ec_hdr.high_type << 2 >> 2) {
             case EXT_TYPE_IPV4 :
-                decode_str.append(decode_type_common(ec_hdr, true, true));
+                decode_str.append(decode_type_common(ec_hdr, value, true, true));
                 break;
 
             case EXT_TYPE_2OCTET_AS :
-                decode_str.append(decode_type_common(ec_hdr));
+                decode_str.append(decode_type_common(ec_hdr, value));
                 break;
 
             case EXT_TYPE_4OCTET_AS :
-                decode_str.append(decode_type_common(ec_hdr, true));
+                decode_str.append(decode_type_common(ec_hdr, value, true));
                 break;
 
             case EXT_TYPE_GENERIC :
-                decode_str.append(decode_type_generic(ec_hdr));
+                decode_str.append(decode_type_generic(ec_hdr, value));
                 break;
 
             case EXT_TYPE_GENERIC_4OCTET_AS :
-                decode_str.append(decode_type_generic(ec_hdr, true));
+                decode_str.append(decode_type_generic(ec_hdr, value, true));
                 break;
 
             case EXT_TYPE_GENERIC_IPV4 :
-                decode_str.append(decode_type_generic(ec_hdr, true, true));
+                decode_str.append(decode_type_generic(ec_hdr, value, true, true));
                 break;
 
             case EXT_TYPE_OPAQUE :
-                decode_str.append(decode_type_opaque(ec_hdr));
+                decode_str.append(decode_type_opaque(ec_hdr, value));
                 break;
 
             case EXT_TYPE_EVPN :
-                decode_str.append(decode_type_evpn(ec_hdr));
+                decode_str.append(decode_type_evpn(ec_hdr, value));
                 break;
 
             case EXT_TYPE_QOS_MARK  : break;// TODO: Implement
@@ -560,17 +561,17 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
  *
  * \return  Decoded string value
  */
-std::string decodeType_ipv6_specific(const extcomm_hdr &ec_hdr) {
+std::string decodeType_ipv6_specific(const extcomm_hdr &ec_hdr, u_char *value) {
     std::stringstream   val_ss;
     uint16_t            val_16b;
     u_char              ipv6_raw[16] = {0};
     char                ipv6_char[40] = {0};
 
-    memcpy(ipv6_raw, ec_hdr.value, 16);
+    memcpy(ipv6_raw, value, 16);
     if (inet_ntop(AF_INET6, ipv6_raw, ipv6_char, sizeof(ipv6_char)) != NULL)
         return "";
 
-    memcpy(&val_16b, ec_hdr.value + 16, 2);
+    memcpy(&val_16b, value + 16, 2);
     SWAP_BYTES(&val_16b);
 
     switch (ec_hdr.low_type) {
@@ -622,6 +623,7 @@ std::string decodeType_ipv6_specific(const extcomm_hdr &ec_hdr) {
 void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data) {
     std::string decode_str = "";
     extcomm_hdr ec_hdr;
+    u_char       *value;
 
     //LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
 
@@ -637,14 +639,14 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
         // Setup extended community header
         ec_hdr.high_type = data[0];
         ec_hdr.low_type = data[1];
-        ec_hdr.value = data + 2;
+        value = data + 2;
 
         /*
          * Docode the community by type
          */
         switch (ec_hdr.high_type << 2 >> 2) {
             case 0 :  // Currently IPv6 specific uses this type field
-                decode_str.append(decodeType_ipv6_specific(ec_hdr));
+                decode_str.append(decodeType_ipv6_specific(ec_hdr, value));
                 break;
 
             default :

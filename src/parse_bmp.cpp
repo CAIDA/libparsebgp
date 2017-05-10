@@ -26,11 +26,6 @@ static void libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, int
         throw "BMP message length is too large for buffer, invalid BMP sender";
     }
 
-//    SELF_DEBUG("sock=%d: Buffering %d from socket", sock, bmp_len);
-    /*if ((bmp_data_len=Recv(sock, bmp_data, bmp_len, MSG_WAITALL)) != bmp_len) {
- //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
-         throw "Error while reading BMP data into buffer";
-    }*/
     if ((bmp_data_len=extract_from_buffer(buffer, buf_len, bmp_data, bmp_len)) != bmp_len) {
         //        LOG_ERR("sock=%d: Couldn't read all %d bytes into buffer",sock, bmp_len);
         throw "Error while reading BMP data into buffer";
@@ -42,10 +37,8 @@ static void libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, int
 }
 /**
  * Parse the v3 peer header
- *
- * \param [in]  sock        Socket to read the message from
  */
-//void parseBMP::parsePeerHdr(int sock) {
+
 static int libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 &parsed_peer_header, unsigned char *&buffer,
                                                  int &buf_len) {
     int read_size=0;
@@ -146,8 +139,6 @@ static int libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data
  * \details
  *      v3 has a different header structure and changes the peer
  *      header format.
- *
- * \param [in]  sock        Socket to read the message from
  */
 static int libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *&parsed_msg, unsigned char *&buffer,
                                                int &buf_len) {

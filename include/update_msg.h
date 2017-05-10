@@ -250,7 +250,7 @@ struct mp_reach_nlri {
 struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
-    u_char       *value;                         ///<
+    //u_char       *value;                         ///<
     string       val;
 };
 
@@ -267,11 +267,13 @@ struct parsed_data_ls {
 typedef struct attr_value{
     uint8_t                 origin;
     list<as_path_segment>   as_path;
-    u_char                  ipv4_raw[4];
-    uint32_t                value32bit;
+    u_char                  next_hop[4];
+    u_char                  originator_id[4];
+    uint32_t                med;
+    uint32_t                local_pref;
     uint16_t                value16bit;
     string                  aggregator;
-//        list<u_char[4]>         cluster_list;
+    list<u_char*>         cluster_list;
     list<uint16_t>          attr_type_comm;
     list<extcomm_hdr>       ext_comm;
     mp_unreach_nlri         mp_unreach_nlri_data;

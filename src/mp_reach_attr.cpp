@@ -14,25 +14,6 @@
 //namespace bgp_msg {
 
 /**
- * Constructor for class
- *
- * \details Handles BGP MP Reach NLRI
- *
- * \param [in]     logPtr                   Pointer to existing Logger for app logging
- * \param [in]     pperAddr                 Printed form of peer address used for logging
- * \param [in]     peer_info                Persistent Peer info pointer
- * \param [in]     enable_debug             Debug true to enable, false to disable
- */
-
-    void libparsebgp_mp_reach_attr_init(libparsebgp_mp_reach_attr_parsed_data *parse_data, std::string peerAddr,
-                                        peer_info *peer_info)
-    {
-        parse_data->peer_inf=peer_info;
-        parse_data->peer_addr = peerAddr;
-    }
-
-
-    /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
  *
  * \details
@@ -233,8 +214,6 @@
 
             case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
             {
-                //libparsebgp_mp_link_state_parsed_data *data;
-                //libparsebgp_mp_link_state_init(data, parse_data->peer_addr, &parsed_data);
                 libparsebgp_mp_link_state_parse_reach_link_state(path_attrs, next_hop, nlri_data);
                 break;
             }
