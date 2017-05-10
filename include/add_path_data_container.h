@@ -15,20 +15,16 @@
 #include <map>
 #include <memory>
 
-
-class AddPathDataContainer {
-private:
-
-    struct sendReceiveCodesForSentAndReceivedOpenMessageStructure {
-        int     sendReceiveCodeForSentOpenMessage;
-        int     sendReceiveCodeForReceivedOpenMessage;
+    struct send_receive_codes_for_sent_and_received_open_message_structure {
+        int     send_receive_code_for_sent_open_message;
+        int     send_receive_code_for_received_open_message;
     };
 
     // Peer related data container. First key is afi safi unique key. Second is structure with Add Path information
-    typedef std::map<std::string, sendReceiveCodesForSentAndReceivedOpenMessageStructure> AddPathMap;
+    typedef std::map<std::string, send_receive_codes_for_sent_and_received_open_message_structure> libparsebgp_addpath_map;
 
     // Peer related information about Add Path
-    AddPathMap addPathMap;
+    //libparsebgp_addpath_map addpath_map;
 
     /**
      * Generates unique string from AFI and SAFI combination
@@ -38,12 +34,7 @@ private:
      *
      * \return string unique for AFI and SAFI combination
      */
-    std::string getAFiSafiKeyString(int afi, int safi);
-
-public:
-    AddPathDataContainer();
-
-    ~AddPathDataContainer();
+    std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi);
 
     /**
      * Add Add Path data to persistent storage
@@ -53,7 +44,7 @@ public:
      * \param [in] send_receive     Send Recieve code from RFC
      * \param [in] sent_open        Is obtained from sent open message. False if from recieved
      */
-    void addAddPath(int afi, int safi, int send_receive, bool sent_open);
+    void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open);
 
     /**
      * Is add path capability enabled for such AFI and SAFI
@@ -63,9 +54,6 @@ public:
      *
      * \return is enabled
      */
-    bool isAddPathEnabled(int afi, int safi);
-
-};
-
+    bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi);
 
 #endif //OPENBMP_ADDPATHDATACONTAINER_H

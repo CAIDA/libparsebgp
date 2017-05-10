@@ -10,16 +10,15 @@
 #ifndef NOTIFICATIONMSG_H_
 #define NOTIFICATIONMSG_H_
 
-//#include "Logger.h"
 #include "bgp_common.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
    /**
      * defines the NOTIFICATION BGP header per RFC4271
      *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
      */
-    enum NOTIFY_ERROR_CODES { NOTIFY_MSG_HDR_ERR=1, NOTIFY_OPEN_MSG_ERR, NOTIFY_UPDATE_MSG_ERR,
+    enum notify_error_codes { NOTIFY_MSG_HDR_ERR=1, NOTIFY_OPEN_MSG_ERR, NOTIFY_UPDATE_MSG_ERR,
                               NOTIFY_HOLD_TIMER_EXPIRED, NOTIFY_FSM_ERR, NOTIFY_CEASE };
 
 
@@ -27,7 +26,7 @@ namespace bgp_msg {
       * Defines header error codes
       *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
       */
-     enum MSG_HDR_SUBCODES {
+     enum msg_hdr_subcodes {
                  MSG_HDR_CONN_NOT_SYNC=1,
                  MSG_HDR_BAD_MSG_LEN,
                  MSG_HDR_BAD_MSG_TYPE };
@@ -36,7 +35,7 @@ namespace bgp_msg {
       * Defines open error codes
       *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
       */
-     enum OPEN_SUBCODES {
+     enum open_subcodes {
                  OPEN_UNSUPPORTED_VER=1,
                  OPEN_BAD_PEER_AS,
                  OPEN_BAD_BGP_ID,
@@ -47,7 +46,7 @@ namespace bgp_msg {
        * Defines open error codes
        *  \see http://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml
        */
-     enum UPDATE_SUBCODES {
+     enum update_subcodes {
                  UPDATE_MALFORMED_ATTR_LIST=1,
                  UPDATE_UNRECOGNIZED_WELL_KNOWN_ATTR,
                  UPDATE_MISSING_WELL_KNOWN_ATTR,
@@ -61,7 +60,7 @@ namespace bgp_msg {
      /**
       * Per RFC4486 - cease subcodes
       */
-     enum CEASE_SUBCODES {
+     enum cease_subcodes {
                  CEASE_MAX_PREFIXES=1,
                  CEASE_ADMIN_SHUT,
                  CEASE_PEER_DECONFIG,
@@ -73,26 +72,9 @@ namespace bgp_msg {
      };
 
      /**
-      * BGP notification header (BGP raw message)
-      */
-     struct notify_bgp_hdr {
-         u_char       error_code;                ///< Indicates the type of error
-                                                 ///<   NOTIFY_ERROR_CODES enum for errors
-         u_char       error_subcode;             ///< specific info about the nature of the reported error
-                                                 ///<   values depend on the error code
-         /**
-          * The length of the Data field can be determined from
-          * the message Length field by the following:
-          *
-          *    Message Length = 19(common hdr) + 2(notify hdr) + Data Length
-          *
-          */
-     } __attribute__((__packed__));
-
-     /**
       * Decoded/parsed BGP notification message
       */
-     struct parsed_notify_msg {
+     struct libparsebgp_notify_msg {
          u_char       error_code;                ///< Indicates the type of error
                                                  ///<   NOTIFY_ERROR_CODES enum for errors
          u_char       error_subcode;             ///< specific info about the nature of the reported error
@@ -100,23 +82,6 @@ namespace bgp_msg {
          char         error_text[255];           ///< Decoded notification message
      };
 
-/**
- * \class   NotificationMsg
- *
- * \brief   BGP notification message parser
- * \details This class parses a BGP notification message.  It can be extended to create messages.
- *          message.
- */
-class NotificationMsg {
-public:
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp notification messages
-     *
-     */
-    NotificationMsg();
-    virtual ~NotificationMsg();
 
     /**
      * Parses a notification message stored in a byte buffer
@@ -131,14 +96,8 @@ public:
      *
      * \return True if error, false if no error reading/parsing the notification message
      */
-    bool parseNotify(u_char *data, size_t size, parsed_notify_msg &parsed_msg);
+    int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size);
 
-private:
-    //bool             debug;                           ///< debug flag to indicate debugging
-    //Logger           *logger;                         ///< Logging class pointer
-
-};
-
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */
 
 #endif /* NOTIFICATIONMSG_H_ */

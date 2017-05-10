@@ -7,27 +7,10 @@
  *
  */
 
-#include "../include/NotificationMsg.h"
-#include <cstring>
+#include "../include/notification_msg.h"
 
-namespace bgp_msg {
+//namespace bgp_msg {
 
-/**
- * Constructor for class
- *
- * \details Handles bgp notification messages
- *
- * \param [in]     logPtr       Pointer to existing Logger for app logging
- * \param [in]     enable_debug Debug true to enable, false to disable
- */
-NotificationMsg::NotificationMsg() {
-    //logger = logPtr;
-    //debug = enable_debug;
-}
-
-NotificationMsg::~NotificationMsg() {
-
-}
 
 /**
  * Parses a notification message stored in a byte parsed_msg.error_textfer
@@ -42,25 +25,29 @@ NotificationMsg::~NotificationMsg() {
  *
  * \return True if error, false if no error reading/parsing the notification message
  */
-bool NotificationMsg::parseNotify(u_char *data, size_t size, parsed_notify_msg &parsed_msg) {
+int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size) {
     u_char *dataPtr = data;
-    size_t read_size = 0;
+    int read_size = 0;
 
     // Reset the storage buffer for parsed data
     bzero(&parsed_msg, sizeof(parsed_msg));
 
-    if (read_size < size)
+    if (read_size < size) {
         parsed_msg.error_code = *dataPtr++, size++;
+        read_size++;
+    }
     else {
         //LOG_ERR("Could not read the BGP error code from notify message");
-        return true;
+        return -1;
     }
 
-    if (read_size < size)
-        parsed_msg.error_subcode = *dataPtr++,size++;
+    if (read_size < size) {
+        parsed_msg.error_subcode = *dataPtr++, size++;
+        read_size++;
+    }
     else {
         //LOG_ERR("Could not read the BGP sub code from notify message");
-        return true;
+        return -1;
     }
 
     // Update the error text to be meaningful
@@ -185,8 +172,8 @@ bool NotificationMsg::parseNotify(u_char *data, size_t size, parsed_notify_msg &
         }
     }
 
-    return false;
+    return read_size;
 }
 
 
-} /* namespace bgp_msg */
+//} /* namespace bgp_msg */
