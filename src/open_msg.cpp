@@ -185,7 +185,7 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
 
                         }
                         else {
-                            //                     LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
+                            //LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
                             return 0;
                         }
 

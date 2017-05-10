@@ -31,23 +31,20 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_un
     switch (nlri.safi) {
         case BGP_SAFI_UNICAST: // Unicast IP address prefix
 
-            // Data is an IP address - parse the address and save it
-            //libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, parse_data->peer_inf,
-            //                                    parsed_data.withdrawn);
-            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes);
+            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes_nlri);
             break;
 
         case BGP_SAFI_NLRI_LABEL: // Labeled unicast
             //libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
             //                                         parsed_data.withdrawn);
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes_nlri);
             break;
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
             //TODO: Is this okay?
             //libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
             //                                         parsed_data.vpn_withdrawn);
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes_nlri);
 
             break;
 

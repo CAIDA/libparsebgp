@@ -144,21 +144,6 @@ struct obj_ls_prefix {
     char        sid_tlv[128];           ///< Prefix-SID TLV
 };
 
-/**
-* Persistent peer information structure
-*
-*   OPEN and other updates can add/change persistent peer information.
-*/
-struct peer_info {
-    bool sent_four_octet_asn;                               ///< Indicates if 4 (true) or 2 (false) octet ASN is being used (sent cap)
-    bool recv_four_octet_asn;                               ///< Indicates if 4 (true) or 2 (false) octet ASN is being used (recv cap)
-    bool using_2_octet_asn;                                 ///< Indicates if peer is using two octet ASN format or not (true=2 octet, false=4 octet)
-    bool checked_asn_octet_length;                          ///< Indicates if the ASN octet length has been checked or not
-    libparsebgp_addpath_map add_path_capability;            ///< Stores data about Add Path capability
-    string peer_group;                                      ///< Peer group name of defined
-};
-
-
 //############################################################################
 
 
@@ -195,7 +180,7 @@ enum update_attr_types {
     /*
      * Below attribute types are for internal use only... These are derived/added based on other attributes
      */
-            ATTR_TYPE_INTERNAL_AS_COUNT=9000,        // AS path count - number of AS's
+    ATTR_TYPE_INTERNAL_AS_COUNT=9000,        // AS path count - number of AS's
     ATTR_TYPE_INTERNAL_AS_ORIGIN             // The AS that originated the entry
 };
 
@@ -226,9 +211,9 @@ typedef struct as_path_segment {
 struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
-    unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
+  //  unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
     uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
-    list<update_prefix_tuple> wdrawn_routes;   ///< Withdrawn routes
+    list<update_prefix_tuple> wdrawn_routes_nlri;   ///< Withdrawn routes
 };
 
 struct mp_reach_nlri {

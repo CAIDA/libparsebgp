@@ -4,7 +4,6 @@
 #include "../include/parse_bgp.h"
 #include "../include/parse_bmp.h"
 
-
 /**
  * Buffer remaining BMP message
  *
@@ -214,7 +213,6 @@ static int libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp_parsed_data *
 
         // Handle the older versions
     else if (ver == 1 || ver == 2) {
-        //TODO:
         parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver=ver;
         read_size+=libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
         bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;

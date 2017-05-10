@@ -13,7 +13,6 @@
 #include <list>
 #include <string>
 #include "update_msg.h"
-//#include "parse_common.h"
 
 //namespace bgp_msg {
 
@@ -37,24 +36,6 @@
     unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
     uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
 };*/
-
-struct libparsebgp_mp_reach_attr_parsed_data {
-    std::string peer_addr;              ///< Printed form of the peer address for logging
-    peer_info *peer_inf;
-};
-
-/**
- * Constructor for class
- *
- * \details Handles bgp MP_REACH attributes
- *
- * \param [in]     logPtr                   Pointer to existing Logger for app logging
- * \param [in]     pperAddr                 Printed form of peer address used for logging
- * \param [in]     peer_info                Persistent Peer info pointer
- * \param [in]     enable_debug             Debug true to enable, false to disable
- */
-void libparsebgp_mp_reach_attr_init(libparsebgp_mp_reach_attr_parsed_data *parse_data, std::string peer_addr, peer_info *peer_info);
-
 
 /**
  * Parse the MP_REACH NLRI attribute data
