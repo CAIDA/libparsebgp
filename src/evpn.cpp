@@ -1,8 +1,4 @@
 #include "../include/evpn.h"
-#include "../include/bgp_common.h"
-#include "../include/update_msg.h"
-#include <list>
-#include <map>
 
 /**
  * Parse Ethernet Segment Identifier
