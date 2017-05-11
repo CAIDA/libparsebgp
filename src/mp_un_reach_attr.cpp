@@ -122,7 +122,7 @@ static void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data, bool &hasEndOfRIBMarker) {
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data, bool &has_end_of_rib_marker) {
     //mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -145,8 +145,8 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *pa
 
     //SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), mp_unreach_data->afi, mp_unreach_data->safi);
 
-    if (path_attrs->attr_value.mp_unreach_nlri_data.nlri_len == 0) {
-        hasEndOfRIBMarker = true;
+    if (attr_len == 0) {
+        has_end_of_rib_marker = true;
         //LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
 
     } else {

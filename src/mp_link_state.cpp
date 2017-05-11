@@ -918,7 +918,7 @@ static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, unsigned char *next_hop, unsigned char *nlri_data) {
+void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data) {
     //data->ls_data = &data->parsed_data->ls;
 
     // Process the next hop
@@ -942,7 +942,7 @@ void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_at
         switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
                 //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
-                libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, path_attrs->attr_value.mp_reach_nlri_data.nlri_len);
+                libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, nlri_len);
                 break;
 
         default :

@@ -212,7 +212,7 @@ struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
   //  unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
-    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+  //  uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
     list<update_prefix_tuple> wdrawn_routes_nlri;   ///< Withdrawn routes
 };
 
@@ -220,11 +220,12 @@ struct mp_reach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     uint8_t        nh_len;              ///< Length of next hop
-    //unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
+    unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
     uint8_t        reserved;            ///< Reserved
 
     //unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
-    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+    //uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
+    list<update_prefix_tuple> nlri_info;   ///< Withdrawn routes
 };
 
 /**

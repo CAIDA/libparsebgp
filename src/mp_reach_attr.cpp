@@ -121,11 +121,12 @@
 * \param [in]   nlri           Reference to parsed NLRI struct
 * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
 */
-    static void libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, update_path_attrs *path_attrs, unsigned char *next_hop, unsigned char *nlri_data) {
-        u_char      ip_raw[16];
+    static void libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, update_path_attrs *path_attrs, int nlri_len,
+                                                              unsigned char *next_hop, unsigned char *nlri_data) {
+        /*u_char      ip_raw[16];
         char        ip_char[40];
 
-        bzero(ip_raw, sizeof(ip_raw));
+        bzero(ip_raw, sizeof(ip_raw));*/
 
         /*
          * Decode based on SAFI
@@ -135,31 +136,31 @@
 
                 // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
                 if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                    memcpy(ip_raw, next_hop, 16);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
                 else
-                    memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
-                inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
+                //inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an IP address - parse the address and save it
-                libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, path_attrs->attr_value.mp_reach_nlri_data.nlri_len, path_attrs->advertised);
+                libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->advertised);
                 break;
 
             case BGP_SAFI_NLRI_LABEL:
                 // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
                 if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                    memcpy(ip_raw, next_hop, 16);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
                 else
-                    memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
-                inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
+                //inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an Label, IP address tuple parse and save it
-                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, path_attrs->attr_value.mp_reach_nlri_data.nlri_len, path_attrs->advertised);
+                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->advertised);
                 break;
 
             case BGP_SAFI_MPLS: {
@@ -172,15 +173,15 @@
 
                 // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
                 if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                    memcpy(ip_raw, next_hop, 16);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
                 else
-                    memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
-                inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
+                //inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
-                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, path_attrs->attr_value.mp_reach_nlri_data.nlri_len, path_attrs->vpn);
+                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->vpn);
 
                 break;
             }
@@ -201,39 +202,39 @@
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-    static void libparsebgp_parse_afi(update_path_attrs *path_attrs, unsigned char *nlri_data, unsigned char *next_hop) {
+    static void libparsebgp_parse_afi(update_path_attrs *path_attrs, int nlri_len, unsigned char *nlri_data, unsigned char *next_hop) {
 
         switch (path_attrs->attr_value.mp_reach_nlri_data.afi) {
             case BGP_AFI_IPV6 :  // IPv6
-                libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(false, path_attrs, next_hop, nlri_data);
+                libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(false, path_attrs, nlri_len, next_hop, nlri_data);
                 break;
 
             case BGP_AFI_IPV4 : // IPv4
-                libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(true, path_attrs, next_hop, nlri_data);
+                libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(true, path_attrs, nlri_len, next_hop, nlri_data);
                 break;
 
             case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
             {
-                libparsebgp_mp_link_state_parse_reach_link_state(path_attrs, next_hop, nlri_data);
+                libparsebgp_mp_link_state_parse_reach_link_state(path_attrs, nlri_len, next_hop, nlri_data);
                 break;
             }
 
             case BGP_AFI_L2VPN :
             {
-                u_char      ip_raw[16];
+                /*u_char      ip_raw[16];
                 char        ip_char[40];
 
-                bzero(ip_raw, sizeof(ip_raw));
+                bzero(ip_raw, sizeof(ip_raw));*/
 
                 // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
                 if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                    memcpy(ip_raw, next_hop, 16);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
                 else
-                    memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
-                inet_ntop(path_attrs->attr_value.mp_reach_nlri_data.nh_len == 4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
+                //inet_ntop(path_attrs->attr_value.mp_reach_nlri_data.nh_len == 4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-                path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+                //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // parse by safi
                 switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
@@ -241,7 +242,7 @@
                     {
                         //libparsebgp_evpn_data *evpn_data;
                         //libparsebgp_evpn_init(evpn_data,parse_data->peer_addr, false, &parsed_data);
-                        libparsebgp_evpn_parse_nlri_data(path_attrs, nlri_data, path_attrs->attr_value.mp_reach_nlri_data.nlri_len, false);
+                        libparsebgp_evpn_parse_nlri_data(path_attrs, nlri_data, nlri_len, false);
                         break;
                     }
 
@@ -288,7 +289,7 @@ void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_att
     next_hop = data;  data += path_attrs->attr_value.mp_reach_nlri_data.nh_len; attr_len -= path_attrs->attr_value.mp_reach_nlri_data.nh_len;    // Set pointer position for nh data
     path_attrs->attr_value.mp_reach_nlri_data.reserved = *data++; attr_len--;             // Set the reserve octet
     nlri_data = data;                          // Set pointer position for nlri data
-    path_attrs->attr_value.mp_reach_nlri_data.nlri_len = attr_len;                       // Remaining attribute length is for NLRI data
+    //path_attrs->attr_value.mp_reach_nlri_data.nlri_len = attr_len;                       // Remaining attribute length is for NLRI data
 
     /*
      * Make sure the parsing doesn't exceed buffer
@@ -305,7 +306,7 @@ void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_att
      * Next-hop and NLRI data depends on the AFI & SAFI
      *  Parse data based on AFI + SAFI
      */
-        libparsebgp_parse_afi(path_attrs, nlri_data, next_hop);
+        libparsebgp_parse_afi(path_attrs, attr_len, nlri_data, next_hop);
 }
 
 

@@ -154,7 +154,7 @@
      *
      * \param [in]   nlri           Reference to parsed NLRI struct
      */
-    void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, unsigned char *next_hop, unsigned char *nlri_data);
+    void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data);
 
     /**
      * MP UnReach Link State NLRI parse
