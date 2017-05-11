@@ -20,28 +20,6 @@
 using namespace std;
 
 /**
-     * OBJECT: bgp_peers
-     *
-     * BGP peer table schema
-     */
-struct obj_bgp_peer {
-    u_char      hash_id[16];            ///< hash of router hash_id, peer_rd, peer_addr, and peer_bgp_id
-    u_char      router_hash_id[16];     ///< Router hash ID
-
-    char        peer_rd[32];            ///< Peer distinguisher ID (string/printed format)
-    char        peer_addr[46];          ///< Peer IP address in printed form
-    char        peer_bgp_id[16];        ///< Peer BGP ID in printed form
-    uint32_t    peer_as;                ///< Peer ASN
-    bool        is_l3vpn;                ///< true if peer is L3VPN, otherwise it is Global
-    bool        is_pre_policy;            ///< True if the routes are pre-policy, false if not
-    bool        is_adj_in;                ///< True if the routes are Adj-Rib-In, false if not
-    bool        is_ipv4;                 ///< true if peer is IPv4 or false if IPv6
-    uint32_t    timestamp_secs;         ///< Timestamp in seconds since EPOC
-    uint32_t    timestamp_us;           ///< Timestamp microseconds
-};
-
-
-/**
  * OBJECT: ls_node
  *
  * BGP-LS Node table schema
@@ -211,8 +189,6 @@ typedef struct as_path_segment {
 struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
-  //  unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
-  //  uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
     list<update_prefix_tuple> wdrawn_routes_nlri;   ///< Withdrawn routes
 };
 
@@ -220,11 +196,8 @@ struct mp_reach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     uint8_t        nh_len;              ///< Length of next hop
-    unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
+    unsigned char  next_hop[16];           ///< Next hop address - Pointer to data (normally does not require freeing)
     uint8_t        reserved;            ///< Reserved
-
-    //unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
-    //uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
     list<update_prefix_tuple> nlri_info;   ///< Withdrawn routes
 };
 
@@ -246,6 +219,7 @@ typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map
      * Parsed data structure for BGP-LS
      */
 struct parsed_data_ls {
+
     std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
     std::list<obj_ls_link>   links;        ///< List of link state links
     std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
@@ -271,8 +245,8 @@ struct update_path_attrs {
     uint16_t                attr_len;
     attr_val                attr_value;
     parsed_attrs_map        attrs;
-    list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
-    std::list<update_prefix_tuple>  advertised;
+    //list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
+    //std::list<update_prefix_tuple>  advertised;
     parsed_data_ls          mp_ls_data;
     list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
     list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised

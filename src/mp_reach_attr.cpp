@@ -145,7 +145,7 @@
                 //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an IP address - parse the address and save it
-                libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->advertised);
+                libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->attr_value.mp_reach_nlri_data.nlri_info);
                 break;
 
             case BGP_SAFI_NLRI_LABEL:
@@ -160,7 +160,7 @@
                 //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
                 // Data is an Label, IP address tuple parse and save it
-                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->advertised);
+                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->attr_value.mp_reach_nlri_data.nlri_info);
                 break;
 
             case BGP_SAFI_MPLS: {
@@ -181,7 +181,7 @@
 
                 //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
-                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->vpn);
+                libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->attr_value.mp_reach_nlri_data.nlri_info);
 
                 break;
             }

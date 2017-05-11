@@ -126,27 +126,6 @@
         OSPF_RT_NSSA_2                                  ///< NSSA type 2
     };
 
-/*struct libparsebgp_mp_link_state_parsed_data {
-    std::string peer_addr;                       ///< Printed form of the peer address for logging
-
-    //parsed_update_data *parsed_data;       ///< Parsed data structure
-    parsed_data_ls *ls_data;           ///< Parsed LS Data
-};*/
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp Extended Communities
-     *
-     * \param [in]     logPtr       Pointer to existing Logger for app logging
-     * \param [in]     peerAddr     Printed form of peer address used for logging
-     * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
-     * \param [in]     enable_debug Debug true to enable, false to disable
-     */
-
-    //void libparsebgp_mp_link_state_init(libparsebgp_mp_link_state_parsed_data *data,std::string peer_address,parsed_update_data *parse_data);
-
-        //       virtual ~MPLinkState();
-
     /**
      * MP Reach Link State NLRI parse
      *

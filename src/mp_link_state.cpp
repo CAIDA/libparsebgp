@@ -926,22 +926,21 @@ void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_at
     u_char ip_raw[16];
     char ip_char[40];
 
-    if (path_attrs->attr_value.mp_reach_nlri_data.nh_len == 4) {
-        memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
-        inet_ntop(AF_INET, ip_raw, ip_char, sizeof(ip_char));
-    } else if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 4) {
-        memcpy(ip_raw, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
-        inet_ntop(AF_INET6, ip_raw, ip_char, sizeof(ip_char));
-    }
+//    if (path_attrs->attr_value.mp_reach_nlri_data.nh_len == 4) {
+        memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+        //inet_ntop(AF_INET, ip_raw, ip_char, sizeof(ip_char));
+//    } else if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 4) {
+//        memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+//        //inet_ntop(AF_INET6, ip_raw, ip_char, sizeof(ip_char));
+//    }
 
-    path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
+    //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
         /*
          * Decode based on SAFI
          */
         switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
-                //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
                 libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, nlri_len);
                 break;
 

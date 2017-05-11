@@ -87,29 +87,6 @@
     };
 
 
-
-    /**
-     * Constructor for class
-     *
-     * \details Handles bgp Extended Communities
-     *
-     * \param [in]     logPtr       Pointer to existing Logger for app logging
-     * \param [in]     peerAddr     Printed form of peer address used for logging
-     * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
-     * \param [in]     enable_debug Debug true to enable, false to disable
-     */
-
-/*
-       void libparsebgp_mp_link_state_attr_init(libparsebgp_attr_link_state_parsed_data *data, std::string peerAddr,parsed_update_data *parsed_data)
-       {
-        //logger = logPtr;
-        //debug = enable_debug;
-        data->peer_addr = peerAddr;
-        data->parsed_data = parsed_data;
-        }
-*/
-
-
     /**
      * Parse Link State attribute
      *

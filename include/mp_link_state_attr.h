@@ -128,13 +128,13 @@
     void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *path_attrs, int attr_len, u_char *data);
 
 
-   #define IEEE_INFINITY         0x7F800000
-    #define MINUS_INFINITY        (int32_t)0x80000000L
-    #define PLUS_INFINITY         0x7FFFFFFF
+   #define IEEE_INFINITY            0x7F800000
+    #define MINUS_INFINITY          (int32_t)0x80000000L
+    #define PLUS_INFINITY           0x7FFFFFFF
     #define IEEE_NUMBER_WIDTH       32        /* bits in number */
     #define IEEE_EXP_WIDTH          8         /* bits in exponent */
     #define IEEE_MANTISSA_WIDTH     (IEEE_NUMBER_WIDTH - 1 - IEEE_EXP_WIDTH)
-        #define IEEE_SIGN_MASK          0x80000000
+    #define IEEE_SIGN_MASK          0x80000000
     #define IEEE_EXPONENT_MASK      0x7F800000
     #define IEEE_MANTISSA_MASK      0x007FFFFF
 
