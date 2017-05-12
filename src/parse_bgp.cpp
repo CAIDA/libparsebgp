@@ -82,7 +82,7 @@ uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_
  *
  * \returns True if error, false if no error.
  */
-int libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size) {
+ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size) {
     int read_size = 0;
 
     if (libparsebgp_parse_bgp_parse_header(bgp_update_msg, data, size) == BGP_MSG_UPDATE) {
@@ -111,22 +111,23 @@ int libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_u
  *
  * \returns True if error, false if no error.
  */
-bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
-    bool        rval;
-
+ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
+    ssize_t     read_size = 0;
     // Process the BGP message normally
     if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size) == BGP_MSG_NOTIFICATION) {
         int data_bytes_remaining = bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN;
         data += BGP_MSG_HDR_LEN;
+        read_size += BGP_MSG_HDR_LEN;
 
         libparsebgp_notify_msg notify_msg;
-        if ( (rval=libparsebgp_notification_parse_notify(notify_msg,data, data_bytes_remaining)))
+        if ( libparsebgp_notification_parse_notify(notify_msg,data, data_bytes_remaining))
         {
             throw "Failed to parse the BGP notification message";
         }
         else {
             data += 2;                                                 // Move pointer past notification message
             data_bytes_remaining -= 2;
+            read_size += 2;
 
             bgp_parsed_data.parsed_data.notification_msg.error_code = notify_msg.error_code;
             bgp_parsed_data.parsed_data.notification_msg.error_subcode = notify_msg.error_subcode;
@@ -137,7 +138,7 @@ bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &
     else {
         throw "ERROR: Invalid BGP MSG for BMP down event, expected NOTIFICATION message.";
     }
-    return rval;
+    return read_size;
 }
 
 /**

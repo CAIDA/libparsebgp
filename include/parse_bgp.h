@@ -77,7 +77,7 @@ uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_
  *
  * \returns number of bytes read
  */
-int libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size);
+ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size);
 
 /**
  * handle BGP notify event
@@ -91,7 +91,7 @@ int libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_u
  *
  * @returns number of bytes read
  */
-bool libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size);
+ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size);
 
 /**
  * Parses the BGP common header
