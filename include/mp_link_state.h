@@ -90,7 +90,6 @@ enum ospf_route_types {
 };
 
 
-
 /**
  * MP Reach Link State NLRI parse
  *

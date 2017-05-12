@@ -12,7 +12,7 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-#include "mp_link_state.h"
+//#include "mp_link_state.h"
 #include <string>
 #include <list>
 #include <array>
@@ -228,6 +228,7 @@ struct prefix_descriptor {
     uint8_t     prefix_len;                         ///< Length of prefix in bits
 };
 
+
 struct mp_reach_ls {
     uint16_t        nlri_type;
     uint16_t        nlri_len;
@@ -251,7 +252,7 @@ struct mp_reach_ls {
         struct prefix_nlri_ipv4_ipv6 {
             uint16_t    type;
             uint16_t    len;
-            list <node_descriptor> local_nodes;
+            list <node_descriptor>  local_nodes;
             list <prefix_descriptor> prefix_desc;
         }prefix_nlri_ipv4_ipv6;
     }nlri_ls;

@@ -14,8 +14,6 @@
 #include <string>
 #include "mp_reach_attr.h"
 
-//namespace bgp_msg {
-
 /**
  * Parse the MP_UNREACH NLRI attribute data
  *

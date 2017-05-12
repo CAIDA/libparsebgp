@@ -9,8 +9,7 @@
 
 #include "../include/mp_reach_attr.h"
 #include "../include/evpn.h"
-
-//namespace bgp_msg {
+#include "../include/mp_link_state.h"
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
