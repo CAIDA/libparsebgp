@@ -14,15 +14,13 @@
 /**
  * Buffer remaining MRT message
  *
- * \details This method will read the remaining amount of BMP data and store it in the instance variable bmp_data.
+ * \details This method will read the remaining amount of MRT data and store it in the instance variable mrt_data.
  *          Normally this is used to store the BGP message so that it can be parsed.
  *
- * \param buffer    containes the data
+ * \param buffer    contains the data
  * \param buf_len   has the length of buffer
  *
  * \returns true if successfully parsed the bmp peer down header, false otherwise
- *
- * \throws String error
  */
 static void libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len) {
     if (mrt_len <= 0)
@@ -106,16 +104,19 @@ static uint32_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& b
     }
     return read_size;
 }
+
 /**
  * Process the incoming MRT message header
  *
- * \returns
- *      returns the MRT message type. A type of >= 0 is normal,
- *      < 0 indicates an error
+ * \details This function will parse the incoming buffer for header and store it in header structure
  *
- * //throws (const  char *) on error.   String will detail error message.
+ * \param       buffer              contains the data
+ * \param       buf_len             has the length of buffer
+ * \param       mrt_parsed_hdr      MRT header structure
+ *
+ * \returns     read_size           bytes of the message successfully parsed
+ *
  */
-
 static int libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_mrt_common_hdr &mrt_parsed_hdr) {
     int read_size=0;
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr, 12) != 12)
@@ -140,6 +141,17 @@ static int libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_
     return read_size;
 }
 
+/**
+ * Process the incoming Table Dump message
+ *
+ * \details This function will parse the incoming buffer for table dump message subtype
+ *
+ * \param       buffer              contains the data
+ * \param       buf_len             has the length of buffer
+ * \param       table_dump_msg      table dump structure
+ *
+ * \returns     read_size           bytes of the message successfully parsed
+ */
 static int libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libparsebgp_table_dump_message *table_dump_msg) {
     int read_size=0;
     if (extract_from_buffer(buffer, buf_len, &table_dump_msg, 4) != 4)
@@ -205,6 +217,17 @@ static int libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, 
     return read_size;
 }
 
+/**
+ * Process the incoming Table Dump message
+ *
+ * \details This function will parse the incoming buffer for table dump message subtype
+ *
+ * \param       buffer              contains the data
+ * \param       buf_len             has the length of buffer
+ * \param       table_dump_msg      table dump structure
+ *
+ * \returns     read_size           bytes of the message successfully parsed
+ */
 static int libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& buf_len, libparsebgp_peer_index_table *peer_index_table) {
     uint16_t count = 0;
     int  AS_num;
@@ -266,6 +289,17 @@ static int libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffer, i
     return read_size;
 }
 
+/**
+ * Process the incoming Table Dump message
+ *
+ * \details This function will parse the incoming buffer for table dump message subtype
+ *
+ * \param       buffer              contains the data
+ * \param       buf_len             has the length of buffer
+ * \param       table_dump_msg      table dump structure
+ *
+ * \returns     read_size           bytes of the message successfully parsed
+ */
 static int libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, libparsebgp_rib_entry_header *rib_entry_data) {
     uint16_t count = 0;
     int addr_bytes=0;
@@ -340,6 +374,17 @@ static int libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& b
     return read_size;
 }
 
+/**
+ * Process the incoming RIB generic entry header
+ *
+ * \details This function will parse the incoming buffer for table dump message subtype
+ *
+ * \param       buffer               contains the data
+ * \param       buf_len              has the length of buffer
+ * \param       rib_gen_entry_hdr    RIB generic entry header structure
+ *
+ * \returns     read_size            bytes of the message successfully parsed
+ */
 static int libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, libparsebgp_rib_generic_entry_header *rib_gen_entry_hdr) {
     uint16_t count = 0;
     int read_size=0;
@@ -386,6 +431,17 @@ static int libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& b
     return read_size;
 }
 
+/**
+ * Process the incoming Table Dump v2 message
+ *
+ * \details This function will parse the incoming buffer for table dump v2 message type
+ *
+ * \param       buffer                  contains the data
+ * \param       buf_len                 has the length of buffer
+ * \param       table_dump_v2_msg       table dump v2 structure
+ *
+ * \returns     read_size           bytes of the message successfully parsed
+ */
 static int libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
     int read_size=0;
     switch (mrt_sub_type) {

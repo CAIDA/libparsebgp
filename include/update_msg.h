@@ -12,6 +12,7 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
+#include "mp_link_state.h"
 #include <string>
 #include <list>
 #include <array>
@@ -192,13 +193,81 @@ struct mp_unreach_nlri {
     list<update_prefix_tuple> wdrawn_routes_nlri;   ///< Withdrawn routes
 };
 
+/**
+    * Node (local and remote) common fields
+    */
+struct node_descriptor {
+    uint16_t    type;
+    uint16_t    len;
+    uint32_t    asn;                           ///< BGP ASN
+    uint32_t    bgp_ls_id;                     ///< BGP-LS Identifier
+    uint8_t     igp_router_id[8];              ///< IGP router ID
+    uint8_t     ospf_area_Id[4];               ///< OSPF area ID
+    uint32_t    bgp_router_id;                 ///< BGP router ID (draft-ietf-idr-bgpls-segment-routing-epe)
+    uint8_t     hash_bin[16];                  ///< binary hash for node descriptor
+};
+
+struct link_descriptor {
+    uint32_t    local_id;                           ///< Link Local ID
+    uint32_t    remote_id;                          ///< Link Remote ID
+    uint8_t     intf_addr[16];                      ///< Interface binary address
+    uint8_t     nei_addr[16];                       ///< Neighbor binary address
+    uint32_t    mt_id;                              ///< Multi-Topology ID
+    bool        is_ipv4;                             ///< True if IPv4, false if IPv6
+};
+
+
+/**
+     * Node (local and remote) common fields
+     */
+struct prefix_descriptor {
+    char        ospf_route_type[32];                ///< OSPF Route type in string form for DB enum
+    uint32_t    mt_id;                              ///< Multi-Topology ID
+    uint8_t     prefix[16];                         ///< Prefix binary address
+    uint8_t     prefix_bcast[16];                   ///< Prefix broadcast/ending binary address
+    uint8_t     prefix_len;                         ///< Length of prefix in bits
+};
+
+struct mp_reach_ls {
+    uint16_t        nlri_type;
+    uint16_t        nlri_len;
+    uint8_t         proto_id;
+    uint64_t        id;
+    struct nlri_ls{
+        struct node_nlri {
+            uint16_t    type;
+            uint16_t    len;
+            list <node_descriptor> local_nodes;
+        }node_nlri;
+
+        struct link_nlri {
+            uint16_t    type;
+            uint16_t    len;
+            list <node_descriptor> local_nodes;
+            list <node_descriptor> remote_nodes;
+            list <link_descriptor> link_desc;
+        }link_nlri;
+
+        struct prefix_nlri_ipv4_ipv6 {
+            uint16_t    type;
+            uint16_t    len;
+            list <node_descriptor> local_nodes;
+            list <prefix_descriptor> prefix_desc;
+        }prefix_nlri_ipv4_ipv6;
+    }nlri_ls;
+};
+
+
 struct mp_reach_nlri {
-    uint16_t       afi;                 ///< Address Family Identifier
-    uint8_t        safi;                ///< Subsequent Address Family Identifier
-    uint8_t        nh_len;              ///< Length of next hop
-    unsigned char  next_hop[16];           ///< Next hop address - Pointer to data (normally does not require freeing)
-    uint8_t        reserved;            ///< Reserved
-    list<update_prefix_tuple> nlri_info;   ///< Withdrawn routes
+    uint16_t afi;                 ///< Address Family Identifier
+    uint8_t safi;                ///< Subsequent Address Family Identifier
+    uint8_t nh_len;              ///< Length of next hop
+    unsigned char next_hop[16];           ///< Next hop address - Pointer to data (normally does not require freeing)
+    uint8_t reserved;           ///< Reserved
+    struct nlri_info {
+        list <update_prefix_tuple> nlri_info;   ///< Withdrawn routes
+        list <mp_reach_ls>         mp_rch_ls;
+    }nlri_info;
 };
 
 /**
@@ -220,9 +289,9 @@ typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map
      */
 struct parsed_data_ls {
 
-    std::list<obj_ls_node>   nodes;        ///< List of Link state nodes
-    std::list<obj_ls_link>   links;        ///< List of link state links
-    std::list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+    list<obj_ls_node>   nodes;        ///< List of Link state nodes
+    list<obj_ls_link>   links;        ///< List of link state links
+    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
 };
 typedef struct attr_value{
     uint8_t                 origin;
@@ -233,7 +302,7 @@ typedef struct attr_value{
     uint32_t                local_pref;
     uint16_t                value16bit;
     string                  aggregator;
-    list<u_char*>         cluster_list;
+    list<u_char*>            cluster_list;
     list<uint16_t>          attr_type_comm;
     list<extcomm_hdr>       ext_comm;
     mp_unreach_nlri         mp_unreach_nlri_data;

@@ -496,32 +496,24 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
             }
             case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
             {
-//                ExtCommunity ec(update_msg->peer_addr);
-//                ec.parseExtCommunities(attr_len, data, parsed_data);
                 libparsebgp_ext_communities_parse_ext_communities(path_attrs, data);
                 break;
             }
 
             case ATTR_TYPE_IPV6_EXT_COMMUNITY : // IPv6 specific extended community list (RFC 5701)
             {
-//                ExtCommunity ec6(update_msg->peer_addr);
-//                ec6.parsev6ExtCommunities(attr_len, data, parsed_data);
                 libparsebgp_ext_communities_parse_v6_ext_communities(path_attrs, data);
                 break;
             }
 
             case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
             {
-//                libparsebgp_mp_reach_attr_parsed_data *parse_data;
-//                libparsebgp_mp_reach_attr_init(parse_data, update_msg->peer_addr, update_msg->peer_inf);
                 libparsebgp_mp_reach_attr_parse_reach_nlri_attr(path_attrs, path_attrs->attr_len, data);
                 break;
             }
 
             case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
             {
-//                libparsebgp_mp_un_reach_attr_parse_data *mp_un_reach_attr_data;
-//                libparsebgp_mp_un_reach_attr_init(mp_un_reach_attr_data, update_msg->peer_addr, update_msg->peer_inf);
                 libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(path_attrs, path_attrs->attr_len, data, has_end_of_rib_marker);
                 break;
             }
@@ -533,29 +525,21 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
 
             case ATTR_TYPE_BGP_LS:
             {
-//                libparsebgp_attr_link_state_parsed_data *parse_data;
-//                libparsebgp_mp_link_state_attr_init(parse_data, update_msg->peer_addr, &parsed_data);
                 libparsebgp_mp_link_state_attr_parse_attr_link_state(path_attrs, path_attrs->attr_len, data);
                 break;
             }
 
             case ATTR_TYPE_AS4_PATH:
             {
-                //SELF_DEBUG("%s: rtr=%s: attribute type AS4_PATH is not yet implemented, skipping for now.",
-                //         peer_addr.c_str(), router_addr.c_str());
                 break;
             }
 
             case ATTR_TYPE_AS4_AGGREGATOR:
             {
-                //SELF_DEBUG("%s: rtr=%s: attribute type AS4_AGGREGATOR is not yet implemented, skipping for now.",
-                //           peer_addr.c_str(), router_addr.c_str());
-                break;
+                 break;
             }
 
             default:
-                //LOG_INFO("%s: rtr=%s: attribute type %d is not yet implemented or intentionally ignored, skipping for now.",
-                //        peer_addr.c_str(), router_addr.c_str(), attr_type);
                 break;
 
         } // END OF SWITCH ATTR TYPE

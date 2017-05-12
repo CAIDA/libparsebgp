@@ -14,8 +14,6 @@
 #include <string>
 #include "update_msg.h"
 
-//namespace bgp_msg {
-
 /**
  * \class   MPReachAttr
  *

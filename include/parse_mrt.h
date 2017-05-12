@@ -25,6 +25,14 @@
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
 
+/**
+ * \class   parseMRT
+ *
+ * \brief   Parser for MRT messages
+ * \details This class can be used as needed to parse MRT messages. This
+ *          class will read directly from the socket to read the BMP message.
+ */
+
 using namespace std;
 
 /**
@@ -50,15 +58,17 @@ enum bgp4mp_types {BGP4MP_STATE_CHANGE=0, BGP4MP_MESSAGE, BGP4MP_MESSAGE_AS4=4, 
 
 enum state_values {Idle=1, Connect, Active, OpenSent, OpenConfirm, Esablished};
 
+
+
 /**
-  * Structure for MRT common header
+  * MRT common header
   */
 typedef struct libparsebgp_mrt_common_hdr {
     uint32_t        time_stamp;             ///< 4 byte; timestamp value in seconds
     uint16_t        type;                   ///< 2 byte; type of information contained in message field
     uint16_t        sub_type;               ///< 2 byte; further distinguishing message information
     uint32_t        len;                    ///< 4 byte; length of the message EXCLUDING common header length
-    uint32_t        microsecond_timestamp;  ///< 4 byte: timestamp in microseconds
+    uint32_t        microsecond_timestamp;   ///< 4 byte: timestamp in microseconds
 }libparsebgp_mrt_common_hdr;
 
 /**
@@ -97,12 +107,11 @@ struct peer_entry{
 struct libparsebgp_peer_index_table{
     char                collector_bgp_id[4];
     uint16_t            view_name_length;
-    char*               view_name[1024]; // it is in utf8 format
+    char                view_name[1024]; // it is in utf8 format
     uint16_t            peer_count;
     list<peer_entry>    peer_entries;
 };
 
-//4.3.4
 /**
   * RIB Entry Message format
   */
@@ -114,7 +123,6 @@ struct rib_entry{
     list<update_path_attrs>      bgp_attrs;
 };
 
-//4.3.2
 /**
   * RIB Entry Header Message format
   */
@@ -126,7 +134,6 @@ struct libparsebgp_rib_entry_header{
     list<rib_entry> rib_entries;
 };
 
-//4.3.3
 /**
   * RIB generic entry header
   */
@@ -169,8 +176,6 @@ struct libparsebgp_bgp4mp_msg{
 u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
 int mrt_data_len;              ///< Length/size of data in the data buffer
 
-
-uint16_t mrt_type;
 uint16_t mrt_sub_type;
 uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
 
