@@ -7,6 +7,12 @@
  *
  */
 
+/**
+ * @file    parse_mrt.h
+ *
+ * \brief   Parser for MRT messages
+ * \details The functions in this file can be used as needed to parse MRT messages from buffer
+ */
 
 #ifndef PARSEMRT_H_
 #define PARSEMRT_H_
@@ -18,14 +24,6 @@
 #include "parse_utils.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
-
-/**
- * \class   parseMRT
- *
- * \brief   Parser for MRT messages
- * \details This class can be used as needed to parse MRT messages. This
- *          class will read directly from the socket to read the BMP message.
- */
 
 using namespace std;
 
@@ -52,18 +50,15 @@ enum bgp4mp_types {BGP4MP_STATE_CHANGE=0, BGP4MP_MESSAGE, BGP4MP_MESSAGE_AS4=4, 
 
 enum state_values {Idle=1, Connect, Active, OpenSent, OpenConfirm, Esablished};
 
-
-
 /**
-  * MRT common header
+  * Structure for MRT common header
   */
 typedef struct libparsebgp_mrt_common_hdr {
-    uint32_t        time_stamp;              ///< 4 byte; timestamp value in seconds
+    uint32_t        time_stamp;             ///< 4 byte; timestamp value in seconds
     uint16_t        type;                   ///< 2 byte; type of information contained in message field
-    uint16_t        sub_type;                ///< 2 byte; further distinguishing message information
+    uint16_t        sub_type;               ///< 2 byte; further distinguishing message information
     uint32_t        len;                    ///< 4 byte; length of the message EXCLUDING common header length
-    uint32_t        microsecond_timestamp;   ///< 4 byte: timestamp in microseconds
-//        u_char*         message;                ///< variable length message
+    uint32_t        microsecond_timestamp;  ///< 4 byte: timestamp in microseconds
 }libparsebgp_mrt_common_hdr;
 
 /**
@@ -158,6 +153,9 @@ struct libparsebgp_bgp4mp_state_change{
     uint16_t    new_state;
 };
 
+/**
+ * Structure holding BGP4MP Messages
+ */
 struct libparsebgp_bgp4mp_msg{
     uint32_t    peer_asn;
     uint32_t    local_asn;
@@ -165,7 +163,6 @@ struct libparsebgp_bgp4mp_msg{
     uint16_t    address_family;
     char        peer_ip[40];
     char        local_ip[40];
-    //u_char*     bgp_data;
     libparsebgp_parse_bgp_parsed_data bgp_msg;
 };
 
@@ -177,6 +174,9 @@ uint16_t mrt_type;
 uint16_t mrt_sub_type;
 uint32_t mrt_len;                    ///< Length of the BMP message - does not include the common header size
 
+/*
+ * Structure for table_dump_v2 type as per RFC 6396
+ */
 //union needed
 struct libparsebgp_parsed_table_dump_v2 {
     libparsebgp_peer_index_table          peer_index_tbl;
@@ -184,6 +184,9 @@ struct libparsebgp_parsed_table_dump_v2 {
     libparsebgp_rib_generic_entry_header  rib_generic_entry_hdr;
 };
 
+/*
+ * Structure for parsed MRT message as per RFC 6396
+ */
 struct libparsebgp_parse_mrt_parsed_data {
     libparsebgp_mrt_common_hdr c_hdr;
     //union needed:
@@ -201,8 +204,10 @@ struct libparsebgp_parse_mrt_parsed_data {
 /**
  * Function to parse MRT message
  *
- * \param [in] buffer       Contains the MRT message
- * \param [in] buf_len       Length of buffer
+ * @param [in] buffer       Contains the MRT message
+ * @param [in] buf_len       Length of buffer
+ *
+ * @return number of bytes read
  */
 int libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
 
