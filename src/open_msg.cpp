@@ -23,23 +23,24 @@
  * \param [out]  asn                Reference to the ASN that was discovered
  * \param [out]  capabilities       Reference to the capabilities list<string> (decoded values)
  *
- * \return ZERO is error, otherwise a positive value indicating the number of bytes read
+ * \return negative values for error, otherwise a positive value indicating the number of bytes read
  */
-static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
+static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
     int      read_size   = 0;
-    u_char      *bufPtr     = data;
+    u_char   *bufPtr     = data;
 
     for (int i=0; i < size; ) {
         //param = (open_param_hdr *)bufPtr;
         open_param opt_param;
         memcpy(&opt_param, bufPtr, 2);  //reading type and length
-//        SELF_DEBUG("%s: Open param type=%d len=%d", peer_addr.c_str(), param->type, param->len);
         if (opt_param.param_type != BGP_CAP_PARAM_TYPE) {
-//            LOG_NOTICE("%s: Open param type %d is not supported, expected type %d", peer_addr.c_str(),param->type, BGP_CAP_PARAM_TYPE);
+            return ABNORMAL_MSG;
+            //LOG_NOTICE("%s: Open param type %d is not supported, expected type %d", peer_addr.c_str(),param->type, BGP_CAP_PARAM_TYPE);
         }
 
-            /*
-             * Process the capabilities if present             */
+        /*
+         * Process the capabilities if present
+         */
         else if (opt_param.param_len >= 2 and (read_size + 2 + opt_param.param_len) <= size) {
             u_char *cap_ptr = bufPtr + 2;
 
@@ -48,7 +49,6 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
                 open_capabilities open_cap;
 //                bzero(open_cap, sizeof(open_cap));
                 memcpy(&open_cap, cap_ptr, 2);
-//                SELF_DEBUG("%s: Capability code=%d len=%d", peer_addr.c_str(), cap->code, cap->len);
 
                 /*
                  * Handle the capability
@@ -56,7 +56,6 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
                 switch (open_cap.cap_code) {
                     case BGP_CAP_4OCTET_ASN :
                         if (open_cap.cap_len == 4) {
-                            //uint32_t asn;
                             memcpy(&open_cap.cap_values.asn, cap_ptr + 2, 4);
                             SWAP_BYTES(&open_cap.cap_values.asn);
 
@@ -64,6 +63,7 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
                             //capabilities.push_back(capStr);
                             opt_param.param_values.push_back(open_cap);
                         } else {
+                            return ABNORMAL_MSG;
 //                            LOG_NOTICE("%s: 4 octet ASN capability length is invalid %d expected 4", peer_addr.c_str(), cap->len);
                         }
                         break;
@@ -103,8 +103,6 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
 
                                 /*snprintf(capStr, sizeof(capStr), "ADD Path (%d) : afi=%d safi=%d send/receive=%d",
                                          BGP_CAP_ADD_PATH, data.afi, data.safi, data.send_recieve);
-
-                                //SELF_DEBUG("%s: supports Add Path afi = %d safi = %d send/receive = %d",peer_addr.c_str(), data.afi, data.safi, data.send_recieve);
 
                                 std::string decodeStr(capStr);
                                 decodeStr.append(" : ");
@@ -168,8 +166,6 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
                             memcpy(&open_cap.cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap.cap_values.mpbgp_data));
                             SWAP_BYTES(&open_cap.cap_values.mpbgp_data.afi);
 
-                            //                        SELF_DEBUG("%s: supports MPBGP afi = %d safi=%d",peer_addr.c_str(), data.afi, data.safi);
-
                             /*snprintf(capStr, sizeof(capStr), "MPBGP (%d) : afi=%d safi=%d",
                                      BGP_CAP_MPBGP, data.afi, data.safi);
 
@@ -186,7 +182,7 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
                         }
                         else {
                             //LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
-                            return 0;
+                            return ABNORMAL_MSG;
                         }
 
                         break;
@@ -231,7 +227,7 @@ static int libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *op
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
-int libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
+ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
     char        bgp_id_char[16];
     int      read_size       = 0;
     u_char      *bufPtr         = data;
@@ -244,19 +240,19 @@ int libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data
      */
     if (size < 10) {
     //    LOG_WARN("%s: Cloud not read open message due to buffer having less bytes than open message size", peer_addr.c_str());
-        return 0;
+        return INCOMPLETE_MSG;
     }
 
     if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->ver, 1) != 1)
-        return 0;
+        return ERR_READING_MSG;
     if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->asn, 2) != 2)
-        return 0;
+        return ERR_READING_MSG;
     if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->hold_time, 2) != 2)
-        return 0;
+        return ERR_READING_MSG;
     if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->bgp_id, 4) != 4)
-        return 0;
+        return ERR_READING_MSG;
     if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->opt_param_len, 1) != 1)
-        return 0;
+        return ERR_READING_MSG;
 //    memcpy(&open_msg_data, bufPtr,10); //reading the first few parameters
       read_size = 10;
 //    bufPtr += read_size;                                       // Move pointer past the open header
@@ -272,8 +268,6 @@ int libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data
 
     //inet_ntop(AF_INET, &open_msg_data->bgp_id, bgp_id_char, sizeof(bgp_id_char));
     //bgp_id.assign(bgp_id_char);
-
-//    SELF_DEBUG("%s: Open message:ver=%d hold=%u asn=%hu bgp_id=%s params_len=%d", peer_addr.c_str(),open_hdr.ver, open_hdr.hold, open_hdr.asn, bgp_id.c_str(), open_hdr.param_len);
 
     /*
      * Make sure the buffer contains the rest of the open message, but allow a zero length in case the
@@ -297,7 +291,7 @@ int libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data
 
         if (!libparsebgp_open_msg_parse_capabilities(open_msg_data,bufPtr, open_msg_data->opt_param_len, openMessageIsSent)) {
   //          LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
-            return 0;
+            return ABNORMAL_MSG;
         }
 
         read_size += open_msg_data->opt_param_len;

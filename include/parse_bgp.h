@@ -63,7 +63,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
  *
  * @return the number of bytes read
  */
-uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size, bool is_local_msg = true);
+ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size, bool is_local_msg = true);
 
 
 /**

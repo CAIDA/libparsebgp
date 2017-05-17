@@ -8,10 +8,7 @@
  */
 
 #include "../include/notification_msg.h"
-
-//namespace bgp_msg {
-
-
+#include "../include/parse_utils.h"
 /**
  * Parses a notification message stored in a byte parsed_msg.error_textfer
  *
@@ -25,7 +22,7 @@
  *
  * \return True if error, false if no error reading/parsing the notification message
  */
-int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size) {
+ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size) {
     u_char *dataPtr = data;
     int read_size = 0;
 
@@ -38,7 +35,7 @@ int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_
     }
     else {
         //LOG_ERR("Could not read the BGP error code from notify message");
-        return -1;
+        return ERR_READING_MSG;
     }
 
     if (read_size < size) {
@@ -47,7 +44,7 @@ int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_
     }
     else {
         //LOG_ERR("Could not read the BGP sub code from notify message");
-        return -1;
+        return ERR_READING_MSG;
     }
 
     // Update the error text to be meaningful
@@ -174,6 +171,3 @@ int libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_
 
     return read_size;
 }
-
-
-//} /* namespace bgp_msg */

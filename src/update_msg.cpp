@@ -6,6 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
+
 #include <arpa/inet.h>
 #include "../include/update_msg.h"
 #include "../include/ext_community.h"
@@ -375,6 +376,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
     //attrs[ATTR_TYPE_AGGEGATOR] = decodeStr;
          path_attrs->attr_value.aggregator = decodeStr;
 }
+
 /**
  * Parse attribute data based on attribute type
  *
@@ -620,4 +622,3 @@ void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg
     }
 
 }
-//} /* namespace bgp_msg */

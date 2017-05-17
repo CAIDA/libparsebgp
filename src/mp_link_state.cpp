@@ -9,18 +9,6 @@
 #include <arpa/inet.h>
 #include "../include/mp_link_state.h"
 
-//namespace bgp_msg {
-/**
- * Constructor for class
- *
- * \details Handles bgp Extended Communities
- *
- * \param [in]     logPtr       Pointer to existing Logger for app logging
- * \param [in]     peerAddr     Printed form of peer address used for logging
- * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
- * \param [in]     enable_debug Debug true to enable, false to disable
- */
-
 /**********************************************************************************//*
  * Parse a Local or Remote Descriptor sub-tlv's
  *
@@ -36,7 +24,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
     int             data_read = 0;
 
     if (data_len < 4) {
-        //      LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; too short",peer_addr.c_str());
+        //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; too short",peer_addr.c_str());
         return data_len;
     }
 
@@ -49,7 +37,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
     //SELF_DEBUG("%s: bgp-ls: Parsing node descriptor type %d len %d", peer_addr.c_str(), type, len);
 
     if (info.len > data_len - 4) {
-        //      LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
+        //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
         return data_len;
     }
 
@@ -59,7 +47,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
         case NODE_DESCR_AS:
         {
             if (info.len != 4) {
-                //           LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor AS sub-tlv; too short",peer_addr.c_str());
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor AS sub-tlv; too short",peer_addr.c_str());
                 data_read += info.len;
                 break;
             }
@@ -68,7 +56,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
             SWAP_BYTES(&info.asn);
             data_read += 4;
 
-            //       SELF_DEBUG("%s: bgp-ls: Node descriptor AS = %u", peer_addr.c_str(), info.asn);
+            //SELF_DEBUG("%s: bgp-ls: Node descriptor AS = %u", peer_addr.c_str(), info.asn);
 
             break;
         }
@@ -76,7 +64,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
         case NODE_DESCR_BGP_LS_ID:
         {
             if (info.len != 4) {
-                //     LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor BGP-LS ID sub-tlv; too short",peer_addr.c_str());
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor BGP-LS ID sub-tlv; too short",peer_addr.c_str());
                 data_read += info.len;
                 break;
             }
@@ -86,14 +74,14 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
                 SWAP_BYTES(&info.bgp_ls_id);
                 data_read += 4;
 
-            //     SELF_DEBUG("%s: bgp-ls: Node descriptor BGP-LS ID = %08X", peer_addr.c_str(), info.bgp_ls_id);
+            //SELF_DEBUG("%s: bgp-ls: Node descriptor BGP-LS ID = %08X", peer_addr.c_str(), info.bgp_ls_id);
             break;
         }
 
         case NODE_DESCR_OSPF_AREA_ID:
         {
             if (info.len != 4) {
-                //          LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor OSPF Area ID sub-tlv; too short",peer_addr.c_str());
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor OSPF Area ID sub-tlv; too short",peer_addr.c_str());
                 data_read += info.len <= data_len ? info.len : data_len;
                 break;
             }
@@ -104,14 +92,14 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
             inet_ntop(AF_INET, info.ospf_area_Id, ipv4_char, sizeof(ipv4_char));
             data_read += 4;
 
-            //          SELF_DEBUG("%s: bgp-ls: Node descriptor OSPF Area ID = %s", peer_addr.c_str(), ipv4_char);
+            //SELF_DEBUG("%s: bgp-ls: Node descriptor OSPF Area ID = %s", peer_addr.c_str(), ipv4_char);
             break;
         }
 
         case NODE_DESCR_IGP_ROUTER_ID:
         {
             if (info.len > data_len or info.len > 8) {
-                //               LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor IGP Router ID sub-tlv; len (%d) is invalid",peer_addr.c_str(), len);
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor IGP Router ID sub-tlv; len (%d) is invalid",peer_addr.c_str(), len);
                 data_read += info.len;
                 break;
             }
@@ -868,28 +856,4 @@ void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_
             return;
     }
 }
-/**********************************************************************************//*
- * Hash node descriptor info
- *
- * \details will produce a hash for the node descriptor.  Info hash_bin will be updated.
- *
- * \param [in/out]  info           Node descriptor information returned/updated
- * \param [out]  hash_bin       Node descriptor information returned/updated
- */
-/*
-void MPLinkState::genNodeHashId(node_descriptor &info) {
-    MD5 hash;
 
-    hash.update(info.igp_router_id, sizeof(info.igp_router_id));
-    hash.update((unsigned char *)&info.bgp_ls_id, sizeof(info.bgp_ls_id));
-    hash.update((unsigned char *)&info.asn, sizeof(info.asn));
-    hash.update(info.ospf_area_Id, sizeof(info.ospf_area_Id));
-    hash.finalize();
-
-    // Save the hash
-    unsigned char *hash_bin = hash.raw_digest();
-    memcpy(info.hash_bin, hash_bin, 16);
-    delete[] hash_bin;
-}*/
-
-//} /* namespace bgp_msg */

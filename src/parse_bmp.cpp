@@ -407,9 +407,11 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
 
         bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
 
-        if (!read_size) {
-            throw "Failed to read sent open message";
+        if (!bytes_read) {
+            return ERR_READING_MSG; //throw "Failed to read sent open message";
         }
+        if (bytes_read < 0)
+            return bytes_read;    // has the error codes
 
         data += bytes_read;                                          // Move the pointer pase the sent open message
         size -= bytes_read;
@@ -423,9 +425,11 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
 
         bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg,data, size, false);
 
-        if (!read_size) {
-            throw "Failed to read received open message";
+        if (!bytes_read) {
+            return ERR_READING_MSG; //throw "Failed to read received open message";
         }
+        if (bytes_read < 0)
+            return bytes_read;    // has the error codes
 
         data += bytes_read;                                          // Move the pointer pase the sent open message
         size -= bytes_read;

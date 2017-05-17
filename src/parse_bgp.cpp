@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include "../include/parse_bgp.h"
+#include "../include/parse_utils.h"
 
 using namespace std;
 
@@ -20,9 +21,9 @@ using namespace std;
  * \param [in] bgp_msg           Structure to store the bgp messages
  * \returns bytes read
  */
-uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
+ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
                                                bool is_local_msg) {
-    int read_size = 0;
+    ssize_t read_size = 0;
     u_char  bgp_msg_type = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size);
     int data_bytes_remaining = bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN;
     data += BGP_MSG_HDR_LEN;
@@ -30,15 +31,17 @@ uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_
         case BGP_MSG_UPDATE: {
             if ((read_size=libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data.parsed_data.update_msg, data, data_bytes_remaining,
                                                                    bgp_parsed_data.has_end_of_rib_marker)) != (size - BGP_MSG_HDR_LEN)) {
-                throw "Failed to parse BGP update message";
+                return ERR_READING_MSG; //throw "Failed to parse BGP update message";
             }
             break;
         }
         case BGP_MSG_NOTIFICATION: {
             libparsebgp_notify_msg parsed_msg;
-            if (libparsebgp_notification_parse_notify(parsed_msg,data, data_bytes_remaining))
+            read_size= libparsebgp_notification_parse_notify(parsed_msg,data, data_bytes_remaining);
+            if (read_size < 0)
             {
-                throw "Failed to parse the BGP notification message";
+                //throw "Failed to parse the BGP notification message";
+                return read_size;
             }
             else {
                 read_size = 2;
@@ -57,14 +60,15 @@ uint32_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_
         }
         case BGP_MSG_OPEN: {
             read_size = libparsebgp_open_msg_parse_open_msg(&bgp_parsed_data.parsed_data.open_msg,data, data_bytes_remaining, is_local_msg);
-
             if (!read_size) {
-                throw "Failed to read open message";
+                return ERR_READING_MSG; //throw "Failed to read open message";
             }
+            if (read_size < 0)
+                return read_size;   // contains the error code
             break;
         }
         default: {
-            throw "BGP message type does not match";
+            return ABNORMAL_MSG; //throw "BGP message type does not match";
         }
     }
     data += read_size;
@@ -112,7 +116,7 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &b
  * \returns True if error, false if no error.
  */
 ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
-    ssize_t     read_size = 0;
+    ssize_t     read_size = 0, ret_val = 0;
     // Process the BGP message normally
     if (libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size) == BGP_MSG_NOTIFICATION) {
         int data_bytes_remaining = bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN;
@@ -120,9 +124,11 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
         read_size += BGP_MSG_HDR_LEN;
 
         libparsebgp_notify_msg notify_msg;
-        if ( libparsebgp_notification_parse_notify(notify_msg,data, data_bytes_remaining))
+        ret_val = libparsebgp_notification_parse_notify(notify_msg,data, data_bytes_remaining);
+        if (ret_val)
         {
-            throw "Failed to parse the BGP notification message";
+            return ret_val;
+            //throw "Failed to parse the BGP notification message";
         }
         else {
             data += 2;                                                 // Move pointer past notification message
