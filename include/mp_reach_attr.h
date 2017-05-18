@@ -14,8 +14,6 @@
 #include <string>
 #include "update_msg.h"
 
-//namespace bgp_msg {
-
 /**
  * \class   MPReachAttr
  *
@@ -26,34 +24,16 @@
 /**
  * struct defines the MP_REACH_NLRI (RFC4760 Section 3)
  */
-struct mp_reach_nlri {
+/*struct mp_reach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
-    unsigned char  safi;                ///< Subsequent Address Family Identifier
-    unsigned char  nh_len;              ///< Length of next hop
+    uint8_t        safi;                ///< Subsequent Address Family Identifier
+    uint8_t        nh_len;              ///< Length of next hop
     unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
-    unsigned char  reserved;            ///< Reserved
+    uint8_t        reserved;            ///< Reserved
 
     unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
     uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
-};
-
-struct libParseBGP_mp_reach_attr_parsed_data {
-    std::string peer_addr;              ///< Printed form of the peer address for logging
-    peer_info *peer_inf;
-};
-
-/**
- * Constructor for class
- *
- * \details Handles bgp MP_REACH attributes
- *
- * \param [in]     logPtr                   Pointer to existing Logger for app logging
- * \param [in]     pperAddr                 Printed form of peer address used for logging
- * \param [in]     peer_info                Persistent Peer info pointer
- * \param [in]     enable_debug             Debug true to enable, false to disable
- */
-void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse_data, std::string peer_addr, peer_info *peer_info);
-
+};*/
 
 /**
  * Parse the MP_REACH NLRI attribute data
@@ -67,7 +47,7 @@ void libParseBGP_mp_reach_attr_init(libParseBGP_mp_reach_attr_parsed_data *parse
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_parsed_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data);
+void libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -81,9 +61,7 @@ void libParseBGP_mp_reach_attr_parse_reach_nlri_attr(libParseBGP_mp_reach_attr_p
  * \param [in]   peer_info                  Persistent Peer info pointer
  * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
  */
-void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                           peer_info *peer_info,
-                                   std::list<prefix_tuple> &prefixes);
+void libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -98,9 +76,7 @@ void libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *da
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
 template <typename PREFIX_TUPLE>
-void libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
-                                                 peer_info *peer_info,
-                                        std::list<PREFIX_TUPLE> &prefixes);
+void libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, std::list<PREFIX_TUPLE> &prefixes);
 
 /**
  * Decode label from NLRI data

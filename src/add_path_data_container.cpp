@@ -19,9 +19,9 @@
  * \param [in] send_receive     Send Recieve code from RFC
  * \param [in] sent_open        Is obtained from sent open message. False if from recieved
  */
-void libParseBGP_addpath_add(libParseBGP_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open) {
+void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open) {
     //AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
-    libParseBGP_addpath_map::iterator iterator = addpath_map.find(libParseBGP_addpath_get_afi_safi_key_string(afi, safi));
+    libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
     if(iterator == addpath_map.end()) {
         send_receive_codes_for_sent_and_received_open_message_structure new_structure;
 
@@ -32,7 +32,7 @@ void libParseBGP_addpath_add(libParseBGP_addpath_map &addpath_map, int afi, int 
         }
 
         addpath_map.insert(std::pair<std::string, send_receive_codes_for_sent_and_received_open_message_structure>(
-                libParseBGP_addpath_get_afi_safi_key_string(afi, safi),
+                libparsebgp_addpath_get_afi_safi_key_string(afi, safi),
                 new_structure
         ));
     } else {
@@ -52,7 +52,7 @@ void libParseBGP_addpath_add(libParseBGP_addpath_map &addpath_map, int afi, int 
  *
  * \return string unique for AFI and SAFI combination
  */
-std::string libParseBGP_addpath_get_afi_safi_key_string(int afi, int safi) {
+std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi) {
     std::string result = std::to_string(static_cast<long long>(afi));
     result.append("_");
     result.append(std::to_string(static_cast<long long>(safi)));
@@ -67,8 +67,8 @@ std::string libParseBGP_addpath_get_afi_safi_key_string(int afi, int safi) {
  *
  * \return is enabled
  */
-bool libParseBGP_addpath_is_enabled(libParseBGP_addpath_map &addpath_map, int afi, int safi) {
-    libParseBGP_addpath_map::iterator iterator = addpath_map.find(libParseBGP_addpath_get_afi_safi_key_string(afi, safi));
+bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi) {
+    libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
 
     if(iterator == addpath_map.end()) {
         return false;

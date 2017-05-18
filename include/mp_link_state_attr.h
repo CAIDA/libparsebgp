@@ -97,10 +97,10 @@
         ATTR_PREFIX_SID                                     ///< Prefix-SID TLV (len=variable)
     };
 
-struct libparseBGP_attr_link_state_parsed_data {
+/*struct libparsebgp_attr_link_state_parsed_data {
     std::string peer_addr;                       ///< Printed form of the peer address for logging
     parsed_update_data *parsed_data;       ///< Parsed data structure
-};
+};*/
 
 /**
      * Constructor for class
@@ -114,7 +114,7 @@ struct libparseBGP_attr_link_state_parsed_data {
      */
 
 
-    void libParseBGP_mp_link_state_attr_init(libparseBGP_attr_link_state_parsed_data *data, std::string peer_addr,parsed_update_data *parsed_data);
+//    void libparsebgp_mp_link_state_attr_init(libparsebgp_attr_link_state_parsed_data *data, std::string peer_addr,parsed_update_data *parsed_data);
 
 
     /**
@@ -125,16 +125,16 @@ struct libparseBGP_attr_link_state_parsed_data {
      * \param [in]   attr_len       Length of the attribute data
      * \param [in]   data           Pointer to the attribute data
      */
-    void libParseBGP_mp_link_state_attr_parse_attr_link_state(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
+    void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *path_attrs, int attr_len, u_char *data);
 
 
-   #define IEEE_INFINITY         0x7F800000
-    #define MINUS_INFINITY        (int32_t)0x80000000L
-    #define PLUS_INFINITY         0x7FFFFFFF
+   #define IEEE_INFINITY            0x7F800000
+    #define MINUS_INFINITY          (int32_t)0x80000000L
+    #define PLUS_INFINITY           0x7FFFFFFF
     #define IEEE_NUMBER_WIDTH       32        /* bits in number */
     #define IEEE_EXP_WIDTH          8         /* bits in exponent */
     #define IEEE_MANTISSA_WIDTH     (IEEE_NUMBER_WIDTH - 1 - IEEE_EXP_WIDTH)
-        #define IEEE_SIGN_MASK          0x80000000
+    #define IEEE_SIGN_MASK          0x80000000
     #define IEEE_EXPONENT_MASK      0x7F800000
     #define IEEE_MANTISSA_MASK      0x007FFFFF
 
@@ -152,7 +152,7 @@ struct libparseBGP_attr_link_state_parsed_data {
      *
      * \returns length of the TLV attribute parsed
      */
-    int libParseBGP_mp_link_state_attr_parse_attr_link_state_tlv(libparseBGP_attr_link_state_parsed_data *parse_data, int attr_len, u_char *data);
+    int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char *data);
 
 //    };
 

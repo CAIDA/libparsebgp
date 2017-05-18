@@ -9,29 +9,6 @@
 #include <arpa/inet.h>
 #include "../include/mp_link_state.h"
 
-//namespace bgp_msg {
-/**
- * Constructor for class
- *
- * \details Handles bgp Extended Communities
- *
- * \param [in]     logPtr       Pointer to existing Logger for app logging
- * \param [in]     peerAddr     Printed form of peer address used for logging
- * \param [out]    parsed_data  Reference to parsed_update_data; will be updated with all parsed data
- * \param [in]     enable_debug Debug true to enable, false to disable
- */
-//MPLinkState::MPLinkState(Logger *logPtr, std::string peerAddr,UpdateMsg::parsed_update_data *parsed_data, bool enable_debug) {
-
-void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,std::string peer_address, parsed_update_data *parse_data) {
-    //logger = logPtr;
-    //debug = enable_debug;
-    data->peer_addr = peer_address;
-    data->parsed_data = parse_data;
-}
-
-//    MPLinkState::~MPLinkState() {
-//    }
-
 /**********************************************************************************//*
  * Parse a Local or Remote Descriptor sub-tlv's
  *
@@ -43,37 +20,35 @@ void libParseBGP_mp_link_state_init(libparseBGP_mp_link_state_parsed_data *data,
  *
  * \returns number of bytes read
  */
-int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int data_len, node_descriptor &info) {
-    uint16_t        type;
-    uint16_t        len;
+int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int data_len, node_descriptor &info) {
     int             data_read = 0;
 
     if (data_len < 4) {
-        //      LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; too short",peer_addr.c_str());
+        //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; too short",peer_addr.c_str());
         return data_len;
     }
 
-        memcpy(&type, data, 2);
-        SWAP_BYTES(&type);
+    memcpy(&info.type, data, 2);
+    SWAP_BYTES(&info.type);
 
-        memcpy(&len, data+2, 2);
-        SWAP_BYTES(&len);
+    memcpy(&info.len, data+2, 2);
+    SWAP_BYTES(&info.len);
 
     //SELF_DEBUG("%s: bgp-ls: Parsing node descriptor type %d len %d", peer_addr.c_str(), type, len);
 
-    if (len > data_len - 4) {
-        //      LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
+    if (info.len > data_len - 4) {
+        //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
         return data_len;
     }
 
     data += 4; data_read += 4;
 
-    switch (type) {
+    switch (info.type) {
         case NODE_DESCR_AS:
         {
-            if (len != 4) {
-                //           LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor AS sub-tlv; too short",peer_addr.c_str());
-                data_read += len;
+            if (info.len != 4) {
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor AS sub-tlv; too short",peer_addr.c_str());
+                data_read += info.len;
                 break;
             }
 
@@ -81,16 +56,16 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
             SWAP_BYTES(&info.asn);
             data_read += 4;
 
-            //       SELF_DEBUG("%s: bgp-ls: Node descriptor AS = %u", peer_addr.c_str(), info.asn);
+            //SELF_DEBUG("%s: bgp-ls: Node descriptor AS = %u", peer_addr.c_str(), info.asn);
 
             break;
         }
 
         case NODE_DESCR_BGP_LS_ID:
         {
-            if (len != 4) {
-                //     LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor BGP-LS ID sub-tlv; too short",peer_addr.c_str());
-                data_read += len;
+            if (info.len != 4) {
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor BGP-LS ID sub-tlv; too short",peer_addr.c_str());
+                data_read += info.len;
                 break;
             }
 
@@ -99,15 +74,15 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
                 SWAP_BYTES(&info.bgp_ls_id);
                 data_read += 4;
 
-            //     SELF_DEBUG("%s: bgp-ls: Node descriptor BGP-LS ID = %08X", peer_addr.c_str(), info.bgp_ls_id);
+            //SELF_DEBUG("%s: bgp-ls: Node descriptor BGP-LS ID = %08X", peer_addr.c_str(), info.bgp_ls_id);
             break;
         }
 
         case NODE_DESCR_OSPF_AREA_ID:
         {
-            if (len != 4) {
-                //          LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor OSPF Area ID sub-tlv; too short",peer_addr.c_str());
-                data_read += len <= data_len ? len : data_len;
+            if (info.len != 4) {
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor OSPF Area ID sub-tlv; too short",peer_addr.c_str());
+                data_read += info.len <= data_len ? info.len : data_len;
                 break;
             }
 
@@ -117,21 +92,21 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
             inet_ntop(AF_INET, info.ospf_area_Id, ipv4_char, sizeof(ipv4_char));
             data_read += 4;
 
-            //          SELF_DEBUG("%s: bgp-ls: Node descriptor OSPF Area ID = %s", peer_addr.c_str(), ipv4_char);
+            //SELF_DEBUG("%s: bgp-ls: Node descriptor OSPF Area ID = %s", peer_addr.c_str(), ipv4_char);
             break;
         }
 
         case NODE_DESCR_IGP_ROUTER_ID:
         {
-            if (len > data_len or len > 8) {
-                //               LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor IGP Router ID sub-tlv; len (%d) is invalid",peer_addr.c_str(), len);
-                data_read += len;
+            if (info.len > data_len or info.len > 8) {
+                //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor IGP Router ID sub-tlv; len (%d) is invalid",peer_addr.c_str(), len);
+                data_read += info.len;
                 break;
             }
 
             bzero(info.igp_router_id, sizeof(info.igp_router_id));
-            memcpy(info.igp_router_id, data, len);
-            data_read += len;
+            memcpy(info.igp_router_id, data, info.len);
+            data_read += info.len;
 
             //          SELF_DEBUG("%s: bgp-ls: Node descriptor IGP Router ID %d = %d.%d.%d.%d (%02x%02x.%02x%02x.%02x%02x.%02x %02x)", peer_addr.c_str(), data_read,
 //                            info.igp_router_id[0], info.igp_router_id[1], info.igp_router_id[2], info.igp_router_id[3],
@@ -142,9 +117,9 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
 
         case NODE_DESCR_BGP_ROUTER_ID:
         {
-            if (len != 4) {
+            if (info.len != 4) {
                 //           LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor BGP Router ID sub-tlv; too short",peer_addr.c_str());
-                data_read += len <= data_len ? len : data_len;
+                data_read += info.len <= data_len ? info.len : data_len;
                 break;
             }
 
@@ -160,7 +135,7 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
 
         default:
             //       LOG_NOTICE("%s: bgp-ls: node descriptor sub-tlv %d not yet implemented, skipping.",peer_addr.c_str(), type);
-            data_read += len;
+            data_read += info.len;
             break;
     }
 
@@ -176,7 +151,7 @@ int libParseBGP_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
  * \return string representation for the protocol that matches the DB enum string value
  *          empty will be returned if invalid/unknown.
  */
-static std::string libParseBGP_mp_link_state_decode_nlri_protocol_id(uint8_t proto_id) {
+static std::string libparsebgp_mp_link_state_decode_nlri_protocol_id(uint8_t proto_id) {
     std::string value = "";
 
     switch (proto_id) {
@@ -224,19 +199,12 @@ static std::string libParseBGP_mp_link_state_decode_nlri_protocol_id(uint8_t pro
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-    obj_ls_node node_tbl;
-    bzero(&node_tbl, sizeof(node_tbl));
+static void libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *data, int data_len) {
 
     if (data_len < 4) {
         //LOG_WARN("%s: bgp-ls: Unable to parse node NLRI since it's too short (invalid)", peer_addr.c_str());
         return;
     }
-
-    node_tbl.id       = id;
-    snprintf(node_tbl.protocol, sizeof(node_tbl.protocol), "%s", libParseBGP_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
-
-    //SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, node_tbl.protocol);
 
     /*
      * Parse the local node descriptor sub-tlv
@@ -244,50 +212,34 @@ static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *p
     node_descriptor info;
     bzero(&info, sizeof(info));
 
-    uint16_t type;
-    uint16_t len;
-
-    memcpy(&type, data, 2);
-    SWAP_BYTES(&type);
-    memcpy(&len, data + 2, 2);
-    SWAP_BYTES(&len);
+    memcpy(&mp_reach_ls->nlri_ls.node_nlri.type, data, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.node_nlri.type);
+    memcpy(&mp_reach_ls->nlri_ls.node_nlri.len, data + 2, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.node_nlri.len);
     data_len -= 4;
     data += 4;
 
-    if (len > data_len) {
+    if (mp_reach_ls->nlri_ls.node_nlri.len > data_len) {
         //LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
         return;
     }
 
-    if (type != NODE_DESCR_LOCAL_DESCR) {
+    if (mp_reach_ls->nlri_ls.node_nlri.type != NODE_DESCR_LOCAL_DESCR) {
         //LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not local descriptor",peer_addr.c_str(), type);
         return;
     }
 
     // Parse the local descriptor sub-tlv's
     int data_read;
-    while (len > 0) {
-        data_read = libParseBGP_mp_link_state_parse_descr_local_remote_node(data, len, info);
-        len -= data_read;
+    while (mp_reach_ls->nlri_ls.node_nlri.len > 0) {
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, mp_reach_ls->nlri_ls.node_nlri.len, info);
+        mp_reach_ls->nlri_ls.node_nlri.len -= data_read;
 
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
         data_len -= data_read;
-    }
-
-//        genNodeHashId(info);
-
-
-    // Update node table entry and add to parsed data list
-    node_tbl.is_ipv4 = true;
-    memcpy(node_tbl.hash_id, info.hash_bin, sizeof(node_tbl.hash_id));
-    node_tbl.asn = info.asn;
-    memcpy(node_tbl.ospf_area_Id, info.ospf_area_Id, sizeof(node_tbl.ospf_area_Id));
-    node_tbl.bgp_ls_id = info.bgp_ls_id;
-    memcpy(node_tbl.igp_router_id, info.igp_router_id, sizeof(node_tbl.igp_router_id));
-
-    // Save the parsed data
-    parse_data->ls_data->nodes.push_back(node_tbl);
+        mp_reach_ls->nlri_ls.node_nlri.local_nodes.push_back(info);
+    }// Save the parsed data
 }
 
 /**********************************************************************************//*
@@ -301,7 +253,7 @@ static void libParseBGP_parse_nlri_node(libparseBGP_mp_link_state_parsed_data *p
  *
  * \returns number of bytes read
  */
-int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &info) {
+int libparsebgp_parse_descr_link(u_char *data, int data_len, link_descriptor &info) {
     uint16_t        type;
     uint16_t        len;
     int             data_read = 0;
@@ -460,102 +412,81 @@ int libParseBGP_parse_descr_link(u_char *data, int data_len, link_descriptor &in
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id) {
-    obj_ls_link link_tbl;
-    bzero(&link_tbl, sizeof(link_tbl));
+static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, int data_len) {
 
     if (data_len < 4) {
         //         LOG_WARN("%s: bgp-ls: Unable to parse link NLRI since it's too short (invalid)", peer_addr.c_str());
         return;
     }
 
-    link_tbl.id       = id;
-    snprintf(link_tbl.protocol, sizeof(link_tbl.protocol), "%s", libParseBGP_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
+    //parsing local node descriptor
+    node_descriptor info;
 
-    //      SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, link_tbl.protocol);
+    memcpy(&mp_reach_ls->nlri_ls.link_nlri.type, data, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.link_nlri.type);
+    memcpy(&mp_reach_ls->nlri_ls.link_nlri.len, data + 2, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.link_nlri.len);
+    data_len -= 4;
+    data += 4;
 
-    /*
-     * Parse local and remote node descriptors (expect both)
-     */
-    uint16_t type;
-    uint16_t len;
-
-    for (char i = 0; i < 2; i++) {
-        node_descriptor info;
-        bzero(&info, sizeof(info));
-
-        memcpy(&type, data, 2);
-        SWAP_BYTES(&type);
-        memcpy(&len, data + 2, 2);
-        SWAP_BYTES(&len);
-        data_len -= 4;
-        data += 4;
-
-        if (len > data_len) {
-            //           LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
-            return;
-        }
-
-        // Parse the local descriptor sub-tlv's
-        int data_read;
-        while (len > 0) {
-            data_read = libParseBGP_mp_link_state_parse_descr_local_remote_node(data, len, info);
-            len -= data_read;
-
-            // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
-            data += data_read;
-            data_len -= data_read;
-        }
-
-        //     genNodeHashId(info);
-
-        switch (type) {
-            case NODE_DESCR_LOCAL_DESCR:
-                memcpy(link_tbl.local_node_hash_id, info.hash_bin, sizeof(link_tbl.local_node_hash_id));
-                memcpy(link_tbl.ospf_area_Id, info.ospf_area_Id, sizeof(link_tbl.ospf_area_Id));
-                link_tbl.bgp_ls_id = info.bgp_ls_id;
-                link_tbl.local_node_asn = info.asn;
-                memcpy(link_tbl.igp_router_id, info.igp_router_id, sizeof(link_tbl.igp_router_id));
-                link_tbl.local_bgp_router_id = info.bgp_router_id;
-                break;
-
-            case NODE_DESCR_REMOTE_DESCR:
-                memcpy(link_tbl.remote_node_hash_id, info.hash_bin, sizeof(link_tbl.remote_node_hash_id));
-                memcpy(link_tbl.remote_igp_router_id, info.igp_router_id, sizeof(link_tbl.remote_igp_router_id));
-                link_tbl.remote_node_asn = info.asn;
-                link_tbl.remote_bgp_router_id = info.bgp_router_id;
-                break;
-
-            default:
-                //                 LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not local descriptor",peer_addr.c_str(), type);
-                break;
-        }
+    if (mp_reach_ls->nlri_ls.link_nlri.len > data_len) {
+        //           LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
+        return;
     }
 
-    /*
-     * Remaining data is the link descriptor sub-tlv's
-     */
+    // Parse the local descriptor sub-tlv's
     int data_read;
-    link_descriptor info;
-    bzero(&info, sizeof(info));
-    while (data_len > 0) {
-        data_read = libParseBGP_parse_descr_link(data, data_len, info);
+    while (mp_reach_ls->nlri_ls.link_nlri.len > 0) {
+        bzero(&info, sizeof(info));
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, mp_reach_ls->nlri_ls.link_nlri.len, info);
+        mp_reach_ls->nlri_ls.link_nlri.len -= data_read;
 
+        mp_reach_ls->nlri_ls.link_nlri.local_nodes.push_back(info);
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
         data_len -= data_read;
     }
 
-    // Save link to parsed data
-    //      SELF_DEBUG("MT-ID = %u/%u", link_tbl.mt_id, info.mt_id);
-    link_tbl.is_ipv4             = info.is_ipv4;
-    link_tbl.mt_id              = info.mt_id;
-    link_tbl.local_link_id      = info.local_id;
-    link_tbl.remote_link_id     = info.remote_id;
-    memcpy(link_tbl.intf_addr, info.intf_addr, sizeof(link_tbl.intf_addr));
-    memcpy(link_tbl.nei_addr, info.nei_addr, sizeof(link_tbl.nei_addr));
+    //parsing remote node descriptor
+    bzero(&info, sizeof(info));
 
-    parse_data->ls_data->links.push_back(link_tbl);
+    memcpy(&mp_reach_ls->nlri_ls.link_nlri.type, data, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.link_nlri.type);
+    memcpy(&mp_reach_ls->nlri_ls.link_nlri.len, data + 2, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.link_nlri.len);
+    data_len -= 4;
+    data += 4;
+
+    if (mp_reach_ls->nlri_ls.link_nlri.len > data_len) {
+        //           LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
+        return;
+    }
+
+    // Parse the local descriptor sub-tlv's
+    while (mp_reach_ls->nlri_ls.link_nlri.len > 0) {
+        bzero(&info, sizeof(info));
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, mp_reach_ls->nlri_ls.link_nlri.len, info);
+        mp_reach_ls->nlri_ls.link_nlri.len -= data_read;
+        mp_reach_ls->nlri_ls.link_nlri.remote_nodes.push_back(info);
+        // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
+        data += data_read;
+        data_len -= data_read;
+    }
+
+
+
+    /*
+     * Remaining data is the link descriptor sub-tlv's
+     */
+    link_descriptor link_info;
+    while (data_len > 0) {
+        bzero(&info, sizeof(info));
+        data_read = libparsebgp_parse_descr_link(data, data_len, link_info);
+        mp_reach_ls->nlri_ls.link_nlri.link_desc.push_back(link_info);
+        // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
+        data += data_read;
+        data_len -= data_read;
+    }
 }
 
 /**********************************************************************************//*
@@ -569,7 +500,7 @@ static void libParseBGP_parse_nlri_link(libparseBGP_mp_link_state_parsed_data *p
  * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
  * \returns number of bytes read
  */
-int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4) {
+int libparsebgp_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4) {
     uint16_t type;
     uint16_t len;
     int data_read = 0;
@@ -746,87 +677,61 @@ int libParseBGP_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor
  * \param [in]   proto_id       NLRI protocol type id
  * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
  */
-static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, int data_len, uint64_t id, uint8_t proto_id, bool isIPv4) {
-    obj_ls_prefix prefix_tbl;
-    bzero(&prefix_tbl, sizeof(prefix_tbl));
+static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data, int data_len, bool isIPv4) {
 
     if (data_len < 4) {
         //       LOG_WARN("%s: bgp-ls: Unable to parse prefix NLRI since it's too short (invalid)", peer_addr.c_str());
         return;
     }
-
-    prefix_tbl.id       = id;
-    snprintf(prefix_tbl.protocol, sizeof(prefix_tbl.protocol), "%s", libParseBGP_mp_link_state_decode_nlri_protocol_id(proto_id).c_str());
-
-    //    SELF_DEBUG("%s: bgp-ls: ID = %x Protocol = %s", peer_addr.c_str(), id, prefix_tbl.protocol);
-
     /*
      * Parse the local node descriptor sub-tlv
      */
     node_descriptor local_node;
-    bzero(&local_node, sizeof(local_node));
 
-    uint16_t type;
-    uint16_t len;
 
-        memcpy(&type, data, 2);
-        SWAP_BYTES(&type);
-        memcpy(&len, data + 2, 2);
-        SWAP_BYTES(&len);
-        data_len -= 4;
-        data += 4;
+    memcpy(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.type, data, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.type);
+    memcpy(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len, data + 2, 2);
+    SWAP_BYTES(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len);
+    data_len -= 4;
+    data += 4;
 
-    if (len > data_len) {
+    if (mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len > data_len) {
         //        LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
         return;
     }
 
-    if (type != NODE_DESCR_LOCAL_DESCR) {
+    if (mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.type != NODE_DESCR_LOCAL_DESCR) {
         //        LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not local descriptor",peer_addr.c_str(), type);
         return;
     }
 
     // Parse the local descriptor sub-tlv's
     int data_read;
-    while (len > 0) {
-        data_read = libParseBGP_mp_link_state_parse_descr_local_remote_node(data, len, local_node);
-        len -= data_read;
+    while (mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len > 0) {
+        bzero(&local_node, sizeof(local_node));
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len, local_node);
+        mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len -= data_read;
 
+        mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes.push_back(local_node);
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
         data_len -= data_read;
     }
-
-    // Update the node hash
-//        genNodeHashId(local_node);
 
     /*
      * Remaining data is the link descriptor sub-tlv's
      */
     prefix_descriptor info;
-    bzero(&info, sizeof(info));
     while (data_len > 0) {
-        data_read = libParseBGP_parse_descr_prefix(data, data_len, info, isIPv4);
+        bzero(&info, sizeof(info));
+        data_read = libparsebgp_parse_descr_prefix(data, data_len, info, isIPv4);
 
+        mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc.push_back(info);
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
         data_len -= data_read;
     }
-
-    // Save prefix to parsed data
-    prefix_tbl.isIPv4       = isIPv4;
-    prefix_tbl.prefix_len   = info.prefix_len;
-    prefix_tbl.mt_id        = info.mt_id;
-
-    memcpy(prefix_tbl.ospf_area_Id, local_node.ospf_area_Id, sizeof(prefix_tbl.ospf_area_Id));
-    prefix_tbl.bgp_ls_id = local_node.bgp_ls_id;
-    memcpy(prefix_tbl.igp_router_id, local_node.igp_router_id, sizeof(prefix_tbl.igp_router_id));
-    memcpy(prefix_tbl.local_node_hash_id, local_node.hash_bin, sizeof(prefix_tbl.local_node_hash_id));
-    memcpy(prefix_tbl.prefix_bin, info.prefix, sizeof(prefix_tbl.prefix_bin));
-    memcpy(prefix_tbl.prefix_bcast_bin, info.prefix_bcast, sizeof(prefix_tbl.prefix_bcast_bin));
-    memcpy(prefix_tbl.ospf_route_type, info.ospf_route_type, sizeof(prefix_tbl.ospf_route_type));
-
-    parse_data->ls_data->prefixes.push_back(prefix_tbl);
 }
 /**********************************************************************************//*
  * Parses Link State NLRI data
@@ -836,30 +741,25 @@ static void libParseBGP_parse_nlri_prefix(libparseBGP_mp_link_state_parsed_data 
  * \param [in]   data           Pointer to the NLRI data
  * \param [in]   len            Length of the NLRI data
  */
-static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_parsed_data *parse_data, u_char *data, uint16_t len) {
-    uint16_t        nlri_type;
-    uint16_t        nlri_len;
+static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t len) {
     uint16_t        nlri_len_read = 0;
-
     // Process the NLRI data
     while (nlri_len_read < len) {
+        mp_reach_ls mp_nlri_ls;
+        /*
+         * Parse the NLRI TLV
+         */
+        memcpy(&mp_nlri_ls.nlri_type, data, 2);
+        data += 2;
+        SWAP_BYTES(&mp_nlri_ls.nlri_type);
 
-        //SELF_DEBUG("NLRI read=%d total = %d", nlri_len_read, len);
-
-            /*
-             * Parse the NLRI TLV
-             */
-            memcpy(&nlri_type, data, 2);
-            data += 2;
-            SWAP_BYTES(&nlri_type);
-
-            memcpy(&nlri_len, data, 2);
-            data += 2;
-            SWAP_BYTES(&nlri_len);
+        memcpy(&mp_nlri_ls.nlri_len, data, 2);
+        data += 2;
+        SWAP_BYTES(&mp_nlri_ls.nlri_len);
 
         nlri_len_read += 4;
 
-        if (nlri_len > len) {
+        if (mp_nlri_ls.nlri_len > len) {
 //                LOG_NOTICE("%s: bgp-ls: failed to parse link state NLRI; length is larger than available data",peer_addr.c_str());
             return;
         }
@@ -867,48 +767,41 @@ static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_par
         /*
          * Parse out the protocol and ID (present in each NLRI ypte
          */
-        uint8_t          proto_id;
-        uint64_t         id;
 
-            proto_id = *data;
-            memcpy(&id, data + 1, sizeof(id));
-            SWAP_BYTES(&id);
+        mp_nlri_ls.proto_id = *data;
+        memcpy(&mp_nlri_ls.id, data + 1, sizeof(mp_nlri_ls.id));
+        SWAP_BYTES(&mp_nlri_ls.id);
 
         // Update read NLRI attribute, current TLV length and data pointer
-        nlri_len_read += 9; nlri_len -= 9; data += 9;
+        nlri_len_read += 9; mp_nlri_ls.nlri_len -= 9; data += 9;
 
         /*
          * Decode based on bgp-ls NLRI type
          */
-        switch (nlri_type) {
+        switch (mp_nlri_ls.nlri_type) {
             case NLRI_TYPE_NODE:
-                //                  SELF_DEBUG("%s: bgp-ls: parsing NODE NLRI len=%d", peer_addr.c_str(), nlri_len);
-                libParseBGP_parse_nlri_node(parse_data, data, nlri_len, id, proto_id);
+                libparsebgp_parse_nlri_node(&mp_nlri_ls, data, mp_nlri_ls.nlri_len);
                 break;
 
             case NLRI_TYPE_LINK:
-                //                 SELF_DEBUG("%s: bgp-ls: parsing LINK NLRI", peer_addr.c_str());
-                libParseBGP_parse_nlri_link(parse_data, data, nlri_len, id, proto_id);
+                libparsebgp_parse_nlri_link(&mp_nlri_ls, data,mp_nlri_ls.nlri_len);
                 break;
 
             case NLRI_TYPE_IPV4_PREFIX:
-                //               SELF_DEBUG("%s: bgp-ls: parsing IPv4 PREFIX NLRI", peer_addr.c_str());
-                libParseBGP_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, true);
+                libparsebgp_parse_nlri_prefix(&mp_nlri_ls, data, mp_nlri_ls.nlri_len, true);
                 break;
 
             case NLRI_TYPE_IPV6_PREFIX:
-                //                SELF_DEBUG("%s: bgp-ls: parsing IPv6 PREFIX NLRI", peer_addr.c_str());
-                libParseBGP_parse_nlri_prefix(parse_data, data, nlri_len, id, proto_id, false);
+                libparsebgp_parse_nlri_prefix(&mp_nlri_ls, data, mp_nlri_ls.nlri_len, false);
                 break;
 
             default :
-                //                 LOG_INFO("%s: bgp-ls NLRI Type %d is not implemented yet, skipping for now",peer_addr.c_str(), nlri_type);
                 return;
         }
-
+        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls.push_back(mp_nlri_ls);
         // Move to next link state type
-        data += nlri_len;
-        nlri_len_read += nlri_len;
+        data += mp_nlri_ls.nlri_len;
+        nlri_len_read += mp_nlri_ls.nlri_len;
     }
 }
 /**
@@ -918,37 +811,22 @@ static void libParseBGP_parse_link_state_nlri_data(libparseBGP_mp_link_state_par
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_parsed_data *data, mp_reach_nlri &nlri) {
-    data->ls_data = &data->parsed_data->ls;
+void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data) {
 
-    // Process the next hop
-    // Next-hop is an IPv6 address - Change/set the next-hop attribute in parsed data to use this next-hop
-    u_char ip_raw[16];
-    char ip_char[40];
+    memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
-    if (nlri.nh_len == 4) {
-        memcpy(ip_raw, nlri.next_hop, nlri.nh_len);
-        inet_ntop(AF_INET, ip_raw, ip_char, sizeof(ip_char));
-    } else if (nlri.nh_len > 4) {
-        memcpy(ip_raw, nlri.next_hop, nlri.nh_len);
-        inet_ntop(AF_INET6, ip_raw, ip_char, sizeof(ip_char));
-    }
+    /*
+     * Decode based on SAFI
+     */
+    switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
+        case BGP_SAFI_BGPLS: // Unicast BGP-LS
+            libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, nlri_len);
+            break;
 
-    data->parsed_data->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
-
-        /*
-         * Decode based on SAFI
-         */
-        switch (nlri.safi) {
-            case BGP_SAFI_BGPLS: // Unicast BGP-LS
-                //SELF_DEBUG("REACH: bgp-ls: len=%d", nlri.nlri_len);
-                libParseBGP_parse_link_state_nlri_data(data, nlri.nlri_data, nlri.nlri_len);
-                break;
-
-        default :
-            //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
-            //        peer_addr.c_str(), nlri.afi, nlri.safi);
-            return;
+    default :
+        //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
+        //        peer_addr.c_str(), nlri.afi, nlri.safi);
+        return;
     }
 }
 
@@ -960,16 +838,16 @@ void libParseBGP_mp_link_state_parse_reach_link_state(libparseBGP_mp_link_state_
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_state_parsed_data *data,mp_unreach_nlri &nlri) {
-    data->ls_data = &data->parsed_data->ls_withdrawn;
+void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char *nlri_data, int len) {
+    //data->ls_data = &data->parsed_data->ls_withdrawn;
 
         /*
          * Decode based on SAFI
          */
-        switch (nlri.safi) {
+        switch (path_attrs->attr_value.mp_unreach_nlri_data.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
                 //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
-                libParseBGP_parse_link_state_nlri_data(data,nlri.nlri_data, nlri.nlri_len);
+                libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, len);
                 break;
 
         default :
@@ -978,28 +856,4 @@ void libParseBGP_mp_link_state_parse_unreach_link_state(libparseBGP_mp_link_stat
             return;
     }
 }
-/**********************************************************************************//*
- * Hash node descriptor info
- *
- * \details will produce a hash for the node descriptor.  Info hash_bin will be updated.
- *
- * \param [in/out]  info           Node descriptor information returned/updated
- * \param [out]  hash_bin       Node descriptor information returned/updated
- */
-/*
-void MPLinkState::genNodeHashId(node_descriptor &info) {
-    MD5 hash;
 
-    hash.update(info.igp_router_id, sizeof(info.igp_router_id));
-    hash.update((unsigned char *)&info.bgp_ls_id, sizeof(info.bgp_ls_id));
-    hash.update((unsigned char *)&info.asn, sizeof(info.asn));
-    hash.update(info.ospf_area_Id, sizeof(info.ospf_area_Id));
-    hash.finalize();
-
-    // Save the hash
-    unsigned char *hash_bin = hash.raw_digest();
-    memcpy(info.hash_bin, hash_bin, 16);
-    delete[] hash_bin;
-}*/
-
-//} /* namespace bgp_msg */

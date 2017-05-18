@@ -4,7 +4,7 @@ project(parse_lib)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-        include/parse_common.h
+        include/lib_parse_common.h
         include/mp_link_state_attr.h
         include/mp_link_state.h
         include/add_path_data_container.h
@@ -17,9 +17,9 @@ set(SOURCE_FILES
         include/open_msg.h
         include/parse_bgp.h
         include/update_msg.h
-        include/parse_bmp.h
         include/parse_utils.h
         include/parse_mrt.h
+        include/parse_bmp.h
         include/libParseBGP.h
         src/mp_link_state.cpp
         src/mp_link_state_attr.cpp
@@ -31,8 +31,8 @@ set(SOURCE_FILES
         src/notification_msg.cpp
         src/open_msg.cpp
         src/parse_bgp.cpp
-        src/update_msg.cpp
         src/parse_bmp.cpp
+        src/update_msg.cpp
         src/parse_utils.cpp
         src/parse_mrt.cpp
         )

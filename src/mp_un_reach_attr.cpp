@@ -11,78 +11,41 @@
 #include "../include/mp_link_state.h"
 #include "../include/evpn.h"
 
-
-#include <arpa/inet.h>
-
-//namespace bgp_msg {
-
 /**
- * Constructor for class
+ * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
  *
- * \details Handles BGP MP UnReach NLRI
+ * \details Will handle the SAFI and parsing of AFI IPv4 & IPv6
  *
- * \param [in]     logPtr                   Pointer to existing Logger for app logging
- * \param [in]     pperAddr                 Printed form of peer address used for logging
- * \param [in]     peer_info                Persistent Peer info pointer
- * \param [in]     enable_debug             Debug true to enable, false to disable
- */
-
-    libparseBGP_mp_link_state_parsed_data *link_state_parse_data;
-    void libParseBGP_mp_un_reach_attr_init(libParseBGP_mp_un_reach_attr_parse_data *parse_data, std::string peerAddr,
-                                           peer_info *peer_info) {
-        parse_data->peer_addr = peerAddr;
-        parse_data->peer_inf = peer_info;
-}
-
-/**
- * Parse the MP_UNREACH NLRI attribute data
- *
- * \details
- *      Will parse the MP_REACH_NLRI data passed.  Parsed data will be stored
- *      in parsed_data.
- *
- *      \see RFC4760 for format details.
- *
- * \param [in]   attr_len       Length of the attribute data
- * \param [in]   data           Pointer to the attribute data
+ * \param [in]   is_ipv4         True false to indicate if IPv4 or IPv6
+ * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_reach_attr_parse_data *parse_data, int attr_len, u_char *data, parsed_update_data &parsed_data, bool &hasEndOfRIBMarker) {
-    mp_unreach_nlri nlri;
-    /*
-     * Set the MP Unreach NLRI struct
-     */
-    // Read address family
-    memcpy(&nlri.afi, data, 2); data += 2; attr_len -= 2;
-    SWAP_BYTES(&nlri.afi);                     // change to host order
-
-    nlri.safi = *data++; attr_len--;                // Set the SAFI - 1 octet
-    nlri.nlri_data = data;                          // Set pointer position for nlri data
-    nlri.nlri_len = attr_len;                       // Remaining attribute length is for NLRI data
+static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_unreach_nlri &nlri, u_char *data, int len) {
 
     /*
-     * Make sure the parsing doesn't exceed buffer
+     * Decode based on SAFI
      */
-    if (attr_len < 0) {
-        //LOG_NOTICE("%s: MP_UNREACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
-        return;
-    }
+    switch (nlri.safi) {
+        case BGP_SAFI_UNICAST: // Unicast IP address prefix
+            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes);
+            break;
 
-    //SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), nlri.afi, nlri.safi);
+        case BGP_SAFI_NLRI_LABEL: // Labeled unicast
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
+            break;
 
-    if (nlri.nlri_len == 0) {
-        hasEndOfRIBMarker = true;
-        //LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
+        case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
+            //TODO: Is this okay?
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
 
-    } else {
-        /*
-         * NLRI data depends on the AFI & SAFI
-         *  Parse data based on AFI + SAFI
-         */
-        libParseBGP_mp_un_reach_attr_parse_afi(parse_data, nlri, parsed_data);
+            break;
+
+        default :
+            //LOG_INFO("%s: MP_UNREACH AFI=ipv4/ipv6 (%d) SAFI=%d is not implemented yet, skipping for now",
+            //         peer_addr.c_str(), is_ipv4, nlri.safi);
+            return;
     }
 }
-
 
 /**
  * MP UnReach NLRI parse based on AFI
@@ -93,33 +56,35 @@ void libParseBGP_mp_un_reach_attr_parse_un_reach_nlri_attr(libParseBGP_mp_un_rea
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_data *parse_data,mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
+static void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_char *data, int len) {
 
-    switch (nlri.afi) {
+    switch (path_attrs->attr_value.mp_unreach_nlri_data.afi) {
         case BGP_AFI_IPV6 :  // IPv6
-            libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, false, nlri, parsed_data);
+            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(false, path_attrs->attr_value.mp_unreach_nlri_data, data, len);
             break;
 
         case BGP_AFI_IPV4 : // IPv4
-            libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(parse_data, true, nlri, parsed_data);
+            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(true, path_attrs->attr_value.mp_unreach_nlri_data, data, len);
             break;
 
         case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
-            libParseBGP_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
-            libParseBGP_mp_link_state_parse_unreach_link_state(link_state_parse_data,nlri);
+//            libparsebgp_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
+            //TODO: Currently mp_ls_data in update_msg, figure out where to put it
+            libparsebgp_mp_link_state_parse_unreach_link_state(path_attrs, data, len);
             break;
         }
 
         case BGP_AFI_L2VPN :
         {
             // parse by safi
-            switch (nlri.safi) {
+            switch (path_attrs->attr_value.mp_unreach_nlri_data.safi) {
                 case BGP_SAFI_EVPN : // https://tools.ietf.org/html/rfc7432
                 {
-                    libParseBGP_evpn_data *evpn_data;
-                    libParseBGP_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
-                    libParseBGP_evpn_parse_nlri_data(evpn_data,nlri.nlri_data, nlri.nlri_len);
+//                    libparsebgp_evpn_data *evpn_data;
+//                    libparsebgp_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
+                    //TODO: Same as above
+                    libparsebgp_evpn_parse_nlri_data(path_attrs, data, len, true);
                     break;
                 }
 
@@ -137,42 +102,51 @@ void libParseBGP_mp_un_reach_attr_parse_afi(libParseBGP_mp_un_reach_attr_parse_d
 }
 
 /**
- * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
+ * Parse the MP_UNREACH NLRI attribute data
  *
- * \details Will handle the SAFI and parsing of AFI IPv4 & IPv6
+ * \details
+ *      Will parse the MP_REACH_NLRI data passed.  Parsed data will be stored
+ *      in parsed_data.
  *
- * \param [in]   isIPv4         True false to indicate if IPv4 or IPv6
- * \param [in]   nlri           Reference to parsed Unreach NLRI struct
+ *      \see RFC4760 for format details.
+ *
+ * \param [in]   attr_len       Length of the attribute data
+ * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libParseBGP_mp_un_reach_attr_parse_afi_ipv4_ipv6(libParseBGP_mp_un_reach_attr_parse_data *parse_data,bool isIPv4, mp_unreach_nlri &nlri, parsed_update_data &parsed_data) {
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data, bool &has_end_of_rib_marker) {
+    //mp_unreach_nlri nlri;
+    /*
+     * Set the MP Unreach NLRI struct
+     */
+    // Read address family
+    memcpy(&path_attrs->attr_value.mp_unreach_nlri_data.afi, data, 2); data += 2; attr_len -= 2;
+    SWAP_BYTES(&path_attrs->attr_value.mp_unreach_nlri_data.afi);                     // change to host order
+
+    path_attrs->attr_value.mp_unreach_nlri_data.safi = *data++; attr_len--;                // Set the SAFI - 1 octet
+//    mp_unreach_data->nlri_data = data;                          // Set pointer position for nlri data
+//    mp_unreach_data->nlri_len = attr_len;                       // Remaining attribute length is for NLRI data
 
     /*
-     * Decode based on SAFI
+     * Make sure the parsing doesn't exceed buffer
      */
-    switch (nlri.safi) {
-        case BGP_SAFI_UNICAST: // Unicast IP address prefix
+    if (attr_len < 0) {
+        //LOG_NOTICE("%s: MP_UNREACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
+        return;
+    }
 
-            // Data is an IP address - parse the address and save it
-            libParseBGP_mp_reach_attr_parse_nlri_data_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
-                                                parsed_data.withdrawn);
-            break;
+    //SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), mp_unreach_data->afi, mp_unreach_data->safi);
 
-        case BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
-                                                     parsed_data.withdrawn);
-            break;
+    if (attr_len == 0) {
+        has_end_of_rib_marker = true;
+        //LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
 
-        case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            libParseBGP_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(isIPv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
-                                                     parsed_data.vpn_withdrawn);
-
-            break;
-
-        default :
-            //LOG_INFO("%s: MP_UNREACH AFI=ipv4/ipv6 (%d) SAFI=%d is not implemented yet, skipping for now",
-            //         peer_addr.c_str(), isIPv4, nlri.safi);
-            return;
+    } else {
+        /*
+         * NLRI data depends on the AFI & SAFI
+         *  Parse data based on AFI + SAFI
+         */
+        libparsebgp_mp_un_reach_attr_parse_afi(path_attrs, data, attr_len);
     }
 }
 
