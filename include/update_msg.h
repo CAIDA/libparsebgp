@@ -12,7 +12,6 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-//#include "mp_link_state.h"
 #include <string>
 #include <list>
 #include <array>
@@ -190,12 +189,15 @@ typedef struct as_path_segment {
 struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
-    list<update_prefix_tuple> wdrawn_routes_nlri;   ///< Withdrawn routes
+    struct withdrawn_routes_nlri {
+        list<update_prefix_tuple> wdrawn_routes;   ///< Withdrawn routes
+        list<update_prefix_label_tuple> wdrawn_routes_label;
+    }withdrawn_routes_nlri;
 };
 
 /**
-    * Node (local and remote) common fields
-    */
+* Node (local and remote) common fields
+*/
 struct node_descriptor {
     uint16_t    type;
     uint16_t    len;
@@ -218,8 +220,8 @@ struct link_descriptor {
 
 
 /**
-     * Node (local and remote) common fields
-     */
+ * Node (local and remote) common fields
+ */
 struct prefix_descriptor {
     char        ospf_route_type[32];                ///< OSPF Route type in string form for DB enum
     uint32_t    mt_id;                              ///< Multi-Topology ID
@@ -260,14 +262,15 @@ struct mp_reach_ls {
 
 
 struct mp_reach_nlri {
-    uint16_t afi;                 ///< Address Family Identifier
+    uint16_t afi;                ///< Address Family Identifier
     uint8_t safi;                ///< Subsequent Address Family Identifier
     uint8_t nh_len;              ///< Length of next hop
-    unsigned char next_hop[16];           ///< Next hop address - Pointer to data (normally does not require freeing)
-    uint8_t reserved;           ///< Reserved
+    unsigned char next_hop[16];  ///< Next hop address - Pointer to data (normally does not require freeing)
+    uint8_t reserved;            ///< Reserved
     struct nlri_info {
-        list <update_prefix_tuple> nlri_info;   ///< Withdrawn routes
-        list <mp_reach_ls>         mp_rch_ls;
+        list <update_prefix_tuple>       nlri_info;               ///< Withdrawn routes
+        list <update_prefix_label_tuple> nlri_label_info;
+        list <mp_reach_ls>               mp_rch_ls;
     }nlri_info;
 };
 
@@ -350,7 +353,7 @@ struct libparsebgp_update_msg_data {
   *
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
- int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
+ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
                                                 bool &has_end_of_rib_marker);
 
 /**

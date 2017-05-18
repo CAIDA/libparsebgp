@@ -132,6 +132,12 @@ struct update_prefix_tuple {
     uint8_t len;
     std::string prefix;
 };
+
+struct update_prefix_label_tuple {
+    uint8_t len;
+    std::string label;
+    std::string prefix;
+};
     /**
     * Struct for Route Distinguisher
     */

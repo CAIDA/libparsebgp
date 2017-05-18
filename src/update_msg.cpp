@@ -13,7 +13,7 @@
 #include "../include/mp_reach_attr.h"
 #include "../include/mp_un_reach_attr.h"
 #include "../include/mp_link_state_attr.h"
-
+#include "../include/parse_utils.h"
 
 /**
  * Parses NLRI info (IPv4) from the BGP message
@@ -109,15 +109,13 @@ static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
     int      read_size       = 0;
     u_char      *bufPtr         = data;
 
-    //SELF_DEBUG("%s: rtr=%s: Parsing update message of size %d", peer_addr.c_str(), router_addr.c_str(), size);
-
     if (size < 2) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
-        return 0;
+        return INCOMPLETE_MSG;
     }
 
     // Get the withdrawn length
@@ -129,7 +127,7 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
     // Set the withdrawn data pointer
     if ((size - read_size) < update_msg->wdrawn_route_len) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse withdrawn data", peer_addr.c_str(), router_addr.c_str());
-        return 0;
+        return INCOMPLETE_MSG;
     }
 
     u_char *withdrawn_ptr, *attr_ptr, *nlri_ptr;
@@ -147,7 +145,7 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
     // Set the attributes data pointer
     if ((size - read_size) < update_msg->total_path_attr_len) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse attr data", peer_addr.c_str(), router_addr.c_str());
-        return 0;
+        return INCOMPLETE_MSG;
     }
     attr_ptr = bufPtr;
     bufPtr += update_msg->total_path_attr_len; read_size += update_msg->total_path_attr_len;
@@ -167,7 +165,6 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
         /* ---------------------------------------------------------
          * Parse the withdrawn prefixes
          */
-        //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 withdrawn data", peer_addr.c_str(), router_addr.c_str());
         if (update_msg->wdrawn_route_len > 0)
             libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len, update_msg->wdrawn_routes);
 
@@ -182,7 +179,6 @@ int libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_
         /* ---------------------------------------------------------
          * Parse the NLRI data
          */
-        //SELF_DEBUG("%s: rtr=%s: Getting the IPv4 NLRI data, size = %d", peer_addr.c_str(), router_addr.c_str(), (size - read_size));
         if ((size - read_size) > 0) {
             libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri);
             read_size = size;
@@ -374,7 +370,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
     decodeStr.append(ipv4_char);
 
     //attrs[ATTR_TYPE_AGGEGATOR] = decodeStr;
-         path_attrs->attr_value.aggregator = decodeStr;
+    path_attrs->attr_value.aggregator = decodeStr;
 }
 
 /**

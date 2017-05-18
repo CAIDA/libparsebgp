@@ -10,9 +10,6 @@
 #include "../include/mp_un_reach_attr.h"
 #include "../include/mp_link_state.h"
 #include "../include/evpn.h"
-#include "../include/update_msg.h"
-
-//namespace bgp_msg {
 
 /**
  * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
@@ -30,21 +27,16 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_un
      */
     switch (nlri.safi) {
         case BGP_SAFI_UNICAST: // Unicast IP address prefix
-
-            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes_nlri);
+            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes);
             break;
 
         case BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            //libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
-            //                                         parsed_data.withdrawn);
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes_nlri);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
             break;
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
             //TODO: Is this okay?
-            //libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri.nlri_data, nlri.nlri_len, parse_data->peer_inf,
-            //                                         parsed_data.vpn_withdrawn);
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.wdrawn_routes_nlri);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
 
             break;
 

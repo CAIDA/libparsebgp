@@ -63,22 +63,31 @@ struct cap_add_path_data {
   uint8_t        send_recieve;
 } __attribute__ ((__packed__));
 
+/**
+ * Open message capability value
+ */
 union capability_value {
   uint32_t asn;
   cap_add_path_data add_path_data;
   cap_mpbgp_data mpbgp_data;
 };
 
+/**
+ * Open message capabilities optional parameters
+ */
 struct open_capabilities {
-  uint8_t cap_code;
-  uint8_t cap_len;
-  capability_value cap_values;
+  uint8_t cap_code;             ///< Capability code, 1 octect
+  uint8_t cap_len;              ///< Capability length, 1 octet
+  capability_value cap_values;  ///< Capability values
 };
 
+/**
+ * Open message optional parameters
+ */
 struct open_param {
-  uint8_t param_type;
-  uint8_t param_len;
-  std::list<open_capabilities> param_values;
+  uint8_t param_type;                           ///< Parameter type, 1 octet
+  uint8_t param_len;                            ///< Parameter length, 1 octet
+  std::list<open_capabilities> param_values;    ///< Parameter values
 };
 
 typedef struct libparsebgp_open_msg_data{
@@ -87,7 +96,7 @@ typedef struct libparsebgp_open_msg_data{
   uint16_t          hold_time;           ///< 2 byte hold time - can be zero or >= 3 seconds
   unsigned char     bgp_id[4];           ///< 4 byte bgp id of sender - router_id
   uint8_t           opt_param_len;       ///< optional parameter length - 0 means no params
-  std::list<open_param>  opt_param;      ///< optional parameter
+  std::list<open_param>  opt_param;      ///< optional parameters
 }libparsebgp_open_msg_data;
 
 /**
@@ -105,7 +114,7 @@ typedef struct libparsebgp_open_msg_data{
 * \param [out]  bgp_id       Reference to string for bgp ID in printed form
 * \param [out]  capabilities Reference to the capabilities list<string> (decoded values)
 *
-* \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
+* \return negative values indicate error, otherwise a positive value indicating the number of bytes read
 */
 ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
 

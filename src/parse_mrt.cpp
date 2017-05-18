@@ -107,7 +107,7 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
             break;
         }
         default: {
-            return ABNORMAL_MSG;
+            return INVALID_MSG;
             //throw "Subtype for BGP4MP not supported";
         }
     }
@@ -181,7 +181,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
             break;
         }
         default: {
-            return ABNORMAL_MSG; //throw "Address family is unexpected as per rfc6396";
+            return INVALID_MSG; //throw "Address family is unexpected as per rfc6396";
         }
     }
     if (extract_from_buffer(buffer, buf_len, &table_dump_msg->prefix_len, 1) != 1)
@@ -207,7 +207,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
             break;
         }
         default: {
-            return ABNORMAL_MSG; //throw "Address family is unexpected as per rfc6396";
+            return INVALID_MSG; //throw "Address family is unexpected as per rfc6396";
         }
     }
 
@@ -285,7 +285,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
                 break;
             }
             default: {
-                return ABNORMAL_MSG; //throw "Address family is unexpected as per rfc6396";
+                return INVALID_MSG; //throw "Address family is unexpected as per rfc6396";
             }
         }
         if ( extract_from_buffer(buffer, buf_len, &p_entry->peer_as, as_num) != as_num)
@@ -538,7 +538,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
             }
             default: {
                 //throw "MRT type is unexpected as per rfc6396";
-                return ABNORMAL_MSG;
+                return INVALID_MSG;
             }
         }
 

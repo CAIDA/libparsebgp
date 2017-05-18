@@ -13,7 +13,7 @@ enum parse_msg_error {
     LARGER_MSG_LEN      = -2,        ///< Message length is larger than the maximum possible message length
     CORRUPT_MSG         = -3,        ///< Message does not follow the formats specified in RFCs
     ERR_READING_MSG     = -4,        ///< Error in reading from buffer
-    ABNORMAL_MSG        = -5,        ///< Part of message is different from the expected values
+    INVALID_MSG         = -5,        ///< Part of message is different from the expected values
     NOT_YET_IMPLEMENTED = -6         ///< A feature not yet implemented
     //TODO : More error types to come
 };
