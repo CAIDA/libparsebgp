@@ -164,30 +164,72 @@ struct vpn_tuple {
 };
 
 /**
+ * Struct for route distinguisher
+ */
+struct route_distinguisher {
+    uint8_t        rd_type;
+    std::string    rd_administrator_subfield;
+    std::string    rd_assigned_number;
+};
+
+/**
+ * Struct for ethernet Auto-discovery route
+ */
+struct ethernet_ad_route {
+    route_distinguisher rd;
+    std::string         ethernet_segment_identifier;
+    std::string         ethernet_tag_id_hex;
+    int                 mpls_label;
+};
+
+/**
+ * Struct for MAC/IP Advertisement Route
+ */
+struct mac_ip_advertisement_route {
+    route_distinguisher rd;
+    std::string         ethernet_segment_identifier;
+    std::string         ethernet_tag_id_hex;
+    uint8_t             mac_addr_len;
+    std::string         mac_addr;
+    uint8_t             ip_addr_len;
+    std::string         ip_addr;
+    int                 mpls_label_1;
+    int                 mpls_label_2;
+};
+
+/**
+ * Struct for Inclusive Multicast Ethernet Tag Route
+ */
+struct inclusive_multicast_ethernet_tag_route {
+    route_distinguisher rd;
+    std::string         ethernet_segment_identifier;
+    std::string         ethernet_tag_id_hex;
+    uint8_t             ip_addr_len;
+    std::string         originating_router_ip;
+};
+
+/**
+ * Struct for Ethernet Segment Route
+ */
+struct ethernet_segment_route {
+    route_distinguisher rd;
+    std::string         ethernet_segment_identifier;
+    uint8_t             ip_addr_len;
+    std::string         originating_router_ip;
+};
+
+/**
 * Struct is used for evpn
 */
 struct evpn_tuple {
-    prefix_type   type;                 ///< Prefix type - RIB type
-    unsigned char len;                  ///< Length of prefix in bits
-    std::string   prefix;               ///< Printed form of the IP address
-    uint8_t       prefix_bin[16];       ///< Prefix in binary form
-    uint32_t      path_id;              ///< Path ID (add path draft-ietf-idr-add-paths-15)
-    bool          is_ipv4;               ///< True if IPv4, false if IPv6
-
-    std::string   labels;               ///< Labels in the format of label, label, ...
-    std::string    rd_administrator_subfield;
-    std::string    rd_assigned_number;
-    uint8_t        rd_type;
-    std::string     ethernet_segment_identifier;
-    std::string     ethernet_tag_id_hex;
-    uint8_t         mac_len;
-    std::string     mac;
-    uint8_t         ip_len;
-    std::string     ip;
-    int             mpls_label_1;
-    int             mpls_label_2;
-    uint8_t         originating_router_ip_len;
-    std::string     originating_router_ip;
+    uint8_t route_type;
+    uint8_t length;
+    struct route_specific {
+        ethernet_ad_route                       eth_ad_route;
+        mac_ip_advertisement_route              mac_ip_adv_route;
+        inclusive_multicast_ethernet_tag_route  incl_multicast_eth_tag_route;
+        ethernet_segment_route                  eth_segment_route;
+    }route_type_specific;
 };
 
 /**
