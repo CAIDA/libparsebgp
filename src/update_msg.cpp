@@ -18,13 +18,13 @@
 /**
  * Parses NLRI info (IPv4) from the BGP message
  *
- * \details
+ * @details
  *      Will get the NLRI and Withdrawn prefix entries from the data buffer.  As per RFC,
  *      this is only for v4.  V6/mpls is via mpbgp attributes (RFC4760)
  *
- * \param [in]   data       Pointer to the start of the prefixes to be parsed
- * \param [in]   len        Length of the data in bytes to be read
- * \param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
+ * @param [in]   data       Pointer to the start of the prefixes to be parsed
+ * @param [in]   len        Length of the data in bytes to be read
+ * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
 static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes) {
     u_char       ipv4_raw[4];
@@ -134,13 +134,10 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
     withdrawn_ptr = bufPtr;
     bufPtr += update_msg->wdrawn_route_len; read_size += update_msg->wdrawn_route_len;
 
-    //SELF_DEBUG("%s: rtr=%s: Withdrawn len = %hu", peer_addr.c_str(), router_addr.c_str(), update_msg->wdrawn_route_len );
-
     // Get the attributes length
     memcpy(&update_msg->total_path_attr_len, bufPtr, sizeof(update_msg->total_path_attr_len));
     SWAP_BYTES(&update_msg->total_path_attr_len);
     bufPtr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len);
-    //SELF_DEBUG("%s: rtr=%s: Attribute len = %hu", peer_addr.c_str(), router_addr.c_str(), update_msg->total_path_attr_len);
 
     // Set the attributes data pointer
     if ((size - read_size) < update_msg->total_path_attr_len) {

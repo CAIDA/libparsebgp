@@ -35,8 +35,6 @@ int read_file(ifstream &fin, u_char *array2, int position, int read_size) {
 int main() {
     libparsebgp_parse_msg parse_msg;
 
-
-
     u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x02, 0x00, 0x00, 0x00, 0xcd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                      0x05, 0x00, 0x14, 0x58, 0xb5, 0xe3, 0x61, 0x00, 0x27, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02,
                      0x02, 0x00, 0x00, 0x85, 0xb0, 0x00, 0x00, 0x0d, 0xdd, 0x40, 0x03, 0x04, 0x5e, 0x9c, 0xfc, 0x12, 0x80, 0x04,
@@ -52,10 +50,11 @@ int main() {
                      0x1f};
 
     uint32_t size = 217;
-    parse_msg=libparsebgp_parse_msg_common_wrapper(temp, size, 1);
+    ssize_t read_size;
+    read_size=libparsebgp_parse_msg_common_wrapper(parse_msg, temp, size, 1);
     cout << "Message Parsed Successfully"<<endl;
 
-    cout<<parse_msg.read_size<<"\n" << int(parse_msg.parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver) << "\n"<<parse_msg.parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.len<<endl;
+    cout<<read_size<<"\n" << int(parse_msg.parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver) << "\n"<<parse_msg.parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.len<<endl;
     cout<<int(parse_msg.parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.type)<<endl;
     return 1;
 }

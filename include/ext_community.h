@@ -15,18 +15,7 @@
 #include <list>
 #include <map>
 #include <string>
-//#include "update_msg.h"
 
-//namespace bgp_msg {
-
-/**
- * \class   ExtCommunity
- *
- * \brief   BGP attribute extended community parser
- * \details This class parses extended community attributes.
- *          It can be extended to create attributes messages.
- *          See http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
- */
  /**
  * Defines the BGP Extended communities Types
  *      http://www.iana.org/assignments/bgp-extended-communities/bgp-extended-communities.xhtml
@@ -140,13 +129,12 @@ enum ext_comm_subtype_generic {
 /**
  * Parse the extended communities path attribute (8 byte as per RFC4360)
  *
- * \details
+ * @details
  *     Will parse the EXTENDED COMMUNITIES data passed. Parsed data will be stored
  *     in parsed_data.
  *
- * \param [in]   attr_len       Length of the attribute data
- * \param [in]   data           Pointer to the attribute data
- * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+ * @param [in]   data           Pointer to the attribute data
+ * @param [in]   path_attrs     Reference to update_path_attrs struct; will be updated with all parsed data
  *
  */
 void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char *data);
@@ -154,17 +142,14 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
 /**
  * Parse the extended communities path attribute (20 byte as per RFC5701)
  *
- * \details
+ * @details
  *     Will parse the EXTENDED COMMUNITIES data passed. Parsed data will be stored
  *     in parsed_data.
  *
- * \param [in]   attr_len       Length of the attribute data
- * \param [in]   data           Pointer to the attribute data
- * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+ * @param [in]   data           Pointer to the attribute data
+ * @param [in]   path_attrs     Reference to update_path_attrs struct; will be updated with all parsed data
  *
  */
 void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data);
-
-//} /* namespace bgp_msg */
 
 #endif /* __EXTCOMMUNITY_H__ */

@@ -93,18 +93,22 @@ enum ospf_route_types {
 /**
  * MP Reach Link State NLRI parse
  *
- * \details Will handle parsing the link state NLRI
+ * @details Will handle parsing the link state NLRI
  *
- * \param [in]   nlri           Reference to parsed NLRI struct
+ * @param [in]  path_attrs          Reference to update_path_attrs struct
+ * @param [in]  nlri_len            Length of nlri_data
+ * @param [in]  next_hop            Buffer containing next_hop data, to be parsed
+ * @param [in]  nlri_data           Buffer containing nlri_data to be parsed
  */
-void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data);
+ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data);
 
 /**
  * MP UnReach Link State NLRI parse
  *
- * \details Will handle parsing the unreach link state NLRI
- *
- * \param [in]   nlri           Reference to parsed NLRI struct
+ * @details Will handle parsing the unreach link state NLRI
+ * @param path_attrs     Reference to update_path_attrs struct
+ * @param nlri_data      Buffer containing nlri_data to be parsed
+ * @param len            Length of nlri_data
  */
 void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char *nlri_data, int len);
 

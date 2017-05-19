@@ -226,7 +226,7 @@ void libparsebgp_evpn_parse_route_distinguisher(u_char *data_pointer, uint8_t *r
  * \param [in]   data_len               Length of the data in bytes to be read
  *
  */
-void libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t data_len, bool is_unreach) {
+ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t data_len, bool is_unreach) {
     u_char      *data_pointer = data;
     u_char      ip_binary[16];
     int         addr_bytes;

@@ -8,6 +8,7 @@
  */
 #include <arpa/inet.h>
 #include "../include/mp_link_state.h"
+#include "../include/parse_utils.h"
 
 /**********************************************************************************//*
  * Parse a Local or Remote Descriptor sub-tlv's
@@ -199,11 +200,11 @@ static std::string libparsebgp_mp_link_state_decode_nlri_protocol_id(uint8_t pro
  * \param [in]   id             NLRI/type identifier
  * \param [in]   proto_id       NLRI protocol type id
  */
-static void libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *data, int data_len) {
+static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *data, int data_len) {
 
     if (data_len < 4) {
         //LOG_WARN("%s: bgp-ls: Unable to parse node NLRI since it's too short (invalid)", peer_addr.c_str());
-        return;
+        return INCOMPLETE_MSG;
     }
 
     /*
@@ -221,25 +222,26 @@ static void libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *data, 
 
     if (mp_reach_ls->nlri_ls.node_nlri.len > data_len) {
         //LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
-        return;
+        return INCOMPLETE_MSG;
     }
 
     if (mp_reach_ls->nlri_ls.node_nlri.type != NODE_DESCR_LOCAL_DESCR) {
         //LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not local descriptor",peer_addr.c_str(), type);
-        return;
+        return INVALID_MSG;
     }
 
     // Parse the local descriptor sub-tlv's
-    int data_read;
-    while (mp_reach_ls->nlri_ls.node_nlri.len > 0) {
-        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, mp_reach_ls->nlri_ls.node_nlri.len, info);
-        mp_reach_ls->nlri_ls.node_nlri.len -= data_read;
+    int data_read, len = mp_reach_ls->nlri_ls.node_nlri.len;
+    while (len > 0) {
+        data_read = libparsebgp_mp_link_state_parse_descr_local_remote_node(data, len, info);
+        len -= data_read;
 
         // Update the nlri data pointer and remaining length after processing the local descriptor sub-tlv
         data += data_read;
         data_len -= data_read;
         mp_reach_ls->nlri_ls.node_nlri.local_nodes.push_back(info);
     }// Save the parsed data
+    return mp_reach_ls->nlri_ls.node_nlri.len;
 }
 
 /**********************************************************************************//*
@@ -741,7 +743,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
  * \param [in]   data           Pointer to the NLRI data
  * \param [in]   len            Length of the NLRI data
  */
-static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t len) {
+static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t len) {
     uint16_t        nlri_len_read = 0;
     // Process the NLRI data
     while (nlri_len_read < len) {
@@ -761,7 +763,7 @@ static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs
 
         if (mp_nlri_ls.nlri_len > len) {
 //                LOG_NOTICE("%s: bgp-ls: failed to parse link state NLRI; length is larger than available data",peer_addr.c_str());
-            return;
+            return INCOMPLETE_MSG;
         }
 
         /*
@@ -796,13 +798,14 @@ static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs
                 break;
 
             default :
-                return;
+                return INVALID_MSG;
         }
         path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls.push_back(mp_nlri_ls);
         // Move to next link state type
         data += mp_nlri_ls.nlri_len;
         nlri_len_read += mp_nlri_ls.nlri_len;
     }
+    return nlri_len_read;
 }
 /**
  * MP Reach Link State NLRI parse
@@ -811,7 +814,7 @@ static void libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs
  *
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
-void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data) {
+ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data) {
 
     memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
@@ -826,7 +829,7 @@ void libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_at
     default :
         //LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet, skipping for now",
         //        peer_addr.c_str(), nlri.afi, nlri.safi);
-        return;
+        return NOT_YET_IMPLEMENTED;
     }
 }
 
