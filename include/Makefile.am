@@ -4,9 +4,7 @@
 include_HEADERS = libParseBGP.h \
 		parse_bgp.h 	\
 		parse_bmp.h	\
-		parse_mrt.h	\
-		bgp_common.h	\
-		update_msg.h
+		parse_mrt.h	
 
 noinst_HEADERS = add_path_data_container.h 	\
 		evpn.h				\
@@ -17,7 +15,9 @@ noinst_HEADERS = add_path_data_container.h 	\
 		mp_un_reach_attr.h		\
 		notification_msg.h		\
 		open_msg.h			\
-		parse_common.h			\
-		parse_utils.h
+		parse_utils.h			\
+		bgp_common.h			\
+		update_msg.h			\
+		lib_parse_common.h
 
 CLEANFILES = *~

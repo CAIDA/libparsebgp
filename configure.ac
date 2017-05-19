@@ -31,7 +31,8 @@ AC_PROG_CXX
 
 # Add C++11 support
 # TODO: remove this once we have ported to C
-AX_CXX_COMPILE_STDCXX_11
+CXXFLAGS="-std=c++11"
+#AX_CXX_COMPILE_STDCXX_11
 
 # TODO: add checks for functions/headers that we need (e.g., assert)
 
