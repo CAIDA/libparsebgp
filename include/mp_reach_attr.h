@@ -15,27 +15,6 @@
 #include "update_msg.h"
 
 /**
- * \class   MPReachAttr
- *
- * \brief   BGP attribute MP_REACH parser
- * \details This class parses MP_REACH attributes.
- *          It can be extended to create attributes messages.
- */
-/**
- * struct defines the MP_REACH_NLRI (RFC4760 Section 3)
- */
-/*struct mp_reach_nlri {
-    uint16_t       afi;                 ///< Address Family Identifier
-    uint8_t        safi;                ///< Subsequent Address Family Identifier
-    uint8_t        nh_len;              ///< Length of next hop
-    unsigned char  *next_hop;           ///< Next hop - Pointer to data (normally does not require freeing)
-    uint8_t        reserved;            ///< Reserved
-
-    unsigned char  *nlri_data;          ///< NLRI data - Pointer to data (normally does not require freeing)
-    uint16_t       nlri_len;            ///< Not in RFC header; length of the NLRI data
-};*/
-
-/**
  * Parse the MP_REACH NLRI attribute data
  *
  * \details
@@ -92,7 +71,5 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u
  *
  */
 static inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels);
-
-//} /* namespace bgp_msg */
 
 #endif /* MPREACHATTR_H_ */

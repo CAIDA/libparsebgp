@@ -106,7 +106,6 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &b
             return byte_read;
         if (byte_read != (size - BGP_MSG_HDR_LEN)) {
             return INVALID_MSG;
-            //throw "error in parsing update msg";
         }
         read_size+=byte_read;
     }
@@ -178,11 +177,8 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bg
     /*
      * Error out if data size is not large enough for common header
      */
-    if (size < BGP_MSG_HDR_LEN) {
- //       LOG_WARN("%s: rtr=%s: BGP message is being parsed is %d but expected at least %d in size",p_entry->peer_addr, router_addr.c_str(), size, BGP_MSG_HDR_LEN);
- //       return 0;
-        return INCOMPLETE_MSG;
-    }
+    if (size < BGP_MSG_HDR_LEN)
+       return INCOMPLETE_MSG;
 
     memcpy(&bgp_parsed_data.c_hdr, data, BGP_MSG_HDR_LEN);
 
@@ -194,9 +190,8 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bg
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer
      *      It is expected that the passed bgp message buffer holds the complete BGP message to be parsed
      */
-//    if (common_hdr.len > size) {
-//        LOG_WARN("%s: rtr=%s: BGP message size of %hu is greater than passed data buffer, cannot parse the BGP message",p_entry->peer_addr, router_addr.c_str(), common_hdr.len, size);
-//    }
+    if (bgp_parsed_data.c_hdr.len > size)
+        return LARGER_MSG_LEN;
 
      return BGP_MSG_HDR_LEN;
 }

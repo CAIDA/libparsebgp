@@ -70,18 +70,6 @@ enum MPLS_PROTO_MASK_CODES {
     MPLS_PROTO_RSVP_TE                  = 0x40          ///< Extension to RSVP for LSP tunnels (rfc3209)
 };
 
-
-//        /*
-//         * static const arrays - initialized in implementation
-//         */
-//        static const char * const LS_FLAGS_NODE_NLRI[];
-//        static const char * const LS_FLAGS_PEER_ADJ_SID_ISIS[];
-//        static const char * const LS_FLAGS_PEER_ADJ_SID_OSPF[];
-//        static const char * const LS_FLAGS_SR_CAP_ISIS[];
-//        static const char * const LS_FLAGS_PREFIX_SID_ISIS[];
-//        static const char * const LS_FLAGS_PREFIX_SID_OSPF[];
-
-
 /**
  * Prefix Attribute types
  */

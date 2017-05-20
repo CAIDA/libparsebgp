@@ -20,7 +20,6 @@ set(SOURCE_FILES
         include/parse_utils.h
         include/parse_mrt.h
         include/parse_bmp.h
-        include/libParseBGP.h
         src/mp_link_state.cpp
         src/mp_link_state_attr.cpp
         src/add_path_data_container.cpp
