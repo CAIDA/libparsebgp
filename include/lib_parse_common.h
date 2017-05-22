@@ -8,8 +8,16 @@
 #include "parse_mrt.h"
 #include "parse_bgp.h"
 
+/**
+ * Message types supported by libparsebgp
+ */
 enum libparsebgp_parse_msg_types {MRT_MESSAGE_TYPE = 1, BMP_MESSAGE_TYPE, BGP_MESSAGE_TYPE};
 
+/**
+ * OBJECT: libparsebgp_parse_msg
+ *
+ * Parse Message schema
+ */
 struct libparsebgp_parse_msg{
     libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
     libparsebgp_parsed_bmp_parsed_data parsed_bmp_msg;
@@ -19,10 +27,11 @@ struct libparsebgp_parse_msg{
 /**
  * Main function which will be called for parsing MRT, BMP or BGP message
  *
- * @param parsed_msg    The union which stores the parsed data
- * @param buffer        Buffer containing the raw message
- * @param buf_len       Size of buffer
- * @param type          Type of message - 1 for MRT, 2 for BMP, 3 for BGP
+ * @param [in] parsed_msg    The union which stores the parsed data
+ * @param [in] buffer        Buffer containing the raw message
+ * @param [in] buf_len       Size of buffer
+ * @param [in] type          Type of message - 1 for MRT, 2 for BMP, 3 for BGP
+ *
  * @return number of bytes read
  */
 ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg &parsed_msg, u_char* buffer, int buf_len, int type) {
@@ -41,7 +50,7 @@ ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg &parsed_msg, 
             break;
         }
         default: {
-            read_size = INVALID_MSG;//throw "Type unknown";
+            return INVALID_MSG; //throw "Type unknown";
         }
     }
     return read_size;

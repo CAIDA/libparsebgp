@@ -18,18 +18,18 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, 
 
     //TO DO:
     if (bmp_len <= 0)
-        return 0;
+        return CORRUPT_MSG;
 
-    if (bmp_len > sizeof(bmp_data)) {
+    if (bmp_len > sizeof(bmp_data))
         return LARGER_MSG_LEN; //throw "BMP message length is too large for buffer, invalid BMP sender";
-    }
 
-    if ((bmp_data_len=extract_from_buffer(buffer, buf_len, bmp_data, bmp_len)) != bmp_len) {
+    if ((bmp_data_len=extract_from_buffer(buffer, buf_len, bmp_data, bmp_len)) != bmp_len)
         return ERR_READING_MSG; //throw "Error while reading BMP data into buffer";
-    }
 
     // Indicate no more data is left to read
     bmp_len = 0;
+
+    return 0;       //No error
 }
 
 /**
@@ -189,50 +189,39 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
  *
  * //throws (const  char *) on error.   String will detail error message.
  */
-static ssize_t libparsebgp_parse_bmp_handle_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
-    uint8_t     ver;
-    ssize_t         read_size = 0;
-    // Get the version in order to determine what we read next
-    //    As of Junos 10.4R6.5, it supports version 1
-    read_size+= extract_from_buffer(buffer, buf_len, &ver, 1);
+static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer,
+                                                int &buf_len) {
+    uint8_t         ver;
+    ssize_t         read_size = 0, bytes_read = 0;
 
-    if (read_size != 1)
+    // Reading the version to parse the header accordingly
+    if(extract_from_buffer(buffer, buf_len, &ver, 1)!=1)
         return INVALID_MSG;
+
+    read_size += 1;
 
     // check the version
     if (ver == 3) { // draft-ietf-grow-bmp-04 - 07
         parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver = ver;
-        read_size += libparsebgp_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
+        bytes_read =  libparsebgp_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
+        if(bytes_read<0) return bytes_read;
+
+        read_size+=bytes_read;
         bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type;
     }
         // Handle the older versions
     else if (ver == 1 || ver == 2) {
-        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver=ver;
-        read_size+=libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
+        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver = ver;
+        bytes_read = libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
+        if(bytes_read<0) return bytes_read;
+
+        read_size+=bytes_read;
         bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
 
     } else
         return INVALID_MSG;
 
     return read_size;
-}
-
-/**
- * Parse the v3 peer down BMP header
- *
- * \details This method will update the db peer_down_event struct with BMP header info.
- *
- * \param [in]  sock       Socket to read the message from
- * \param [out] down_event Reference to the peer down event storage (will be updated with bmp info)
- *
- * \returns true if successfully parsed the bmp peer down header, false otherwise
- */
-static bool libparsebgp_parse_bmp_parse_peer_down_event_hdr(libparsebgp_parsed_bmp_peer_down_event *down_event,
-                                                            unsigned char*& buffer, int& buf_len) {
-    if (extract_from_buffer(buffer, buf_len, &down_event->bmp_reason, 1) == 1) {
-        return true;
-    } else
-        return false;
 }
 
 /**
@@ -401,7 +390,7 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
  * \returns Bytes that have been successfully read by the handle up event.
  */
 static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char *data, size_t size) {
-    ssize_t    read_size = 0, bytes_read;
+    ssize_t    read_size = 0, bytes_read = 0;
     /*
     * Process the sent open message
     */
@@ -460,39 +449,37 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
  */
 static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char*& buffer, int& buf_len) {
     bool is_parse_good = true;
-    ssize_t bytes_read = 0;
+    ssize_t read_size = 0;
 
     // Get the local address
-    if ( extract_from_buffer(buffer, buf_len, &up_event->local_ip, 16) != 16)
+    if (extract_from_buffer(buffer, buf_len, &up_event->local_ip, 16) != 16)
         is_parse_good = false;
     else
-        bytes_read += 16;
+        read_size += 16;
 
     // Get the local port
     if (is_parse_good and extract_from_buffer(buffer, buf_len, &up_event->local_port, 2) != 2)
         is_parse_good = false;
-
     else if (is_parse_good) {
-        bytes_read += 2;
+        read_size += 2;
         SWAP_BYTES(&up_event->local_port);
     }
 
     // Get the remote port
     if (is_parse_good and extract_from_buffer(buffer, buf_len, &up_event->remote_port, 2) != 2)
         is_parse_good = false;
-
     else if (is_parse_good) {
-        bytes_read += 2;
+        read_size += 2;
         SWAP_BYTES(&up_event->remote_port);
     }
 
     // Update bytes read
-    bmp_len -= bytes_read;
+    bmp_len -= read_size;
 
     // Validate parse is still good, if not read the remaining bytes of the message so that the next msg will work
     if (!is_parse_good) return CORRUPT_MSG;
 
-    return bytes_read;
+    return read_size;
 }
 
 /**
@@ -514,107 +501,132 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
     bzero(bmp_data, sizeof(bmp_data));
     bmp_len=0;
 
-    try {
-        read_size+= libparsebgp_parse_bmp_handle_msg(parsed_msg, buffer, buf_len);
+    /*
+     * Parsing the bmp message header: Version 1, 2, 3 are supported
+     */
+    bytes_read= libparsebgp_parse_bmp_msg_header(parsed_msg, buffer, buf_len);
+    if(bytes_read<0) return bytes_read;     //checking for the error code returned in parsing bmp header.
 
-        /*
-         * At this point we only have the BMP header message, what happens next depends
-         *      on the BMP message type.
-         */
-        switch (bmp_type) {
-            case TYPE_PEER_DOWN : { // Peer down type
-                if (libparsebgp_parse_bmp_parse_peer_down_event_hdr(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg, buffer, buf_len)) {
+    read_size += bytes_read;
 
-                    read_size += 1;
-                    libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
+    /*
+     * Parsing BMP message based on bmp type retrieved from the header
+     */
+    switch (bmp_type) {
+        case TYPE_PEER_DOWN : { // Parsing Peer down type
+            if (extract_from_buffer(buffer, buf_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.bmp_reason, 1) == 1) {
+                read_size += 1;
+                bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
+                if(bytes_read<0) return bytes_read;
 
-                    // Check if the reason indicates we have a BGP message that follows
-                    switch (parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.bmp_reason) {
-                        case 1 : { // Local system close with BGP notify
-                            read_size += libparsebgp_parse_bgp_handle_down_event(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
-                            break;
-                        }
-                        case 2 : // Local system close, no bgp notify
-                        {
-                            // Read two byte code corresponding to the FSM event
-                            uint16_t fsm_event = 0 ;
-                            memcpy(&fsm_event, bmp_data, 2);
-                            SWAP_BYTES(&fsm_event);
-                            read_size += 2;
-                            break;
-                        }
-                        case 3 : { // remote system close with bgp notify
-                            read_size += libparsebgp_parse_bgp_handle_down_event(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
-                            break;
-                        }
-                        default:
-                            break;
+                // Check if the reason indicates we have a BGP message that follows
+                switch (parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.bmp_reason) {
+                    case 1 : { // Local system close with BGP notify
+                        read_size += libparsebgp_parse_bgp_handle_down_event(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
+                        break;
                     }
-                } else
-                    return ERR_READING_MSG;
-                break;
-            }
-
-            case TYPE_PEER_UP : // Peer up type
-            {
-
-                bytes_read = libparsebgp_parse_bmp_parse_peer_up_event_hdr(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg, buffer, buf_len);
-
-                if(bytes_read<0) return bytes_read;
-                read_size += bytes_read;
-
-                libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
-                bytes_read = libparsebgp_parse_bgp_handle_up_event(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg, bmp_data, bmp_data_len);
-
-                if(bytes_read<0) return bytes_read;
-                read_size += bytes_read;
-
-                break;
-            }
-
-            case TYPE_ROUTE_MON : { // Route monitoring type
-                libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
-                bytes_read = libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len);
-
-                if(bytes_read<0) return bytes_read;
-                read_size += bytes_read;
-                break;
-            }
-
-            case TYPE_STATS_REPORT : { // Stats Report
-                libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
-                bytes_read = libparsebgp_parse_bmp_handle_stats_report(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_stat_rep, bmp_data, bmp_data_len);
-
-                if(bytes_read<0) return bytes_read;
-                read_size += bytes_read;
-                break;
-            }
-
-            case TYPE_INIT_MSG : { // Initiation Message
-                libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
-                bytes_read = libparsebgp_parse_bmp_handle_init_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_init_msg, bmp_data, bmp_data_len);
-
-                if(bytes_read<0) return bytes_read;
-                read_size += bytes_read;
-                break;
-            }
-
-            case TYPE_TERM_MSG : { // Termination Message
-                libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len);
-                bytes_read = libparsebgp_parse_bmp_handle_term_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_term_msg, bmp_data, bmp_data_len);
-
-                if(bytes_read<0) return bytes_read;
-                read_size += bytes_read;
-                break;
-            }
-            default:
-                return CORRUPT_MSG;
+                    case 2 : // Local system close, no bgp notify
+                    {
+                        // Read two byte code corresponding to the FSM event
+                        uint16_t fsm_event = 0 ;
+                        memcpy(&fsm_event, bmp_data, 2);
+                        SWAP_BYTES(&fsm_event);
+                        read_size += 2;
+                        break;
+                    }
+                    case 3 : { // remote system close with bgp notify
+                        read_size += libparsebgp_parse_bgp_handle_down_event(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg, bmp_data, bmp_data_len);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } else
+                return ERR_READING_MSG;
+            break;
         }
-    } catch (char const *str) {
-        // Mark the router as disconnected and update the error to be a local disconnect (no term message received)
-        //  LOG_INFO("%s: Caught: %s", client->c_ip, str);
-        throw str;
-    }
 
+        case TYPE_PEER_UP : // Parsing Peer up type
+        {
+            /*
+             * Parsing the up event header except open messages
+             */
+            if((bytes_read = libparsebgp_parse_bmp_parse_peer_up_event_hdr(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg, buffer, buf_len))<0)
+                return bytes_read;
+
+            read_size += bytes_read;
+
+            /*
+             * Reading the message into buffer bmp_data
+             */
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
+                return bytes_read;
+
+            if((bytes_read = libparsebgp_parse_bgp_handle_up_event(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg, bmp_data, bmp_data_len))<0)
+                return bytes_read;
+
+            read_size += bytes_read;
+
+            break;
+        }
+
+        case TYPE_ROUTE_MON : { // Route monitoring type
+            /*
+             * Reading the message into buffer bmp_data
+             */
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
+                return bytes_read;
+
+            if((bytes_read = libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len))<0)
+                return bytes_read;
+
+            read_size += bytes_read;
+            break;
+        }
+
+        case TYPE_STATS_REPORT : { // Stats Report
+            /*
+             * Reading the message into buffer bmp_data
+             */
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
+                return bytes_read;
+
+            if((bytes_read = libparsebgp_parse_bmp_handle_stats_report(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_stat_rep, bmp_data, bmp_data_len))<0)
+                return bytes_read;
+
+            read_size += bytes_read;
+            break;
+        }
+
+        case TYPE_INIT_MSG : { // Initiation Message
+            /*
+             * Reading the message into buffer bmp_data
+             */
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
+                return bytes_read;
+
+            if((bytes_read = libparsebgp_parse_bmp_handle_init_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_init_msg, bmp_data, bmp_data_len))<0)
+                return bytes_read;
+
+            read_size += bytes_read;
+            break;
+        }
+
+        case TYPE_TERM_MSG : { // Termination Message
+            /*
+             * Reading the message into buffer bmp_data
+             */
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
+                return bytes_read;
+
+            if((bytes_read = libparsebgp_parse_bmp_handle_term_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_term_msg, bmp_data, bmp_data_len))<0)
+                return bytes_read;
+
+            read_size += bytes_read;
+            break;
+        }
+        default:
+            return CORRUPT_MSG;     //Invalid BMP message type
+    }
     return read_size;
 }
