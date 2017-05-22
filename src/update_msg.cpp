@@ -26,7 +26,7 @@
  * @param [in]   len        Length of the data in bytes to be read
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
-static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes) {
+static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes) {
     u_char       ipv4_raw[4];
     char         ipv4_char[16];
     int          addr_bytes;
@@ -35,7 +35,7 @@ static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len
     update_prefix_tuple prefix_tuple;
 
     if (len <= 0 or data == NULL)
-        return;
+        return CORRUPT_MSG;
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4
     // Set the type for all to be unicast V4
@@ -93,6 +93,7 @@ static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len
             //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
         }
     }
+    return 0;
 }
 
 
@@ -110,7 +111,7 @@ static void libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
 ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
-    int      read_size       = 0;
+    ssize_t     read_size       = 0, bytes_read = 0;
     u_char      *bufPtr         = data;
 
     if (size < 2) {
@@ -162,22 +163,26 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
         /* ---------------------------------------------------------
          * Parse the withdrawn prefixes
          */
-        if (update_msg->wdrawn_route_len > 0)
-            libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len, update_msg->wdrawn_routes);
-
+        if (update_msg->wdrawn_route_len > 0) {
+            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len,
+                                                                   update_msg->wdrawn_routes);
+            if(bytes_read<0) return bytes_read;
+        }
         /* ---------------------------------------------------------
          * Parse the attributes
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (update_msg->total_path_attr_len > 0) {
-            libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker);
+            bytes_read = libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker);
+            if(bytes_read<0) return bytes_read;
         }
 
         /* ---------------------------------------------------------
          * Parse the NLRI data
          */
         if ((size - read_size) > 0) {
-            libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri);
+            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri);
+            if(bytes_read<0) return bytes_read;
             read_size = size;
         }
     }
@@ -382,7 +387,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker) {
         std::string decodeStr       = "";
         u_char      *ipv4_raw;
         uint16_t    value16bit;
@@ -514,9 +519,7 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
             }
 
             case ATTR_TYPE_AS_PATHLIMIT : // deprecated
-            {
-                break;
-            }
+                return NOT_YET_IMPLEMENTED;
 
             case ATTR_TYPE_BGP_LS:
             {
@@ -525,14 +528,10 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
             }
 
             case ATTR_TYPE_AS4_PATH:
-            {
-                break;
-            }
+                return NOT_YET_IMPLEMENTED;
 
             case ATTR_TYPE_AS4_AGGREGATOR:
-            {
-                 break;
-            }
+                return NOT_YET_IMPLEMENTED;
 
             default:
                 break;
@@ -551,29 +550,22 @@ void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_cha
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
-    /*
-     * Per RFC4271 Section 4.3, flat indicates if the length is 1 or 2 octets
-     */
-    //u_char   attr_flags;
-    //u_char   attr_type;
-    //uint16_t attr_len;
+ssize_t libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
 
-    if (len == 0)
-        return;
-
-    else if (len < 3) {
+    ssize_t bytes_read;
+    if (len < 3) {
         //LOG_WARN("%s: rtr=%s: Cannot parse the attributes due to the data being too short, error in update message. len=%d",
         //        peer_addr.c_str(), router_addr.c_str(), len);
-        return;
+        return CORRUPT_MSG;
     }
 
     /*
      * Iterate through all attributes and parse them
      */
-    update_path_attrs path_attrs;
 
     for (int read_size=0;  read_size < len; read_size += 2) {
+        update_path_attrs path_attrs;
+
         path_attrs.attr_type.attr_flags = *data++;
         path_attrs.attr_type.attr_type_code = *data++;
 
@@ -600,7 +592,8 @@ void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg
             /*
              * Parse data based on attribute type
              */
-            libparsebgp_update_msg_parse_attr_data(&path_attrs, data, has_end_of_rib_marker);
+            bytes_read = libparsebgp_update_msg_parse_attr_data(&path_attrs, data, has_end_of_rib_marker);
+            if(bytes_read<0) return bytes_read;
             data += path_attrs.attr_len;
             read_size += path_attrs.attr_len;
 
@@ -608,10 +601,10 @@ void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg
             //            attr_type, attr_len);
 
         } else if (path_attrs.attr_len) {
-            return;
+            return INCOMPLETE_MSG;
         }
         update_msg.push_back(path_attrs);
         //delete path_attrs;
     }
-
+    return 0;
 }

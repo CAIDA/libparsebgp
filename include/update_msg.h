@@ -366,8 +366,8 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
-void libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
 
 #endif /* UPDATEMSG_H_ */
