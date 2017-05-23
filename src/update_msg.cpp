@@ -110,7 +110,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool &has_end_of_rib_marker) {
     ssize_t     read_size       = 0, bytes_read = 0;
     u_char      *bufPtr         = data;
 
@@ -201,7 +201,6 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
     int         path_len    = path_attrs->attr_len;
     uint16_t    as_path_cnt = 0;
     as_path_segment as_segment;
-
 
     if (path_len < 4) // Nothing to parse if length doesn't include at least one asn
         return;

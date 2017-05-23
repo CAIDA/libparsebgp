@@ -353,7 +353,7 @@ struct libparsebgp_update_msg_data {
   *
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
- ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, size_t size,
+ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size,
                                                 bool &has_end_of_rib_marker);
 
 /**

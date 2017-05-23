@@ -92,23 +92,26 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
  * \returns True if error, false if no error.
  */
 ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size) {
-    int read_size = 0;
-    ssize_t byte_read = libparsebgp_parse_bgp_parse_header(bgp_update_msg, data, size);
-    if (byte_read < 0)
-        return byte_read;
+    ssize_t read_size = 0, bytes_read =0;
+    if((bytes_read = libparsebgp_parse_bgp_parse_header(bgp_update_msg, data, size))<0)
+        return bytes_read;
+    read_size += bytes_read;
+
     if (bgp_update_msg.c_hdr.type == BGP_MSG_UPDATE) {
-        int data_bytes_remaining = bgp_update_msg.c_hdr.len - BGP_MSG_HDR_LEN;
+        ssize_t data_bytes_remaining = bgp_update_msg.c_hdr.len - BGP_MSG_HDR_LEN;
         data += BGP_MSG_HDR_LEN;
         read_size+=BGP_MSG_HDR_LEN;
-        byte_read=libparsebgp_update_msg_parse_update_msg(&bgp_update_msg.parsed_data.update_msg, data, data_bytes_remaining,
-                                                          bgp_update_msg.has_end_of_rib_marker);
-        if (byte_read < 0)
-            return byte_read;
-        if (byte_read != (size - BGP_MSG_HDR_LEN)) {
+        if((bytes_read=libparsebgp_update_msg_parse_update_msg(&bgp_update_msg.parsed_data.update_msg, data, data_bytes_remaining,
+                                                          bgp_update_msg.has_end_of_rib_marker))<0)
+            return bytes_read;
+
+        if (bytes_read != (size - BGP_MSG_HDR_LEN))
             return INVALID_MSG;
-        }
-        read_size+=byte_read;
-    }
+
+        read_size += bytes_read;
+    } else
+        return INVALID_MSG;
+
     return read_size;
 }
 
