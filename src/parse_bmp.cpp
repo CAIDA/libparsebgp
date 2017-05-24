@@ -18,7 +18,7 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, 
 
     //TO DO:
     if (bmp_len <= 0)
-        return CORRUPT_MSG;
+        return 0;
 
     if (bmp_len > sizeof(bmp_data))
         return LARGER_MSG_LEN; //throw "BMP message length is too large for buffer, invalid BMP sender";

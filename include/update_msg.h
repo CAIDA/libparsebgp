@@ -259,9 +259,12 @@ struct update_path_attrs {
     parsed_data_ls          mp_ls_data;
     list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
     list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
-    list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
     parsed_ls_attrs_map     ls_attrs;
+    list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
     parsed_data_ls          ls;                 ///< REACH: Link state parsed data
+    //parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
+    //libparsebgp_evpn_data evpn_data;
+    //libparsebgp_addpath_map add_path_map;
     bgp_link_state_attrs    bgp_ls;
     libparsebgp_addpath_map add_path_map;
 };
