@@ -25,21 +25,9 @@ using namespace std;
  * BGP-LS Node table schema
  */
 struct obj_ls_node {
-    u_char      hash_id[16];                ///< hash id for the entry
     uint64_t    id;                         ///< Routing universe identifier
-    bool        is_ipv4;                     ///< True if interface/neighbor is IPv4, false otherwise
-    uint32_t    asn;                        ///< BGP ASN
-    uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
-    uint8_t     igp_router_id[8];           ///< IGP router ID
-    uint8_t     ospf_area_Id[4];            ///< OSPF area ID
     char        protocol[32];               ///< String representation of the protocol name
-    uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID
-    uint8_t     isis_area_id[9];            ///< IS-IS area ID
-    char        flags[32];                  ///< String representation of the flag bits
-    char        name[255];                  ///< Name of router
-    char        mt_id[255];                 ///< Multi-Topology ID
-    char        sr_capabilities_tlv[255];   ///< SR Capabilities TLV
-};
+    };
 
 
 /**
@@ -48,46 +36,9 @@ struct obj_ls_node {
  * BGP-LS Link table schema
  */
 struct obj_ls_link {
-    u_char      hash_id[16];                ///< hash id for the entry
     uint64_t    id;                         ///< Routing universe identifier
-    uint32_t    mt_id;                      ///< Multi-Topology ID
-
-    uint32_t    bgp_ls_id;                  ///< BGP-LS Identifier
-    uint8_t     igp_router_id[8];           ///< IGP router ID (local)
-    uint8_t     remote_igp_router_id[8];    ///< IGP router ID (remote)
-    uint8_t     ospf_area_Id[4];            ///< OSPF area ID
-    uint8_t     router_id[16];              ///< IPv4 or IPv6 router ID (local)
-    uint8_t     remote_router_id[16];       ///< IPv4 or IPv6 router ID (remote)
-
-    uint32_t    local_node_asn;             ///< Local node asn
-    uint32_t    remote_node_asn;            ///< Remote node asn
-    uint32_t    local_bgp_router_id;        ///< Local BGP router id (draft-ietf-idr-bgpls-segment-routing-epe)
-    uint32_t    remote_bgp_router_id;       ///< Remote BGP router id (draft-ietf-idr-bgpls-segment-routing-epe)
-
-    uint8_t     isis_area_id[9];            ///< IS-IS area ID
-
     char        protocol[32];               ///< String representation of the protocol name
-    uint8_t     intf_addr[16];              ///< Interface binary address
-    uint8_t     nei_addr[16];               ///< Neighbor binary address
-    uint32_t    local_link_id;              ///< Local Link ID (IS-IS)
-    uint32_t    remote_link_id;             ///< Remote Link ID (IS-IS)
-    bool        is_ipv4;                     ///< True if interface/neighbor is IPv4, false otherwise
-    u_char      local_node_hash_id[16];     ///< Local node hash ID
-    u_char      remote_node_hash_id[16];    ///< Remove node hash ID
-    uint32_t    admin_group;                ///< Admin group
-    uint32_t    max_link_bw;                ///< Maximum link bandwidth
-    uint32_t    max_resv_bw;                ///< Maximum reserved bandwidth
-    char        unreserved_bw[100];         ///< string for unreserved bandwidth, a set of 8 uint32_t values
-
-    uint32_t    te_def_metric;              ///< Default TE metric
-    char        protection_type[60];        ///< String representation for the protection types
-    char        mpls_proto_mask[32];        ///< Either LDP or RSVP-TE
-    uint32_t    igp_metric;                 ///< IGP metric
-    char        srlg[128];                  ///< String representation of the shared risk link group values
-    char        name[255];                  ///< Name of router
-    char        peer_node_sid[128];         ///< Peer node side (draft-ietf-idr-bgpls-segment-routing-epe)
-    char        peer_adj_sid[128];          ///< Peer Adjency Segment Identifier
-};
+    };
 
 /**
  * OBJECT: ls_prefix
@@ -95,31 +46,8 @@ struct obj_ls_link {
  * BGP-LS Prefix table schema
  */
 struct obj_ls_prefix {
-    u_char      hash_id[16];            ///< hash for the entry
     uint64_t    id;                     ///< Routing universe identifier
     char        protocol[32];           ///< String representation of the protocol name
-
-    uint32_t    bgp_ls_id;              ///< BGP-LS Identifier
-    uint8_t     igp_router_id[8];       ///< IGP router ID
-    uint8_t     ospf_area_Id[4];        ///< OSPF area ID
-    uint8_t     router_id[16];          ///< IPv4 or IPv6 router ID
-    uint8_t     isis_area_id[9];        ///< IS-IS area ID
-    uint8_t     intf_addr[16];          ///< Interface binary address
-    uint8_t     nei_addr[16];           ///< Neighbor binary address
-
-    u_char      local_node_hash_id[16]; ///< Local node hash ID
-    uint32_t    mt_id;                  ///< Multi-Topology ID
-    uint32_t    metric;                 ///< Prefix metric
-    bool        isIPv4;                 ///< True if interface/neighbor is IPv4, false otherwise
-    u_char      prefix_len;             ///< Length of prefix in bits
-    char        ospf_route_type[32];    ///< String representation of the OSPF route type
-    uint8_t     prefix_bin[16];         ///< Prefix in binary form
-    uint8_t     prefix_bcast_bin[16];   ///< Broadcast address/last address in binary form
-    char        igp_flags[32];          ///< String representation of the IGP flags
-    uint32_t    route_tag;              ///< Route tag
-    uint64_t    ext_route_tag;          ///< Extended route tag
-    uint8_t     ospf_fwd_addr[16];      ///< IPv4/IPv6 OSPF forwarding address
-    char        sid_tlv[128];           ///< Prefix-SID TLV
 };
 
 //############################################################################
@@ -218,7 +146,6 @@ struct link_descriptor {
     bool        is_ipv4;                             ///< True if IPv4, false if IPv6
 };
 
-
 /**
  * Node (local and remote) common fields
  */
@@ -229,7 +156,6 @@ struct prefix_descriptor {
     uint8_t     prefix_bcast[16];                   ///< Prefix broadcast/ending binary address
     uint8_t     prefix_len;                         ///< Length of prefix in bits
 };
-
 
 struct mp_reach_ls {
     uint16_t        nlri_type;
@@ -313,21 +239,29 @@ typedef struct attr_value{
     mp_reach_nlri           mp_reach_nlri_data;
 }attr_val;
 
+typedef struct bgp_link_state_attrs{
+    uint16_t            type;
+    uint16_t            len;
+    struct node_attr{
+        char node_flag_bits;
+        char node_ipv4_router_id_local[4];
+        char node_ipv6_router_id_local[16];
+        char isis_area_id[8];
+    }node;
+}bgp_link_state_attrs;
+
 struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
     parsed_attrs_map        attrs;
-    //list<vpn_tuple>         vpn;                ///< List of vpn prefixes advertised
-    //std::list<update_prefix_tuple>  advertised;
     parsed_data_ls          mp_ls_data;
     list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
     list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
     list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
     parsed_ls_attrs_map     ls_attrs;
     parsed_data_ls          ls;                 ///< REACH: Link state parsed data
-    parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
-    //libparsebgp_evpn_data evpn_data;
+    bgp_link_state_attrs    bgp_ls;
     libparsebgp_addpath_map add_path_map;
 };
 

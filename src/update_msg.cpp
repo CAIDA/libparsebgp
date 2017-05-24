@@ -111,8 +111,8 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
 ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool &has_end_of_rib_marker) {
-    ssize_t     read_size       = 0, bytes_read = 0;
-    u_char      *bufPtr         = data;
+    ssize_t     read_size       = 0, bytes_read = 0, bytes_check = 0;
+    u_char      *buf_ptr        = data;
 
     if (size < 2) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
@@ -120,41 +120,42 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
     }
 
     // Get the withdrawn length
-    memcpy(&update_msg->wdrawn_route_len, bufPtr, sizeof(update_msg->wdrawn_route_len));
+    memcpy(&update_msg->wdrawn_route_len, buf_ptr, sizeof(update_msg->wdrawn_route_len));
     SWAP_BYTES(&update_msg->wdrawn_route_len);
-    bufPtr += sizeof(update_msg->wdrawn_route_len);
+    buf_ptr += sizeof(update_msg->wdrawn_route_len);
     read_size += sizeof(update_msg->wdrawn_route_len);
+    bytes_check += sizeof(update_msg->wdrawn_route_len);
 
     // Set the withdrawn data pointer
-    if ((size - read_size) < update_msg->wdrawn_route_len) {
+    if ((size - bytes_check) < update_msg->wdrawn_route_len) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse withdrawn data", peer_addr.c_str(), router_addr.c_str());
         return INCOMPLETE_MSG;
     }
 
     u_char *withdrawn_ptr, *attr_ptr, *nlri_ptr;
-    withdrawn_ptr = bufPtr;
-    bufPtr += update_msg->wdrawn_route_len; read_size += update_msg->wdrawn_route_len;
+    withdrawn_ptr = buf_ptr;
+    buf_ptr += update_msg->wdrawn_route_len; bytes_check += update_msg->wdrawn_route_len;
 
     // Get the attributes length
-    memcpy(&update_msg->total_path_attr_len, bufPtr, sizeof(update_msg->total_path_attr_len));
+    memcpy(&update_msg->total_path_attr_len, buf_ptr, sizeof(update_msg->total_path_attr_len));
     SWAP_BYTES(&update_msg->total_path_attr_len);
-    bufPtr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len);
+    buf_ptr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len); bytes_check += sizeof(update_msg->wdrawn_route_len);
 
     // Set the attributes data pointer
-    if ((size - read_size) < update_msg->total_path_attr_len) {
+    if ((size - bytes_check) < update_msg->total_path_attr_len) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse attr data", peer_addr.c_str(), router_addr.c_str());
         return INCOMPLETE_MSG;
     }
-    attr_ptr = bufPtr;
-    bufPtr += update_msg->total_path_attr_len; read_size += update_msg->total_path_attr_len;
+    attr_ptr = buf_ptr;
+    buf_ptr += update_msg->total_path_attr_len; bytes_check += update_msg->total_path_attr_len;
 
     // Set the NLRI data pointer
-    nlri_ptr = bufPtr;
+    nlri_ptr = buf_ptr;
 
     /*
      * Check if End-Of-RIB
      */
-    if (not update_msg->wdrawn_route_len and (size - read_size) <= 0 and not update_msg->total_path_attr_len) {
+    if (not update_msg->wdrawn_route_len and (size - bytes_check) <= 0 and not update_msg->total_path_attr_len) {
         has_end_of_rib_marker = true;
         //LOG_INFO("%s: rtr=%s: End-Of-RIB marker", peer_addr.c_str(), router_addr.c_str());
 
@@ -167,6 +168,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
             bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len,
                                                                    update_msg->wdrawn_routes);
             if(bytes_read<0) return bytes_read;
+            read_size += bytes_read;
         }
         /* ---------------------------------------------------------
          * Parse the attributes
@@ -174,19 +176,21 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          */
         if (update_msg->total_path_attr_len > 0) {
             bytes_read = libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker);
+
             if(bytes_read<0) return bytes_read;
+            read_size += bytes_read;
         }
 
         /* ---------------------------------------------------------
          * Parse the NLRI data
          */
-        if ((size - read_size) > 0) {
+        if ((size - bytes_check) > 0) {
             bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri);
+
             if(bytes_read<0) return bytes_read;
-            read_size = size;
+            read_size += bytes_read;
         }
     }
-
     return read_size;
 }
 
@@ -387,156 +391,156 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
 ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker) {
-        std::string decodeStr       = "";
-        u_char      *ipv4_raw;
-        uint16_t    value16bit;
+    std::string decodeStr       = "";
+    u_char      *ipv4_raw;
+    uint16_t    value16bit;
 
-        /*
-         * Parse based on attribute type
-         */
-        switch (path_attrs->attr_type.attr_type_code) {
+    /*
+     * Parse based on attribute type
+     */
+    switch (path_attrs->attr_type.attr_type_code) {
 
-            case ATTR_TYPE_ORIGIN : // Origin
-                switch (data[0]) {
-                    case 0 : decodeStr.assign("igp"); break;
-                    case 1 : decodeStr.assign("egp"); break;
-                    case 2 : decodeStr.assign("incomplete"); break;
-                }
+        case ATTR_TYPE_ORIGIN : // Origin
+            switch (data[0]) {
+                case 0 : decodeStr.assign("igp"); break;
+                case 1 : decodeStr.assign("egp"); break;
+                case 2 : decodeStr.assign("incomplete"); break;
+            }
 
 //                parsed_data.attrs[ATTR_TYPE_ORIGIN] = decodeStr;
-                path_attrs->attr_value.origin = data[0];
-                break;
+            path_attrs->attr_value.origin = data[0];
+            break;
 
-            case ATTR_TYPE_AS_PATH : // AS_PATH
-                libparsebgp_update_msg_parse_attr_as_path(path_attrs, data);
-                break;
+        case ATTR_TYPE_AS_PATH : // AS_PATH
+            libparsebgp_update_msg_parse_attr_as_path(path_attrs, data);
+            break;
 
-            case ATTR_TYPE_NEXT_HOP : // Next hop v4
-                memcpy(path_attrs->attr_value.next_hop, data, 4);
+        case ATTR_TYPE_NEXT_HOP : // Next hop v4
+            memcpy(path_attrs->attr_value.next_hop, data, 4);
 //                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-                break;
+            break;
 
-            case ATTR_TYPE_MED : // MED value
-            {
-                memcpy(&path_attrs->attr_value.med, data, 4);
-                SWAP_BYTES(&path_attrs->attr_value.med);
+        case ATTR_TYPE_MED : // MED value
+        {
+            memcpy(&path_attrs->attr_value.med, data, 4);
+            SWAP_BYTES(&path_attrs->attr_value.med);
 //                std::ostringstream numString;
 //                numString << value32bit;
 //                parsed_data.attrs[ATTR_TYPE_MED] = numString.str();
 
-                break;
-            }
-            case ATTR_TYPE_LOCAL_PREF : // local pref value
-            {
-                memcpy(&path_attrs->attr_value.local_pref, data, 4);
-                SWAP_BYTES(&path_attrs->attr_value.local_pref);
+            break;
+        }
+        case ATTR_TYPE_LOCAL_PREF : // local pref value
+        {
+            memcpy(&path_attrs->attr_value.local_pref, data, 4);
+            SWAP_BYTES(&path_attrs->attr_value.local_pref);
 //                std::ostringstream numString;
 //                numString << value32bit;
 //                parsed_data.attrs[ATTR_TYPE_LOCAL_PREF] = numString.str();
-                break;
-            }
-            case ATTR_TYPE_ATOMIC_AGGREGATE : // Atomic aggregate
+            break;
+        }
+        case ATTR_TYPE_ATOMIC_AGGREGATE : // Atomic aggregate
 //                parsed_data.attrs[ATTR_TYPE_ATOMIC_AGGREGATE] = std::string("1");
 //                path_attrs->attr_value.origin = 1;
-                break;
+            break;
 
-            case ATTR_TYPE_AGGEGATOR : // Aggregator
-                libparsebgp_update_msg_parse_attr_aggegator(path_attrs, data);
-                break;
+        case ATTR_TYPE_AGGEGATOR : // Aggregator
+            libparsebgp_update_msg_parse_attr_aggegator(path_attrs, data);
+            break;
 
-            case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
-                memcpy(path_attrs->attr_value.originator_id, data, 4);
+        case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
+            memcpy(path_attrs->attr_value.originator_id, data, 4);
 //                inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
 //                parsed_data.attrs[ATTR_TYPE_ORIGINATOR_ID] = std::string(ipv4_char);
-                break;
+            break;
 
-            case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
-                // According to RFC 4456, the value is a sequence of cluster id's
-                for (int i=0; i < path_attrs->attr_len; i += 4) {
-                    memcpy(ipv4_raw, data, 4);
-                    data += 4;
+        case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
+            // According to RFC 4456, the value is a sequence of cluster id's
+            for (int i=0; i < path_attrs->attr_len; i += 4) {
+                memcpy(ipv4_raw, data, 4);
+                data += 4;
 //                    inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
 //                    decodeStr.append(ipv4_char);
 //                    decodeStr.append(" ");
-                    path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
-                }
+                path_attrs->attr_value.cluster_list.push_back(ipv4_raw);
+            }
 
 //                parsed_data.attrs[ATTR_TYPE_CLUSTER_LIST] = decodeStr;
-                break;
+            break;
 
-            case ATTR_TYPE_COMMUNITIES : // Community list
-            {
-                for (int i = 0; i < path_attrs->attr_len; i += 4) {
+        case ATTR_TYPE_COMMUNITIES : // Community list
+        {
+            for (int i = 0; i < path_attrs->attr_len; i += 4) {
 //                    std::ostringstream numString;
 
-                    // Add space between entries
+                // Add space between entries
 //                    if (i)
 //                        decodeStr.append(" ");
 
-                    // Add entry
-                    memcpy(&value16bit, data, 2);
-                    data += 2;
-                    SWAP_BYTES(&value16bit);
+                // Add entry
+                memcpy(&value16bit, data, 2);
+                data += 2;
+                SWAP_BYTES(&value16bit);
 //                    numString << value16bit;
 //                    numString << ":";
-                    path_attrs->attr_value.attr_type_comm.push_back(value16bit);
+                path_attrs->attr_value.attr_type_comm.push_back(value16bit);
 
-                    memcpy(&value16bit, data, 2);
-                    data += 2;
-                    SWAP_BYTES(&value16bit);
+                memcpy(&value16bit, data, 2);
+                data += 2;
+                SWAP_BYTES(&value16bit);
 //                    numString << value16bit;
 //                    decodeStr.append(numString.str());
-                    path_attrs->attr_value.attr_type_comm.push_back(value16bit);
-                }
+                path_attrs->attr_value.attr_type_comm.push_back(value16bit);
+            }
 
 //                parsed_data.attrs[ATTR_TYPE_COMMUNITIES] = decodeStr;
 
-                break;
-            }
-            case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
-            {
-                libparsebgp_ext_communities_parse_ext_communities(path_attrs, data);
-                break;
-            }
+            break;
+        }
+        case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
+        {
+            libparsebgp_ext_communities_parse_ext_communities(path_attrs, data);
+            break;
+        }
 
-            case ATTR_TYPE_IPV6_EXT_COMMUNITY : // IPv6 specific extended community list (RFC 5701)
-            {
-                libparsebgp_ext_communities_parse_v6_ext_communities(path_attrs, data);
-                break;
-            }
+        case ATTR_TYPE_IPV6_EXT_COMMUNITY : // IPv6 specific extended community list (RFC 5701)
+        {
+            libparsebgp_ext_communities_parse_v6_ext_communities(path_attrs, data);
+            break;
+        }
 
-            case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
-            {
-                libparsebgp_mp_reach_attr_parse_reach_nlri_attr(path_attrs, path_attrs->attr_len, data);
-                break;
-            }
+        case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
+        {
+            libparsebgp_mp_reach_attr_parse_reach_nlri_attr(path_attrs, path_attrs->attr_len, data);
+            break;
+        }
 
-            case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
-            {
-                libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(path_attrs, path_attrs->attr_len, data, has_end_of_rib_marker);
-                break;
-            }
+        case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
+        {
+            libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(path_attrs, path_attrs->attr_len, data, has_end_of_rib_marker);
+            break;
+        }
 
-            case ATTR_TYPE_AS_PATHLIMIT : // deprecated
-                return NOT_YET_IMPLEMENTED;
+        case ATTR_TYPE_AS_PATHLIMIT : // deprecated
+            return NOT_YET_IMPLEMENTED;
 
-            case ATTR_TYPE_BGP_LS:
-            {
-                libparsebgp_mp_link_state_attr_parse_attr_link_state(path_attrs, path_attrs->attr_len, data);
-                break;
-            }
+        case ATTR_TYPE_BGP_LS:
+        {
+            libparsebgp_mp_link_state_attr_parse_attr_link_state(path_attrs, path_attrs->attr_len, data);
+            break;
+        }
 
-            case ATTR_TYPE_AS4_PATH:
-                return NOT_YET_IMPLEMENTED;
+        case ATTR_TYPE_AS4_PATH:
+            return NOT_YET_IMPLEMENTED;
 
-            case ATTR_TYPE_AS4_AGGREGATOR:
-                return NOT_YET_IMPLEMENTED;
+        case ATTR_TYPE_AS4_AGGREGATOR:
+            return NOT_YET_IMPLEMENTED;
 
-            default:
-                break;
+        default:
+            break;
 
-        } // END OF SWITCH ATTR TYPE
-    }
+    } // END OF SWITCH ATTR TYPE
+}
 
 
 /**
@@ -551,41 +555,36 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
  */
 ssize_t libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
 
-    ssize_t bytes_read;
-    if (len < 3) {
-        //LOG_WARN("%s: rtr=%s: Cannot parse the attributes due to the data being too short, error in update message. len=%d",
-        //        peer_addr.c_str(), router_addr.c_str(), len);
+    ssize_t bytes_read = 0, read_size = 0;
+    if (len <= 3)
         return CORRUPT_MSG;
-    }
 
     /*
      * Iterate through all attributes and parse them
      */
 
-    for (int read_size=0;  read_size < len; read_size += 2) {
+    for (int read=0;  read < len; read += 2) {
         update_path_attrs path_attrs;
 
         path_attrs.attr_type.attr_flags = *data++;
         path_attrs.attr_type.attr_type_code = *data++;
-
+        read_size += 2;
         // Check if the length field is 1 or two bytes
         if (ATTR_FLAG_EXTENDED(path_attrs.attr_type.attr_flags)) {
-            //SELF_DEBUG("%s: rtr=%s: extended length path attribute bit set for an entry", peer_addr.c_str(), router_addr.c_str());
-
             memcpy(&path_attrs.attr_len, data, 2);
             data += 2;
+            read += 2;
             read_size += 2;
             SWAP_BYTES(&path_attrs.attr_len);
 
-        } else
+        } else {
             path_attrs.attr_len = *data++;
-        read_size++;
-
-        //SELF_DEBUG("%s: rtr=%s: attribute type = %d len_sz = %d",
-        //       peer_addr.c_str(), router_addr.c_str(), attr_type, attr_len);
+            read++;
+            read_size++;
+        }
 
         // Get the attribute data, if we have any; making sure to not overrun buffer
-        if (path_attrs.attr_len > 0 and (read_size + path_attrs.attr_len) <= len) {
+        if (path_attrs.attr_len > 0 and (read + path_attrs.attr_len) <= len) {
             // Data pointer is currently at the data position of the attribute
 
             /*
@@ -594,6 +593,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_
             bytes_read = libparsebgp_update_msg_parse_attr_data(&path_attrs, data, has_end_of_rib_marker);
             if(bytes_read<0) return bytes_read;
             data += path_attrs.attr_len;
+            read += path_attrs.attr_len;
             read_size += path_attrs.attr_len;
 
             //SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
@@ -605,5 +605,5 @@ ssize_t libparsebgp_update_msg_parse_attributes(list<update_path_attrs> &update_
         update_msg.push_back(path_attrs);
         //delete path_attrs;
     }
-    return 0;
+    return read_size;
 }
