@@ -246,7 +246,8 @@ typedef struct bgp_link_state_attrs{
         char node_flag_bits;
         char node_ipv4_router_id_local[4];
         char node_ipv6_router_id_local[16];
-        char isis_area_id[8];
+        char node_isis_area_id[8];
+        char node_name[256];
     }node;
 }bgp_link_state_attrs;
 

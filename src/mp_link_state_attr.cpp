@@ -294,7 +294,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
 
         case ATTR_NODE_ISIS_AREA_ID:
             if (path_attrs->bgp_ls.len <= 8)
-                memcpy(&path_attrs->bgp_ls.node.isis_area_id, data, path_attrs->bgp_ls.len);
+                memcpy(&path_attrs->bgp_ls.node.node_isis_area_id, data, path_attrs->bgp_ls.len);
 //                path_attrs->ls_attrs[ATTR_NODE_ISIS_AREA_ID].data()[8] = path_attrs->bgp_ls.len;
             break;
 
@@ -320,8 +320,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             break;
 
         case ATTR_NODE_NAME:
-            path_attrs->ls_attrs[ATTR_NODE_NAME].fill(0);
-            strncpy((char *)path_attrs->ls_attrs[ATTR_NODE_NAME].data(), (char *)data, path_attrs->bgp_ls.len);
+            strncpy(path_attrs->bgp_ls.node.node_name, (char *)data, path_attrs->bgp_ls.len);
 
     //        SELF_DEBUG("%s: bgp-ls: parsed node name attribute: name = %s", peer_addr.c_str(),parsed_data->ls_attrs[ATTR_NODE_NAME].data());
             break;
