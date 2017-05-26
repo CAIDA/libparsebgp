@@ -77,7 +77,7 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_
 *
 * \returns Bytes that have been successfully read by the parse bmp v2.
 */
-static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
+static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int& buf_len) {
     int read_size=0;
     size_t i;
     char buf[256] = {0};
@@ -210,7 +210,7 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
  *
  */
 static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
-    uint8_t         ver;
+    uint8_t         ver = 0;
     ssize_t         read_size = 0, bytes_read = 0;
 
     // Reading the version to parse the header accordingly
@@ -258,7 +258,7 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
 *
 * \returns Bytes that have been successfully read by the handle initiation message.
 */
-static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init_msg *init_msg, unsigned char* buf_ptr, int buf_len) {
+static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init_msg *init_msg, unsigned char *buf_ptr, int buf_len) {
     int info_len;
     ssize_t read_bytes = 0;
 
@@ -270,6 +270,8 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
      */
     for (int i=0; i < bmp_data_len; i += BMP_INIT_MSG_LEN) {
         init_msg_v3_tlv *init_msg_tlv = (init_msg_v3_tlv *)malloc(sizeof(init_msg_v3_tlv));
+
+        memset(init_msg_tlv, 0, sizeof(init_msg_v3_tlv));
 
         memcpy(&init_msg_tlv, buf_ptr, BMP_INIT_MSG_LEN);
         read_bytes+= BMP_INIT_MSG_LEN;
@@ -312,13 +314,14 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
     int info_len;
     ssize_t read_bytes = 0;
 
-    uint8_t num_tlvs = bmp_data_len/BMP_TERM_MSG_LEN, curr_tlv = 0;
+    uint32_t num_tlvs = bmp_data_len/BMP_TERM_MSG_LEN, curr_tlv = 0;
     term_msg->term_msg_tlvs = (term_msg_v3_tlv *)malloc(num_tlvs*sizeof(term_msg_v3_tlv));
     /*
      * Loop through the term message (in buffer) to parse each TLV
      */
     for (int i=0; i < bmp_data_len; i += BMP_TERM_MSG_LEN) {
         term_msg_v3_tlv *term_msg_tlv = (term_msg_v3_tlv *)malloc(sizeof(term_msg_v3_tlv));
+        memset(term_msg_tlv, 0, sizeof(term_msg_v3_tlv));
 
         memcpy(&term_msg_tlv, buf_ptr, BMP_TERM_MSG_LEN);
         read_bytes += BMP_TERM_MSG_LEN;
@@ -356,7 +359,7 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
  *
  * \returns Bytes that have been successfully read by the handle stats report.
  */
-static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_stat_rep *stat_rep_msg, unsigned char * buffer, int buf_len) {
+static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_stat_rep *stat_rep_msg, unsigned char *buffer, int buf_len) {
     char b[8];
     ssize_t read_size = 0;
 
@@ -370,38 +373,39 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
 
     // Loop through each stats object
     for (unsigned long i = 0; i < stat_rep_msg->stats_count; i++) {
-        stat_counter stat_info;
-        bzero(&stat_info, sizeof(stat_counter));
+        stat_counter *stat_info = (stat_counter *)malloc(sizeof(stat_counter));
+        memset(stat_info, 0, sizeof(stat_counter));
+
         bzero(b,8);
-        if ((extract_from_buffer(buffer, buf_len, &stat_info.stat_type, 2)) != 2)
+        if ((extract_from_buffer(buffer, buf_len, &stat_info->stat_type, 2)) != 2)
             return ERR_READING_MSG;
 
         read_size+=2;
-        if ((extract_from_buffer(buffer, buf_len, &stat_info.stat_len, 2)) != 2)
+        if ((extract_from_buffer(buffer, buf_len, &stat_info->stat_len, 2)) != 2)
             return ERR_READING_MSG;
 
         read_size+=2;
         // convert integer from network to host bytes
-        SWAP_BYTES(&stat_info.stat_type);
-        SWAP_BYTES(&stat_info.stat_len);
+        SWAP_BYTES(&stat_info->stat_type);
+        SWAP_BYTES(&stat_info->stat_len);
 
         // check if this is a 32 bit number  (default)
-        if (stat_info.stat_len == 4 or stat_info.stat_len == 8) {
+        if (stat_info->stat_len == 4 or stat_info->stat_len == 8) {
 
             // Read the stats counter - 32/64 bits
-            if ((extract_from_buffer(buffer, buf_len, b, stat_info.stat_len)) == stat_info.stat_len) {
-                read_size+=stat_info.stat_len;
+            if ((extract_from_buffer(buffer, buf_len, b, stat_info->stat_len)) == stat_info->stat_len) {
+                read_size+=stat_info->stat_len;
                 // convert the bytes from network to host order
-                SWAP_BYTES(b, stat_info.stat_len);
-                memcpy(stat_info.stat_data, b, stat_info.stat_len);
+                SWAP_BYTES(b, stat_info->stat_len);
+                memcpy(stat_info->stat_data, b, stat_info->stat_len);
             }
 
         } else {
 
-            while (stat_info.stat_len-- > 0)
+            while (stat_info->stat_len-- > 0)
                 extract_from_buffer(buffer, buf_len, &b[0], 1);
         }
-        stat_rep_msg->total_stats_counter[i]=stat_info;
+        stat_rep_msg->total_stats_counter[i]=*stat_info;
 //        delete stat_info;
     }
     return read_size;
@@ -478,7 +482,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
  *
  * \returns Bytes that have been successfully read by the peer up header parser.
  */
-static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char*& buffer, int& buf_len) {
+static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char *&buffer, int& buf_len) {
     bool is_parse_good = true;
     ssize_t read_size = 0;
 
@@ -527,7 +531,6 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_
  * \returns Bytes that have been successfully read by the bmp parser.
  */
 ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
-    string peer_info_key;
     ssize_t read_size = 0, bytes_read = 0;
     bzero(bmp_data, sizeof(bmp_data));
     bmp_len=0;

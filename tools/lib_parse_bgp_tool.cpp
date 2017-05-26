@@ -103,7 +103,9 @@ int main() {
         while(msg_read)
         {
             //parseBMP *p = new parseBMP();
-            libparsebgp_parse_msg parse_msg;
+            libparsebgp_parse_msg *parse_msg = malloc(sizeof(libparsebgp_parse_msg));
+            memset(parse_msg, 0, sizeof(libparsebgp_parse_msg));
+
             bytes_read=libparsebgp_parse_msg_common_wrapper(parse_msg, buffer, len, msg_type);
             cout << "Message Parsed Successfully"<<endl;
 
