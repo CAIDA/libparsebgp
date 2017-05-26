@@ -13,6 +13,8 @@
  * \param [in]  buffer       Buffer to read the message from
  * \param [in]  buf_len      Buffer length of the available buffer
  *
+ * \param [out] err_code     Returning error code in buffering the message
+ *
  */
 static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, int& buf_len) {
 
@@ -21,10 +23,10 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, 
         return CORRUPT_MSG;
 
     if (bmp_len > sizeof(bmp_data))
-        return LARGER_MSG_LEN; //throw "BMP message length is too large for buffer, invalid BMP sender";
+        return LARGER_MSG_LEN;      //BMP message length is too large for buffer, invalid BMP sender
 
     if ((bmp_data_len=extract_from_buffer(buffer, buf_len, bmp_data, bmp_len)) != bmp_len)
-        return ERR_READING_MSG; //throw "Error while reading BMP data into buffer";
+        return ERR_READING_MSG;     //Error while reading BMP data into buffer
 
     // Indicate no more data is left to read
     bmp_len = 0;
@@ -38,14 +40,19 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, 
 * \details
 *      v3 uses the same common header, but adds the Peer Up message type.
 *
-* \param [in]  sock        Socket to read the message from
+* \param [in]     parsed_peer_header    Reference to the peer header Message structure
+* \param [in]     buffer                Pointer to the raw BMP Message header
+* \param [in]     buf_len               length of the data buffer (used to prevent overrun)
+*
+* \returns  Bytes that have been successfully read by bmp parse peer header.
+*
 */
-static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 &parsed_peer_header, unsigned char *&buffer,
-                                                 int &buf_len) {
+static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 &parsed_peer_header, unsigned char *&buffer, int &buf_len) {
     int read_size=0;
     if (extract_from_buffer(buffer, buf_len, &parsed_peer_header, BMP_PEER_HDR_LEN)!= BMP_PEER_HDR_LEN)
         return ERR_READING_MSG;
 
+    // Adding the peer header len to the read_size
     read_size+=BMP_PEER_HDR_LEN;
 
     // Adjust the common header length to remove the peer header (as it's been read)
@@ -57,13 +64,18 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_
     SWAP_BYTES(&parsed_peer_header.ts_usecs);
     return read_size;
 }
+
 /**
 * Parse v1 and v2 BMP header
 *
 * \details
 *      v2 uses the same common header, but adds the Peer Up message type.
 *
-* \param [in]  sock        Socket to read the message from
+* \param [in]     parsed_msg       Pointer to the bmp parsed data structure
+* \param [in]     buffer           Pointer to the raw BMP Message header
+* \param [in]     buf_len          length of the data buffer (used to prevent overrun)
+*
+* \returns Bytes that have been successfully read by the parse bmp v2.
 */
 static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char*& buffer, int& buf_len) {
     int read_size=0;
@@ -118,15 +130,14 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
                         return ERR_READING_MSG;
                 }
             } else
-                return ERR_READING_MSG;
+                return ERR_READING_MSG;     //error in reading bgp length
             break;
 
         case 3: // Peer Up notification
-            return NOT_YET_IMPLEMENTED; //throw "ERROR: Will need to add support for peer up if it's really used.";
+            return NOT_YET_IMPLEMENTED;     //ERROR: Will need to add support for peer up if it's really used.
     }
     return read_size;
 }
-
 
 /**
  * Parse v3 BMP header
@@ -134,15 +145,23 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
  * \details
  *      v3 has a different header structure and changes the peer
  *      header format.
+ *
+ * \param [in]     parsed_msg    Pointer to the bmp parsed data structure
+ * \param [in]     buffer        Pointer to the raw BMP Message header
+ * \param [in]     buf_len       length of the data buffer (used to prevent overrun)
+ *
+ * \return Bytes that have been successfully read by the parse bmp v3.
  */
-static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *&parsed_msg, unsigned char *&buffer,
-                                               int &buf_len) {
+static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *&parsed_msg, unsigned char *&buffer, int &buf_len) {
 
     ssize_t read_size = 0;
+    //reading the length in the header
     if ((extract_from_buffer(buffer, buf_len, &parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len, 4)) != 4)
         return ERR_READING_MSG;
 
     read_size+=4;
+
+    //reading the bmp type in the header
     if ((extract_from_buffer(buffer, buf_len, &parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type, 1)) != 1)
         return ERR_READING_MSG;
 
@@ -151,14 +170,13 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
     // Change to host order
     SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len);
 
-    //   SELF_DEBUG("BMP v3: type = %x len=%d", parsed_msg->c_hdr_v3.type, parsed_msg->c_hdr_v3.len);
-
     // Adjust length to remove common header size
     bmp_len = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len - 1 - BMP_HDRv3_LEN;
 
     if (bmp_len > BGP_MAX_MSG_SIZE)
         return LARGER_MSG_LEN;
 
+    //Parsing per peer header for every type except init and term since these messages doesn't contain peer headers
     switch (parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type) {
         case TYPE_ROUTE_MON: // Route monitoring
         case TYPE_STATS_REPORT: // Statistics Report
@@ -173,24 +191,25 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
             break;
 
         default:
-            return INVALID_MSG;     //throw "ERROR: BMP message type is not supported";
+            return INVALID_MSG;     //ERROR: BMP message type is not supported
     }
     return read_size;
 }
 
 /**
- * Process the incoming BMP message
+ * Process the incoming BMP message's header
  *
- * \returns
- *      returns the BMP message type. A type of >= 0 is normal,
- *      < 0 indicates an error
+ * \details
+ *      This function parses the header in a bmp message and further parses it according to the version in the header
  *
- * \param [in] sock     Socket to read the BMP message from
+ * \param [in]     parsed_msg    Pointer to the bmp parsed data structure
+ * \param [in]     buffer        Pointer to the raw BMP Message header
+ * \param [in]     buf_len       length of the data buffer (used to prevent overrun)
  *
- * //throws (const  char *) on error.   String will detail error message.
+ * \return Bytes that have been successfully read by the parse bmp v3.
+ *
  */
-static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer,
-                                                int &buf_len) {
+static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
     uint8_t         ver;
     ssize_t         read_size = 0, bytes_read = 0;
 
@@ -203,6 +222,7 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
     // check the version
     if (ver == 3) { // draft-ietf-grow-bmp-04 - 07
         parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver = ver;
+        //parsing the rest of the message as per the version
         bytes_read =  libparsebgp_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
         if(bytes_read<0) return bytes_read;
 
@@ -212,6 +232,7 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
         // Handle the older versions
     else if (ver == 1 || ver == 2) {
         parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver = ver;
+        //parsing the rest of the message as per the version
         bytes_read = libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
         if(bytes_read<0) return bytes_read;
 
@@ -219,7 +240,7 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
         bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
 
     } else
-        return INVALID_MSG;
+        return INVALID_MSG;     //Invalid version in the message header
 
     return read_size;
 }
@@ -241,11 +262,15 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
     int info_len;
     ssize_t read_bytes = 0;
 
+    int num_tlvs = bmp_data_len/BMP_INIT_MSG_LEN, curr_tlv = 0;
+
+    init_msg->init_msg_tlvs = (init_msg_v3_tlv *)malloc(num_tlvs*sizeof(init_msg_v3_tlv));
     /*
      * Loop through the init message (in buffer) to parse each TLV
      */
     for (int i=0; i < bmp_data_len; i += BMP_INIT_MSG_LEN) {
-        init_msg_v3_tlv *init_msg_tlv;
+        init_msg_v3_tlv *init_msg_tlv = (init_msg_v3_tlv *)malloc(sizeof(init_msg_v3_tlv));
+
         memcpy(&init_msg_tlv, buf_ptr, BMP_INIT_MSG_LEN);
         read_bytes+= BMP_INIT_MSG_LEN;
 
@@ -263,7 +288,8 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
             buf_ptr += info_len;                     // Move pointer past the info data
             i += info_len;                          // Update the counter past the info data
         }
-        init_msg->init_msg_tlvs.push_back(*init_msg_tlv);
+
+        init_msg->init_msg_tlvs[curr_tlv++] = *init_msg_tlv;
         delete init_msg_tlv;
     }
     return read_bytes;
@@ -286,11 +312,14 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
     int info_len;
     ssize_t read_bytes = 0;
 
+    uint8_t num_tlvs = bmp_data_len/BMP_TERM_MSG_LEN, curr_tlv = 0;
+    term_msg->term_msg_tlvs = (term_msg_v3_tlv *)malloc(num_tlvs*sizeof(term_msg_v3_tlv));
     /*
      * Loop through the term message (in buffer) to parse each TLV
      */
     for (int i=0; i < bmp_data_len; i += BMP_TERM_MSG_LEN) {
-        term_msg_v3_tlv *term_msg_tlv;
+        term_msg_v3_tlv *term_msg_tlv = (term_msg_v3_tlv *)malloc(sizeof(term_msg_v3_tlv));
+
         memcpy(&term_msg_tlv, buf_ptr, BMP_TERM_MSG_LEN);
         read_bytes += BMP_TERM_MSG_LEN;
 
@@ -308,7 +337,7 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
             buf_ptr += info_len;                     // Move pointer past the info data
             i += info_len;                       // Update the counter past the info data
         }
-        term_msg->term_msg_tlvs.push_back(*term_msg_tlv);
+        term_msg->term_msg_tlvs[curr_tlv++] = *term_msg_tlv;
         delete term_msg_tlv;
     }
     return read_bytes;
@@ -336,6 +365,8 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
 
     SWAP_BYTES(&stat_rep_msg->stats_count);
     read_size+=4;
+
+    stat_rep_msg->total_stats_counter = (stat_counter *)malloc(stat_rep_msg->stats_count*sizeof(stat_counter));
 
     // Loop through each stats object
     for (unsigned long i = 0; i < stat_rep_msg->stats_count; i++) {
@@ -370,7 +401,7 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
             while (stat_info.stat_len-- > 0)
                 extract_from_buffer(buffer, buf_len, &b[0], 1);
         }
-        stat_rep_msg->total_stats_counter.push_back(stat_info);
+        stat_rep_msg->total_stats_counter[i]=stat_info;
 //        delete stat_info;
     }
     return read_size;
@@ -504,10 +535,10 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
     /*
      * Parsing the bmp message header: Version 1, 2, 3 are supported
      */
-    bytes_read= libparsebgp_parse_bmp_msg_header(parsed_msg, buffer, buf_len);
-    if(bytes_read<0) return bytes_read;     //checking for the error code returned in parsing bmp header.
+    if((bytes_read= libparsebgp_parse_bmp_msg_header(parsed_msg, buffer, buf_len))<0)
+        return bytes_read;      //checking for the error code returned in parsing bmp header.
 
-    read_size += bytes_read;
+    read_size += bytes_read;    //adding the bytes read from parsing the header
 
     /*
      * Parsing BMP message based on bmp type retrieved from the header
@@ -562,11 +593,13 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
                 return bytes_read;
 
+            /*
+             * Parsing the received and sent open message in the up event message
+             */
             if((bytes_read = libparsebgp_parse_bgp_handle_up_event(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg, bmp_data, bmp_data_len))<0)
                 return bytes_read;
 
             read_size += bytes_read;
-
             break;
         }
 
@@ -577,6 +610,9 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
                 return bytes_read;
 
+            /*
+             * Parsing the bgp update message
+             */
             if((bytes_read = libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len))<0)
                 return bytes_read;
 
@@ -591,6 +627,9 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
                 return bytes_read;
 
+            /*
+             * Parsing the stats report message
+             */
             if((bytes_read = libparsebgp_parse_bmp_handle_stats_report(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_stat_rep, bmp_data, bmp_data_len))<0)
                 return bytes_read;
 
@@ -605,6 +644,9 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
                 return bytes_read;
 
+            /*
+             * Parsing the init message tlvs
+             */
             if((bytes_read = libparsebgp_parse_bmp_handle_init_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_init_msg, bmp_data, bmp_data_len))<0)
                 return bytes_read;
 
@@ -619,6 +661,9 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, buf_len))<0)
                 return bytes_read;
 
+            /*
+             * Parsing the term message tlvs
+             */
             if((bytes_read = libparsebgp_parse_bmp_handle_term_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_term_msg, bmp_data, bmp_data_len))<0)
                 return bytes_read;
 

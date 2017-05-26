@@ -93,8 +93,6 @@ enum update_attr_types {
 /**
  * parsed path attributes map
  */
-//    std::map<update_attr_types, std::string>            parsed_attrs;
-typedef std::pair<update_attr_types, std::string>   parsed_attrs_pair;
 typedef std::map<update_attr_types, std::string>    parsed_attrs_map;
 
 // Parsed bgp-ls attributes map

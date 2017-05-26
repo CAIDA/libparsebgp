@@ -12,7 +12,7 @@
  * BMP Header lengths, not counting the version in the common hdr
  */
 #define BMP_HDRv3_LEN 5             ///< BMP v3 header length, not counting the version
-#define BMP_HDRv1v2_LEN 43
+#define BMP_HDRv1v2_LEN  43
 #define BMP_PEER_HDR_LEN 42         ///< BMP peer header length
 #define BMP_INIT_MSG_LEN 4          ///< BMP init message header length, does not count the info field
 #define BMP_TERM_MSG_LEN 4          ///< BMP term message header length, does not count the info field
@@ -114,7 +114,7 @@ typedef struct init_msg_v3_tlv {
 * BMP initiation message: This can contain multiple init - tlvs
 */
 typedef struct libparsebgp_parsed_bmp_init_msg {
-    list<init_msg_v3_tlv> init_msg_tlvs;    ///< list of init message tlvs
+    init_msg_v3_tlv *init_msg_tlvs;    ///< list of init message tlvs
 }libparsebgp_parsed_bmp_init_msg;
 
 /**
@@ -130,17 +130,13 @@ typedef struct term_msg_v3_tlv {
 * BMP termination message: This can contain multiple term - tlvs
 */
 typedef struct libparsebgp_parsed_bmp_term_msg {
-    list<term_msg_v3_tlv> term_msg_tlvs;    ///< list of term message tlvs
+    term_msg_v3_tlv *term_msg_tlvs;    ///< list of term message tlvs
 }libparsebgp_parsed_bmp_term_msg;
 
 /**
  * OBJECT: peer_up_events
  *
  * Peer Up Events schema
- *
- * \note    open_params are the decoded values in string/text format; e.g. "attr=value ..."
- *          Numeric values are converted to printed form.   The buffer itself is
- *          allocated by the caller and freed by the caller.
  */
 typedef struct libparsebgp_parsed_bmp_peer_up_event {
     char                                local_ip[16];           ///< IPv4 or IPv6 printed IP address
@@ -177,7 +173,7 @@ typedef struct stat_counter {
  */
 typedef struct libparsebgp_parsed_bmp_stat_rep {
     uint32_t                stats_count;            ///< 4 bytes - Stats Count
-    list<stat_counter>      total_stats_counter;    ///< 2 bytes - Information type
+    stat_counter*           total_stats_counter;    ///< 2 bytes - Information type
 }libparsebgp_parsed_bmp_stat_rep;
 
 /**
@@ -219,7 +215,6 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
         libparsebgp_parsed_bmp_rm_msg             parsed_rm_msg;                    ///< structure for bmp route monitoring msg
         libparsebgp_parsed_bmp_stat_rep           parsed_stat_rep;                  ///< structure for bmp stats report msg
     }libparsebgp_parsed_bmp_msg;
-
 }libparsebgp_parsed_bmp_parsed_data;
 
 /**
