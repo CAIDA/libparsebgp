@@ -35,7 +35,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
     update_prefix_tuple prefix_tuple;
 
     if (len <= 0 or data == NULL)
-        return CORRUPT_MSG;
+        return 0;
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4
     // Set the type for all to be unicast V4
@@ -95,7 +95,6 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
     }
     return 0;
 }
-
 
 /**
  * Parses the update message
@@ -194,7 +193,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
     return read_size;
 }
 
-    /**
+/**
  * Parse attribute AS_PATH data
  *
  * \param [in]   attr_len       Length of the attribute data
@@ -334,7 +333,7 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
 //        attrs[ATTR_TYPE_INTERNAL_AS_ORIGIN] = decoded_path.substr(spos, (epos - spos) + 1);
 }
 
-    /**
+/**
  * Parse attribute AGGEGATOR data
  *
  * \param [in]   attr_len       Length of the attribute data

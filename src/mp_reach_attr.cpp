@@ -120,7 +120,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
 * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
 */
 static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, update_path_attrs *path_attrs, int nlri_len,
-                                                          unsigned char *next_hop, unsigned char *nlri_data) {
+                                                             unsigned char *next_hop, unsigned char *nlri_data) {
     ssize_t read_size = 0;
     /*
      * Decode based on SAFI
