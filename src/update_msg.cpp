@@ -93,7 +93,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
             //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
         }
     }
-    return 0;
+    return len;
 }
 
 /**
@@ -539,6 +539,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
             break;
 
     } // END OF SWITCH ATTR TYPE
+    return path_attrs->attr_len;
 }
 
 

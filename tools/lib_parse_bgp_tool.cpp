@@ -60,8 +60,9 @@ int read_file(ifstream &fin, u_char *array2, int position, int read_size) {
 //}
 
 int main() {
-    string filename = "../testfile.txt";
-    int msg_type = 2;
+    //string filename = "../testfile.txt";
+    string filename = "C:\\Users\\Induja\\Documents\\CAIDA\\update.txt";
+    int msg_type = 1;
 //    for (int i=1; i < argc; i++) {
 //        if (!strcmp(argv[i], "-c")) {
 //            // We expect the next arg to be the filename
@@ -107,7 +108,6 @@ int main() {
             memset(parse_msg, 0, sizeof(libparsebgp_parse_msg));
 
             bytes_read=libparsebgp_parse_msg_common_wrapper(parse_msg, buffer, len, msg_type);
-            cout << "Message Parsed Successfully"<<endl;
 
             if(bytes_read < 0) {
                 msg_read = false;
@@ -117,9 +117,13 @@ int main() {
                 msg_read=false;
             else {
                 position += bytes_read;
+                cout << "Message Parsed Successfully"<<endl;
                 cout << bytes_read << " " << position << endl;
+                len-=bytes_read;
                 buffer += bytes_read;
             }
+            if (end_reach)
+                break;
         }
         if(cur==2)
             return 1;

@@ -96,11 +96,10 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &b
     if((bytes_read = libparsebgp_parse_bgp_parse_header(bgp_update_msg, data, size))<0)
         return bytes_read;
     read_size += bytes_read;
+    data += bytes_read;
 
     if (bgp_update_msg.c_hdr.type == BGP_MSG_UPDATE) {
         ssize_t data_bytes_remaining = bgp_update_msg.c_hdr.len - BGP_MSG_HDR_LEN;
-        data += BGP_MSG_HDR_LEN;
-        read_size+=BGP_MSG_HDR_LEN;
         if((bytes_read=libparsebgp_update_msg_parse_update_msg(&bgp_update_msg.parsed_data.update_msg, data, data_bytes_remaining,
                                                           bgp_update_msg.has_end_of_rib_marker))<0)
             return bytes_read;

@@ -246,7 +246,24 @@ typedef struct bgp_link_state_attrs{
         char node_ipv6_router_id_local[16];
         char node_isis_area_id[8];
         char node_name[256];
+        char mt_id[256];
     }node;
+    struct link_attr{
+        char link_admin_group [4];
+        char link_igp_metric[4];
+        char link_ipv4_router_id_remote[4];
+        char link_ipv6_router_id_remote[4];
+        char link_max_link_bw[4];
+        char link_max_resv_bw[4];
+        char link_name[256];
+        char link_te_def_metric[4];
+        char link_unresv_bw[32];
+        char link_peer_epe_node_sid[32];
+    }link;
+    struct prefix_attr {
+        char prefix_prefix_metric[4];
+        char prefix_route_tag[4];
+    }prefix;
 }bgp_link_state_attrs;
 
 struct update_path_attrs {
@@ -263,7 +280,7 @@ struct update_path_attrs {
     //parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
     //libparsebgp_evpn_data evpn_data;
     //libparsebgp_addpath_map add_path_map;
-    bgp_link_state_attrs    bgp_ls;
+    list<bgp_link_state_attrs>    bgp_ls;
     libparsebgp_addpath_map add_path_map;
 };
 
