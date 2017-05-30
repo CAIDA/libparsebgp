@@ -279,27 +279,20 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
 //        }
 
         // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
-        int seg_len = as_segment.seg_len;
+        int seg_len = as_segment.seg_len, count=0;
+        as_segment.seg_asn = (uint32_t *)malloc(as_segment.seg_len*sizeof(uint32_t));
         for (; seg_len > 0; seg_len--) {
-            uint32_t seg_asn;
+            uint32_t seg_asn = 0;
             seg_asn = 0;
             memcpy(&seg_asn, data, asn_octet_size);  data += asn_octet_size;
             path_len -= asn_octet_size;                               // Adjust the path length for what was read
 
             SWAP_BYTES(&seg_asn, asn_octet_size);
-//            decoded_path.append(" ");
-//            std::ostringstream numString;
-//            numString << as_segment.seg_asn;
-//            decoded_path.append(numString.str());
-
             // Increase the as path count
             ++as_path_cnt;
-            as_segment.seg_asn.push_back(seg_asn);
+            as_segment.seg_asn[count++]=seg_asn;
         }
 
-//        if (as_segment.seg_type == 1) {            // If AS-SET close with a brace
-//            decoded_path.append(" }");
-//        }
         path_attrs->attr_value.as_path.push_back(as_segment);
     }
 

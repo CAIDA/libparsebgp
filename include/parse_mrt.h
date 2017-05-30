@@ -18,7 +18,6 @@
 #define PARSEMRT_H_
 
 #include <string>
-#include <list>
 #include <vector>
 #include "parse_bgp.h"
 #include "parse_utils.h"
@@ -109,7 +108,7 @@ struct libparsebgp_peer_index_table{
     uint16_t            view_name_length;
     char                view_name[1024]; // it is in utf8 format
     uint16_t            peer_count;
-    list<peer_entry>    peer_entries;
+    peer_entry*         peer_entries;
 };
 
 /**
@@ -131,7 +130,7 @@ struct libparsebgp_rib_entry_header{
     uint8_t         prefix_length;
     char            prefix[46];
     uint16_t        entry_count;
-    list<rib_entry> rib_entries;
+    rib_entry*      rib_entries;
 };
 
 /**
@@ -143,7 +142,7 @@ struct libparsebgp_rib_generic_entry_header{
     uint8_t         subsequent_afi;
     u_char*         nlri;
     uint16_t        entry_count;
-    list<rib_entry> rib_entries;
+    rib_entry*      rib_entries;
 };
 
 /**

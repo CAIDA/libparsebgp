@@ -139,8 +139,7 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
             //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             // Data is an IP address - parse the address and save it
-            read_size = libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len,
-                                                                            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info);
+            read_size = libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info);
             break;
 
         case BGP_SAFI_NLRI_LABEL:
@@ -311,11 +310,10 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char *data, uint16_t len, std::list<update_prefix_tuple> &prefixes) {
-    u_char            ip_raw[16];
-    char              ip_char[40];
-    u_char            addr_bytes;
-    update_prefix_tuple tuple;
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char *data, uint16_t len, update_prefix_tuple *prefixes) {
+    u_char              ip_raw[16];
+    char                ip_char[40];
+    u_char              addr_bytes;
 
     if (len <= 0 or data == NULL)
         return 0;
@@ -327,9 +325,13 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
     //bool add_path_enabled = libparsebgp_addpath_is_enabled(peer_info->add_path_capability, is_ipv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6,
     //                                                                        BGP_SAFI_NLRI_LABEL);
 
+    int count=0;
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {
-        //tuple.path_id = 0;
+        update_prefix_tuple *tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
+        memset(tuple, 0, sizeof(update_prefix_tuple));
+
+        prefixes = (update_prefix_tuple *)realloc(prefixes, sizeof(update_prefix_tuple));
 
         bzero(ip_raw, sizeof(ip_raw));
 
@@ -342,11 +344,11 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
             tuple.path_id = 0;*/
 
         // set the address in bits length
-        tuple.len = *data++;
+        tuple->len = *data++;
 
         // Figure out how many bytes the bits requires
-        addr_bytes = tuple.len / 8;
-        if (tuple.len % 8)
+        addr_bytes = tuple->len / 8;
+        if (tuple->len % 8)
            ++addr_bytes;
 
         memcpy(ip_raw, data, addr_bytes);
@@ -356,13 +358,12 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
         // Convert the IP to string printed format
         inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-        tuple.prefix.assign(ip_char);
-
-        // set the raw/binary address
-        //memcpy(tuple.prefix_bin, ip_raw, sizeof(ip_raw));
+        tuple->prefix.assign(ip_char);
 
         // Add tuple to prefix list
-        prefixes.push_back(tuple);
+        prefixes[count++] = *tuple;
+
+        delete(tuple);
     }
     return len;
 }

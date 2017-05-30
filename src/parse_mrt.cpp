@@ -259,8 +259,10 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
     read_size+=2;
     SWAP_BYTES(&peer_index_table->peer_count);
 
+    peer_index_table->peer_entries = (peer_entry *)malloc(peer_index_table->peer_count*sizeof(peer_entry));
+
     while (count < peer_index_table->peer_count) {
-        peer_entry *p_entry = new peer_entry;
+        peer_entry *p_entry = (peer_entry *)malloc(sizeof(peer_entry));
         if (extract_from_buffer(buffer, buf_len, &p_entry->peer_type, 1) != 1)
             return ERR_READING_MSG; //throw "Error in parsing collector_BGPID";
         read_size+=1;
@@ -291,9 +293,8 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
         if ( extract_from_buffer(buffer, buf_len, &p_entry->peer_as, as_num) != as_num)
             return ERR_READING_MSG; //throw "Error in parsing local address in IPv4";
         read_size+=as_num;
-        peer_index_table->peer_entries.push_back(*p_entry);
+        peer_index_table->peer_entries[count++] = *p_entry;
         delete p_entry;
-        count++;
     }
     return read_size;
 }
@@ -352,8 +353,10 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
     read_size+=2;
     SWAP_BYTES(&rib_entry_data->entry_count);
 
+    rib_entry_data->rib_entries = (rib_entry *)malloc(rib_entry_data->entry_count*sizeof(rib_entry));
+
     while (count < rib_entry_data->entry_count) {
-        rib_entry *r_entry = new rib_entry();
+        rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
 
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             return ERR_READING_MSG; //throw "Error in parsing peer Index";
@@ -375,9 +378,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
-        rib_entry_data->rib_entries.push_back(*r_entry);
+        rib_entry_data->rib_entries[count++]=*r_entry;
         delete r_entry;
-        count++;
     }
     return read_size;
 }
@@ -410,8 +412,10 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
 
     SWAP_BYTES(&rib_gen_entry_hdr->entry_count);
 
+    rib_gen_entry_hdr->rib_entries = (rib_entry *)malloc(rib_gen_entry_hdr->entry_count*sizeof(rib_entry));
+
     while (count < rib_gen_entry_hdr->entry_count) {
-        rib_entry *r_entry = new rib_entry();
+        rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             return ERR_READING_MSG; //throw "Error in parsing peer Index";
 
@@ -432,9 +436,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
-        rib_gen_entry_hdr->rib_entries.push_back(*r_entry);
+        rib_gen_entry_hdr->rib_entries[count++]=*r_entry;
         delete r_entry;
-        count++;
     }
     return read_size;
 }
@@ -549,7 +552,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
     return read_size;
 }
 
-/*
+
 int main() {
     u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
                      0x00, 0x00, 0x19, 0x2f, 0x00, 0x00, 0x00, 0x01, 0x67, 0xf7, 0x03, 0x2d, 0x80, 0xdf, 0x33, 0x66,
@@ -558,13 +561,13 @@ int main() {
                      0x02, 0x16, 0x02, 0x05, 0x00, 0x00, 0xe4, 0x8f, 0x00, 0x00, 0x1b, 0x1b, 0x00, 0x04, 0x01, 0x04,
                      0x00, 0x00, 0x6e, 0xb7, 0x00, 0x04, 0x05, 0x73, 0x40, 0x03, 0x04, 0x67, 0xf7, 0x03, 0x2d, 0x18,
                      0xbf, 0x05, 0xaa};
-    */
+
 /*u_char temp[] = {0x58, 0x67, 0xb5, 0x31, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x07, 0x2c,
                      0x00, 0x00, 0x31, 0x6e, 0x00, 0x00, 0x00, 0x02, 0x2a, 0x01, 0x02, 0xa8, 0x00, 0x00, 0x00, 0x00,
                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x01, 0x06, 0x7c, 0x02, 0xe8, 0x00, 0x02,
                      0xff, 0xff, 0x00, 0x00, 0x00, 0x04, 0x00, 0x28, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x13, 0x04};*//*
-
+*/
     u_char *tmp;
     tmp = temp;
     //parseMRT *p = new parseMRT();
@@ -586,4 +589,4 @@ int main() {
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
 //    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
     return 1;
-}*/
+}

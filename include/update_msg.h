@@ -106,7 +106,7 @@ struct attr_type_tuple {
 typedef struct as_path_segment {
     uint8_t         seg_type;
     uint8_t         seg_len;
-    list<uint32_t>  seg_asn;
+    uint32_t        *seg_asn;
 }as_path_segment;
 
 /**
@@ -116,7 +116,7 @@ struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     struct withdrawn_routes_nlri {
-        list<update_prefix_tuple> wdrawn_routes;   ///< Withdrawn routes
+        update_prefix_tuple             *wdrawn_routes;   ///< Withdrawn routes
         list<update_prefix_label_tuple> wdrawn_routes_label;
     }withdrawn_routes_nlri;
 };
@@ -192,9 +192,9 @@ struct mp_reach_nlri {
     unsigned char next_hop[16];  ///< Next hop address - Pointer to data (normally does not require freeing)
     uint8_t reserved;            ///< Reserved
     struct nlri_info {
-        list <update_prefix_tuple>       nlri_info;               ///< Withdrawn routes
+        update_prefix_tuple              *nlri_info;               ///< Withdrawn routes
         list <update_prefix_label_tuple> nlri_label_info;
-        list <mp_reach_ls>               mp_rch_ls;
+        mp_reach_ls                      *mp_rch_ls;
     }nlri_info;
 };
 

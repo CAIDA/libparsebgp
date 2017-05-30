@@ -744,24 +744,28 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
  * \param [in]   len            Length of the NLRI data
  */
 static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t len) {
-    uint16_t        nlri_len_read = 0;
+    uint16_t        nlri_len_read = 0, count = 0;
     // Process the NLRI data
     while (nlri_len_read < len) {
-        mp_reach_ls mp_nlri_ls;
+        if(count==0)
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
+        else
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls = (mp_reach_ls *)realloc(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls, sizeof(mp_reach_ls));
+        mp_reach_ls *mp_nlri_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
         /*
          * Parse the NLRI TLV
          */
-        memcpy(&mp_nlri_ls.nlri_type, data, 2);
+        memcpy(&mp_nlri_ls->nlri_type, data, 2);
         data += 2;
-        SWAP_BYTES(&mp_nlri_ls.nlri_type);
+        SWAP_BYTES(&mp_nlri_ls->nlri_type);
 
-        memcpy(&mp_nlri_ls.nlri_len, data, 2);
+        memcpy(&mp_nlri_ls->nlri_len, data, 2);
         data += 2;
-        SWAP_BYTES(&mp_nlri_ls.nlri_len);
+        SWAP_BYTES(&mp_nlri_ls->nlri_len);
 
         nlri_len_read += 4;
 
-        if (mp_nlri_ls.nlri_len > len) {
+        if (mp_nlri_ls->nlri_len > len) {
 //                LOG_NOTICE("%s: bgp-ls: failed to parse link state NLRI; length is larger than available data",peer_addr.c_str());
             return INCOMPLETE_MSG;
         }
@@ -770,40 +774,41 @@ static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_at
          * Parse out the protocol and ID (present in each NLRI ypte
          */
 
-        mp_nlri_ls.proto_id = *data;
-        memcpy(&mp_nlri_ls.id, data + 1, sizeof(mp_nlri_ls.id));
-        SWAP_BYTES(&mp_nlri_ls.id);
+        mp_nlri_ls->proto_id = *data;
+        memcpy(&mp_nlri_ls->id, data + 1, sizeof(mp_nlri_ls->id));
+        SWAP_BYTES(&mp_nlri_ls->id);
 
         // Update read NLRI attribute, current TLV length and data pointer
-        nlri_len_read += 9; mp_nlri_ls.nlri_len -= 9; data += 9;
+        nlri_len_read += 9; mp_nlri_ls->nlri_len -= 9; data += 9;
 
         /*
          * Decode based on bgp-ls NLRI type
          */
-        switch (mp_nlri_ls.nlri_type) {
+        switch (mp_nlri_ls->nlri_type) {
             case NLRI_TYPE_NODE:
-                libparsebgp_parse_nlri_node(&mp_nlri_ls, data, mp_nlri_ls.nlri_len);
+                libparsebgp_parse_nlri_node(mp_nlri_ls, data, mp_nlri_ls->nlri_len);
                 break;
 
             case NLRI_TYPE_LINK:
-                libparsebgp_parse_nlri_link(&mp_nlri_ls, data,mp_nlri_ls.nlri_len);
+                libparsebgp_parse_nlri_link(mp_nlri_ls, data,mp_nlri_ls->nlri_len);
                 break;
 
             case NLRI_TYPE_IPV4_PREFIX:
-                libparsebgp_parse_nlri_prefix(&mp_nlri_ls, data, mp_nlri_ls.nlri_len, true);
+                libparsebgp_parse_nlri_prefix(mp_nlri_ls, data, mp_nlri_ls->nlri_len, true);
                 break;
 
             case NLRI_TYPE_IPV6_PREFIX:
-                libparsebgp_parse_nlri_prefix(&mp_nlri_ls, data, mp_nlri_ls.nlri_len, false);
+                libparsebgp_parse_nlri_prefix(mp_nlri_ls, data, mp_nlri_ls->nlri_len, false);
                 break;
 
             default :
                 return INVALID_MSG;
         }
-        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls.push_back(mp_nlri_ls);
+        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count]=*mp_nlri_ls;
         // Move to next link state type
-        data += mp_nlri_ls.nlri_len;
-        nlri_len_read += mp_nlri_ls.nlri_len;
+        count++;
+        data += mp_nlri_ls->nlri_len;
+        nlri_len_read += mp_nlri_ls->nlri_len;
     }
     return nlri_len_read;
 }
