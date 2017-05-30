@@ -260,9 +260,11 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
     SWAP_BYTES(&peer_index_table->peer_count);
 
     peer_index_table->peer_entries = (peer_entry *)malloc(peer_index_table->peer_count*sizeof(peer_entry));
+    peer_entry *p_entry = (peer_entry *)malloc(sizeof(peer_entry));
 
     while (count < peer_index_table->peer_count) {
-        peer_entry *p_entry = (peer_entry *)malloc(sizeof(peer_entry));
+        memset(p_entry, 0, sizeof(peer_entry));
+
         if (extract_from_buffer(buffer, buf_len, &p_entry->peer_type, 1) != 1)
             return ERR_READING_MSG; //throw "Error in parsing collector_BGPID";
         read_size+=1;
@@ -294,8 +296,8 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
             return ERR_READING_MSG; //throw "Error in parsing local address in IPv4";
         read_size+=as_num;
         peer_index_table->peer_entries[count++] = *p_entry;
-        delete p_entry;
     }
+    delete(p_entry);
     return read_size;
 }
 
@@ -354,9 +356,10 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
     SWAP_BYTES(&rib_entry_data->entry_count);
 
     rib_entry_data->rib_entries = (rib_entry *)malloc(rib_entry_data->entry_count*sizeof(rib_entry));
+    rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
 
     while (count < rib_entry_data->entry_count) {
-        rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
+        memset(r_entry, 0, sizeof(rib_entry));
 
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             return ERR_READING_MSG; //throw "Error in parsing peer Index";
@@ -379,8 +382,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
         buf_len-=r_entry->attribute_len;
 
         rib_entry_data->rib_entries[count++]=*r_entry;
-        delete r_entry;
     }
+    delete r_entry;
     return read_size;
 }
 
@@ -413,9 +416,11 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
     SWAP_BYTES(&rib_gen_entry_hdr->entry_count);
 
     rib_gen_entry_hdr->rib_entries = (rib_entry *)malloc(rib_gen_entry_hdr->entry_count*sizeof(rib_entry));
+    rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
 
     while (count < rib_gen_entry_hdr->entry_count) {
-        rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
+        memset(r_entry, 0, sizeof(rib_entry));
+
         if (extract_from_buffer(buffer, buf_len, &r_entry->peer_index, 2) != 2)
             return ERR_READING_MSG; //throw "Error in parsing peer Index";
 
@@ -437,8 +442,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
         buf_len-=r_entry->attribute_len;
 
         rib_gen_entry_hdr->rib_entries[count++]=*r_entry;
-        delete r_entry;
     }
+    delete r_entry;
     return read_size;
 }
 
