@@ -34,19 +34,19 @@ struct libparsebgp_parse_msg{
  *
  * @return number of bytes read
  */
-ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg &parsed_msg, u_char* buffer, int buf_len, int type) {
+ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, u_char* buffer, int buf_len, int type) {
     ssize_t read_size = 0;
     switch (type) {
         case MRT_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg.parsed_mrt_msg, buffer, buf_len);
+            read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg->parsed_mrt_msg, buffer, buf_len);
             break;
         }
         case BMP_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_bmp_parse_msg(&parsed_msg.parsed_bmp_msg, buffer, buf_len);
+            read_size=libparsebgp_parse_bmp_parse_msg(&parsed_msg->parsed_bmp_msg, buffer, buf_len);
             break;
         }
         case BGP_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_bgp_parse_msg(parsed_msg.parsed_bgp_msg, buffer, buf_len);
+            read_size=libparsebgp_parse_bgp_parse_msg(parsed_msg->parsed_bgp_msg, buffer, buf_len);
             break;
         }
         default: {

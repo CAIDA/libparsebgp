@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int read_file(ifstream &fin, u_char *array2, int position, int read_size) {
+int read_file(ifstream &fin, u_char *array2, int position, int read_size, int *read_bytes) {
     int curr=0;
     char *array = new char[read_size];
     if(fin.is_open())
@@ -16,9 +16,10 @@ int read_file(ifstream &fin, u_char *array2, int position, int read_size) {
             fin.get(array[curr]); //reading one character from file to array
             curr++;
         }
+        *read_bytes = (curr-1)/3;
         array[curr-1] = '\0'; //placing character array terminating character
 
-        for(int i=0, j=0;i<read_size;i+=3, j++)
+        for(int i=0, j=0;i<curr;i+=3, j++)
         {
             int tmp;
             sscanf(array+i, "%2x",&tmp);
@@ -61,8 +62,8 @@ int read_file(ifstream &fin, u_char *array2, int position, int read_size) {
 
 int main() {
     //string filename = "../testfile.txt";
-    string filename = "C:\\Users\\Induja\\Documents\\CAIDA\\update.txt";
-    int msg_type = 1;
+    string filename = "../testfile.txt";
+    int msg_type = 2;
 //    for (int i=1; i < argc; i++) {
 //        if (!strcmp(argv[i], "-c")) {
 //            // We expect the next arg to be the filename
@@ -89,22 +90,25 @@ int main() {
     int read_size = 3072;
     int position = 0;
     bool msg_read = true;
-    int len = 1024, cur=0, bytes_read;
+    int len = 1024, cur=0, bytes_read, read_bytes = 0;
     int end_reach=0;
 
     ifstream fin(filename);
 
+    int count = 1;
+    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
     while(!end_reach)
     {
         cur++;
         u_char *buffer = new u_char[read_size/3];
-        end_reach = read_file(fin, buffer, 3*position, read_size);
+        end_reach = read_file(fin, buffer, 3*position, read_size, &read_bytes);
         msg_read = true;
-        len = 1024;
-        while(msg_read)
+        len = read_bytes;
+
+        libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
+        while(msg_read && len>0)
         {
-            //parseBMP *p = new parseBMP();
-            libparsebgp_parse_msg *parse_msg = malloc(sizeof(libparsebgp_parse_msg));
+            all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,count*sizeof(libparsebgp_parse_msg *));
             memset(parse_msg, 0, sizeof(libparsebgp_parse_msg));
 
             bytes_read=libparsebgp_parse_msg_common_wrapper(parse_msg, buffer, len, msg_type);
@@ -121,10 +125,14 @@ int main() {
                 cout << bytes_read << " " << position << endl;
                 len-=bytes_read;
                 buffer += bytes_read;
+                all_parsed_msg[count-1] = parse_msg;
+                cout<<count-1<<" "<<int(all_parsed_msg[count - 1]->parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.type)<<endl;
+
+                ++count;
             }
-            if (end_reach)
-                break;
         }
+        if (end_reach)
+            break;
         if(cur==2)
             return 1;
     }
