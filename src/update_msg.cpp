@@ -27,28 +27,24 @@
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
 static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map &add_path_map, u_char *data, uint16_t len,
-                                                         update_prefix_tuple *prefixes) {
+                                                         list<update_prefix_tuple> &prefixes) {
     u_char       ipv4_raw[4];
     char         ipv4_char[16];
     int          addr_bytes;
 
     //prefix_tuple tuple;
-    update_prefix_tuple *prefix_tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
-
-    prefixes = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
+    update_prefix_tuple prefix_tuple;
 
     if (len <= 0 or data == NULL)
         return 0;
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4
     // Set the type for all to be unicast V4
+    //tuple.type = PREFIX_UNICAST_V4;
+    //tuple.is_ipv4 = true;
 
-    int count = 0;
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {
-
-        if(count)
-            prefixes = (update_prefix_tuple *)realloc(prefixes, count*sizeof(update_prefix_tuple));
 
         //bzero(ipv4_raw, sizeof(ipv4_raw));
         //bzero(tuple.prefix_bin, sizeof(tuple.prefix_bin));
@@ -56,22 +52,22 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
         // Parse add-paths if enabled
         if (libparsebgp_addpath_is_enabled(add_path_map, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
             and (len - read_size) >= 4) {
-            memcpy(&prefix_tuple->path_id, data, 4);
-            SWAP_BYTES(&prefix_tuple->path_id.afi);
+            memcpy(&prefix_tuple.path_id, data, 4);
+            SWAP_BYTES(&prefix_tuple.path_id.afi);
             data += 4; read_size += 4;
         } else {
-            prefix_tuple->path_id.afi = 0;
-            prefix_tuple->path_id.safi = 0;
-            prefix_tuple->path_id.send_recieve = 0;
+            prefix_tuple.path_id.afi = 0;
+            prefix_tuple.path_id.safi = 0;
+            prefix_tuple.path_id.send_recieve = 0;
         }
 
         // set the address in bits length
         //tuple.len = *data++;
-        prefix_tuple->len = *data++;
+        prefix_tuple.len = *data++;
 
         // Figure out how many bytes the bits requires
-        addr_bytes = prefix_tuple->len / 8;
-        if (prefix_tuple->len % 8)
+        addr_bytes = prefix_tuple.len / 8;
+        if (prefix_tuple.len % 8)
             ++addr_bytes;
 
         //SELF_DEBUG("%s: rtr=%s: Reading NLRI data prefix bits=%d bytes=%d", peer_addr.c_str(),
@@ -84,7 +80,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
 
             // Convert the IP to string printed format
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-            prefix_tuple->prefix.assign(ipv4_char);
+            prefix_tuple.prefix.assign(ipv4_char);
             //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
             //           router_addr.c_str(), ipv4_char, tuple.len);
 
@@ -92,7 +88,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
             //memcpy(tuple.prefix_bin, ipv4_raw, sizeof(ipv4_raw));
 
             // Add tuple to prefix list
-            prefixes[count++]=*prefix_tuple;
+            prefixes.push_back(prefix_tuple);
 
         } else if (addr_bytes > 4) {
             //LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",
@@ -548,7 +544,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs *update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
@@ -557,51 +553,47 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
     /*
      * Iterate through all attributes and parse them
      */
-    int count = 0;
-    update_msg = (update_path_attrs *)malloc(sizeof(update_path_attrs));
-    update_path_attrs *path_attrs = (update_path_attrs *)malloc(sizeof(update_path_attrs));
-    for (int read=0;  read < len; read += 2) {
-        memset(path_attrs, 0, sizeof(path_attrs));
-        if(count)
-            update_msg = (update_path_attrs *)realloc(update_msg,(count+1)*sizeof(update_path_attrs));
 
-        path_attrs->attr_type.attr_flags = *data++;
-        path_attrs->attr_type.attr_type_code = *data++;
+    for (int read=0;  read < len; read += 2) {
+        update_path_attrs path_attrs;
+
+        path_attrs.attr_type.attr_flags = *data++;
+        path_attrs.attr_type.attr_type_code = *data++;
         read_size += 2;
         // Check if the length field is 1 or two bytes
-        if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
-            memcpy(&path_attrs->attr_len, data, 2);
+        if (ATTR_FLAG_EXTENDED(path_attrs.attr_type.attr_flags)) {
+            memcpy(&path_attrs.attr_len, data, 2);
             data += 2;
             read += 2;
             read_size += 2;
-            SWAP_BYTES(&path_attrs->attr_len);
+            SWAP_BYTES(&path_attrs.attr_len);
 
         } else {
-            path_attrs->attr_len = *data++;
+            path_attrs.attr_len = *data++;
             read++;
             read_size++;
         }
 
         // Get the attribute data, if we have any; making sure to not overrun buffer
-        if (path_attrs->attr_len > 0 and (read + path_attrs->attr_len) <= len) {
+        if (path_attrs.attr_len > 0 and (read + path_attrs.attr_len) <= len) {
             // Data pointer is currently at the data position of the attribute
 
             /*
              * Parse data based on attribute type
              */
-            bytes_read = libparsebgp_update_msg_parse_attr_data(add_path_map, path_attrs, data, has_end_of_rib_marker);
+            bytes_read = libparsebgp_update_msg_parse_attr_data(add_path_map, &path_attrs, data, has_end_of_rib_marker);
             if(bytes_read<0) return bytes_read;
-            data += path_attrs->attr_len;
-            read += path_attrs->attr_len;
-            read_size += path_attrs->attr_len;
+            data += path_attrs.attr_len;
+            read += path_attrs.attr_len;
+            read_size += path_attrs.attr_len;
 
             //SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
             //            attr_type, attr_len);
 
-        } else if (path_attrs->attr_len) {
+        } else if (path_attrs.attr_len) {
             return INCOMPLETE_MSG;
         }
-        update_msg[count++]=*path_attrs;
+        update_msg.push_back(path_attrs);
         //delete path_attrs;
     }
     return read_size;
