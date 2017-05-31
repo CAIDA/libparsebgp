@@ -219,7 +219,8 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
     read_size+=4;
 
     bool has_end_of_rib_marker;
-    libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker);
+    libparsebgp_addpath_map add_path_map;
+    libparsebgp_update_msg_parse_attributes(add_path_map, table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker);
     read_size += table_dump_msg->attribute_len;
     buf_len-=table_dump_msg->attribute_len;
 
@@ -377,7 +378,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
         SWAP_BYTES(&r_entry->attribute_len);
 
         bool has_end_of_rib_marker;
-        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
+        libparsebgp_addpath_map add_path_map;
+        libparsebgp_update_msg_parse_attributes(add_path_map, r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
@@ -437,7 +439,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
         SWAP_BYTES(&r_entry->attribute_len);
 
         bool has_end_of_rib_marker;
-        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
+        libparsebgp_addpath_map add_path_map;
+        libparsebgp_update_msg_parse_attributes(add_path_map, r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
@@ -557,6 +560,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
     return read_size;
 }
 
+/*
 
 int main() {
     u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
@@ -567,12 +571,16 @@ int main() {
                      0x00, 0x00, 0x6e, 0xb7, 0x00, 0x04, 0x05, 0x73, 0x40, 0x03, 0x04, 0x67, 0xf7, 0x03, 0x2d, 0x18,
                      0xbf, 0x05, 0xaa};
 
+*/
 /*u_char temp[] = {0x58, 0x67, 0xb5, 0x31, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x07, 0x2c,
                      0x00, 0x00, 0x31, 0x6e, 0x00, 0x00, 0x00, 0x02, 0x2a, 0x01, 0x02, 0xa8, 0x00, 0x00, 0x00, 0x00,
                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x01, 0x06, 0x7c, 0x02, 0xe8, 0x00, 0x02,
                      0xff, 0xff, 0x00, 0x00, 0x00, 0x04, 0x00, 0x28, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x13, 0x04};*//*
 */
+/*
+*//*
+
     u_char *tmp;
     tmp = temp;
     //parseMRT *p = new parseMRT();
@@ -595,3 +603,4 @@ int main() {
 //    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
     return 1;
 }
+*/

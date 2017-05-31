@@ -125,13 +125,20 @@ struct prefix_tuple {
     std::string   labels;               ///< Labels in the format of label, label, ...
 };
 
+struct path_identifier {
+    uint16_t afi;
+    uint8_t  safi;
+    uint8_t  send_recieve;
+};
 
 struct update_prefix_tuple {
+    path_identifier path_id;
     uint8_t len;                        ///< Length of prefix in bits
     std::string prefix;                 ///< Address prefix
 };
 
 struct update_prefix_label_tuple {
+    path_identifier path_id;
     uint8_t len;                        ///< Length of prefix in bits
     std::string label;                  ///< Labels
     std::string prefix;                 ///< Address prefix
