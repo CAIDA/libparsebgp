@@ -96,7 +96,7 @@ int main() {
     ifstream fin(filename);
 
     int count = 1;
-    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
+//    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
     while(!end_reach)
     {
         cur++;
@@ -105,13 +105,14 @@ int main() {
         msg_read = true;
         len = read_bytes;
 
-        libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
+//        libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
         while(msg_read && len>0)
         {
-            all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,count*sizeof(libparsebgp_parse_msg *));
-            memset(parse_msg, 0, sizeof(libparsebgp_parse_msg));
+            libparsebgp_parse_msg parse_msg;
+//            all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,count*sizeof(libparsebgp_parse_msg *));
+//            memset(parse_msg, 0, sizeof(libparsebgp_parse_msg));
 
-            bytes_read=libparsebgp_parse_msg_common_wrapper(parse_msg, buffer, len, msg_type);
+            bytes_read=libparsebgp_parse_msg_common_wrapper(&parse_msg, buffer, len, msg_type);
 
             if(bytes_read < 0) {
                 msg_read = false;
@@ -122,11 +123,11 @@ int main() {
             else {
                 position += bytes_read;
                 cout << "Message Parsed Successfully"<<endl;
-                cout << bytes_read << " " << position << endl;
+                cout << bytes_read << " " << position <<" "<<len<< endl;
                 len-=bytes_read;
                 buffer += bytes_read;
-                all_parsed_msg[count-1] = parse_msg;
-                cout<<count-1<<" "<<int(all_parsed_msg[count - 1]->parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.type)<<endl;
+//                all_parsed_msg[count-1] = parse_msg;
+//                cout<<count-1<<" "<<int(all_parsed_msg[count - 1]->parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.type)<<endl;
 
                 ++count;
             }

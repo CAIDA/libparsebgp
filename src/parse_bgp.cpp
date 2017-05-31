@@ -18,17 +18,25 @@ using namespace std;
  *
  * \param [in] data             Pointer to the raw BGP message header
  * \param [in] size             length of the data buffer (used to prevent overrun)
- * \param [in] bgp_msg           Structure to store the bgp messages
+ * \param [in] bgp_msg          Structure to store the bgp messages
  * \returns bytes read
  */
 ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
                                                bool is_local_msg) {
     ssize_t read_size = 0;
-    ssize_t ret_val = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size);
+
+    /*
+     * Parsing the bgp message header
+     */
+    ssize_t ret_val = libparsebgp_parse_bgp_parse_header(bgp_parsed_data.c_hdr, data, size);
     if (ret_val < 0)
         return ret_val;
     int data_bytes_remaining = bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN;
     data += BGP_MSG_HDR_LEN;
+
+    /*
+     * Parsing the bgp msg according to the type of the message
+     */
     switch (bgp_parsed_data.c_hdr.type) {
         case BGP_MSG_UPDATE: {
             read_size = libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data.parsed_data.update_msg, data, data_bytes_remaining,
@@ -41,22 +49,14 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
             break;
         }
         case BGP_MSG_NOTIFICATION: {
-            libparsebgp_notify_msg parsed_msg;
-            read_size= libparsebgp_notification_parse_notify(parsed_msg,data, data_bytes_remaining);
+            read_size= libparsebgp_notification_parse_notify( bgp_parsed_data.parsed_data.notification_msg,data, data_bytes_remaining);
             if (read_size < 0)
-            {
-                //throw "Failed to parse the BGP notification message";
-                return read_size;
-            }
+                return read_size; //Failed to parse the BGP notification message
+
             else {
                 read_size = 2;
                 data += 2;                                                 // Move pointer past notification message
                 data_bytes_remaining -= 2;
-
-                bgp_parsed_data.parsed_data.notification_msg.error_code = parsed_msg.error_code;
-                bgp_parsed_data.parsed_data.notification_msg.error_subcode = parsed_msg.error_subcode;
-                strncpy(bgp_parsed_data.parsed_data.notification_msg.error_text, parsed_msg.error_text,
-                        sizeof(bgp_parsed_data.parsed_data.notification_msg.error_text));
             }
             break;
         }
@@ -65,15 +65,15 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
         }
         case BGP_MSG_OPEN: {
             read_size = libparsebgp_open_msg_parse_open_msg(&bgp_parsed_data.parsed_data.open_msg,data, data_bytes_remaining, is_local_msg);
-            if (!read_size) {
-                return ERR_READING_MSG; //throw "Failed to read open message";
-            }
+            if (!read_size)
+                return ERR_READING_MSG; //Failed to read open message;
+
             if (read_size < 0)
                 return read_size;   // contains the error code
             break;
         }
         default: {
-            return INVALID_MSG; //throw "BGP message type does not match";
+            return INVALID_MSG; //Invalid bgp message type
         }
     }
     data += read_size;
@@ -88,17 +88,19 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
  *
  * \param [in]     data             Pointer to the raw BGP message header
  * \param [in]     size             length of the data buffer (used to prevent overrun)
+ * \param [in]     bgp_update_msg   Structure to store the bgp update message
  *
  * \returns True if error, false if no error.
  */
 ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size) {
     ssize_t read_size = 0, bytes_read =0;
-    if((bytes_read = libparsebgp_parse_bgp_parse_header(bgp_update_msg, data, size))<0)
+    //Process the BGP message header
+    if((bytes_read = libparsebgp_parse_bgp_parse_header(bgp_update_msg.c_hdr, data, size))<0)
         return bytes_read;
     read_size += bytes_read;
     data += bytes_read;
 
-    if (bgp_update_msg.c_hdr.type == BGP_MSG_UPDATE) {
+    if (bgp_update_msg.c_hdr.type == BGP_MSG_UPDATE) {  //checking for proper message type
         ssize_t data_bytes_remaining = bgp_update_msg.c_hdr.len - BGP_MSG_HDR_LEN;
         if((bytes_read=libparsebgp_update_msg_parse_update_msg(&bgp_update_msg.parsed_data.update_msg, data, data_bytes_remaining,
                                                           bgp_update_msg.has_end_of_rib_marker))<0)
@@ -130,34 +132,26 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &b
 ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
     ssize_t     read_size = 0, ret_val = 0;
     // Process the BGP message normally
-    ret_val = libparsebgp_parse_bgp_parse_header(bgp_parsed_data, data, size);
+    ret_val = libparsebgp_parse_bgp_parse_header(bgp_parsed_data.c_hdr, data, size);
     if (ret_val < 0)
         return ret_val;
-    if (bgp_parsed_data.c_hdr.type == BGP_MSG_NOTIFICATION) {
+    if (bgp_parsed_data.c_hdr.type == BGP_MSG_NOTIFICATION) {   //checking for valid bgp message type
         int data_bytes_remaining = bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN;
         data += BGP_MSG_HDR_LEN;
         read_size += BGP_MSG_HDR_LEN;
 
-        libparsebgp_notify_msg notify_msg;
-        ret_val = libparsebgp_notification_parse_notify(notify_msg,data, data_bytes_remaining);
+        libparsebgp_notify_msg *notify_msg = (libparsebgp_notify_msg *)malloc(sizeof(libparsebgp_notify_msg));
+        ret_val = libparsebgp_notification_parse_notify(bgp_parsed_data.parsed_data.notification_msg,data, data_bytes_remaining);
         if (ret_val < 0)
-        {
-            return ret_val;
-            //throw "Failed to parse the BGP notification message";
-        }
+            return ret_val; //Error:Failed to parse the BGP notification message
         else {
             data += 2;                                                 // Move pointer past notification message
             data_bytes_remaining -= 2;
             read_size += 2;
-
-            bgp_parsed_data.parsed_data.notification_msg.error_code = notify_msg.error_code;
-            bgp_parsed_data.parsed_data.notification_msg.error_subcode = notify_msg.error_subcode;
-            strncpy(bgp_parsed_data.parsed_data.notification_msg.error_text, notify_msg.error_text,
-                    sizeof(bgp_parsed_data.parsed_data.notification_msg.error_text));
         }
     }
     else {
-        return INVALID_MSG; //throw "ERROR: Invalid BGP MSG for BMP down event, expected NOTIFICATION message.";
+        return INVALID_MSG; //ERROR: Invalid BGP MSG for BMP down event, expected NOTIFICATION message.
     }
     return read_size;
 }
@@ -165,34 +159,35 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
 /**
  * Parses the BGP common header
  *
- * \details
+ * @details
  *      This method will parse the bgp common header and will upload the global
- *      c_hdr structure, instance data pointer, and remaining bytes of message.
+ *      c_hdr structure, instance data pointer.
  *      The return value of this method will be the BGP message type.
  *
- * \param [in]      data            Pointer to the raw BGP message header
- * \param [in]      size            length of the data buffer (used to prevent overrun)
+ * @param [in]      data                Pointer to the raw BGP message header
+ * @param [in]      size                length of the data buffer (used to prevent overrun)
+ * @param [in]      c_hdr               Struct to store common bgp header
  *
- * \returns BGP message type
+ * @returns Bytes read in parsing the header
  */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
+ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_char *data, size_t size) {
     /*
      * Error out if data size is not large enough for common header
      */
     if (size < BGP_MSG_HDR_LEN)
        return INCOMPLETE_MSG;
 
-    memcpy(&bgp_parsed_data.c_hdr, data, BGP_MSG_HDR_LEN);
+    memcpy(&c_hdr, data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
-    SWAP_BYTES(&(bgp_parsed_data.c_hdr.len));
-    SWAP_BYTES(&(bgp_parsed_data.c_hdr.type));
+    SWAP_BYTES(&(c_hdr.len));
+    SWAP_BYTES(&(c_hdr.type));
 
     /*
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer
      *      It is expected that the passed bgp message buffer holds the complete BGP message to be parsed
      */
-    if (bgp_parsed_data.c_hdr.len > size)
+    if (c_hdr.len > size)
         return LARGER_MSG_LEN;
 
      return BGP_MSG_HDR_LEN;

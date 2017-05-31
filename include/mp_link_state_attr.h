@@ -120,6 +120,6 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
  *
  * @returns length of the TLV attribute parsed
  */
-int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char *data);
+int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char *data, int count);
 
 #endif //_OPENBMP_LINKSTATEATTR_H_

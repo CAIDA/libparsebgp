@@ -55,9 +55,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
-template <typename PREFIX_TUPLE>
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(libparsebgp_addpath_map &add_path_map, bool isIPv4, u_char *data, uint16_t len,
-                                                                  std::list<PREFIX_TUPLE> &prefixes);
+                                                                  update_prefix_label_tuple *prefixes);
 
 /**
  * Decode label from NLRI data

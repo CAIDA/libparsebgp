@@ -117,7 +117,7 @@ struct mp_unreach_nlri {
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     struct withdrawn_routes_nlri {
         update_prefix_tuple             *wdrawn_routes;   ///< Withdrawn routes
-        list<update_prefix_label_tuple> wdrawn_routes_label;
+        update_prefix_label_tuple       *wdrawn_routes_label;
     }withdrawn_routes_nlri;
 };
 
@@ -136,6 +136,8 @@ struct node_descriptor {
 };
 
 struct link_descriptor {
+    uint16_t    type;
+    uint16_t    len;
     uint32_t    local_id;                           ///< Link Local ID
     uint32_t    remote_id;                          ///< Link Remote ID
     uint8_t     intf_addr[16];                      ///< Interface binary address
@@ -148,6 +150,8 @@ struct link_descriptor {
  * Node (local and remote) common fields
  */
 struct prefix_descriptor {
+    uint16_t    type;
+    uint16_t    len;
     char        ospf_route_type[32];                ///< OSPF Route type in string form for DB enum
     uint32_t    mt_id;                              ///< Multi-Topology ID
     uint8_t     prefix[16];                         ///< Prefix binary address
@@ -164,22 +168,22 @@ struct mp_reach_ls {
         struct node_nlri {
             uint16_t    type;
             uint16_t    len;
-            list <node_descriptor> local_nodes;
+            node_descriptor *local_nodes;
         }node_nlri;
 
         struct link_nlri {
             uint16_t    type;
             uint16_t    len;
-            list <node_descriptor> local_nodes;
-            list <node_descriptor> remote_nodes;
-            list <link_descriptor> link_desc;
+            node_descriptor* local_nodes;
+            node_descriptor* remote_nodes;
+            link_descriptor* link_desc;
         }link_nlri;
 
         struct prefix_nlri_ipv4_ipv6 {
             uint16_t    type;
             uint16_t    len;
-            list <node_descriptor>  local_nodes;
-            list <prefix_descriptor> prefix_desc;
+            node_descriptor   *local_nodes;
+            prefix_descriptor *prefix_desc;
         }prefix_nlri_ipv4_ipv6;
     }nlri_ls;
 };
@@ -193,7 +197,7 @@ struct mp_reach_nlri {
     uint8_t reserved;            ///< Reserved
     struct nlri_info {
         update_prefix_tuple              *nlri_info;               ///< Withdrawn routes
-        list <update_prefix_label_tuple> nlri_label_info;
+        update_prefix_label_tuple        *nlri_label_info;
         mp_reach_ls                      *mp_rch_ls;
     }nlri_info;
 };
@@ -206,7 +210,6 @@ struct mp_reach_nlri {
 struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
-    //u_char       *value;                         ///<
     string       val;
 };
 
@@ -223,16 +226,16 @@ struct parsed_data_ls {
 };
 typedef struct attr_value{
     uint8_t                 origin;
-    list<as_path_segment>   as_path;
+    as_path_segment         *as_path;
     u_char                  next_hop[4];
     u_char                  originator_id[4];
     uint32_t                med;
     uint32_t                local_pref;
     uint16_t                value16bit;
     string                  aggregator;
-    list<u_char*>            cluster_list;
-    list<uint16_t>          attr_type_comm;
-    list<extcomm_hdr>       ext_comm;
+    u_char                  **cluster_list;
+    uint16_t                *attr_type_comm;
+    extcomm_hdr             *ext_comm;
     mp_unreach_nlri         mp_unreach_nlri_data;
     mp_reach_nlri           mp_reach_nlri_data;
 }attr_val;
@@ -272,24 +275,24 @@ struct update_path_attrs {
     attr_val                attr_value;
     parsed_attrs_map        attrs;
     parsed_data_ls          mp_ls_data;
-    list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
-    list<evpn_tuple>        evpn;               ///< List of evpn nlris advertised
+    //list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
+    evpn_tuple              *evpn;               ///< List of evpn nlris advertised
     parsed_ls_attrs_map     ls_attrs;
-    list<evpn_tuple>        evpn_withdrawn;     ///< List of evpn nlris withdrawn
+    evpn_tuple              *evpn_withdrawn;     ///< List of evpn nlris withdrawn
     parsed_data_ls          ls;                 ///< REACH: Link state parsed data
     //parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
     //libparsebgp_evpn_data evpn_data;
     //libparsebgp_addpath_map add_path_map;
-    list<bgp_link_state_attrs>    bgp_ls;
+    bgp_link_state_attrs    *bgp_ls;
 };
 
 
 struct libparsebgp_update_msg_data {
     uint16_t                    wdrawn_route_len;
-    list <update_prefix_tuple>  wdrawn_routes;
+    update_prefix_tuple         *wdrawn_routes;
     uint16_t                    total_path_attr_len;
-    list <update_path_attrs>    path_attributes;
-    list <update_prefix_tuple>  nlri;
+    update_path_attrs           *path_attributes;
+    update_prefix_tuple         *nlri;
 };
 
  /**
@@ -318,7 +321,7 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs *update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
 ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
 

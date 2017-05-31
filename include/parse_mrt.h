@@ -83,7 +83,7 @@ typedef struct libparsebgp_table_dump_message{
     char                    peer_ip[16];
     uint16_t                peer_as;
     uint16_t                attribute_len;
-    list<update_path_attrs> bgp_attrs;
+    update_path_attrs       *bgp_attrs;
 }libparsebgp_table_dump_message;
 
 
@@ -119,7 +119,7 @@ struct rib_entry{
     uint32_t                     originated_time;
     uint16_t                     attribute_len;
     bool                         end_of_rib_marker;
-    list<update_path_attrs>      bgp_attrs;
+    update_path_attrs            *bgp_attrs;
 };
 
 /**

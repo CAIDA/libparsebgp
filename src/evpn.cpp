@@ -232,9 +232,13 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
     char        ip_char[40];
     int         data_read = 0;
 
-    while ((data_read + 10 /* min read */) < data_len) {
-        evpn_tuple tuple;
+    evpn_tuple *tuple = (evpn_tuple *)malloc(sizeof(evpn_tuple));
+    path_attrs->evpn_withdrawn = (evpn_tuple *)malloc(sizeof(evpn_tuple));
 
+    int count1=0,count2=0;
+    while ((data_read + 10 /* min read */) < data_len) {
+
+        memset(tuple, 0, sizeof(tuple));
         //Cleanup variables in case of not modified
 //        tuple.mpls_label_1 = 0;
 //        tuple.mpls_label_2 = 0;
@@ -246,18 +250,18 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
 //        tuple.path_id = 0;
 //        tuple.originating_router_ip_len = 0;
 
-        tuple.route_type = *data_pointer;
+        tuple->route_type = *data_pointer;
         data_pointer++;
 
-        tuple.length = *data_pointer;
+        tuple->length = *data_pointer;
         data_pointer++;
-        uint8_t len = tuple.length;
+        uint8_t len = tuple->length;
 
-        switch (tuple.route_type) {
+        switch (tuple->route_type) {
             case EVPN_ROUTE_TYPE_ETHERNET_AUTO_DISCOVERY: {
                 libparsebgp_evpn_parse_route_distinguisher(
                         data_pointer,
-                        tuple.route_type_specific.eth_ad_route.rd
+                        tuple->route_type_specific.eth_ad_route.rd
                 );
                 data_pointer += 8;
 
@@ -267,7 +271,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                 if ((data_read + 17 /* expected read size */) <= data_len) {
 
                     // Ethernet Segment Identifier (10 bytes)
-                    libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple.route_type_specific.eth_ad_route.ethernet_segment_identifier);
+                    libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple->route_type_specific.eth_ad_route.ethernet_segment_identifier);
                     data_pointer += 10;
 
                     //Ethernet Tag Id (4 bytes), printing in hex.
@@ -283,12 +287,12 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                         ethernet_tag_id_stream << std::hex << setfill('0') << setw(2) << (int) ethernet_id[i];
                     }
 
-                    tuple.route_type_specific.eth_ad_route.ethernet_tag_id_hex = ethernet_tag_id_stream.str();
+                    tuple->route_type_specific.eth_ad_route.ethernet_tag_id_hex = ethernet_tag_id_stream.str();
 
                     //MPLS Label (3 bytes)
-                    memcpy(&tuple.route_type_specific.eth_ad_route.mpls_label, data_pointer, 3);
-                    SWAP_BYTES(&tuple.route_type_specific.eth_ad_route.mpls_label);
-                    tuple.route_type_specific.eth_ad_route.mpls_label >>= 8;
+                    memcpy(&tuple->route_type_specific.eth_ad_route.mpls_label, data_pointer, 3);
+                    SWAP_BYTES(&tuple->route_type_specific.eth_ad_route.mpls_label);
+                    tuple->route_type_specific.eth_ad_route.mpls_label >>= 8;
 
                     data_pointer += 3;
                     data_read += 17;
@@ -299,7 +303,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
             case EVPN_ROUTE_TYPE_MAC_IP_ADVERTISMENT: {
                 libparsebgp_evpn_parse_route_distinguisher(
                         data_pointer,
-                        tuple.route_type_specific.mac_ip_adv_route.rd
+                        tuple->route_type_specific.mac_ip_adv_route.rd
                 );
                 data_pointer += 8;
 
@@ -309,7 +313,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                 if ((data_read + 25 /* expected read size */) <= data_len) {
 
                     // Ethernet Segment Identifier (10 bytes)
-                    libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple.route_type_specific.mac_ip_adv_route.ethernet_segment_identifier);
+                    libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple->route_type_specific.mac_ip_adv_route.ethernet_segment_identifier);
                     data_pointer += 10;
 
                     // Ethernet Tag ID (4 bytes)
@@ -325,35 +329,35 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                         ethernet_tag_id_stream << std::hex << setfill('0') << setw(2) << (int) ethernet_id[i];
                     }
 
-                    tuple.route_type_specific.mac_ip_adv_route.ethernet_tag_id_hex = ethernet_tag_id_stream.str();
+                    tuple->route_type_specific.mac_ip_adv_route.ethernet_tag_id_hex = ethernet_tag_id_stream.str();
 
                     // MAC Address Length (1 byte)
                     uint8_t mac_address_length = *data_pointer;
 
-                    tuple.route_type_specific.mac_ip_adv_route.mac_addr_len = mac_address_length;
+                    tuple->route_type_specific.mac_ip_adv_route.mac_addr_len = mac_address_length;
                     data_pointer++;
 
                     // MAC Address (6 byte)
-                    tuple.route_type_specific.mac_ip_adv_route.mac_addr.assign(parse_mac(data_pointer));
+                    tuple->route_type_specific.mac_ip_adv_route.mac_addr.assign(parse_mac(data_pointer));
                     data_pointer += 6;
 
                     // IP Address Length (1 byte)
-                    tuple.route_type_specific.mac_ip_adv_route.ip_addr_len = *data_pointer;
+                    tuple->route_type_specific.mac_ip_adv_route.ip_addr_len = *data_pointer;
                     data_pointer++;
 
                     data_read += 22;
                     len -= 22;
 
-                    addr_bytes = tuple.route_type_specific.mac_ip_adv_route.ip_addr_len > 0 ? (tuple.route_type_specific.mac_ip_adv_route.ip_addr_len / 8) : 0;
+                    addr_bytes = tuple->route_type_specific.mac_ip_adv_route.ip_addr_len > 0 ? (tuple->route_type_specific.mac_ip_adv_route.ip_addr_len / 8) : 0;
 
-                    if (tuple.route_type_specific.mac_ip_adv_route.ip_addr_len > 0 and (addr_bytes + data_read) <= data_len) {
+                    if (tuple->route_type_specific.mac_ip_adv_route.ip_addr_len > 0 and (addr_bytes + data_read) <= data_len) {
                         // IP Address (0, 4, or 16 bytes)
                         bzero(ip_binary, 16);
                         memcpy(&ip_binary, data_pointer, addr_bytes);
 
-                        inet_ntop(tuple.route_type_specific.mac_ip_adv_route.ip_addr_len > 32 ? AF_INET6 : AF_INET, ip_binary, ip_char, sizeof(ip_char));
+                        inet_ntop(tuple->route_type_specific.mac_ip_adv_route.ip_addr_len > 32 ? AF_INET6 : AF_INET, ip_binary, ip_char, sizeof(ip_char));
 
-                        tuple.route_type_specific.mac_ip_adv_route.ip_addr = ip_char;
+                        tuple->route_type_specific.mac_ip_adv_route.ip_addr = ip_char;
 
                         data_pointer += addr_bytes;
                         data_read += addr_bytes;
@@ -363,9 +367,9 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                     if ((data_read + 3) <= data_len) {
 
                         // MPLS Label1 (3 bytes)
-                        memcpy(&tuple.route_type_specific.mac_ip_adv_route.mpls_label_1, data_pointer, 3);
-                        SWAP_BYTES(&tuple.route_type_specific.mac_ip_adv_route.mpls_label_1);
-                        tuple.route_type_specific.mac_ip_adv_route.mpls_label_1 >>= 8;
+                        memcpy(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_1, data_pointer, 3);
+                        SWAP_BYTES(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_1);
+                        tuple->route_type_specific.mac_ip_adv_route.mpls_label_1 >>= 8;
 
                         data_pointer += 3;
                         data_read += 3;
@@ -376,9 +380,9 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                     if (len == 3) {
                         //SELF_DEBUG("%s: parsing second evpn label\n", peer_addr.c_str());
 
-                        memcpy(&tuple.route_type_specific.mac_ip_adv_route.mpls_label_2, data_pointer, 3);
-                        SWAP_BYTES(&tuple.route_type_specific.mac_ip_adv_route.mpls_label_2);
-                        tuple.route_type_specific.mac_ip_adv_route.mpls_label_2 >>= 8;
+                        memcpy(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_2, data_pointer, 3);
+                        SWAP_BYTES(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_2);
+                        tuple->route_type_specific.mac_ip_adv_route.mpls_label_2 >>= 8;
 
                         data_pointer += 3;
                         data_read += 3;
@@ -390,7 +394,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
             case EVPN_ROUTE_TYPE_INCLUSIVE_MULTICAST_ETHERNET_TAG: {
                 libparsebgp_evpn_parse_route_distinguisher(
                         data_pointer,
-                        tuple.route_type_specific.incl_multicast_eth_tag_route.rd
+                        tuple->route_type_specific.incl_multicast_eth_tag_route.rd
                 );
                 data_pointer += 8;
 
@@ -411,27 +415,27 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                         ethernet_tag_id_stream << std::hex << setfill('0') << setw(2) << (int) ethernet_id[i];
                     }
 
-                    tuple.route_type_specific.incl_multicast_eth_tag_route.ethernet_tag_id_hex = ethernet_tag_id_stream.str();
+                    tuple->route_type_specific.incl_multicast_eth_tag_route.ethernet_tag_id_hex = ethernet_tag_id_stream.str();
 
                     // IP Address Length (1 byte)
-                    tuple.route_type_specific.incl_multicast_eth_tag_route.ip_addr_len = *data_pointer;
+                    tuple->route_type_specific.incl_multicast_eth_tag_route.ip_addr_len = *data_pointer;
                     data_pointer++;
 
                     data_read += 5;
                     len -= 5;
 
-                    addr_bytes = tuple.route_type_specific.incl_multicast_eth_tag_route.ip_addr_len > 0 ? (tuple.route_type_specific.incl_multicast_eth_tag_route.ip_addr_len / 8) : 0;
+                    addr_bytes = tuple->route_type_specific.incl_multicast_eth_tag_route.ip_addr_len > 0 ? (tuple->route_type_specific.incl_multicast_eth_tag_route.ip_addr_len / 8) : 0;
 
-                    if (tuple.route_type_specific.incl_multicast_eth_tag_route.ip_addr_len > 0 and (addr_bytes + data_read) <= data_len) {
+                    if (tuple->route_type_specific.incl_multicast_eth_tag_route.ip_addr_len > 0 and (addr_bytes + data_read) <= data_len) {
 
                         // Originating Router's IP Address (4 or 16 bytes)
                         bzero(ip_binary, 16);
                         memcpy(&ip_binary, data_pointer, addr_bytes);
 
-                        inet_ntop(tuple.route_type_specific.incl_multicast_eth_tag_route.ip_addr_len > 32 ? AF_INET6 : AF_INET,
+                        inet_ntop(tuple->route_type_specific.incl_multicast_eth_tag_route.ip_addr_len > 32 ? AF_INET6 : AF_INET,
                                   ip_binary, ip_char, sizeof(ip_char));
 
-                        tuple.route_type_specific.incl_multicast_eth_tag_route.originating_router_ip = ip_char;
+                        tuple->route_type_specific.incl_multicast_eth_tag_route.originating_router_ip = ip_char;
 
                         data_pointer += addr_bytes;
                         data_read += addr_bytes;
@@ -444,7 +448,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
             case EVPN_ROUTE_TYPE_ETHERNET_SEGMENT_ROUTE: {
                 libparsebgp_evpn_parse_route_distinguisher(
                         data_pointer,
-                        tuple.route_type_specific.eth_segment_route.rd
+                        tuple->route_type_specific.eth_segment_route.rd
                 );
                 data_pointer += 8;
 
@@ -454,28 +458,28 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                 if ((data_read + 11 /* expected read size */) <= data_len) {
 
                     // Ethernet Segment Identifier (10 bytes)
-                    libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple.route_type_specific.eth_segment_route.ethernet_segment_identifier);
+                    libparsebgp_evpn_parse_ethernet_segment_identifier(path_attrs, data_pointer, &tuple->route_type_specific.eth_segment_route.ethernet_segment_identifier);
                     data_pointer += 10;
 
                     // IP Address Length (1 bytes)
-                    tuple.route_type_specific.eth_segment_route.ip_addr_len = *data_pointer;
+                    tuple->route_type_specific.eth_segment_route.ip_addr_len = *data_pointer;
                     data_pointer++;
 
                     data_read += 11;
                     len -= 11;
 
-                    addr_bytes = tuple.route_type_specific.eth_segment_route.ip_addr_len > 0 ? (tuple.route_type_specific.eth_segment_route.ip_addr_len / 8) : 0;
+                    addr_bytes = tuple->route_type_specific.eth_segment_route.ip_addr_len > 0 ? (tuple->route_type_specific.eth_segment_route.ip_addr_len / 8) : 0;
 
-                    if (tuple.route_type_specific.eth_segment_route.ip_addr_len > 0 and (addr_bytes + data_read) <= data_len) {
+                    if (tuple->route_type_specific.eth_segment_route.ip_addr_len > 0 and (addr_bytes + data_read) <= data_len) {
 
                         // Originating Router's IP Address (4 or 16 bytes)
                         bzero(ip_binary, 16);
-                        memcpy(&ip_binary, data_pointer, (int) tuple.route_type_specific.eth_segment_route.ip_addr_len / 8);
+                        memcpy(&ip_binary, data_pointer, (int) tuple->route_type_specific.eth_segment_route.ip_addr_len / 8);
 
-                        inet_ntop(tuple.route_type_specific.eth_segment_route.ip_addr_len > 32 ? AF_INET6 : AF_INET,
+                        inet_ntop(tuple->route_type_specific.eth_segment_route.ip_addr_len > 32 ? AF_INET6 : AF_INET,
                                   ip_binary, ip_char, sizeof(ip_char));
 
-                        tuple.route_type_specific.eth_segment_route.originating_router_ip = ip_char;
+                        tuple->route_type_specific.eth_segment_route.originating_router_ip = ip_char;
 
                         data_read += addr_bytes;
                         len -= addr_bytes;
@@ -491,9 +495,15 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
             }
         }
 
-        if (is_unreach)
-            path_attrs->evpn_withdrawn.push_back(tuple);
-        else
-            path_attrs->evpn.push_back(tuple);
+        if (is_unreach) {
+            if (count1)
+                path_attrs->evpn_withdrawn = (evpn_tuple *)realloc(path_attrs->evpn_withdrawn, (count1 + 1) * sizeof(evpn_tuple));
+            path_attrs->evpn_withdrawn[count1++] = *tuple;
+        }
+        else {
+            if(count2)
+                path_attrs->evpn = (evpn_tuple *)realloc(path_attrs->evpn, (count2+1)*sizeof(evpn_tuple));
+            path_attrs->evpn[count2++]=*tuple;
+        }
     }
 }

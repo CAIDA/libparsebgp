@@ -18,6 +18,7 @@
  */
 static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, int& buf_len) {
 
+    bmp_data_len=0;
     //TO DO:
     if (bmp_len <= 0)
         return 0;
@@ -259,7 +260,7 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
 * \returns Bytes that have been successfully read by the handle initiation message.
 */
 static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init_msg *init_msg, unsigned char *buf_ptr, int buf_len) {
-    int info_len;
+    int info_len = 0;
     ssize_t read_bytes = 0;
 
     int num_tlvs = bmp_data_len/BMP_INIT_MSG_LEN, curr_tlv = 0;
@@ -273,14 +274,17 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
     for (int i=0; i < bmp_data_len; i += BMP_INIT_MSG_LEN) {
         memset(init_msg_tlv, 0, sizeof(init_msg_v3_tlv));
 
-        memcpy(&init_msg_tlv, buf_ptr, BMP_INIT_MSG_LEN);
-        read_bytes+= BMP_INIT_MSG_LEN;
+        memcpy(&init_msg_tlv->type, buf_ptr, 2);
+        read_bytes+= 2;
+        buf_ptr+= 2;
 
-        memset(init_msg_tlv->info, 0, sizeof init_msg_tlv->info);
+        memcpy(&init_msg_tlv->len, buf_ptr, 2);
+        read_bytes+= 2;
+        buf_ptr+= 2;
+
+        memset(init_msg_tlv->info, 0, sizeof(init_msg_tlv->info));
         SWAP_BYTES(&init_msg_tlv->len);
         SWAP_BYTES(&init_msg_tlv->type);
-
-        buf_ptr += BMP_INIT_MSG_LEN;                // Move pointer past the info header
 
         if (init_msg_tlv->len > 0) {
             info_len = sizeof(init_msg_tlv->info) < init_msg_tlv->len ? sizeof(init_msg_tlv->info) : init_msg_tlv->len;
@@ -324,7 +328,12 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
     for (int i=0; i < bmp_data_len; i += BMP_TERM_MSG_LEN) {
         memset(term_msg_tlv, 0, sizeof(term_msg_v3_tlv));
 
-        memcpy(&term_msg_tlv, buf_ptr, BMP_TERM_MSG_LEN);
+        memcpy(&term_msg_tlv->type, buf_ptr, 2);
+        buf_ptr+=2;
+
+        memcpy(&term_msg_tlv->len, buf_ptr, 2);
+        buf_ptr+=2;
+
         read_bytes += BMP_TERM_MSG_LEN;
 
         memset(term_msg_tlv->info, 0, sizeof term_msg_tlv->info);
@@ -431,7 +440,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
     /*
     * Process the sent open message
     */
-    if (libparsebgp_parse_bgp_parse_header(up_event->sent_open_msg, data, size) == BGP_MSG_OPEN) {
+    if (libparsebgp_parse_bgp_parse_header(up_event->sent_open_msg.c_hdr, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
         size -= BGP_MSG_HDR_LEN;
         read_size += BGP_MSG_HDR_LEN;
@@ -450,7 +459,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
     } else
         return CORRUPT_MSG; //throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
 
-    if (libparsebgp_parse_bgp_parse_header(up_event->received_open_msg, data, size) == BGP_MSG_OPEN) {
+    if (libparsebgp_parse_bgp_parse_header(up_event->received_open_msg.c_hdr, data, size) == BGP_MSG_OPEN) {
         data += BGP_MSG_HDR_LEN;
         size -= BGP_MSG_HDR_LEN;
         read_size += BGP_MSG_HDR_LEN;

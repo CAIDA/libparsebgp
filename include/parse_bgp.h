@@ -103,10 +103,10 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
  *
  * @param [in]      data                Pointer to the raw BGP message header
  * @param [in]      size                length of the data buffer (used to prevent overrun)
- * @param [in]      bgp_parsed_data     Struct to hold parsed BGP message
+ * @param [in]      c_hdr               Struct to store common bgp header
  *
- * @returns BGP message type
+ * @returns Bytes read in parsing the header
  */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size);
+ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_char *data, size_t size);
 
 #endif /* PARSEBGP_H_ */
