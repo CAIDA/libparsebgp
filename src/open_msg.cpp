@@ -24,14 +24,21 @@
  * \return negative values for error, otherwise a positive value indicating the number of bytes read
  */
 static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
-    int      read_size   = 0;
+    int      read_size   = 0, count_param = 0, count_cap = 0;
     u_char   *bufPtr     = data;
+    open_param      *opt_param = (open_param *)malloc(sizeof(open_param));
+    open_msg_data->opt_param = (open_param *)malloc(sizeof(open_param));
 
     for (int i=0; i < size; ) {
-        //param = (open_param_hdr *)bufPtr;
-        open_param opt_param;
-        memcpy(&opt_param, bufPtr, 2);  //reading type and length
-        if (opt_param.param_type != BGP_CAP_PARAM_TYPE) {
+        count_cap = 0;
+        if(count_param)
+            open_msg_data->opt_param = (open_param *)realloc(open_msg_data->opt_param, (count_param+1)*sizeof(open_param));
+        memset(opt_param, 0, sizeof(opt_param));
+
+        memcpy(&opt_param->param_type, bufPtr, 1);  //reading type
+        memcpy(&opt_param->param_len, bufPtr+1, 1);   //reading length
+
+        if (opt_param->param_type != BGP_CAP_PARAM_TYPE) {
             return INVALID_MSG;
             //LOG_NOTICE("%s: Open param type %d is not supported, expected type %d", peer_addr.c_str(),param->type, BGP_CAP_PARAM_TYPE);
         }
@@ -39,27 +46,30 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
         /*
          * Process the capabilities if present
          */
-        else if (opt_param.param_len >= 2 and (read_size + 2 + opt_param.param_len) <= size) {
+        else if (opt_param->param_len >= 2 and (read_size + 2 + opt_param->param_len) <= size) {
             u_char *cap_ptr = bufPtr + 2;
+            open_capabilities *open_cap = (open_capabilities *)malloc(sizeof(open_capabilities));
+            opt_param->param_values = (open_capabilities *)malloc(sizeof(open_capabilities));
+            for (int c=0; c < opt_param->param_len; ) {
+                if(count_cap)
+                    opt_param->param_values = (open_capabilities *)realloc(opt_param->param_values, (count_cap+1)*sizeof(open_capabilities));
 
-            for (int c=0; c < opt_param.param_len; ) {
-                //cap = (cap_param *)cap_ptr;
-                open_capabilities open_cap;
-//                bzero(open_cap, sizeof(open_cap));
-                memcpy(&open_cap, cap_ptr, 2);
+                memset(open_cap, 0, sizeof(open_cap));
+                memcpy(&open_cap->cap_code, cap_ptr, 1); //reading capability code
+                memcpy(&open_cap->cap_len, cap_ptr+1, 1); //reading capability length
 
                 /*
                  * Handle the capability
                  */
-                switch (open_cap.cap_code) {
+                switch (open_cap->cap_code) {
                     case BGP_CAP_4OCTET_ASN :
-                        if (open_cap.cap_len == 4) {
-                            memcpy(&open_cap.cap_values.asn, cap_ptr + 2, 4);
-                            SWAP_BYTES(&open_cap.cap_values.asn);
+                        if (open_cap->cap_len == 4) {
+                            memcpy(&open_cap->cap_values.asn, cap_ptr + 2, 4);
+                            SWAP_BYTES(&open_cap->cap_values.asn);
 
                             //snprintf(capStr, sizeof(capStr), "4 Octet ASN (%d)", BGP_CAP_4OCTET_ASN);
                             //capabilities.push_back(capStr);
-                            opt_param.param_values.push_back(open_cap);
+                            opt_param->param_values[count_cap++]=*open_cap;
                         } else {
                             return INVALID_MSG;
 //                            LOG_NOTICE("%s: 4 octet ASN capability length is invalid %d expected 4", peer_addr.c_str(), cap->len);
@@ -91,13 +101,13 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                          * Move past the cap code and len, then iterate over all paths encoded
                          */
                         cap_ptr += 2;
-                        if (open_cap.cap_len >= 4) {
+                        if (open_cap->cap_len >= 4) {
 
-                            for (int l = 0; l < open_cap.cap_len; l += 4) {
-                                memcpy(&open_cap.cap_values.add_path_data, cap_ptr, 4);
+                            for (int l = 0; l < open_cap->cap_len; l += 4) {
+                                memcpy(&open_cap->cap_values.add_path_data, cap_ptr, 4);
                                 cap_ptr += 4;
 
-                                SWAP_BYTES(&open_cap.cap_values.add_path_data.afi);
+                                SWAP_BYTES(&open_cap->cap_values.add_path_data.afi);
 
                                 /*snprintf(capStr, sizeof(capStr), "ADD Path (%d) : afi=%d safi=%d send/receive=%d",
                                          BGP_CAP_ADD_PATH, data.afi, data.safi, data.send_recieve);
@@ -131,7 +141,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                                 //TODO: figure out if following is needed
 //                                libparsebgp_addpath_add(open_msg_data->add_path_capability, open_cap.cap_values.add_path_data.afi,
 //                                                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
-                                opt_param.param_values.push_back(open_cap);
+                                opt_param->param_values[count_cap++]=*open_cap;
                                 //capabilities.push_back(decodeStr);
                             }
                         }
@@ -140,42 +150,21 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                     }
 
                     case BGP_CAP_GRACEFUL_RESTART:
-                        //                     SELF_DEBUG("%s: supports graceful restart", peer_addr.c_str());
-                        //snprintf(capStr, sizeof(capStr), "Graceful Restart (%d)", BGP_CAP_GRACEFUL_RESTART);
-                        //capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_OUTBOUND_FILTER:
-                        //                    SELF_DEBUG("%s: supports outbound filter", peer_addr.c_str());
-                        //snprintf(capStr, sizeof(capStr), "Outbound Filter (%d)", BGP_CAP_OUTBOUND_FILTER);
-                        //capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_MULTI_SESSION:
-                        //                    SELF_DEBUG("%s: supports multi-session", peer_addr.c_str());
-                        //snprintf(capStr, sizeof(capStr), "Multi-session (%d)", BGP_CAP_MULTI_SESSION);
-                        //capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_MPBGP:
                     {
                         //cap_mpbgp_data data;
-                        if (open_cap.cap_len == sizeof(open_cap.cap_values.mpbgp_data)) {
-                            memcpy(&open_cap.cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap.cap_values.mpbgp_data));
-                            SWAP_BYTES(&open_cap.cap_values.mpbgp_data.afi);
-
-                            /*snprintf(capStr, sizeof(capStr), "MPBGP (%d) : afi=%d safi=%d",
-                                     BGP_CAP_MPBGP, data.afi, data.safi);
-
-                            ///Building capability string
-
-                            std::string decodedStr(capStr);
-                            decodedStr.append(" : ");
-                            decodedStr.append(GET_SAFI_STRING_BY_CODE(data.safi));
-                            decodedStr.append(" ");
-                            decodedStr.append(GET_AFI_STRING_BY_CODE(data.afi));*/
-                            opt_param.param_values.push_back(open_cap);
-                            //capabilities.push_back(decodedStr);
+                        if (open_cap->cap_len == sizeof(open_cap->cap_values.mpbgp_data)) {
+                            memcpy(&open_cap->cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap->cap_values.mpbgp_data));
+                            SWAP_BYTES(&open_cap->cap_values.mpbgp_data.afi);
+                            opt_param->param_values[count_cap++]=*open_cap;
 
                         }
                         else {
@@ -195,16 +184,16 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                 }
 
                 // Move the pointer to the next capability
-                c += 2 + open_cap.cap_len;
-                cap_ptr += 2 + open_cap.cap_len;
+                c += 2 + open_cap->cap_len;
+                cap_ptr += 2 + open_cap->cap_len;
             }
         }
 
         // Move index to next param
-        i += 2 + opt_param.param_len;
-        bufPtr += 2 + opt_param.param_len;
-        read_size += 2 + opt_param.param_len;
-        open_msg_data->opt_param.push_back(opt_param);
+        i += 2 + opt_param->param_len;
+        bufPtr += 2 + opt_param->param_len;
+        read_size += 2 + opt_param->param_len;
+        open_msg_data->opt_param[count_param++] = *opt_param;
     }
     return read_size;
 }
