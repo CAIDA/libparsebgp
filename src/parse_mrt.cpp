@@ -9,6 +9,7 @@
 
 #include "../include/parse_mrt.h"
 #include <arpa/inet.h>
+#include <parse_mrt.h>
 
 /**
  * Destructor function to free memory allocated to libparsebgp_parse_mrt_parsed_data
@@ -24,7 +25,6 @@ void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_par
     free(&mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr);
     //free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries->bgp_attrs); //need to loop through
     free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries);
-    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.nlri);
     free(&mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr);
     free(&mrt_parsed_data->parsed_data.table_dump_v2);
     free(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg);
@@ -386,12 +386,31 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
     int read_size=0;
     string peer_info_key;
 
-    if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr, 7) != 7)
+    if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr->sequence_number, 4) != 4)
         return ERR_READING_MSG; //throw "Error in parsing sequence number";
-    read_size+=7;
+    read_size+=4;
 
-    //TODO : nlri thing, have to check with the bgp code
+    if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr->address_family_identifier, 2) != 2)
+        return ERR_READING_MSG; //throw "Error in parsing sequence number";
+    read_size+=2;
 
+    if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr->subsequent_afi, 1) != 1)
+        return ERR_READING_MSG; //throw "Error in parsing sequence number";
+    read_size+=1;
+
+    rib_gen_entry_hdr->nlri_entry.len = *buffer++;
+    read_size++;
+
+    // Figure out how many bytes the bits requires
+    int addr_bytes = rib_gen_entry_hdr->nlri_entry.len / 8;
+    if (rib_gen_entry_hdr->nlri_entry.len % 8)
+        ++addr_bytes;
+
+    if (addr_bytes <= 4) {
+        memcpy(&rib_gen_entry_hdr->nlri_entry.prefix, buffer, addr_bytes);
+        read_size += addr_bytes;
+        buffer += addr_bytes;
+    }
     if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr->entry_count, 2) != 2)
         return ERR_READING_MSG; //throw "Error in parsing peer count";
     read_size+=2;

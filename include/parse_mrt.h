@@ -132,7 +132,10 @@ struct libparsebgp_rib_generic_entry_header{
     uint32_t        sequence_number;                ///< 4-octet sequence number
     uint16_t        address_family_identifier;      ///< 2-octet address family identifier
     uint8_t         subsequent_afi;                 ///< 1-octet Subsequent AFI (SAFI)
-    u_char*         nlri;                           ///< single NLRI entry
+    struct nlri_entry{
+        uint8_t     len;                        ///< 1-octet Length of prefix in bits
+        string      prefix;                     ///< Address prefix
+    }nlri_entry;                                          ///< single NLRI entry
     uint16_t        entry_count;                    ///< 2-octet entry count, number of RIB Entries
     rib_entry*      rib_entries;                    ///< List of RIB Entries
 };
