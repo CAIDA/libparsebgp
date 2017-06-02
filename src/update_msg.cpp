@@ -27,13 +27,14 @@
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
 static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map &add_path_map, u_char *data, uint16_t len,
-                                                         list<update_prefix_tuple> &prefixes) {
+                                                         update_prefix_tuple **prefixes) {
     u_char       ipv4_raw[4];
     char         ipv4_char[16];
-    int          addr_bytes;
-
+    int          addr_bytes = 0;
+    int          count = 0;
     //prefix_tuple tuple;
-    update_prefix_tuple prefix_tuple;
+    update_prefix_tuple *prefix_tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
+    prefixes = (update_prefix_tuple **)malloc(sizeof(update_prefix_tuple*));
 
     if (len <= 0 or data == NULL)
         return 0;
@@ -45,29 +46,32 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
 
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {
+        if(count)
+            prefixes = (update_prefix_tuple **)realloc(prefixes, (count+1)*sizeof(update_prefix_tuple*));
 
+        memset(prefix_tuple, 0, sizeof(prefix_tuple));
         //bzero(ipv4_raw, sizeof(ipv4_raw));
         //bzero(tuple.prefix_bin, sizeof(tuple.prefix_bin));
 
         // Parse add-paths if enabled
         if (libparsebgp_addpath_is_enabled(add_path_map, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
             and (len - read_size) >= 4) {
-            memcpy(&prefix_tuple.path_id, data, 4);
-            SWAP_BYTES(&prefix_tuple.path_id.afi);
+            memcpy(&prefix_tuple->path_id, data, 4);
+            SWAP_BYTES(&prefix_tuple->path_id.afi);
             data += 4; read_size += 4;
         } else {
-            prefix_tuple.path_id.afi = 0;
-            prefix_tuple.path_id.safi = 0;
-            prefix_tuple.path_id.send_recieve = 0;
+            prefix_tuple->path_id.afi = 0;
+            prefix_tuple->path_id.safi = 0;
+            prefix_tuple->path_id.send_recieve = 0;
         }
 
         // set the address in bits length
         //tuple.len = *data++;
-        prefix_tuple.len = *data++;
+        prefix_tuple->len = *data++;
 
         // Figure out how many bytes the bits requires
-        addr_bytes = prefix_tuple.len / 8;
-        if (prefix_tuple.len % 8)
+        addr_bytes = prefix_tuple->len / 8;
+        if (prefix_tuple->len % 8)
             ++addr_bytes;
 
         //SELF_DEBUG("%s: rtr=%s: Reading NLRI data prefix bits=%d bytes=%d", peer_addr.c_str(),
@@ -80,7 +84,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
 
             // Convert the IP to string printed format
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-            prefix_tuple.prefix.assign(ipv4_char);
+            prefix_tuple->prefix.assign(ipv4_char);
             //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
             //           router_addr.c_str(), ipv4_char, tuple.len);
 
@@ -88,7 +92,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
             //memcpy(tuple.prefix_bin, ipv4_raw, sizeof(ipv4_raw));
 
             // Add tuple to prefix list
-            prefixes.push_back(prefix_tuple);
+            prefixes[count++]=prefix_tuple;
 
         } else if (addr_bytes > 4) {
             //LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",

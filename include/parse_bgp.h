@@ -33,11 +33,11 @@ using namespace std;
  */
 enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE, BGP_MSG_ROUTE_REFRESH };
 
-typedef struct libparsebgp_common_bgp_hdr {
+struct libparsebgp_common_bgp_hdr {
     uint8_t   marker[16];                           ///< 16-octet field is included for compatibility. All ones (required).
-    unsigned short   len;                           ///< Total length of the message, including the header in octets. min length is 19, max is 4096
-    unsigned char    type;                          ///< type code of the message
-}libparsebgp_common_bgp_hdr;
+    uint16_t  len;                           ///< Total length of the message, including the header in octets. min length is 19, max is 4096
+    uint8_t   type;                          ///< type code of the message
+}__attribute__((__packed__));
 
 /**
  * This struct holds the parsed BGP data according to RFC 4271

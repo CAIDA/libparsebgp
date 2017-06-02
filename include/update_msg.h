@@ -289,10 +289,10 @@ struct update_path_attrs {
 
 struct libparsebgp_update_msg_data {
     uint16_t                    wdrawn_route_len;
-    list <update_prefix_tuple>  wdrawn_routes;
+    update_prefix_tuple         **wdrawn_routes;
     uint16_t                    total_path_attr_len;
     list <update_path_attrs>    path_attributes;
-    list <update_prefix_tuple>  nlri;
+    update_prefix_tuple         **nlri;
 };
 
  /**
@@ -323,6 +323,6 @@ struct libparsebgp_update_msg_data {
  */
 ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
-ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &path_attrs, u_char *data, bool &has_end_of_rib_marker);
 
 #endif /* UPDATEMSG_H_ */
