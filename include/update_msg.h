@@ -215,15 +215,16 @@ struct extcomm_hdr {
 
 typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
-/**
-     * Parsed data structure for BGP-LS
-     */
-struct parsed_data_ls {
+///**
+//     * Parsed data structure for BGP-LS
+//     */
+//struct parsed_data_ls {
+//
+//    list<obj_ls_node>   nodes;        ///< List of Link state nodes
+//    list<obj_ls_link>   links;        ///< List of link state links
+//    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+//};
 
-    list<obj_ls_node>   nodes;        ///< List of Link state nodes
-    list<obj_ls_link>   links;        ///< List of link state links
-    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
-};
 typedef struct attr_value{
     uint8_t                 origin;
     as_path_segment         *as_path;
@@ -273,15 +274,11 @@ struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
-    parsed_attrs_map        attrs;
-    parsed_data_ls          mp_ls_data;
-    //list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
+    list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
     evpn_tuple              *evpn;               ///< List of evpn nlris advertised
     parsed_ls_attrs_map     ls_attrs;
     evpn_tuple              *evpn_withdrawn;     ///< List of evpn nlris withdrawn
-    parsed_data_ls          ls;                 ///< REACH: Link state parsed data
-    //parsed_data_ls          ls_withdrawn;       ///< UNREACH: Parsed Withdrawn data
-    //libparsebgp_evpn_data evpn_data;
+//    parsed_data_ls          ls;                 ///< REACH: Link state parsed data
     //libparsebgp_addpath_map add_path_map;
     bgp_link_state_attrs    *bgp_ls;
 };
@@ -291,7 +288,7 @@ struct libparsebgp_update_msg_data {
     uint16_t                    wdrawn_route_len;
     update_prefix_tuple         **wdrawn_routes;
     uint16_t                    total_path_attr_len;
-    list <update_path_attrs>    path_attributes;
+    update_path_attrs           **path_attributes;
     update_prefix_tuple         **nlri;
 };
 
@@ -321,8 +318,8 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
-ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &path_attrs, u_char *data, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs **path_attrs, u_char *data, bool &has_end_of_rib_marker);
 
 #endif /* UPDATEMSG_H_ */

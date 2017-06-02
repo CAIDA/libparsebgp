@@ -342,14 +342,14 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             // https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.1.1
             //TODO: Need to change this implementation and add to bgp_ls_attr
             // Decode flags
-            if (strcmp(path_attrs->ls.nodes.front().protocol, "IS-IS") >= 0) {
-                val_ss << parse_flags_to_string(*data, LS_FLAGS_SR_CAP_ISIS, sizeof(LS_FLAGS_SR_CAP_ISIS));
-
-            } else if (strcmp(path_attrs->ls.nodes.front().protocol, "OSPF") >= 0) {
-
-                // TODO: Add flags for OSPF... Currently not defined in https://tools.ietf.org/html/draft-ietf-ospf-ospfv3-segment-routing-extensions-07#section-3
-                val_ss << int(*data);   //this->parse_flags_to_string(*data, LS_FLAGS_SR_CAP_OSPF, sizeof(LS_FLAGS_SR_CAP_OSPF));
-            }
+//            if (strcmp(path_attrs->ls.nodes.front().protocol, "IS-IS") >= 0) {
+//                val_ss << parse_flags_to_string(*data, LS_FLAGS_SR_CAP_ISIS, sizeof(LS_FLAGS_SR_CAP_ISIS));
+//
+//            } else if (strcmp(path_attrs->ls.nodes.front().protocol, "OSPF") >= 0) {
+//
+//                // TODO: Add flags for OSPF... Currently not defined in https://tools.ietf.org/html/draft-ietf-ospf-ospfv3-segment-routing-extensions-07#section-3
+//                val_ss << int(*data);   //this->parse_flags_to_string(*data, LS_FLAGS_SR_CAP_OSPF, sizeof(LS_FLAGS_SR_CAP_OSPF));
+//            }
 
             val_ss << " ";
 
@@ -534,15 +534,15 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             if (strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()) > 0)
                 val_ss << ", ";
 
-            // Decode flags
-            if (strcmp(path_attrs->ls.links.front().protocol, "IS-IS") >= 0) {
-                val_ss << parse_flags_to_string(*data,
-                                                      LS_FLAGS_PEER_ADJ_SID_ISIS, sizeof(LS_FLAGS_PEER_ADJ_SID_ISIS));
-
-            } else if (strcmp(path_attrs->ls.links.front().protocol, "OSPF") >= 0) {
-                val_ss << parse_flags_to_string(*data,
-                                                      LS_FLAGS_PEER_ADJ_SID_OSPF, sizeof(LS_FLAGS_PEER_ADJ_SID_OSPF));
-            }
+//            // Decode flags
+//            if (strcmp(path_attrs->ls.links.front().protocol, "IS-IS") >= 0) {
+//                val_ss << parse_flags_to_string(*data,
+//                                                      LS_FLAGS_PEER_ADJ_SID_ISIS, sizeof(LS_FLAGS_PEER_ADJ_SID_ISIS));
+//
+//            } else if (strcmp(path_attrs->ls.links.front().protocol, "OSPF") >= 0) {
+//                val_ss << parse_flags_to_string(*data,
+//                                                      LS_FLAGS_PEER_ADJ_SID_OSPF, sizeof(LS_FLAGS_PEER_ADJ_SID_OSPF));
+//            }
 
             data += 1;
 
@@ -731,15 +731,15 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             // Package structure:
             // https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.3.1
 
-            // Decode flags
-            if (strcmp(path_attrs->ls.prefixes.front().protocol, "IS-IS") >= 0) {
-                val_ss << parse_flags_to_string(*data,
-                                                LS_FLAGS_PREFIX_SID_ISIS, sizeof(LS_FLAGS_PREFIX_SID_ISIS));
-
-            } else if (strcmp(path_attrs->ls.prefixes.front().protocol, "OSPF") >= 0) {
-                val_ss << parse_flags_to_string(*data,
-                                                LS_FLAGS_PREFIX_SID_OSPF, sizeof(LS_FLAGS_PREFIX_SID_OSPF));
-            }
+//            // Decode flags
+//            if (strcmp(path_attrs->ls.prefixes.front().protocol, "IS-IS") >= 0) {
+//                val_ss << parse_flags_to_string(*data,
+//                                                LS_FLAGS_PREFIX_SID_ISIS, sizeof(LS_FLAGS_PREFIX_SID_ISIS));
+//
+//            } else if (strcmp(path_attrs->ls.prefixes.front().protocol, "OSPF") >= 0) {
+//                val_ss << parse_flags_to_string(*data,
+//                                                LS_FLAGS_PREFIX_SID_OSPF, sizeof(LS_FLAGS_PREFIX_SID_OSPF));
+//            }
 
             val_ss << ' ';
             data += 1;

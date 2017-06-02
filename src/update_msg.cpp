@@ -548,56 +548,61 @@ ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, list<update_path_attrs> &update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
         return CORRUPT_MSG;
 
+    int count = 0;
+    update_msg = (update_path_attrs **)malloc(sizeof(update_path_attrs*));
+    update_path_attrs *path_attrs =(update_path_attrs *)malloc(sizeof(update_path_attrs));
     /*
      * Iterate through all attributes and parse them
      */
 
     for (int read=0;  read < len; read += 2) {
-        update_path_attrs path_attrs;
+        memset(path_attrs, 0, sizeof(path_attrs));
+        if(count)
+            update_msg = (update_path_attrs **)realloc(update_msg,(count+1)*sizeof(update_path_attrs *));
 
-        path_attrs.attr_type.attr_flags = *data++;
-        path_attrs.attr_type.attr_type_code = *data++;
+        path_attrs->attr_type.attr_flags = *data++;
+        path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
         // Check if the length field is 1 or two bytes
-        if (ATTR_FLAG_EXTENDED(path_attrs.attr_type.attr_flags)) {
-            memcpy(&path_attrs.attr_len, data, 2);
+        if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
+            memcpy(&path_attrs->attr_len, data, 2);
             data += 2;
             read += 2;
             read_size += 2;
-            SWAP_BYTES(&path_attrs.attr_len);
+            SWAP_BYTES(&path_attrs->attr_len);
 
         } else {
-            path_attrs.attr_len = *data++;
+            path_attrs->attr_len = *data++;
             read++;
             read_size++;
         }
 
         // Get the attribute data, if we have any; making sure to not overrun buffer
-        if (path_attrs.attr_len > 0 and (read + path_attrs.attr_len) <= len) {
+        if (path_attrs->attr_len > 0 and (read + path_attrs->attr_len) <= len) {
             // Data pointer is currently at the data position of the attribute
 
             /*
              * Parse data based on attribute type
              */
-            bytes_read = libparsebgp_update_msg_parse_attr_data(add_path_map, &path_attrs, data, has_end_of_rib_marker);
+            bytes_read = libparsebgp_update_msg_parse_attr_data(add_path_map, path_attrs, data, has_end_of_rib_marker);
             if(bytes_read<0) return bytes_read;
-            data += path_attrs.attr_len;
-            read += path_attrs.attr_len;
-            read_size += path_attrs.attr_len;
+            data += path_attrs->attr_len;
+            read += path_attrs->attr_len;
+            read_size += path_attrs->attr_len;
 
             //SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
             //            attr_type, attr_len);
 
-        } else if (path_attrs.attr_len) {
+        } else if (path_attrs->attr_len) {
             return INCOMPLETE_MSG;
         }
-        update_msg.push_back(path_attrs);
+        update_msg[count++]=path_attrs;
         //delete path_attrs;
     }
     return read_size;
