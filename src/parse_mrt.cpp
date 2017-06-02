@@ -11,15 +11,30 @@
 #include <arpa/inet.h>
 
 /**
+ * Destructor function to free memory allocated to libparsebgp_parse_mrt_parsed_data
+ */
+void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
+    free(&mrt_parsed_data->c_hdr);
+    //free(mrt_parsed_data->parsed_data.table_dump.bgp_attrs); //need to loop through
+    free(&mrt_parsed_data->parsed_data.table_dump);
+    free(mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_entries);
+    free(&mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl);
+    //free(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries->bgp_attrs); //need to loop through
+    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries);
+    free(&mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr);
+    //free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries->bgp_attrs); //need to loop through
+    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries);
+    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.nlri);
+    free(&mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr);
+    free(&mrt_parsed_data->parsed_data.table_dump_v2);
+    free(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg);
+    libparsebgp_parse_bgp_destructor(mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg);
+    free(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg);
+    free(mrt_parsed_data);
+}
+
+/**
  * Buffer remaining MRT message
- *
- * \details This method will read the remaining amount of MRT data and store it in the instance variable mrt_data.
- *          Normally this is used to store the BGP message so that it can be parsed.
- *
- * \param buffer    contains the data
- * \param buf_len   has the length of buffer
- *
- * \returns true if successfully parsed the bmp peer down header, false otherwise
  */
 static ssize_t libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& buf_len) {
     if (mrt_len <= 0)
@@ -40,17 +55,21 @@ static ssize_t libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& b
     return 0;
 }
 
-
+/**
+ * Parse the BGP4MP message
+ */
 static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& buf_len, libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     ssize_t read_size = 0, ret_val = 0;
     switch (mrt_parsed_data->c_hdr.sub_type) {
         case BGP4MP_STATE_CHANGE:
         case BGP4MP_STATE_CHANGE_AS4: {
-            int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_STATE_CHANGE_AS4) ? 8 : 4;
+            mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg ={0};
+            int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_STATE_CHANGE_AS4) ? 4 : 2;
             int ip_addr_len = 4;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg, asn_len) != asn_len)  // ASNs
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn, asn_len) != asn_len)
                 return ERR_READING_MSG;
-                //throw;
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.local_asn, asn_len) != asn_len)
+                return ERR_READING_MSG;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.interface_index, 2) != 2)
                 return ERR_READING_MSG;
                 //throw;
@@ -80,9 +99,12 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
         case BGP4MP_MESSAGE_AS4:
         case BGP4MP_MESSAGE_LOCAL:
         case BGP4MP_MESSAGE_AS4_LOCAL: {
-            int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4 || mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4_LOCAL) ? 8 : 4;
+            mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg = {0};
+            int asn_len = (mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4 || mrt_parsed_data->c_hdr.sub_type == BGP4MP_MESSAGE_AS4_LOCAL) ? 4 : 2;
             int ip_addr_len = 4;
-            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg, asn_len) != asn_len) //ASNs
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn, asn_len) != asn_len)
+                return ERR_READING_MSG; //throw;
+            if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn, asn_len) != asn_len) //Peer asn
                 return ERR_READING_MSG; //throw;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.interface_index, 2) != 2)
                 return ERR_READING_MSG; //throw;
@@ -98,7 +120,7 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
                 return ERR_READING_MSG; //throw;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_ip, ip_addr_len) != ip_addr_len)
                 return ERR_READING_MSG; //throw;
-            read_size += asn_len + 2*ip_addr_len + 4;
+            read_size += 2*asn_len + 2*ip_addr_len + 4;
             ret_val = libparsebgp_parse_bgp_parse_msg(mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg, buffer, buf_len,
                                                       mrt_parsed_data->c_hdr.sub_type > 5);
             if (ret_val < 0)
@@ -116,15 +138,6 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
 
 /**
  * Process the incoming MRT message header
- *
- * \details This function will parse the incoming buffer for header and store it in header structure
- *
- * \param       buffer              contains the data
- * \param       buf_len             has the length of buffer
- * \param       mrt_parsed_hdr      MRT header structure
- *
- * \returns     read_size           bytes of the message successfully parsed
- *
  */
 static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& buf_len, libparsebgp_mrt_common_hdr &mrt_parsed_hdr) {
     int read_size=0;
@@ -152,14 +165,6 @@ static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& 
 
 /**
  * Process the incoming Table Dump message
- *
- * \details This function will parse the incoming buffer for table dump message subtype
- *
- * \param       buffer              contains the data
- * \param       buf_len             has the length of buffer
- * \param       table_dump_msg      table dump structure
- *
- * \returns     read_size           bytes of the message successfully parsed
  */
 static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libparsebgp_table_dump_message *table_dump_msg) {
     int read_size=0;
@@ -229,14 +234,6 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
 
 /**
  * Process the incoming Table Dump message
- *
- * \details This function will parse the incoming buffer for table dump message subtype
- *
- * \param       buffer              contains the data
- * \param       buf_len             has the length of buffer
- * \param       table_dump_msg      table dump structure
- *
- * \returns     read_size           bytes of the message successfully parsed
  */
 static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& buf_len, libparsebgp_peer_index_table *peer_index_table) {
     uint16_t count = 0;
@@ -304,14 +301,6 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
 
 /**
  * Process the incoming Table Dump message
- *
- * \details This function will parse the incoming buffer for table dump message subtype
- *
- * \param       buffer              contains the data
- * \param       buf_len             has the length of buffer
- * \param       table_dump_msg      table dump structure
- *
- * \returns     read_size           bytes of the message successfully parsed
  */
 static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, libparsebgp_rib_entry_header *rib_entry_data) {
     uint16_t count = 0;
@@ -391,14 +380,6 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 
 /**
  * Process the incoming RIB generic entry header
- *
- * \details This function will parse the incoming buffer for table dump message subtype
- *
- * \param       buffer               contains the data
- * \param       buf_len              has the length of buffer
- * \param       rib_gen_entry_hdr    RIB generic entry header structure
- *
- * \returns     read_size            bytes of the message successfully parsed
  */
 static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, libparsebgp_rib_generic_entry_header *rib_gen_entry_hdr) {
     uint16_t count = 0;
@@ -452,14 +433,6 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
 
 /**
  * Process the incoming Table Dump v2 message
- *
- * \details This function will parse the incoming buffer for table dump v2 message type
- *
- * \param       buffer                  contains the data
- * \param       buf_len                 has the length of buffer
- * \param       table_dump_v2_msg       table dump v2 structure
- *
- * \returns     read_size           bytes of the message successfully parsed
  */
 static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
     int ret = 0, read_size = 0;
@@ -493,6 +466,9 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& bu
     return read_size;
 }
 
+/**
+ * Function to parse MRT message
+ */
 ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
     int read_size=0, ret_val = 0;
     try {

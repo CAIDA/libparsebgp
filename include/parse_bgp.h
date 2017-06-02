@@ -45,7 +45,7 @@ struct libparsebgp_common_bgp_hdr {
 typedef struct libparsebgp_parse_bgp_parsed_data {
     libparsebgp_common_bgp_hdr c_hdr;               ///< Has the bgp common header
     //union needed
-    struct parsed_bgp_data {
+    struct parsed_bgp_data {                        ///< Union of the different types of BGP messages
         libparsebgp_open_msg_data open_msg;         ///< Stores the open message
         libparsebgp_update_msg_data update_msg;     ///< Stores update message
         libparsebgp_notify_msg notification_msg;    ///< Stores notification message
@@ -73,7 +73,6 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
  * @param [in]     bgp_update_msg   Struct to hold parsed BGP message
  * @param [in]     data             Pointer to the raw BGP message header
  * @param [in]     size             length of the data buffer (used to prevent overrun)
-
  *
  * \returns number of bytes read
  */
@@ -108,5 +107,12 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
  * @returns Bytes read in parsing the header
  */
 ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_char *data, size_t size);
+
+/**
+ * Destructor function to free the memory allocated in parse_bgp
+ * @param bgp_parsed_data  Struct containing bgp data
+ *
+ */
+void libparsebgp_parse_bgp_destructor(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data);
 
 #endif /* PARSEBGP_H_ */

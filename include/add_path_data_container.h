@@ -11,7 +11,6 @@
 #define OPENBMP_ADDPATHDATACONTAINER_H
 
 #include "bgp_common.h"
-
 #include <map>
 #include <memory>
 
@@ -22,9 +21,6 @@ struct send_receive_codes_for_sent_and_received_open_message_structure {
 
 // Peer related data container. First key is afi safi unique key. Second is structure with Add Path information
 typedef std::map<std::string, send_receive_codes_for_sent_and_received_open_message_structure> libparsebgp_addpath_map;
-
-// Peer related information about Add Path
-//libparsebgp_addpath_map addpath_map;
 
 /**
  * Generates unique string from AFI and SAFI combination
@@ -49,10 +45,10 @@ void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int 
 /**
  * Is add path capability enabled for such AFI and SAFI
  *
- * \param [in] afi              Afi code from RFC
- * \param [in] safi             Safi code form RFC
+ * @param [in] afi              Afi code from RFC
+ * @param [in] safi             Safi code form RFC
  *
- * \return is enabled
+ * @return is enabled
  */
 bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi);
 

@@ -14,12 +14,7 @@
 using namespace std;
 
 /**
- * parse BGP messages
- *
- * \param [in] data             Pointer to the raw BGP message header
- * \param [in] size             length of the data buffer (used to prevent overrun)
- * \param [in] bgp_msg          Structure to store the bgp messages
- * \returns bytes read
+ * function to parse BGP messages
  */
 ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size,
                                                bool is_local_msg) {
@@ -83,14 +78,6 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
 
 /**
  * handle BGP update message and store in DB
- *
- * \details Parses the bgp update message and store it in the DB.
- *
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- * \param [in]     bgp_update_msg   Structure to store the bgp update message
- *
- * \returns True if error, false if no error.
  */
 ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size) {
     ssize_t read_size = 0, bytes_read =0;
@@ -118,16 +105,6 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &b
 
 /**
  * handle  BGP notify event - updates the down event with parsed data
- *
- * \details
- *  The notify message does not directly add to Db, so the calling
- *  method/function must handle that.
- *
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- * \param [out]    down_event       Reference to the down event/notification storage buffer
- *
- * \returns True if error, false if no error.
  */
 ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size) {
     ssize_t     read_size = 0, ret_val = 0;
@@ -158,17 +135,6 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
 
 /**
  * Parses the BGP common header
- *
- * @details
- *      This method will parse the bgp common header and will upload the global
- *      c_hdr structure, instance data pointer.
- *      The return value of this method will be the BGP message type.
- *
- * @param [in]      data                Pointer to the raw BGP message header
- * @param [in]      size                length of the data buffer (used to prevent overrun)
- * @param [in]      c_hdr               Struct to store common bgp header
- *
- * @returns Bytes read in parsing the header
  */
 ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_char *data, size_t size) {
     /*
@@ -191,4 +157,13 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_
         return LARGER_MSG_LEN;
 
      return BGP_MSG_HDR_LEN;
+}
+/**
+ * Destructor function to free the memory allocated in parse_bgp
+ */
+void libparsebgp_parse_bgp_destructor(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data) {
+    free(&bgp_parsed_data.c_hdr);
+//    libparsebgp_parse_open_msg_destructor(bgp_parsed_data.parsed_data.open_msg);
+    free(&bgp_parsed_data.parsed_data.notification_msg);
+//    libparsebgp_parse_update_msg_destructor(bgp_parsed_data.parsed_data.update_msg);
 }

@@ -125,21 +125,30 @@ struct prefix_tuple {
     std::string   labels;               ///< Labels in the format of label, label, ...
 };
 
-struct path_identifier {
-    uint16_t afi;
-    uint8_t  safi;
-    uint8_t  send_recieve;
-};
+/**
+* Defines the Add Path capability
+*/
+struct add_path_capability {
+    uint16_t       afi;
+    uint8_t        safi;
+    uint8_t        send_recieve;
+} __attribute__ ((__packed__));
 
+/**
+ * Defines the prefix tuple in update message
+ */
 struct update_prefix_tuple {
-    path_identifier path_id;
-    uint8_t len;                        ///< Length of prefix in bits
+    add_path_capability path_id;        ///< 4-octet Path identifier
+    uint8_t len;                        ///< 1-octet Length of prefix in bits
     std::string prefix;                 ///< Address prefix
 };
 
+/**
+ * Defines prefix tuple with label
+ */
 struct update_prefix_label_tuple {
-    path_identifier path_id;
-    uint8_t len;                        ///< Length of prefix in bits
+    add_path_capability path_id;        ///< 4-octet path identifier
+    uint8_t len;                        ///< 1-octet Length of prefix in bits
     std::string label;                  ///< Labels
     std::string prefix;                 ///< Address prefix
 };
@@ -239,9 +248,11 @@ struct evpn_tuple {
     }route_type_specific;
 };
 
-/**
- *  Function to parse mac
- */
+ /**
+  * Function to parse mac
+  * @param data_pointer buffer containing data to read
+  * @return string containing mac
+  */
 inline std::string parse_mac(u_char *data_pointer) {
     u_char *pointer = data_pointer;
 

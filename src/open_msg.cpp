@@ -20,8 +20,6 @@
  * \param [in]   data               Pointer to raw bgp payload data, starting at the open/cap message
  * \param [in]   size               Size of the data available to read; prevent overrun when reading
  * \param [in]   openMessageIsSent  If open message is sent. False if received
- * \param [out]  asn                Reference to the ASN that was discovered
- * \param [out]  capabilities       Reference to the capabilities list<string> (decoded values)
  *
  * \return negative values for error, otherwise a positive value indicating the number of bytes read
  */
@@ -131,8 +129,8 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                                         break;
                                 }*/
                                 //TODO: figure out if following is needed
-                                //libparsebgp_addpath_add(open_msg_data->add_path_capability, open_cap.cap_values.add_path_data.afi,
-                                //                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
+//                                libparsebgp_addpath_add(open_msg_data->add_path_capability, open_cap.cap_values.add_path_data.afi,
+//                                                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
                                 opt_param.param_values.push_back(open_cap);
                                 //capabilities.push_back(decodeStr);
                             }
@@ -220,10 +218,6 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
  * \param [in]   data               Pointer to raw bgp payload data, starting at the notification message
  * \param [in]   size               Size of the data available to read; prevent overrun when reading
  * \param [in]   openMessageIsSent  If open message is sent. False if received
- * \param [out]  asn                Reference to the ASN that was discovered
- * \param [out]  holdTime           Reference to the hold time
- * \param [out]  bgp_id             Reference to string for bgp ID in printed form
- * \param [out]  capabilities       Reference to the capabilities list<string> (decoded values)
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
@@ -299,4 +293,18 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
 
 
     return read_size;
+}
+
+static void libparsebgp_parse_open_msg_opt_param_destructor(open_param &param) {
+    for (int i = 0; i < param.param_len; ++i) {
+        //free(param.param_values[i]);
+    }
+    //free(param);
+}
+
+void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data) {
+    for (int i = 0; i < open_msg_data->opt_param_len; i++) {
+        //libparsebgp_parse_open_msg_opt_param_destructor(open_msg_data->opt_param[i]);
+    }
+    //free(open_msg_data);
 }

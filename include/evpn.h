@@ -26,6 +26,7 @@ enum evpn_routes_types {
  * @param [in]   data_len               Length of the data in bytes to be read
  * @param [in]   is_unreach             Indicates whether MP_REACH or MP_UNREACH
  *
+ * @return number of bytes read
  */
 ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,u_char *data, uint16_t data_len, bool is_unreach);
 

@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <list>
+#include "../include/bgp_common.h"
 
 /**
 * Defines the BGP capabilities
@@ -46,30 +47,12 @@ enum bgp_cap_add_path_send_receive_codes {
 };
 
 /**
-* Defines the MPBGP capability data
-*/
-struct cap_mpbgp_data {
-   uint16_t       afi;                    ///< Address family to support
-    u_char         reserved;               ///< Unused
-    u_char         safi;                   ///< Subsequent address family
-} __attribute__ ((__packed__));
-
-/**
-* Defines the Add Path capability data
-*/
-struct cap_add_path_data {
-  uint16_t       afi;
-  uint8_t        safi;
-  uint8_t        send_recieve;
-} __attribute__ ((__packed__));
-
-/**
  * Open message capability value
  */
 union capability_value {
-  uint32_t asn;
-  cap_add_path_data add_path_data;
-  cap_mpbgp_data mpbgp_data;
+    uint32_t asn;
+    add_path_capability add_path_data;
+    add_path_capability mpbgp_data;
 };
 
 /**
@@ -102,19 +85,16 @@ typedef struct libparsebgp_open_msg_data{
 /**
 * Parses an open message
 *
-* \details
+* @details
 *      Reads the open message from buffer.  The parsed data will be
 *      returned via the out params.
 *
-* \param [in]   data         Pointer to raw bgp payload data, starting at the notification message
-* \param [in]   size         Size of the data parsed_msg.error_textfer, to prevent overrun when reading
-* \param [in]   openMessageIsSent  If open message is sent. False if received
-* \param [out]  asn          Reference to the ASN that was discovered
-* \param [out]  holdTime     Reference to the hold time
-* \param [out]  bgp_id       Reference to string for bgp ID in printed form
-* \param [out]  capabilities Reference to the capabilities list<string> (decoded values)
+* @param [in]   open_msg_data       Structure containing parsed open message
+* @param [in]   data                Pointer to raw bgp payload data, starting at the notification message
+* @param [in]   size                Size of the data parsed_msg.error_textfer, to prevent overrun when reading
+* @param [in]   openMessageIsSent   If open message is sent. False if received
 *
-* \return negative values indicate error, otherwise a positive value indicating the number of bytes read
+* @return negative values indicate error, otherwise a positive value indicating the number of bytes read
 */
 ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
 

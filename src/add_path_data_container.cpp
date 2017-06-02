@@ -13,11 +13,6 @@
 
 /**
  * Add Add Path data to persistent storage
- *
- * \param [in] afi              Afi code from RFC
- * \param [in] safi             Safi code form RFC
- * \param [in] send_receive     Send Recieve code from RFC
- * \param [in] sent_open        Is obtained from sent open message. False if from recieved
  */
 void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open) {
     //AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
@@ -61,11 +56,6 @@ std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi) {
 
 /**
  * Is add path capability enabled for such AFI and SAFI
- *
- * \param [in] afi              Afi code from RFC
- * \param [in] safi             Safi code form RFC
- *
- * \return is enabled
  */
 bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi) {
     libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));

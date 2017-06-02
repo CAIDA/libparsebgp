@@ -35,7 +35,6 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_addpath
             break;
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            //TODO: Is this okay?
             libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(add_path_map, is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
 
             break;
@@ -70,7 +69,6 @@ static void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_addpath_map &add_
         case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
         {
 //            libparsebgp_mp_link_state_init(link_state_parse_data, parse_data->peer_addr, &parsed_data);
-            //TODO: Currently mp_ls_data in update_msg, figure out where to put it
             libparsebgp_mp_link_state_parse_unreach_link_state(path_attrs, data, len);
             break;
         }
@@ -83,7 +81,6 @@ static void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_addpath_map &add_
                 {
 //                    libparsebgp_evpn_data *evpn_data;
 //                    libparsebgp_evpn_init(evpn_data,parse_data->peer_addr, true, &parsed_data);
-                    //TODO: Same as above
                     libparsebgp_evpn_parse_nlri_data(path_attrs, data, len, true);
                     break;
                 }

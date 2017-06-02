@@ -7,13 +7,13 @@
 /**
  * Buffer remaining BMP message
  *
- * \details This method will read the remaining amount of BMP data and store it in the instance variable bmp_data.
+ * @details This method will read the remaining amount of BMP data and store it in the instance variable bmp_data.
  *          Normally this is used to store the BGP message so that it can be parsed.
  *
- * \param [in]  buffer       Buffer to read the message from
- * \param [in]  buf_len      Buffer length of the available buffer
+ * @param [in]  buffer       Buffer to read the message from
+ * @param [in]  buf_len      Buffer length of the available buffer
  *
- * \param [out] err_code     Returning error code in buffering the message
+ * @return Returns the error code in buffering the message
  *
  */
 static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, int& buf_len) {
@@ -38,14 +38,14 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char*& buffer, 
 /**
 * Parse v3 BMP header
 *
-* \details
+* @details
 *      v3 uses the same common header, but adds the Peer Up message type.
 *
-* \param [in]     parsed_peer_header    Reference to the peer header Message structure
-* \param [in]     buffer                Pointer to the raw BMP Message header
-* \param [in]     buf_len               length of the data buffer (used to prevent overrun)
+* @param [in]     parsed_peer_header    Reference to the peer header Message structure
+* @param [in]     buffer                Pointer to the raw BMP Message header
+* @param [in]     buf_len               length of the data buffer (used to prevent overrun)
 *
-* \returns  Bytes that have been successfully read by bmp parse peer header.
+* @returns  Bytes that have been successfully read by bmp parse peer header.
 *
 */
 static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 &parsed_peer_header, unsigned char *&buffer, int &buf_len) {
@@ -69,14 +69,14 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_
 /**
 * Parse v1 and v2 BMP header
 *
-* \details
+* @details
 *      v2 uses the same common header, but adds the Peer Up message type.
 *
-* \param [in]     parsed_msg       Pointer to the bmp parsed data structure
-* \param [in]     buffer           Pointer to the raw BMP Message header
-* \param [in]     buf_len          length of the data buffer (used to prevent overrun)
+* @param [in]     parsed_msg       Pointer to the bmp parsed data structure
+* @param [in]     buffer           Pointer to the raw BMP Message header
+* @param [in]     buf_len          length of the data buffer (used to prevent overrun)
 *
-* \returns Bytes that have been successfully read by the parse bmp v2.
+* @returns Bytes that have been successfully read by the parse bmp v2.
 */
 static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int& buf_len) {
     int read_size=0;
@@ -143,15 +143,15 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
 /**
  * Parse v3 BMP header
  *
- * \details
+ * @details
  *      v3 has a different header structure and changes the peer
  *      header format.
  *
- * \param [in]     parsed_msg    Pointer to the bmp parsed data structure
- * \param [in]     buffer        Pointer to the raw BMP Message header
- * \param [in]     buf_len       length of the data buffer (used to prevent overrun)
+ * @param [in]     parsed_msg    Pointer to the bmp parsed data structure
+ * @param [in]     buffer        Pointer to the raw BMP Message header
+ * @param [in]     buf_len       length of the data buffer (used to prevent overrun)
  *
- * \return Bytes that have been successfully read by the parse bmp v3.
+ * @return Bytes that have been successfully read by the parse bmp v3.
  */
 static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_data *&parsed_msg, unsigned char *&buffer, int &buf_len) {
 
@@ -200,18 +200,19 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
 /**
  * Process the incoming BMP message's header
  *
- * \details
+ * @details
  *      This function parses the header in a bmp message and further parses it according to the version in the header
  *
- * \param [in]     parsed_msg    Pointer to the bmp parsed data structure
- * \param [in]     buffer        Pointer to the raw BMP Message header
- * \param [in]     buf_len       length of the data buffer (used to prevent overrun)
+ * @param [in]     parsed_msg    Pointer to the bmp parsed data structure
+ * @param [in]     buffer        Pointer to the raw BMP Message header
+ * @param [in]     buf_len       length of the data buffer (used to prevent overrun)
  *
- * \return Bytes that have been successfully read by the parse bmp v3.
+ * @return Bytes that have been successfully read by the parse bmp v3.
  *
  */
 static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int &buf_len) {
-    uint8_t         ver = 0;
+//    uint8_t         ver = 0;
+    ver = 0;
     ssize_t         read_size = 0, bytes_read = 0;
 
     // Reading the version to parse the header accordingly
@@ -249,15 +250,15 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
 /**
 * Parse and return back the initiation message and update the init message structure
 *
-* \details
+* @details
 *        This method will read the init message tlvs and then store them in the init message structure.
 *
-* \param [in]     init_msg         Pointer to the initiation Message structure
-* \param [in]     data             Pointer to the raw BGP message header
-* \param [in]     size             length of the data buffer (used to prevent overrun)
-* \param [out]    init_msg         Reference to the initiation message (will be updated with bmp message)
+* @param [in]     init_msg         Pointer to the initiation Message structure
+* @param [in]     data             Pointer to the raw BGP message header
+* @param [in]     size             length of the data buffer (used to prevent overrun)
+* @param [out]    init_msg         Reference to the initiation message (will be updated with bmp message)
 *
-* \returns Bytes that have been successfully read by the handle initiation message.
+* @returns Bytes that have been successfully read by the handle initiation message.
 */
 static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init_msg *init_msg, unsigned char *buf_ptr, int buf_len) {
     int info_len = 0;
@@ -304,15 +305,15 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
 /**
 * Parse and return back the termination message and update the term message structure
 *
-* \details
+* @details
         *  This method will read the expected stat counts and then parse the stat info messages.
 *
-* \param [in]     term_msg         Pointer to the termination Message structure
-* \param [in]     data             Pointer to the raw BGP message header
-* \param [in]     size             length of the data buffer (used to prevent overrun)
-* \param [out]    term_msg         Reference to the termination message (will be updated with bmp message)
+* @param [in]     term_msg         Pointer to the termination Message structure
+* @param [in]     data             Pointer to the raw BGP message header
+* @param [in]     size             length of the data buffer (used to prevent overrun)
+* @param [out]    term_msg         Reference to the termination message (will be updated with bmp message)
 *
-* \returns Bytes that have been successfully read by the handle termination message.
+* @returns Bytes that have been successfully read by the handle termination message.
 */
 static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term_msg *term_msg, unsigned char *buf_ptr, int buf_len) {
     int info_len;
@@ -359,15 +360,15 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
 /**
  * Parse and return back the stats report and update the stat rep structure
  *
- * \details
+ * @details
  *  This method will read the expected stat counts and then parse the stat info messages.
  *
- * \param [in]     stat_rep_msg     Pointer to the stat report Message structure
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- * \param [out]    up_event         Reference to the stat report (will be updated with bmp message)
+ * @param [in]     stat_rep_msg     Pointer to the stat report Message structure
+ * @param [in]     data             Pointer to the raw BGP message header
+ * @param [in]     size             length of the data buffer (used to prevent overrun)
+ * @param [out]    up_event         Reference to the stat report (will be updated with bmp message)
  *
- * \returns Bytes that have been successfully read by the handle stats report.
+ * @returns Bytes that have been successfully read by the handle stats report.
  */
 static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_stat_rep *stat_rep_msg, unsigned char *buffer, int buf_len) {
     char b[8];
@@ -425,15 +426,15 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
 /**
  * Handles the up event by parsing the BGP open messages - Up event will be updated
  *
- * \details
+ * @details
  *  This method will read the expected sent and receive open messages.
  *
- * \param [in]     up_event         Pointer to the Up Event Message structure
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- * \param [out]    up_event         Reference to the peer up event storage (will be updated with bmp info)
+ * @param [in]     up_event         Pointer to the Up Event Message structure
+ * @param [in]     data             Pointer to the raw BGP message header
+ * @param [in]     size             length of the data buffer (used to prevent overrun)
+ * @param [out]    up_event         Reference to the peer up event storage (will be updated with bmp info)
  *
- * \returns Bytes that have been successfully read by the handle up event.
+ * @returns Bytes that have been successfully read by the handle up event.
  */
 static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char *data, size_t size) {
     ssize_t    read_size = 0, bytes_read = 0;
@@ -495,14 +496,14 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
 /**
  * Parse the v3 peer up BMP header
  *
- * \details This method will update the peer_up_event struct with BMP header info.
+ * @details This method will update the peer_up_event struct with BMP header info.
  *
- * \param [in]     up_event         Pointer to the Up Event Message structure
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- * \param [out]    up_event         Reference to the peer up event storage (will be updated with bmp info)
+ * @param [in]     up_event         Pointer to the Up Event Message structure
+ * @param [in]     data             Pointer to the raw BGP message header
+ * @param [in]     size             length of the data buffer (used to prevent overrun)
+ * @param [out]    up_event         Reference to the peer up event storage (will be updated with bmp info)
  *
- * \returns Bytes that have been successfully read by the peer up header parser.
+ * @returns Bytes that have been successfully read by the peer up header parser.
  */
 static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char *&buffer, int& buf_len) {
     bool is_parse_good = true;
@@ -542,15 +543,15 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_
 /**
  * Parses a BMP message by its various types
  *
- * \details
+ * @details
  *  This function will parse the header of the message and according to the type of the BMP message, it parses the rest of the message.
  *
- * \param [in]     parsed_msg       Pointer to the BMP Message structure
- * \param [in]     data             Pointer to the raw BGP message header
- * \param [in]     size             length of the data buffer (used to prevent overrun)
- * \param [out]    parsed_msg       Referenced to the updated bmp parsed message
+ * @param [in]     parsed_msg       Pointer to the BMP Message structure
+ * @param [in]     data             Pointer to the raw BGP message header
+ * @param [in]     size             length of the data buffer (used to prevent overrun)
+ * @param [out]    parsed_msg       Referenced to the updated bmp parsed message
  *
- * \returns Bytes that have been successfully read by the bmp parser.
+ * @returns Bytes that have been successfully read by the bmp parser.
  */
 ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len) {
     ssize_t read_size = 0, bytes_read = 0;
@@ -638,7 +639,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Parsing the bgp update message
              */
-            if((bytes_read = libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg, bmp_data, bmp_data_len))<0)
+            if((bytes_read = libparsebgp_parse_bgp_handle_update(parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, bmp_data, bmp_data_len))<0)
                 return bytes_read;
 
             read_size += bytes_read;
@@ -701,6 +702,55 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
     return read_size;
 }
 
+/**
+ * Destructor function to free bmp_parsed_data
+ */
+void libparsebgp_parse_bmp_destructor(libparsebgp_parsed_bmp_parsed_data *parsed_data) {
+    switch (bmp_type) {
+        case TYPE_INIT_MSG : {
+            int num_tlvs = bmp_data_len / BMP_INIT_MSG_LEN;
+            for (int i = 0; i < num_tlvs; i++) {
+                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg.init_msg_tlvs[i]);
+            }
+            free(parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg.init_msg_tlvs);
+            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg);
+            break;
+        }
+        case TYPE_PEER_DOWN: {
+            //TODO: Need to figure out
+            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg);
+            break;
+        }
+        case TYPE_PEER_UP: {
+//            libparsebgp_parse_open_msg_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.received_open_msg);
+//            libparsebgp_parse_open_msg_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.sent_open_msg);
+            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg);
+            break;
+        }
+        case TYPE_ROUTE_MON: {
+            //libparsebgp_parse_update_msg_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg);
+            break;
+        }
+        case TYPE_STATS_REPORT: {
+            for (int i = 0; i < parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.stats_count; i++) {
+                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.total_stats_counter[i]);
+            }
+            free(parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.total_stats_counter);
+            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep);
+            break;
+        }
+        case TYPE_TERM_MSG: {
+            uint32_t num_tlvs = bmp_data_len/BMP_TERM_MSG_LEN;
+            for (int i = 0; i < num_tlvs; i++) {
+                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg.term_msg_tlvs[i]);
+            }
+            free(parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg.term_msg_tlvs);
+            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg);
+            break;
+        }
+    }
+}
+
 //int main() {
 ///*    u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
 //                     0x00, 0x00, 0x19, 0x2f, 0x00, 0x00, 0x00, 0x01, 0x67, 0xf7, 0x03, 0x2d, 0x80, 0xdf, 0x33, 0x66,
@@ -741,4 +791,3 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
 ////    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
 //    return 1;
 //}
-

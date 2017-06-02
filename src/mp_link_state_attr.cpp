@@ -340,7 +340,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             val_ss.str(std::string());
 
             // https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.1.1
-
+            //TODO: Need to change this implementation and add to bgp_ls_attr
             // Decode flags
             if (strcmp(path_attrs->ls.nodes.front().protocol, "IS-IS") >= 0) {
                 val_ss << parse_flags_to_string(*data, LS_FLAGS_SR_CAP_ISIS, sizeof(LS_FLAGS_SR_CAP_ISIS));
@@ -529,7 +529,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
 
         case ATTR_LINK_ADJACENCY_SID: {
             val_ss.str(std::string());
-
+            //TODO: Need to change this implementation and add to bgp_ls_attr
             // There can be more than one adj sid, append as list
             if (strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()) > 0)
                 val_ss << ", ";
@@ -723,7 +723,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
 
         case ATTR_PREFIX_SID: {
             val_ss.str(std::string());
-
+            //TODO: Need to change this implementation and add to bgp_ls_attr
             // There can be more than one prefix_sid, append as list
             if (strlen((char *)path_attrs->ls_attrs[ATTR_PREFIX_SID].data()) > 0)
                 val_ss << ", ";
