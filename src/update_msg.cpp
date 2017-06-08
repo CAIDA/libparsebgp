@@ -51,8 +51,6 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
             prefixes = (update_prefix_tuple **)realloc(prefixes, (count+1)*sizeof(update_prefix_tuple*));
 
         memset(prefix_tuple, 0, sizeof(prefix_tuple));
-        //bzero(ipv4_raw, sizeof(ipv4_raw));
-        //bzero(tuple.prefix_bin, sizeof(tuple.prefix_bin));
 
         // Parse add-paths if enabled
         if (libparsebgp_addpath_is_enabled(add_path_map, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
@@ -86,12 +84,6 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
             // Convert the IP to string printed format
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
             strcpy(prefix_tuple->prefix, ipv4_char);
-//            prefix_tuple->prefix.assign(ipv4_char);
-            //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
-            //           router_addr.c_str(), ipv4_char, tuple.len);
-
-            // set the raw/binary address
-            //memcpy(tuple.prefix_bin, ipv4_raw, sizeof(ipv4_raw));
 
             // Add tuple to prefix list
             prefixes[count++]=prefix_tuple;
@@ -101,6 +93,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
             //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
         }
     }
+    free(prefix_tuple);
     return len;
 }
 
@@ -310,6 +303,7 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
 
         path_attrs->attr_value.as_path[count_as_segment++]=*as_segment;
     }
+    free(as_segment);
 
     //SELF_DEBUG("%s: rtr=%s: Parsed AS_PATH count %hu : %s", peer_addr.c_str(), router_addr.c_str(), as_path_cnt, decoded_path.c_str());
 
@@ -399,8 +393,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  */
 ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs,
                                                u_char *data, bool &has_end_of_rib_marker) {
-    std::string decodeStr       = "";
-    u_char      *ipv4_raw;
+//    std::string decodeStr       = "";
     uint16_t    value16bit;
 
     /*
@@ -409,11 +402,11 @@ ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path
     switch (path_attrs->attr_type.attr_type_code) {
 
         case ATTR_TYPE_ORIGIN : // Origin
-            switch (data[0]) {
-                case 0 : decodeStr.assign("igp"); break;
-                case 1 : decodeStr.assign("egp"); break;
-                case 2 : decodeStr.assign("incomplete"); break;
-            }
+//            switch (data[0]) {
+//                case 0 : decodeStr.assign("igp"); break;
+//                case 1 : decodeStr.assign("egp"); break;
+//                case 2 : decodeStr.assign("incomplete"); break;
+//            }
 
 //                parsed_data.attrs[ATTR_TYPE_ORIGIN] = decodeStr;
             path_attrs->attr_value.origin = data[0];
@@ -565,10 +558,11 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
      */
 
     for (int read=0;  read < len; read += 2) {
-        memset(path_attrs, 0, sizeof(path_attrs));
         if(count)
             update_msg = (update_path_attrs **)realloc(update_msg,(count+1)*sizeof(update_path_attrs *));
-//        memset(update_msg[count], 0, sizeof(update_path_attrs));
+        memset(path_attrs, 0, sizeof(path_attrs));
+        memset(update_msg[count], 0, sizeof(update_path_attrs));
+
         path_attrs->attr_type.attr_flags = *data++;
         path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
@@ -607,8 +601,8 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
         }
         update_msg[count] = (update_path_attrs *)malloc(sizeof(update_path_attrs));
         memcpy(update_msg[count++],path_attrs, sizeof(update_path_attrs));
-        //delete path_attrs;
     }
+    free(path_attrs);
     return read_size;
 }
 

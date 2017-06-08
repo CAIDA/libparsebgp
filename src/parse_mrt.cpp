@@ -337,9 +337,13 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
     uint8_t  addr_fam;
     int read_size=0;
 
-    if (extract_from_buffer(buffer, buf_len, &peer_index_table, 6) != 6)
+    if (extract_from_buffer(buffer, buf_len, &peer_index_table->collector_bgp_id, 4) != 4)
         return ERR_READING_MSG; //throw "Error in parsing collector_BGPID and view_name_length";
-    read_size+=6;
+    read_size+=4;
+
+    if (extract_from_buffer(buffer, buf_len, &peer_index_table->view_name_length, 2) != 2)
+        return ERR_READING_MSG; //throw "Error in parsing collector_BGPID and view_name_length";
+    read_size+=2;
 
     if (peer_index_table->view_name_length) {
         if (extract_from_buffer(buffer, buf_len, &peer_index_table->view_name, peer_index_table->view_name_length) !=
@@ -356,6 +360,8 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
     peer_index_table->peer_entries = (peer_entry *)malloc(peer_index_table->peer_count*sizeof(peer_entry));
     peer_entry *p_entry = (peer_entry *)malloc(sizeof(peer_entry));
 
+    memset(peer_index_table->peer_entries ,0 , sizeof(peer_index_table->peer_entries));
+
     while (count < peer_index_table->peer_count) {
         memset(p_entry, 0, sizeof(peer_entry));
 
@@ -368,6 +374,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
 
         if ( extract_from_buffer(buffer, buf_len, &p_entry->peer_bgp_id, 4) != 4)
             return ERR_READING_MSG; //throw "Error in parsing local address in peer_BGPID";
+        read_size+= 4;
 
         switch (addr_fam) {
             case AFI_IPv4:{
@@ -391,7 +398,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
         read_size+=as_num;
         peer_index_table->peer_entries[count++] = *p_entry;
     }
-    delete(p_entry);
+    free(p_entry);
     return read_size;
 }
 
@@ -426,12 +433,10 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 
         switch (mrt_sub_type) {
             case RIB_IPV4_UNICAST:
-                inet_ntop(AF_INET, local_addr, rib_entry_data->prefix,
-                          sizeof(rib_entry_data->prefix));
+                inet_ntop(AF_INET, local_addr, rib_entry_data->prefix,sizeof(rib_entry_data->prefix));
                 break;
             case RIB_IPV6_UNICAST:
-                inet_ntop(AF_INET6, local_addr, rib_entry_data->prefix,
-                          sizeof(rib_entry_data->prefix));
+                inet_ntop(AF_INET6, local_addr, rib_entry_data->prefix,sizeof(rib_entry_data->prefix));
                 break;
         }
     }
@@ -443,6 +448,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 
     rib_entry_data->rib_entries = (rib_entry *)malloc(rib_entry_data->entry_count*sizeof(rib_entry));
     rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
+
+    memset(rib_entry_data->rib_entries, 0, sizeof(rib_entry_data->rib_entries));
 
     while (count < rib_entry_data->entry_count) {
         memset(r_entry, 0, sizeof(rib_entry));
@@ -470,7 +477,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 
         rib_entry_data->rib_entries[count++]=*r_entry;
     }
-    delete r_entry;
+    free(r_entry);
     return read_size;
 }
 
@@ -516,6 +523,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
     rib_gen_entry_hdr->rib_entries = (rib_entry *)malloc(rib_gen_entry_hdr->entry_count*sizeof(rib_entry));
     rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
 
+    memset(rib_gen_entry_hdr->rib_entries, 0, sizeof(rib_gen_entry_hdr->rib_entries));
+
     while (count < rib_gen_entry_hdr->entry_count) {
         memset(r_entry, 0, sizeof(rib_entry));
 
@@ -542,7 +551,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
 
         rib_gen_entry_hdr->rib_entries[count++]=*r_entry;
     }
-    delete r_entry;
+    free(r_entry);
     return read_size;
 }
 
