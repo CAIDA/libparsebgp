@@ -116,8 +116,9 @@ struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     struct withdrawn_routes_nlri {
-        update_prefix_tuple             *wdrawn_routes;   ///< Withdrawn routes
-        update_prefix_label_tuple       *wdrawn_routes_label;
+        update_prefix_tuple             *wdrawn_routes;       ///< Withdrawn routes
+        update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
+        evpn_tuple                      *evpn_withdrawn;      ///< List of evpn nlris withdrawn
     }withdrawn_routes_nlri;
 };
 
@@ -199,6 +200,7 @@ struct mp_reach_nlri {
         update_prefix_tuple              *nlri_info;               ///< Withdrawn routes
         update_prefix_label_tuple        *nlri_label_info;
         mp_reach_ls                      *mp_rch_ls;
+        evpn_tuple                       *evpn;               ///< List of evpn nlris advertised
     }nlri_info;
 };
 
@@ -224,22 +226,6 @@ typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map
 //    list<obj_ls_link>   links;        ///< List of link state links
 //    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
 //};
-
-typedef struct attr_value{
-    uint8_t                 origin;
-    as_path_segment         *as_path;
-    u_char                  next_hop[4];
-    u_char                  originator_id[4];
-    uint32_t                med;
-    uint32_t                local_pref;
-    uint16_t                value16bit;
-    string                  aggregator;
-    u_char                  **cluster_list;
-    uint16_t                *attr_type_comm;
-    extcomm_hdr             *ext_comm;
-    mp_unreach_nlri         mp_unreach_nlri_data;
-    mp_reach_nlri           mp_reach_nlri_data;
-}attr_val;
 
 typedef struct bgp_link_state_attrs{
     uint16_t            type;
@@ -270,17 +256,31 @@ typedef struct bgp_link_state_attrs{
     }prefix;
 }bgp_link_state_attrs;
 
+typedef struct attr_value{
+    uint8_t                 origin;
+    as_path_segment         *as_path;
+    u_char                  next_hop[4];
+    u_char                  originator_id[4];
+    uint32_t                med;
+    uint32_t                local_pref;
+    uint16_t                value16bit;
+    string                  aggregator;
+    u_char                  **cluster_list;
+    uint16_t                *attr_type_comm;
+    extcomm_hdr             *ext_comm;
+    mp_unreach_nlri         mp_unreach_nlri_data;
+    mp_reach_nlri           mp_reach_nlri_data;
+    bgp_link_state_attrs    *bgp_ls;
+}attr_val;
+
 struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
-    list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
-    evpn_tuple              *evpn;               ///< List of evpn nlris advertised
-    parsed_ls_attrs_map     ls_attrs;
-    evpn_tuple              *evpn_withdrawn;     ///< List of evpn nlris withdrawn
+//    list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
+//    parsed_ls_attrs_map     ls_attrs;
 //    parsed_data_ls          ls;                 ///< REACH: Link state parsed data
     //libparsebgp_addpath_map add_path_map;
-    bgp_link_state_attrs    *bgp_ls;
 };
 
 
@@ -318,8 +318,12 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
-ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs **path_attrs, u_char *data, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
+
+void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
+
+void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attrs);
 
 #endif /* UPDATEMSG_H_ */

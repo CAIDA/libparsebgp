@@ -99,10 +99,10 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
      * Loop through all TLV's for the attribute
      */
     int tlv_len, count =0;
-    path_attrs->bgp_ls = (bgp_link_state_attrs *)malloc(sizeof(bgp_link_state_attrs));
+    path_attrs->attr_value.bgp_ls = (bgp_link_state_attrs *)malloc(sizeof(bgp_link_state_attrs));
     while (attr_len > 0) {
         if(count)
-            path_attrs->bgp_ls = (bgp_link_state_attrs *)realloc(path_attrs->bgp_ls,(count+1)*sizeof(bgp_link_state_attrs));
+            path_attrs->attr_value.bgp_ls = (bgp_link_state_attrs *)realloc(path_attrs->attr_value.bgp_ls,(count+1)*sizeof(bgp_link_state_attrs));
 
         tlv_len = libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(path_attrs, attr_len, data, count);
         attr_len -= tlv_len;
@@ -337,10 +337,10 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             break;
 
         case ATTR_NODE_SR_CAPABILITIES: {
-            val_ss.str(std::string());
+            //TODO: Need to change this implementation and add to bgp_ls_attr
+            /*val_ss.str(std::string());
 
             // https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.1.1
-            //TODO: Need to change this implementation and add to bgp_ls_attr
             // Decode flags
 //            if (strcmp(path_attrs->ls.nodes.front().protocol, "IS-IS") >= 0) {
 //                val_ss << parse_flags_to_string(*data, LS_FLAGS_SR_CAP_ISIS, sizeof(LS_FLAGS_SR_CAP_ISIS));
@@ -412,7 +412,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             }
     //        SELF_DEBUG("%s: bgp-ls: parsed node sr capabilities (len=%d) %s", peer_addr.c_str(), len, val_ss.str().c_str());
 
-            memcpy(path_attrs->ls_attrs[ATTR_NODE_SR_CAPABILITIES].data(), val_ss.str().data(), val_ss.str().length());
+            memcpy(path_attrs->ls_attrs[ATTR_NODE_SR_CAPABILITIES].data(), val_ss.str().data(), val_ss.str().length());*/
             break;
         }
 
@@ -528,8 +528,9 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
         }
 
         case ATTR_LINK_ADJACENCY_SID: {
-            val_ss.str(std::string());
             //TODO: Need to change this implementation and add to bgp_ls_attr
+            /*val_ss.str(std::string());
+
             // There can be more than one adj sid, append as list
             if (strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()) > 0)
                 val_ss << ", ";
@@ -563,7 +564,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             strncat((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data(),
                     val_ss.str().c_str(),
                     path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].size() -
-                            strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()));
+                            strlen((char *)path_attrs->ls_attrs[ATTR_LINK_ADJACENCY_SID].data()));*/
             break;
         }
 
@@ -725,6 +726,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             val_ss.str(std::string());
             //TODO: Need to change this implementation and add to bgp_ls_attr
             // There can be more than one prefix_sid, append as list
+/*
             if (strlen((char *)path_attrs->ls_attrs[ATTR_PREFIX_SID].data()) > 0)
                 val_ss << ", ";
 
@@ -768,6 +770,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
                     val_ss.str().c_str(),
                     path_attrs->ls_attrs[ATTR_PREFIX_SID].size() -
                             strlen((char *)path_attrs->ls_attrs[ATTR_PREFIX_SID].data()));
+*/
 
             //    SELF_DEBUG("%s: bgp-ls: parsed sr prefix segment identifier  flags = %x len=%d : %s",
             //               peer_addr.c_str(), *(data - 4), len, val_ss.str().c_str());
@@ -780,6 +783,6 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             //           peer_addr.c_str(), type, len);
             break;
     }
-    path_attrs->bgp_ls[count]= *bgp_ls_attr;
+    path_attrs->attr_value.bgp_ls[count]= *bgp_ls_attr;
     return bgp_ls_attr->len + 4;
 }

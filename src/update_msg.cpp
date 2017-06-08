@@ -13,6 +13,7 @@
 #include "../include/mp_reach_attr.h"
 #include "../include/mp_un_reach_attr.h"
 #include "../include/mp_link_state_attr.h"
+#include "../include/mp_link_state.h"
 #include "../include/parse_utils.h"
 
 /**
@@ -27,7 +28,7 @@
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
 static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map &add_path_map, u_char *data, uint16_t len,
-                                                         update_prefix_tuple **prefixes) {
+                                                         update_prefix_tuple **&prefixes) {
     u_char       ipv4_raw[4];
     char         ipv4_char[16];
     int          addr_bytes = 0;
@@ -84,7 +85,8 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
 
             // Convert the IP to string printed format
             inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-            prefix_tuple->prefix.assign(ipv4_char);
+            strcpy(prefix_tuple->prefix, ipv4_char);
+//            prefix_tuple->prefix.assign(ipv4_char);
             //SELF_DEBUG("%s: rtr=%s: Adding prefix %s len %d", peer_addr.c_str(),
             //           router_addr.c_str(), ipv4_char, tuple.len);
 
@@ -548,7 +550,8 @@ ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **&update_msg,
+                                                u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
@@ -565,7 +568,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
         memset(path_attrs, 0, sizeof(path_attrs));
         if(count)
             update_msg = (update_path_attrs **)realloc(update_msg,(count+1)*sizeof(update_path_attrs *));
-
+//        memset(update_msg[count], 0, sizeof(update_path_attrs));
         path_attrs->attr_type.attr_flags = *data++;
         path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
@@ -602,8 +605,157 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
         } else if (path_attrs->attr_len) {
             return INCOMPLETE_MSG;
         }
-        update_msg[count++]=path_attrs;
+        update_msg[count] = (update_path_attrs *)malloc(sizeof(update_path_attrs));
+        memcpy(update_msg[count++],path_attrs, sizeof(update_path_attrs));
         //delete path_attrs;
     }
     return read_size;
+}
+
+void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attrs) {
+    switch (path_attrs->attr_type.attr_type_code) {
+        case ATTR_TYPE_AS_PATH: {
+            int n_as_path = 0, path_len = path_attrs->attr_len;
+            while (path_len > 0) {
+                // Count of AS's, not bytes
+                path_len -= (2* path_attrs->attr_value.as_path[n_as_path].seg_len + 2);
+                n_as_path++;
+            }
+            for (int i = 0; i < n_as_path; ++i) {
+                free(path_attrs->attr_value.as_path[i].seg_asn);
+                path_attrs->attr_value.as_path[i].seg_asn = NULL;
+            }
+            free(path_attrs->attr_value.as_path);
+            path_attrs->attr_value.as_path = NULL;
+            break;
+        }
+        case ATTR_TYPE_CLUSTER_LIST: {
+            for (int i = 0; i < path_attrs->attr_len/4; ++i) {
+                free(path_attrs->attr_value.cluster_list[i]);
+                path_attrs->attr_value.cluster_list[i] = NULL;
+            }
+            free(path_attrs->attr_value.cluster_list);
+            path_attrs->attr_value.cluster_list = NULL;
+            break;
+        }
+        case ATTR_TYPE_COMMUNITIES: {
+            free(path_attrs->attr_value.attr_type_comm);
+            path_attrs->attr_value.attr_type_comm = NULL;
+            break;
+        }
+        case ATTR_TYPE_EXT_COMMUNITY: {
+            free(path_attrs->attr_value.ext_comm);
+            path_attrs->attr_value.ext_comm = NULL;
+            break;
+        }
+        case ATTR_TYPE_MP_UNREACH_NLRI: {
+            free(path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn);
+            path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn = NULL;
+
+            free(path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.wdrawn_routes);
+            path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.wdrawn_routes = NULL;
+
+            free(path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.wdrawn_routes_label);
+            path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.wdrawn_routes_label = NULL;
+//            free(&path_attrs->attr_value.mp_unreach_nlri_data);
+            break;
+        }
+        case ATTR_TYPE_MP_REACH_NLRI: {
+            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn);
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn = NULL;
+
+            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info);
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info = NULL;
+
+            int nlri_len_read = 0, count = 0, len = path_attrs->attr_len - path_attrs->attr_value.mp_reach_nlri_data.nh_len - 5;
+            while (nlri_len_read < len) {
+                nlri_len_read += 13;
+
+                switch (path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_type) {
+                    case NLRI_TYPE_NODE: {
+                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes = NULL;
+                        break;
+                    }
+
+                    case NLRI_TYPE_LINK: {
+                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.local_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.local_nodes = NULL;
+
+                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.link_desc);
+                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.link_desc = NULL;
+
+                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.remote_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.remote_nodes = NULL;
+
+                        break;
+                    }
+
+                    case NLRI_TYPE_IPV4_PREFIX:
+                    case NLRI_TYPE_IPV6_PREFIX: {
+                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes = NULL;
+
+                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc);
+                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc = NULL;
+                        break;
+                    }
+                }
+            }
+            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls);
+
+            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_label_info);
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_label_info = NULL;
+
+//            free(&path_attrs->attr_value.mp_reach_nlri_data);
+            break;
+        }
+        case ATTR_TYPE_BGP_LS: {
+            free(path_attrs->attr_value.bgp_ls);
+            break;
+        }
+    }
+}
+
+void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size) {
+    int addr_bytes, n_wdrawn_routes = 0, data_remaining = update_msg->wdrawn_route_len, n_path_attrs = 0;
+    while (data_remaining > 0) {
+        addr_bytes = update_msg->wdrawn_routes[n_wdrawn_routes]->len / 8;
+        if (update_msg->wdrawn_routes[n_wdrawn_routes]->len % 8)
+            ++addr_bytes;
+        data_remaining -= (addr_bytes + 1);
+        n_wdrawn_routes++;
+    }
+    for (int i = 0; i < n_wdrawn_routes; ++i) {
+        free(update_msg->wdrawn_routes[i]);
+        update_msg->wdrawn_routes[i] = NULL;
+    }
+    free(update_msg->wdrawn_routes);
+    update_msg->wdrawn_routes = NULL;
+
+    for (int read=0;  read < update_msg->total_path_attr_len; read += 2) {
+        // Check if the length field is 1 or 2 bytes
+        if (ATTR_FLAG_EXTENDED(update_msg->path_attributes[n_path_attrs]->attr_type.attr_flags))
+            read += 2;
+        else
+            read++;
+
+        if (update_msg->path_attributes[n_path_attrs]->attr_len > 0 and
+                (read + update_msg->path_attributes[n_path_attrs]->attr_len) <= update_msg->total_path_attr_len) {
+            read += update_msg->path_attributes[n_path_attrs]->attr_len;
+            n_path_attrs++;
+        }
+    }
+    for (int i = 0; i < n_path_attrs; ++i) {
+        libparsebgp_parse_update_path_attrs_destructor(update_msg->path_attributes[i]);
+    }
+    free(update_msg->path_attributes);
+
+    for (int i = 0; i < total_size - update_msg->total_path_attr_len - update_msg->wdrawn_route_len - sizeof(update_msg->total_path_attr_len) -
+                                sizeof(update_msg->wdrawn_route_len); ++i) {
+        free(update_msg->nlri[i]);
+        update_msg->nlri[i] = NULL;
+    }
+    free(update_msg->nlri);
+    update_msg->nlri = NULL;
 }

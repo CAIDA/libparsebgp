@@ -284,16 +284,16 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
     return read_size;
 }
 
-static void libparsebgp_parse_open_msg_opt_param_destructor(open_param &param) {
-    for (int i = 0; i < param.param_len; ++i) {
-        //free(param.param_values[i]);
-    }
-    //free(param);
-}
+//static void libparsebgp_parse_open_msg_opt_param_destructor(open_param &param) {
+//    for (int i = 0; i < param.param_len; ++i) {
+//        free(&param.param_values[i]);
+//    }
+//    free(&param);
+//}
 
 void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data) {
     for (int i = 0; i < open_msg_data->opt_param_len; i++) {
-        //libparsebgp_parse_open_msg_opt_param_destructor(open_msg_data->opt_param[i]);
+        free(open_msg_data->opt_param[i].param_values);
     }
-    //free(open_msg_data);
+    free(open_msg_data->opt_param);
 }

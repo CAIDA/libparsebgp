@@ -708,44 +708,48 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
 void libparsebgp_parse_bmp_destructor(libparsebgp_parsed_bmp_parsed_data *parsed_data) {
     switch (bmp_type) {
         case TYPE_INIT_MSG : {
-            int num_tlvs = bmp_data_len / BMP_INIT_MSG_LEN;
-            for (int i = 0; i < num_tlvs; i++) {
-                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg.init_msg_tlvs[i]);
-            }
+//            int num_tlvs = bmp_data_len / BMP_INIT_MSG_LEN;
+//            for (int i = 0; i < num_tlvs; i++) {
+//                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg.init_msg_tlvs[i]);
+//            }
             free(parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg.init_msg_tlvs);
-            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg);
+            parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg.init_msg_tlvs = NULL;
+//            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_init_msg);
             break;
         }
         case TYPE_PEER_DOWN: {
-            //TODO: Need to figure out
-            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg);
+            libparsebgp_parse_bgp_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.notify_msg);
+//            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg);
             break;
         }
         case TYPE_PEER_UP: {
-//            libparsebgp_parse_open_msg_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.received_open_msg);
-//            libparsebgp_parse_open_msg_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.sent_open_msg);
-            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg);
+            libparsebgp_parse_bgp_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.received_open_msg);
+            libparsebgp_parse_bgp_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg.sent_open_msg);
+//            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg);
             break;
         }
         case TYPE_ROUTE_MON: {
-            //libparsebgp_parse_update_msg_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_rm_msg.update_msg);
+            libparsebgp_parse_bgp_destructor(parsed_data->libparsebgp_parsed_bmp_msg.parsed_rm_msg);
+//            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_rm_msg);
             break;
         }
         case TYPE_STATS_REPORT: {
-            for (int i = 0; i < parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.stats_count; i++) {
-                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.total_stats_counter[i]);
-            }
+//            for (int i = 0; i < parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.stats_count; i++) {
+//                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.total_stats_counter[i]);
+//            }
             free(parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.total_stats_counter);
-            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep);
+            parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep.total_stats_counter = NULL;
+//            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_stat_rep);
             break;
         }
         case TYPE_TERM_MSG: {
-            uint32_t num_tlvs = bmp_data_len/BMP_TERM_MSG_LEN;
-            for (int i = 0; i < num_tlvs; i++) {
-                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg.term_msg_tlvs[i]);
-            }
+//            uint32_t num_tlvs = bmp_data_len/BMP_TERM_MSG_LEN;
+//            for (int i = 0; i < num_tlvs; i++) {
+//                free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg.term_msg_tlvs[i]);
+//            }
             free(parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg.term_msg_tlvs);
-            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg);
+            parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg.term_msg_tlvs = NULL;
+//            free(&parsed_data->libparsebgp_parsed_bmp_msg.parsed_term_msg);
             break;
         }
     }

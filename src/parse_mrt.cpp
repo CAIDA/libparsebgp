@@ -9,28 +9,124 @@
 
 #include "../include/parse_mrt.h"
 #include <arpa/inet.h>
-#include <parse_mrt.h>
 
 /**
  * Destructor function to free memory allocated to libparsebgp_parse_mrt_parsed_data
  */
 void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
-    free(&mrt_parsed_data->c_hdr);
-    //free(mrt_parsed_data->parsed_data.table_dump.bgp_attrs); //need to loop through
-    free(&mrt_parsed_data->parsed_data.table_dump);
-    free(mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_entries);
-    free(&mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl);
-    //free(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries->bgp_attrs); //need to loop through
-    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries);
-    free(&mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr);
-    //free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries->bgp_attrs); //need to loop through
-    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries);
-    free(&mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr);
-    free(&mrt_parsed_data->parsed_data.table_dump_v2);
-    free(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg);
-    libparsebgp_parse_bgp_destructor(mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg);
-    free(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg);
-    free(mrt_parsed_data);
+    switch (mrt_parsed_data->c_hdr.type) {
+        case TABLE_DUMP: {
+            int n_path_attrs = 0;
+            for (int read=0;  read < mrt_parsed_data->parsed_data.table_dump.attribute_len; read += 2) {
+                // Check if the length field is 1 or 2 bytes
+                if (ATTR_FLAG_EXTENDED(mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_type.attr_flags))
+                    read += 2;
+                else
+                    read++;
+
+                if (mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_len > 0 and
+                    (read + mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_len) <=
+                    mrt_parsed_data->parsed_data.table_dump.attribute_len) {
+                    read += mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_len;
+                    n_path_attrs++;
+                }
+            }
+            for (int i = 0; i < n_path_attrs; ++i) {
+                libparsebgp_parse_update_path_attrs_destructor(mrt_parsed_data->parsed_data.table_dump.bgp_attrs[i]);
+            }
+            free(mrt_parsed_data->parsed_data.table_dump.bgp_attrs);
+            mrt_parsed_data->parsed_data.table_dump.bgp_attrs = NULL;
+//            free(&mrt_parsed_data->parsed_data.table_dump);
+            break;
+        }
+        case TABLE_DUMP_V2: {
+            switch (mrt_parsed_data->c_hdr.sub_type) {
+                case PEER_INDEX_TABLE: {
+//                    free(mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_entries);
+//                    for (int i = 0; i < mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_count; ++i) {
+//                        free(&mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_entries[i]);
+//
+//                    }
+                    free(mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_entries);
+                    mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl.peer_entries = NULL;
+//                    free(&mrt_parsed_data->parsed_data.table_dump_v2.peer_index_tbl);
+                    break;
+                }
+                case RIB_IPV4_UNICAST:
+                case RIB_IPV6_UNICAST: {
+                    for (int i = 0; i < mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.entry_count; ++i) {
+                        int n_path_attrs = 0;
+                        for (int read=0;  read < mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].attribute_len; read += 2) {
+                            // Check if the length field is 1 or 2 bytes
+                            if (ATTR_FLAG_EXTENDED(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_type.attr_flags))
+                                read += 2;
+                            else
+                                read++;
+
+                            if (mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len > 0 and
+                                (read + mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len) <=
+                                        mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].attribute_len) {
+                                read += mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len;
+                                n_path_attrs++;
+                            }
+                        }
+                        for (int j = 0; j < n_path_attrs; ++j) {
+                            libparsebgp_parse_update_path_attrs_destructor(
+                                    mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]);
+                        }
+                        free(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs);
+                        mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs = NULL;
+                    }
+                    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries);
+                    mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries = NULL;
+                    break;
+                }
+                case RIB_GENERIC: {
+                    for (int i = 0; i < mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count; ++i) {
+                        int n_path_attrs = 0;
+                        for (int read=0;  read < mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].attribute_len;
+                             read += 2) {
+                            // Check if the length field is 1 or 2 bytes
+                            if (ATTR_FLAG_EXTENDED(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_type.attr_flags))
+                                read += 2;
+                            else
+                                read++;
+
+                            if (mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len > 0 and
+                                (read + mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len) <=
+                                mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].attribute_len) {
+                                read += mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len;
+                                n_path_attrs++;
+                            }
+                        }
+                        for (int j = 0; j < n_path_attrs; ++j) {
+                            libparsebgp_parse_update_path_attrs_destructor(
+                                    mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]);
+                        }
+                        free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs);
+                        mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs = NULL;
+                    }
+                    free(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries);
+                    mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries = NULL;
+                    break;
+                }
+            }
+            break;
+        }
+        case BGP4MP_ET:
+        case BGP4MP: {
+            switch (mrt_parsed_data->c_hdr.sub_type) {
+                case BGP4MP_MESSAGE:
+                case BGP4MP_MESSAGE_AS4:
+                case BGP4MP_MESSAGE_LOCAL:
+                case BGP4MP_MESSAGE_AS4_LOCAL: {
+                    libparsebgp_parse_bgp_destructor(mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.bgp_msg);
+                    break;
+                }
+            }
+            break;
+        }
+    }
 }
 
 /**
@@ -456,29 +552,32 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
 static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
     int ret = 0, read_size = 0;
     switch (mrt_sub_type) {
-        case PEER_INDEX_TABLE:
-            ret = libparsebgp_parse_mrt_parse_peer_index_table(buffer,buf_len, &table_dump_v2_msg->peer_index_tbl);
+        case PEER_INDEX_TABLE: {
+            ret = libparsebgp_parse_mrt_parse_peer_index_table(buffer, buf_len, &table_dump_v2_msg->peer_index_tbl);
             if (ret < 0)
                 return ret;
             read_size += ret;
             break;
-
+        }
         case RIB_IPV4_UNICAST:
-        case RIB_IPV6_UNICAST:
-            ret = libparsebgp_parse_mrt_parse_rib_unicast(buffer,buf_len, &table_dump_v2_msg->rib_entry_hdr);
+        case RIB_IPV6_UNICAST: {
+            ret = libparsebgp_parse_mrt_parse_rib_unicast(buffer, buf_len, &table_dump_v2_msg->rib_entry_hdr);
             if (ret < 0)
                 return ret;
             read_size += ret;
             break;
-
+        }
         case RIB_IPV4_MULTICAST: //TODO: due to lack of multicast data
-        case RIB_IPV6_MULTICAST: //TODO: due to lack of multicast data
-        case RIB_GENERIC:
-            ret = libparsebgp_parse_mrt_parse_rib_generic(buffer,buf_len, &table_dump_v2_msg->rib_generic_entry_hdr);
+        case RIB_IPV6_MULTICAST: { //TODO: due to lack of multicast data
+            break;
+        }
+        case RIB_GENERIC: {
+            ret = libparsebgp_parse_mrt_parse_rib_generic(buffer, buf_len, &table_dump_v2_msg->rib_generic_entry_hdr);
             if (ret < 0)
                 return ret;
             read_size += ret;
             break;
+        }
         default:
             break;
     }
@@ -490,68 +589,62 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& bu
  */
 ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
     int read_size=0, ret_val = 0;
-    try {
-        ret_val = libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data->c_hdr);
-        if (ret_val < 0)
-            return ret_val;
-        read_size += ret_val;
+    ret_val = libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data->c_hdr);
+    if (ret_val < 0)
+        return ret_val;
+    read_size += ret_val;
 
-        switch (mrt_parsed_data->c_hdr.type) {
-            case OSPFv2 :     //do nothing
-            case OSPFv3 :     //do nothing
-            case OSPFv3_ET : {//do nothing
-                break;
-            }
-
-            case TABLE_DUMP : {
-                ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-                if (ret_val < 0)
-                    return ret_val;
-                ret_val = libparsebgp_parse_mrt_parse_table_dump(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump);
-                if (ret_val < 0)
-                    return ret_val;
-                read_size += ret_val;
-                break;
-            }
-
-            case TABLE_DUMP_V2 : {
-                if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len))<0)
-                    return ret_val;
-                if (ret_val < 0)
-                    return ret_val;
-                ret_val = libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump_v2);
-                if (ret_val < 0)
-                    return ret_val;
-                read_size += ret_val;
-                break;
-            }
-
-            case BGP4MP :
-            case BGP4MP_ET : {
-                ssize_t err_code = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-                if (err_code < 0)
-                    return err_code;
-                //libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-                err_code = libparsebgp_parse_mrt_parse_bgp4mp(mrt_data, mrt_data_len, mrt_parsed_data);
-                if (err_code < 0)
-                    return err_code;
-                read_size += err_code;
-                break;
-            }
-            case ISIS :
-            case ISIS_ET : {
-                break;  //do nothing
-            }
-            default: {
-                //throw "MRT type is unexpected as per rfc6396";
-                return INVALID_MSG;
-            }
+    switch (mrt_parsed_data->c_hdr.type) {
+        case OSPFv2 :     //do nothing
+        case OSPFv3 :     //do nothing
+        case OSPFv3_ET : {//do nothing
+            break;
         }
 
-    } catch (char const *str) {
-        throw str;
-    }
+        case TABLE_DUMP : {
+            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
+            if (ret_val < 0)
+                return ret_val;
+            ret_val = libparsebgp_parse_mrt_parse_table_dump(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump);
+            if (ret_val < 0)
+                return ret_val;
+            read_size += ret_val;
+            break;
+        }
 
+        case TABLE_DUMP_V2 : {
+            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len))<0)
+                return ret_val;
+            if (ret_val < 0)
+                return ret_val;
+            ret_val = libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump_v2);
+            if (ret_val < 0)
+                return ret_val;
+            read_size += ret_val;
+            break;
+        }
+
+        case BGP4MP :
+        case BGP4MP_ET : {
+            ssize_t err_code = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
+            if (err_code < 0)
+                return err_code;
+            //libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
+            err_code = libparsebgp_parse_mrt_parse_bgp4mp(mrt_data, mrt_data_len, mrt_parsed_data);
+            if (err_code < 0)
+                return err_code;
+            read_size += err_code;
+            break;
+        }
+        case ISIS :
+        case ISIS_ET : {
+            break;  //do nothing
+        }
+        default: {
+            //throw "MRT type is unexpected as per rfc6396";
+            return INVALID_MSG;
+        }
+    }
     return read_size;
 }
 
@@ -565,38 +658,38 @@ int main() {
 //                     0x02, 0x0c, 0x00, 0x01, 0x3f, 0x0c, 0x00, 0x01, 0x3f, 0x00, 0x00, 0x1b, 0x6a, 0x02, 0x44, 0x43, 0x21,
 //                     0x63, 0x2d, 0x3d, 0x00, 0x55, 0x00, 0x00};
 
-//len = 217
-u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x02, 0x00, 0x00, 0x00, 0xcd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                 0x05, 0x00, 0x14, 0x58, 0xb5, 0xe3, 0x61, 0x00, 0x27, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02,
-                 0x02, 0x00, 0x00, 0x85, 0xb0, 0x00, 0x00, 0x0d, 0xdd, 0x40, 0x03, 0x04, 0x5e, 0x9c, 0xfc, 0x12, 0x80, 0x04,
-                 0x04, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x08, 0x04, 0x85, 0xb0, 0x01, 0x4d, 0x00, 0x2a, 0x58, 0xaf, 0x4f, 0x3b,
-                 0x00, 0x30, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00,
-                 0x0d, 0x1c, 0x40, 0x03, 0x04, 0xb9, 0x2c, 0x74, 0x01, 0xc0, 0x08, 0x14, 0x0d, 0x1c, 0x00, 0x02, 0x0d, 0x1c,
-                 0x02, 0x02, 0x0d, 0x1c, 0x08, 0x43, 0xbb, 0x00, 0x00, 0x06, 0xbb, 0x00, 0x0d, 0x1c, 0x00, 0x13, 0x58, 0x91,
-                 0x2d, 0x7f, 0x00, 0x19, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0x79, 0x2b,
-                 0x00, 0x00, 0x99, 0x9e, 0x40, 0x03, 0x04, 0x5b, 0xe4, 0x97, 0x01, 0x00, 0x34, 0x58, 0x90, 0x94, 0x4e, 0x00,
-                 0x15, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x06, 0x02, 0x01, 0x00, 0x00, 0x46, 0xba, 0x40, 0x03, 0x04,
-                 0xca, 0x49, 0x28, 0x2d, 0x00, 0x0e, 0x58, 0xb5, 0x9c, 0xbd, 0x00, 0x19, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02,
-                 0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0x51, 0x23, 0x00, 0x00, 0x0d, 0x1c, 0x40, 0x03, 0x04, 0x50, 0xf1, 0xb0,
-                 0x1f};
+//    int len = 217;
+//    u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x02, 0x00, 0x00, 0x00, 0xcd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+//                     0x05, 0x00, 0x14, 0x58, 0xb5, 0xe3, 0x61, 0x00, 0x27, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02,
+//                     0x02, 0x00, 0x00, 0x85, 0xb0, 0x00, 0x00, 0x0d, 0xdd, 0x40, 0x03, 0x04, 0x5e, 0x9c, 0xfc, 0x12, 0x80, 0x04,
+//                     0x04, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x08, 0x04, 0x85, 0xb0, 0x01, 0x4d, 0x00, 0x2a, 0x58, 0xaf, 0x4f, 0x3b,
+//                     0x00, 0x30, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00,
+//                     0x0d, 0x1c, 0x40, 0x03, 0x04, 0xb9, 0x2c, 0x74, 0x01, 0xc0, 0x08, 0x14, 0x0d, 0x1c, 0x00, 0x02, 0x0d, 0x1c,
+//                     0x02, 0x02, 0x0d, 0x1c, 0x08, 0x43, 0xbb, 0x00, 0x00, 0x06, 0xbb, 0x00, 0x0d, 0x1c, 0x00, 0x13, 0x58, 0x91,
+//                     0x2d, 0x7f, 0x00, 0x19, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0x79, 0x2b,
+//                     0x00, 0x00, 0x99, 0x9e, 0x40, 0x03, 0x04, 0x5b, 0xe4, 0x97, 0x01, 0x00, 0x34, 0x58, 0x90, 0x94, 0x4e, 0x00,
+//                     0x15, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x06, 0x02, 0x01, 0x00, 0x00, 0x46, 0xba, 0x40, 0x03, 0x04,
+//                     0xca, 0x49, 0x28, 0x2d, 0x00, 0x0e, 0x58, 0xb5, 0x9c, 0xbd, 0x00, 0x19, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02,
+//                     0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0x51, 0x23, 0x00, 0x00, 0x0d, 0x1c, 0x40, 0x03, 0x04, 0x50, 0xf1, 0xb0,
+//                     0x1f};
 
-//len = 99;
-//    u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
-//                     0x00, 0x00, 0x19, 0x2f, 0x00, 0x00, 0x00, 0x01, 0x67, 0xf7, 0x03, 0x2d, 0x80, 0xdf, 0x33, 0x66,
-//                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-//                     0x00, 0x43, 0x02, 0x00, 0x04, 0x18, 0xa8, 0xb5, 0x24, 0x00, 0x24, 0x40, 0x01, 0x01, 0x00, 0x40,
-//                     0x02, 0x16, 0x02, 0x05, 0x00, 0x00, 0xe4, 0x8f, 0x00, 0x00, 0x1b, 0x1b, 0x00, 0x04, 0x01, 0x04,
-//                     0x00, 0x00, 0x6e, 0xb7, 0x00, 0x04, 0x05, 0x73, 0x40, 0x03, 0x04, 0x67, 0xf7, 0x03, 0x2d, 0x18,
-//                     0xbf, 0x05, 0xaa};
+    int len = 99;
+    u_char temp[] = {0x58, 0xb6, 0x12, 0x84, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0xe4, 0x8f,
+                     0x00, 0x00, 0x19, 0x2f, 0x00, 0x00, 0x00, 0x01, 0x67, 0xf7, 0x03, 0x2d, 0x80, 0xdf, 0x33, 0x66,
+                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                     0x00, 0x43, 0x02, 0x00, 0x04, 0x18, 0xa8, 0xb5, 0x24, 0x00, 0x24, 0x40, 0x01, 0x01, 0x00, 0x40,
+                     0x02, 0x16, 0x02, 0x05, 0x00, 0x00, 0xe4, 0x8f, 0x00, 0x00, 0x1b, 0x1b, 0x00, 0x04, 0x01, 0x04,
+                     0x00, 0x00, 0x6e, 0xb7, 0x00, 0x04, 0x05, 0x73, 0x40, 0x03, 0x04, 0x67, 0xf7, 0x03, 0x2d, 0x18,
+                     0xbf, 0x05, 0xaa};
 
-//len = 75;
-//u_char temp[] =     {0x58, 0x67, 0xb5, 0x31, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x07, 0x2c,
+//    int len = 75;
+//    u_char temp[] = {0x58, 0x67, 0xb5, 0x31, 0x00, 0x10, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3f, 0x00, 0x00, 0x07, 0x2c,
 //                     0x00, 0x00, 0x31, 0x6e, 0x00, 0x00, 0x00, 0x02, 0x2a, 0x01, 0x02, 0xa8, 0x00, 0x00, 0x00, 0x00,
 //                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x01, 0x06, 0x7c, 0x02, 0xe8, 0x00, 0x02,
 //                     0xff, 0xff, 0x00, 0x00, 0x00, 0x04, 0x00, 0x28, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 //                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x13, 0x04};
 
-    int len = 217;
+//    int len = 217;
 //unsigned char temp[] = {0x03, 0x00, 0x00, 0x00, 0x06, 0x04};
 //len = 186;
 //unsigned char temp[] = {0x03, 0x00, 0x00, 0x00, 0xba, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x45, 0xb8, 0xc1, 0x00, 0x00, 0x0d, 0x1c, 0x04, 0x45, 0xb8, 0xc1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xdf, 0x33, 0x67, 0xd0, 0x40, 0x00, 0xb3, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x41, 0x01, 0x04, 0x19, 0x2f, 0x02, 0x58, 0x80, 0xdf, 0x33, 0x67, 0x24, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x02, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x01, 0x02, 0x02, 0x80, 0x00, 0x02, 0x02, 0x02, 0x00, 0x02, 0x02, 0x46, 0x00, 0x02, 0x06, 0x41, 0x04, 0x00, 0x00, 0x19, 0x2f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x35, 0x01, 0x04, 0x0d, 0x1c, 0x00, 0xb4, 0x04, 0x45, 0xb8, 0xc1, 0x18, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x02, 0x02, 0x06, 0x01, 0x04, 0x00, 0x01, 0x00, 0x01, 0x02, 0x02, 0x02, 0x00, 0x02, 0x02, 0x80, 0x00};
@@ -607,8 +700,9 @@ u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x02, 0x00, 0x00, 0x0
 
     u_char *tmp;
     tmp = temp;
-    libparsebgp_parse_mrt_parsed_data bmp_data;
-    int read_size = libparsebgp_parse_mrt_parse_msg(&bmp_data, tmp, len);
+    libparsebgp_parse_mrt_parsed_data mrt_data;
+    int read_size = libparsebgp_parse_mrt_parse_msg(&mrt_data, tmp, len);
+    libparsebgp_parse_mrt_destructor(&mrt_data);
     cout << "Hello Ojas and Induja"<<endl;
     cout << read_size;
 

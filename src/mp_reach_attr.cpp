@@ -366,7 +366,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_
         // Convert the IP to string printed format
         inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
-        tuple->prefix.assign(ip_char);
+//        tuple->prefix.assign(ip_char);
+        strcpy(tuple->prefix, ip_char);
 
         // Add tuple to prefix list
         prefixes[count++] = *tuple;

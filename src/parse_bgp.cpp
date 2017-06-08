@@ -162,8 +162,15 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_
  * Destructor function to free the memory allocated in parse_bgp
  */
 void libparsebgp_parse_bgp_destructor(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data) {
-    free(&bgp_parsed_data.c_hdr);
-//    libparsebgp_parse_open_msg_destructor(bgp_parsed_data.parsed_data.open_msg);
-    free(&bgp_parsed_data.parsed_data.notification_msg);
-//    libparsebgp_parse_update_msg_destructor(bgp_parsed_data.parsed_data.update_msg);
+//    free(&bgp_parsed_data.c_hdr);
+    switch (bgp_parsed_data.c_hdr.type) {
+        case BGP_MSG_OPEN: {
+            libparsebgp_parse_open_msg_destructor(&bgp_parsed_data.parsed_data.open_msg);
+            break;
+        }
+        case BGP_MSG_UPDATE: {
+            libparsebgp_parse_update_msg_destructor(&bgp_parsed_data.parsed_data.update_msg, bgp_parsed_data.c_hdr.len - BGP_MSG_HDR_LEN);
+            break;
+        }
+    }
 }

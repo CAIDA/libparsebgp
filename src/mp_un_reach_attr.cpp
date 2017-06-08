@@ -20,7 +20,8 @@
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_addpath_map &add_path_map, bool is_ipv4, mp_unreach_nlri &nlri, u_char *data, int len) {
+static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_addpath_map &add_path_map, bool is_ipv4, mp_unreach_nlri &nlri,
+                                                             u_char *data, int len) {
 
     /*
      * Decode based on SAFI
@@ -36,7 +37,6 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_addpath
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
             libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(add_path_map, is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
-
             break;
 
         default :

@@ -140,7 +140,7 @@ struct add_path_capability {
 struct update_prefix_tuple {
     add_path_capability path_id;        ///< 4-octet Path identifier
     uint8_t len;                        ///< 1-octet Length of prefix in bits
-    std::string prefix;                 ///< Address prefix
+    char prefix[40];                 ///< Address prefix
 };
 
 /**
