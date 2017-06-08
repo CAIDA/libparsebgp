@@ -635,12 +635,15 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
     }
 
     path_attrs->attr_value.ext_comm = (extcomm_hdr *)malloc(path_attrs->attr_len/20*sizeof(extcomm_hdr));
+    memset(path_attrs->attr_value.ext_comm ,0 , sizeof(path_attrs->attr_value.ext_comm));
+
     int count = 0;
 
     /*
      * Loop through consecutive entries
      */
     for (int i = 0; i < path_attrs->attr_len; i += 20) {
+        memset(ec_hdr, 0, sizeof(ec_hdr));
         // Setup extended community header
         ec_hdr->high_type = data[0];
         ec_hdr->low_type = data[1];
@@ -662,4 +665,6 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
         ec_hdr->val=decode_str;
         path_attrs->attr_value.ext_comm[count++] = *ec_hdr;
     }
+    free(ec_hdr);
+    free(value);
 }

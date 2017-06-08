@@ -117,7 +117,6 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
         data += BGP_MSG_HDR_LEN;
         read_size += BGP_MSG_HDR_LEN;
 
-        libparsebgp_notify_msg *notify_msg = (libparsebgp_notify_msg *)malloc(sizeof(libparsebgp_notify_msg));
         ret_val = libparsebgp_notification_parse_notify(bgp_parsed_data.parsed_data.notification_msg,data, data_bytes_remaining);
         if (ret_val < 0)
             return ret_val; //Error:Failed to parse the BGP notification message

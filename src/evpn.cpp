@@ -511,4 +511,5 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
             path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn[count2++]=*tuple;
         }
     }
+    free(tuple);
 }

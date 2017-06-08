@@ -195,6 +195,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
         read_size += 2 + opt_param->param_len;
         open_msg_data->opt_param[count_param++] = *opt_param;
     }
+    free(opt_param);
     return read_size;
 }
 /**

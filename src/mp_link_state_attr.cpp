@@ -784,5 +784,6 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             break;
     }
     path_attrs->attr_value.bgp_ls[count]= *bgp_ls_attr;
+    free(bgp_ls_attr);
     return bgp_ls_attr->len + 4;
 }

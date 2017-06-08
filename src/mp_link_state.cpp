@@ -245,7 +245,7 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *dat
         data_len -= data_read;
         mp_reach_ls->nlri_ls.node_nlri.local_nodes[count++]=*info;
     }// Save the parsed data
-    delete info;
+    free(info);
     return mp_reach_ls->nlri_ls.node_nlri.len;
 }
 
@@ -483,7 +483,7 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, 
         data_len -= data_read;
     }
 
-
+    free(info);
 
     /*
      * Remaining data is the link descriptor sub-tlv's
@@ -502,6 +502,7 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, 
         data += data_read;
         data_len -= data_read;
     }
+    free(link_info);
 }
 
 /**********************************************************************************//*
@@ -701,7 +702,6 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
      */
     node_descriptor *local_node = (node_descriptor *)malloc(sizeof(node_descriptor));
 
-
     memcpy(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.type, data, 2);
     SWAP_BYTES(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.type);
     memcpy(&mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len, data + 2, 2);
@@ -736,6 +736,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
         data += data_read;
         data_len -= data_read;
     }
+    free(local_node);
 
     /*
      * Remaining data is the link descriptor sub-tlv's
@@ -754,6 +755,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
         data += data_read;
         data_len -= data_read;
     }
+    free(info);
 }
 /**********************************************************************************//*
  * Parses Link State NLRI data
@@ -765,13 +767,14 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
  */
 static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs, u_char *data, uint16_t len) {
     uint16_t        nlri_len_read = 0, count = 0;
+    mp_reach_ls *mp_nlri_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
+    path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
     // Process the NLRI data
     while (nlri_len_read < len) {
-        if(count==0)
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
-        else
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls = (mp_reach_ls *)realloc(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls, sizeof(mp_reach_ls));
-        mp_reach_ls *mp_nlri_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
+        if(count)
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls = (mp_reach_ls *)realloc(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls, (count+1)*sizeof(mp_reach_ls));
+
+        memset(mp_nlri_ls, 0, sizeof(mp_nlri_ls));
         /*
          * Parse the NLRI TLV
          */
@@ -824,12 +827,12 @@ static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_at
             default :
                 return INVALID_MSG;
         }
-        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count]=*mp_nlri_ls;
+        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count++]=*mp_nlri_ls;
         // Move to next link state type
-        count++;
         data += mp_nlri_ls->nlri_len;
         nlri_len_read += mp_nlri_ls->nlri_len;
     }
+    free(mp_nlri_ls);
     return nlri_len_read;
 }
 /**

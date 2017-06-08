@@ -45,8 +45,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(libparsebgp_ad
 
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {
-
-        prefixes = (update_prefix_label_tuple *)realloc(prefixes, (count+1)*sizeof(update_prefix_label_tuple));
+        if(count)
+            prefixes = (update_prefix_label_tuple *)realloc(prefixes, (count+1)*sizeof(update_prefix_label_tuple));
         memset(tuple, 0, sizeof(tuple));
 
         // Only check for add-paths if not mpls/vpn
@@ -112,6 +112,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(libparsebgp_ad
 
         prefixes[count++]=*tuple;
     }
+    free(tuple);
     return len;
 }
 
@@ -319,7 +320,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_
                                                             uint16_t len, update_prefix_tuple *prefixes) {
     u_char              ip_raw[16];
     char                ip_char[40];
-    u_char              addr_bytes;
+    int                 addr_bytes;
 
     if (len <= 0 or data == NULL)
         return 0;
@@ -332,11 +333,14 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_
 
     int count=0;
     // Loop through all prefixes
+    prefixes = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
+    update_prefix_tuple *tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
+
     for (size_t read_size=0; read_size < len; read_size++) {
-        update_prefix_tuple *tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
         memset(tuple, 0, sizeof(update_prefix_tuple));
 
-        prefixes = (update_prefix_tuple *)realloc(prefixes, sizeof(update_prefix_tuple));
+        if(count)
+            prefixes = (update_prefix_tuple *)realloc(prefixes, (count+1)*sizeof(update_prefix_tuple));
 
         bzero(ip_raw, sizeof(ip_raw));
 
@@ -371,9 +375,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_
 
         // Add tuple to prefix list
         prefixes[count++] = *tuple;
-
-        delete(tuple);
     }
+    free(tuple);
     return len;
 }
 
