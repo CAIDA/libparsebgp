@@ -63,6 +63,7 @@ struct attr_type_tuple {
 typedef struct as_path_segment {
     uint8_t         seg_type;
     uint8_t         seg_len;
+    uint8_t         num_seg_asn;
     uint32_t        *seg_asn;
 }as_path_segment;
 
@@ -73,8 +74,11 @@ struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     struct withdrawn_routes_nlri {
+        uint16_t                        count_wdrawn_routes;
         update_prefix_tuple             *wdrawn_routes;       ///< Withdrawn routes
+        uint16_t                        count_wdrawn_routes_label;
         update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
+        uint16_t                        count_evpn_withdrawn;
         evpn_tuple                      *evpn_withdrawn;      ///< List of evpn nlris withdrawn
     }withdrawn_routes_nlri;
 };
@@ -157,6 +161,10 @@ struct mp_reach_nlri {
     unsigned char next_hop[16];  ///< Next hop address - Pointer to data (normally does not require freeing)
     uint8_t reserved;            ///< Reserved
     struct nlri_info {
+        uint16_t                         count_nlri_info;
+        uint16_t                         count_nlri_label_info;
+        uint16_t                         count_mp_rch_ls;
+        uint16_t                         count_evpn;
         update_prefix_tuple              *nlri_info;               ///< Withdrawn routes
         update_prefix_label_tuple        *nlri_label_info;
         mp_reach_ls                      *mp_rch_ls;
@@ -175,17 +183,6 @@ struct extcomm_hdr {
     string       val;
 };
 
-//typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
-
-///**
-//     * Parsed data structure for BGP-LS
-//     */
-//struct parsed_data_ls {
-//
-//    list<obj_ls_node>   nodes;        ///< List of Link state nodes
-//    list<obj_ls_link>   links;        ///< List of link state links
-//    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
-//};
 
 typedef struct bgp_link_state_attrs{
     uint16_t            type;
@@ -241,6 +238,10 @@ struct update_path_attrs {
 
 
 struct libparsebgp_update_msg_data {
+    uint16_t                    count_wdrawn_route;
+    uint16_t                    count_path_attr;
+    uint16_t                    count_nlri;
+
     uint16_t                    wdrawn_route_len;
     update_prefix_tuple         **wdrawn_routes;
     uint16_t                    total_path_attr_len;
@@ -274,9 +275,8 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker, uint16_t *count);
 
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
 /**
  * Parse attribute data based on attribute type
  *
@@ -291,7 +291,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
  * \param [in]   has_end_of_rib_marker
  * \param [out]  read_bytes             Bytes read in parsing this message.
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker, uint16_t *count);
 
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
 

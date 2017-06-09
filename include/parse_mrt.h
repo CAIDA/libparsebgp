@@ -111,6 +111,7 @@ struct rib_entry{
     uint16_t                     peer_index;        ///< 2-octet Peer index
     uint32_t                     originated_time;   ///< 4-octet, originated time for the RIB Entry
     uint16_t                     attribute_len;     ///< 2-octet, length of the BGP attributes field
+    uint16_t                     bgp_attrs_count;
     update_path_attrs            **bgp_attrs;         ///< List of BGP attributes
 };
 

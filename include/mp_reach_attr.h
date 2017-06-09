@@ -40,7 +40,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_
  * \param [in]   peer_info                  Persistent Peer info pointer
  * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, update_prefix_tuple *prefixes);
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
+                                                            update_prefix_tuple *prefixes, uint16_t *prefix_count);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -54,7 +55,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char 
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, update_prefix_label_tuple *prefixes);
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len,
+                                                                  update_prefix_label_tuple *prefixes, uint16_t *prefix_count);
 
 /**
  * Decode label from NLRI data

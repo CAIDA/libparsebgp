@@ -27,15 +27,15 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_un
      */
     switch (nlri.safi) {
         case BGP_SAFI_UNICAST: // Unicast IP address prefix
-            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes);
+            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes, &nlri.withdrawn_routes_nlri.count_wdrawn_routes);
             break;
 
         case BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label, &nlri.withdrawn_routes_nlri.count_wdrawn_routes_label);
             break;
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label, &nlri.withdrawn_routes_nlri.count_wdrawn_routes_label);
             break;
 
         default :

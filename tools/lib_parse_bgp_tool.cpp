@@ -249,8 +249,13 @@ int shift(u_char *&buffer, int bytes_read)
     return (BUFFER_SIZE-bytes_read);
 }
 
-int main() {
-    char file_path[] = "../testfile.txt";
+int main(int argc, char * argv[]) {
+
+    char file_path[20];
+    if (argc>1)
+        strcpy(file_path, argv[1]);
+    else
+        strcpy(file_path, "../testfile.txt");
     int position = 0, total_bytes_read = 0, msg_type = 1, len = BUFFER_SIZE, count = 0;
     ssize_t bytes_read = 0;
     u_char *buffer;
