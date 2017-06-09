@@ -75,6 +75,7 @@ typedef struct libparsebgp_table_dump_message{
     char                    peer_ip[16];        ///< 4-octe ot 16-octet (depending on type) peer IP address
     uint16_t                peer_as;            ///< 2-octet peer AS number
     uint16_t                attribute_len;      ///< 2-octet, contains the length of the Attribute field
+    uint16_t                bgp_attrs_count;
     update_path_attrs       **bgp_attrs;        ///< contains the BGP attribute information for the RIB entry
 }libparsebgp_table_dump_message;
 

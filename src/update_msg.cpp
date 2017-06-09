@@ -541,7 +541,6 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
         if(count)
             update_msg = (update_path_attrs **)realloc(update_msg,(count+1)*sizeof(update_path_attrs *));
         memset(path_attrs, 0, sizeof(path_attrs));
-        memset(update_msg[count], 0, sizeof(update_path_attrs));
 
         path_attrs->attr_type.attr_flags = *data++;
         path_attrs->attr_type.attr_type_code = *data++;

@@ -251,9 +251,11 @@ int shift(u_char *&buffer, int bytes_read)
 
 int main() {
     char file_path[] = "../testfile.txt";
-    int position = 0, bytes_read = 0, total_bytes_read = 0, msg_type = 1, len = BUFFER_SIZE;
+    int position = 0, total_bytes_read = 0, msg_type = 1, len = BUFFER_SIZE, count = 0;
+    ssize_t bytes_read = 0;
     u_char *buffer;
     bool msg_read = true;
+    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
     FILE *fp = fopen(file_path, "r");
     if (fp != NULL) {
         while (!feof(fp)) {
@@ -262,9 +264,12 @@ int main() {
             len = BUFFER_SIZE;
             total_bytes_read = 0;
 
+            libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
             while (msg_read && len > 0) {
-                libparsebgp_parse_msg parse_msg;
-                bytes_read = libparsebgp_parse_msg_common_wrapper(&parse_msg, buffer + total_bytes_read, len, msg_type);
+                if(count)
+                    all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,(count+1)*sizeof(libparsebgp_parse_msg *));
+                memset(parse_msg, 0, sizeof(parse_msg));
+                bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, buffer + total_bytes_read, len, msg_type);
                 cout <<endl<< "out of parser" << endl;
                 if (bytes_read < 0) {
                     msg_read = false;
@@ -277,12 +282,23 @@ int main() {
                     len -= bytes_read;
                     cout << bytes_read << " " << position << " " << len << endl;
                     total_bytes_read += bytes_read;
+                    all_parsed_msg[count] = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
+                    memcpy(all_parsed_msg[count], parse_msg, sizeof(libparsebgp_parse_msg));
+                    cout<<int(parse_msg->parsed_mrt_msg.c_hdr.len)<<" "<<int(parse_msg->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
+                    cout<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.len)<<" "<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
+                    count++;
                 }
             }
             position = shift(buffer, bytes_read);
         }
     } else
         cout<<"File could not be opened";
+
+    cout<<count<<endl;
+//    for (int i=0;i<count;i++)
+//    {
+//        cout<<int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len)<<" "<<int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
+//    }
     return 0;
 }
 

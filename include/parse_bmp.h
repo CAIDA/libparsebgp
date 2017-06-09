@@ -113,6 +113,7 @@ typedef struct init_msg_v3_tlv {
 * BMP initiation message: This can contain multiple init - tlvs
 */
 typedef struct libparsebgp_parsed_bmp_init_msg {
+    uint32_t         num_tlvs;
     init_msg_v3_tlv *init_msg_tlvs;    ///< list of init message tlvs
 }libparsebgp_parsed_bmp_init_msg;
 
@@ -129,6 +130,7 @@ typedef struct term_msg_v3_tlv {
 * BMP termination message: This can contain multiple term - tlvs
 */
 typedef struct libparsebgp_parsed_bmp_term_msg {
+    uint32_t         num_tlvs;
     term_msg_v3_tlv *term_msg_tlvs;    ///< list of term message tlvs
 }libparsebgp_parsed_bmp_term_msg;
 

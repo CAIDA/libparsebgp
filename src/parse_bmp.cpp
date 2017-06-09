@@ -264,7 +264,7 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
     int info_len = 0;
     ssize_t read_bytes = 0;
 
-    int num_tlvs = bmp_data_len/BMP_INIT_MSG_LEN, curr_tlv = 0;
+    uint8_t num_tlvs = bmp_data_len/BMP_INIT_MSG_LEN, curr_tlv = 0;
 
     init_msg->init_msg_tlvs = (init_msg_v3_tlv *)malloc(num_tlvs*sizeof(init_msg_v3_tlv));
     init_msg_v3_tlv *init_msg_tlv = (init_msg_v3_tlv *)malloc(sizeof(init_msg_v3_tlv));
@@ -299,6 +299,7 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
 
         init_msg->init_msg_tlvs[curr_tlv++] = *init_msg_tlv;
     }
+    init_msg->num_tlvs = num_tlvs;
     free(init_msg_tlv);
     return read_bytes;
 }
@@ -355,6 +356,7 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
         }
         term_msg->term_msg_tlvs[curr_tlv++] = *term_msg_tlv;
     }
+    term_msg->num_tlvs = num_tlvs;
     free(term_msg_tlv);
     return read_bytes;
 }
