@@ -26,7 +26,7 @@
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, int attr_len, u_char *data);
+ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -40,8 +40,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(libparsebgp_addpath_map 
  * \param [in]   peer_info                  Persistent Peer info pointer
  * \param [out]  prefixes                   Reference to a list<prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_map &add_path_map, bool isIPv4, u_char *data, uint16_t len,
-                                                            update_prefix_tuple *prefixes);
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, update_prefix_tuple *prefixes);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -55,8 +54,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(libparsebgp_addpath_
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(libparsebgp_addpath_map &add_path_map, bool isIPv4, u_char *data, uint16_t len,
-                                                                  update_prefix_label_tuple *prefixes);
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u_char *data, uint16_t len, update_prefix_label_tuple *prefixes);
 
 /**
  * Decode label from NLRI data

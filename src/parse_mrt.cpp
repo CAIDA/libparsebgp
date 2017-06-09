@@ -320,8 +320,8 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
     read_size+=4;
 
     bool has_end_of_rib_marker;
-    libparsebgp_addpath_map add_path_map;
-    libparsebgp_update_msg_parse_attributes(add_path_map, table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker);
+//    libparsebgp_addpath_map add_path_map;
+    libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker);
     read_size += table_dump_msg->attribute_len;
     buf_len-=table_dump_msg->attribute_len;
 
@@ -470,8 +470,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
         SWAP_BYTES(&r_entry->attribute_len);
 
         bool has_end_of_rib_marker;
-        libparsebgp_addpath_map add_path_map;
-        libparsebgp_update_msg_parse_attributes(add_path_map, r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
+//        libparsebgp_addpath_map add_path_map;
+        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
@@ -544,8 +544,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
         SWAP_BYTES(&r_entry->attribute_len);
 
         bool has_end_of_rib_marker;
-        libparsebgp_addpath_map add_path_map;
-        libparsebgp_update_msg_parse_attributes(add_path_map, r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
+//        libparsebgp_addpath_map add_path_map;
+        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
@@ -597,10 +597,13 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& bu
  * Function to parse MRT message
  */
 ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
-    int read_size=0, ret_val = 0;
+    ssize_t read_size=0, ret_val = 0;
     ret_val = libparsebgp_parse_mrt_parse_common_header(buffer, buf_len, mrt_parsed_data->c_hdr);
-    if (ret_val < 0)
+    if (ret_val < 0) {
+        //Error found, call destructor and return error code
+        libparsebgp_parse_mrt_destructor(mrt_parsed_data);
         return ret_val;
+    }
     read_size += ret_val;
 
     switch (mrt_parsed_data->c_hdr.type) {
@@ -612,37 +615,45 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
 
         case TABLE_DUMP : {
             ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-            if (ret_val < 0)
-                return ret_val;
+            if (ret_val < 0) {
+                read_size = ret_val;
+                break;
+            }
             ret_val = libparsebgp_parse_mrt_parse_table_dump(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump);
             if (ret_val < 0)
-                return ret_val;
-            read_size += ret_val;
+                read_size = ret_val;
+            else
+                read_size += ret_val;
             break;
         }
 
         case TABLE_DUMP_V2 : {
-            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len))<0)
-                return ret_val;
-            if (ret_val < 0)
-                return ret_val;
+            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len))<0) {
+                read_size = ret_val;
+                break;
+            }
+
             ret_val = libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump_v2);
             if (ret_val < 0)
-                return ret_val;
-            read_size += ret_val;
+                read_size = ret_val;
+            else
+                read_size += ret_val;
             break;
         }
 
         case BGP4MP :
         case BGP4MP_ET : {
-            ssize_t err_code = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-            if (err_code < 0)
-                return err_code;
-            //libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
-            err_code = libparsebgp_parse_mrt_parse_bgp4mp(mrt_data, mrt_data_len, mrt_parsed_data);
-            if (err_code < 0)
-                return err_code;
-            read_size += err_code;
+            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, buf_len);
+            if (ret_val < 0) {
+                read_size = ret_val;
+                break;
+            }
+
+            ret_val = libparsebgp_parse_mrt_parse_bgp4mp(mrt_data, mrt_data_len, mrt_parsed_data);
+            if (ret_val < 0)
+                read_size = ret_val;
+            else
+                read_size += ret_val;
             break;
         }
         case ISIS :
@@ -651,9 +662,13 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
         }
         default: {
             //throw "MRT type is unexpected as per rfc6396";
-            return INVALID_MSG;
+            read_size = INVALID_MSG;
         }
     }
+    if (read_size < 0) {
+        libparsebgp_parse_mrt_destructor(mrt_parsed_data);
+    }
+
     return read_size;
 }
 

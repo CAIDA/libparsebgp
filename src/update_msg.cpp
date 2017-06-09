@@ -27,7 +27,7 @@
  * @param [in]   len        Length of the data in bytes to be read
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
-static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map &add_path_map, u_char *data, uint16_t len,
+static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
                                                          update_prefix_tuple **&prefixes) {
     u_char       ipv4_raw[4];
     char         ipv4_char[16];
@@ -53,16 +53,19 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
         memset(prefix_tuple, 0, sizeof(prefix_tuple));
 
         // Parse add-paths if enabled
-        if (libparsebgp_addpath_is_enabled(add_path_map, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
-            and (len - read_size) >= 4) {
-            memcpy(&prefix_tuple->path_id, data, 4);
-            SWAP_BYTES(&prefix_tuple->path_id.afi);
-            data += 4; read_size += 4;
-        } else {
-            prefix_tuple->path_id.afi = 0;
-            prefix_tuple->path_id.safi = 0;
-            prefix_tuple->path_id.send_recieve = 0;
-        }
+//        if (libparsebgp_addpath_is_enabled(add_path_map, BGP_AFI_IPV4, BGP_SAFI_UNICAST)
+//            and (len - read_size) >= 4) {
+//            memcpy(&prefix_tuple->path_id, data, 4);
+//            SWAP_BYTES(&prefix_tuple->path_id.afi);
+//            data += 4; read_size += 4;
+//        } else {
+//            prefix_tuple->path_id.afi = 0;
+//            prefix_tuple->path_id.safi = 0;
+//            prefix_tuple->path_id.send_recieve = 0;
+//        }
+        prefix_tuple->path_id.afi = 0;
+        prefix_tuple->path_id.safi = 0;
+        prefix_tuple->path_id.send_recieve = 0;
 
         // set the address in bits length
         //tuple.len = *data++;
@@ -113,7 +116,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(libparsebgp_addpath_map
 ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool &has_end_of_rib_marker) {
     ssize_t     read_size       = 0, bytes_read = 0, bytes_check = 0;
     u_char      *buf_ptr        = data;
-    libparsebgp_addpath_map add_path_map;
+//    libparsebgp_addpath_map add_path_map;
     if (size < 2) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
         return INCOMPLETE_MSG;
@@ -165,7 +168,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          * Parse the withdrawn prefixes
          */
         if (update_msg->wdrawn_route_len > 0) {
-            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(add_path_map, withdrawn_ptr, update_msg->wdrawn_route_len,
+            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len,
                                                                    update_msg->wdrawn_routes);
             if(bytes_read<0) return bytes_read;
             read_size += bytes_read;
@@ -175,7 +178,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (update_msg->total_path_attr_len > 0) {
-            bytes_read = libparsebgp_update_msg_parse_attributes(add_path_map, update_msg->path_attributes, attr_ptr,
+            bytes_read = libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, attr_ptr,
                                                                  update_msg->total_path_attr_len, has_end_of_rib_marker);
 
             if(bytes_read<0) return bytes_read;
@@ -186,7 +189,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          * Parse the NLRI data
          */
         if ((size - bytes_check) > 0) {
-            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(add_path_map, nlri_ptr, (size - read_size), update_msg->nlri);
+            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri);
 
             if(bytes_read<0) return bytes_read;
             read_size += bytes_read;
@@ -390,9 +393,9 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs,
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs,
                                                u_char *data, bool &has_end_of_rib_marker) {
-   uint16_t    value16bit;
+    uint16_t    value16bit;
 
     /*
      * Parse based on attribute type
@@ -480,13 +483,13 @@ ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path
 
         case ATTR_TYPE_MP_REACH_NLRI :  // RFC4760
         {
-            libparsebgp_mp_reach_attr_parse_reach_nlri_attr(add_path_map, path_attrs, path_attrs->attr_len, data);
+            libparsebgp_mp_reach_attr_parse_reach_nlri_attr(path_attrs, path_attrs->attr_len, data);
             break;
         }
 
         case ATTR_TYPE_MP_UNREACH_NLRI : // RFC4760
         {
-            libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(add_path_map, path_attrs, path_attrs->attr_len, data, has_end_of_rib_marker);
+            libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(path_attrs, path_attrs->attr_len, data, has_end_of_rib_marker);
             break;
         }
 
@@ -523,8 +526,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **&update_msg,
-                                                u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
@@ -566,7 +568,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
             /*
              * Parse data based on attribute type
              */
-            bytes_read = libparsebgp_update_msg_parse_attr_data(add_path_map, path_attrs, data, has_end_of_rib_marker);
+            bytes_read = libparsebgp_update_msg_parse_attr_data(path_attrs, data, has_end_of_rib_marker);
             if(bytes_read<0) return bytes_read;
             data += path_attrs->attr_len;
             read += path_attrs->attr_len;

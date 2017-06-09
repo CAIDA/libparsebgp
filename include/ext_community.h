@@ -12,9 +12,6 @@
 #define __EXTCOMMUNITY_H__
 
 #include "bgp_common.h"
-#include <list>
-#include <map>
-#include <string>
 
  /**
  * Defines the BGP Extended communities Types

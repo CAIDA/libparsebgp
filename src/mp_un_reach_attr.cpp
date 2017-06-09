@@ -20,23 +20,22 @@
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_addpath_map &add_path_map, bool is_ipv4, mp_unreach_nlri &nlri,
-                                                             u_char *data, int len) {
+static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_unreach_nlri &nlri, u_char *data, int len) {
 
     /*
      * Decode based on SAFI
      */
     switch (nlri.safi) {
         case BGP_SAFI_UNICAST: // Unicast IP address prefix
-            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(add_path_map, is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes);
+            libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes);
             break;
 
         case BGP_SAFI_NLRI_LABEL: // Labeled unicast
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(add_path_map, is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
             break;
 
         case BGP_SAFI_MPLS: // MPLS (vpnv4/vpnv6)
-            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(add_path_map, is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
+            libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, data, len, nlri.withdrawn_routes_nlri.wdrawn_routes_label);
             break;
 
         default :
@@ -55,15 +54,15 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(libparsebgp_addpath
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-static void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, u_char *data, int len) {
+static void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_char *data, int len) {
 
     switch (path_attrs->attr_value.mp_unreach_nlri_data.afi) {
         case BGP_AFI_IPV6 :  // IPv6
-            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(add_path_map, false, path_attrs->attr_value.mp_unreach_nlri_data, data, len);
+            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(false, path_attrs->attr_value.mp_unreach_nlri_data, data, len);
             break;
 
         case BGP_AFI_IPV4 : // IPv4
-            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(add_path_map, true, path_attrs->attr_value.mp_unreach_nlri_data, data, len);
+            libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(true, path_attrs->attr_value.mp_unreach_nlri_data, data, len);
             break;
 
         case BGP_AFI_BGPLS : // BGP-LS (draft-ietf-idr-ls-distribution-10)
@@ -111,8 +110,7 @@ static void libparsebgp_mp_un_reach_attr_parse_afi(libparsebgp_addpath_map &add_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs,
-                                                           int attr_len, u_char *data, bool &has_end_of_rib_marker) {
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data, bool &has_end_of_rib_marker) {
     //mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
@@ -144,7 +142,7 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(libparsebgp_addpath_m
          * NLRI data depends on the AFI & SAFI
          *  Parse data based on AFI + SAFI
          */
-        libparsebgp_mp_un_reach_attr_parse_afi(add_path_map, path_attrs, data, attr_len);
+        libparsebgp_mp_un_reach_attr_parse_afi(path_attrs, data, attr_len);
     }
 }
 

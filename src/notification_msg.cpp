@@ -34,7 +34,6 @@ ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg
         read_size++;
     }
     else {
-        //LOG_ERR("Could not read the BGP error code from notify message");
         return ERR_READING_MSG;
     }
 

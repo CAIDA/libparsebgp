@@ -14,6 +14,7 @@
 /**
  * Add Add Path data to persistent storage
  */
+/*
 void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open) {
     //AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
     libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
@@ -38,6 +39,7 @@ void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int 
         }
     }
 }
+*/
 
 /**
  * Generates unique string from AFI and SAFI combination
@@ -47,17 +49,17 @@ void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int 
  *
  * \return string unique for AFI and SAFI combination
  */
-std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi) {
+/*std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi) {
     std::string result = std::to_string(static_cast<long long>(afi));
     result.append("_");
     result.append(std::to_string(static_cast<long long>(safi)));
     return result;
-}
+}*/
 
 /**
  * Is add path capability enabled for such AFI and SAFI
  */
-bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi) {
+/*bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi) {
     libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
 
     if(iterator == addpath_map.end()) {
@@ -73,4 +75,4 @@ bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int af
                     iterator->second.send_receive_code_for_received_open_message == BGP_CAP_ADD_PATH_SEND_RECEIVE
             );
     }
-}
+}*/

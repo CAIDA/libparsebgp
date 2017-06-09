@@ -12,9 +12,8 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-#include <list>
+#include <string>
 #include <array>
-#include <map>
 
 using namespace std;
 
@@ -176,6 +175,17 @@ struct extcomm_hdr {
     string       val;
 };
 
+//typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
+
+///**
+//     * Parsed data structure for BGP-LS
+//     */
+//struct parsed_data_ls {
+//
+//    list<obj_ls_node>   nodes;        ///< List of Link state nodes
+//    list<obj_ls_link>   links;        ///< List of link state links
+//    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
+//};
 
 typedef struct bgp_link_state_attrs{
     uint16_t            type;
@@ -264,8 +274,9 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
 /**
  * Parse attribute data based on attribute type
  *
@@ -280,7 +291,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_pat
  * \param [in]   has_end_of_rib_marker
  * \param [out]  read_bytes             Bytes read in parsing this message.
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
 
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
 
