@@ -10,8 +10,6 @@
 #define MPUNREACHATTR_H_
 
 #include "bgp_common.h"
-#include <list>
-#include <string>
 #include "mp_reach_attr.h"
 
 /**

@@ -10,7 +10,6 @@
 #ifndef BGPCOMMON_H_
 #define BGPCOMMON_H_
 
-#include <string>
 #include <cstdint>
 #include <sstream>
 #include <cinttypes>
@@ -105,24 +104,6 @@ enum prefix_type {
     PREFIX_VPN_v6,
     PREFIX_MULTICAST_V4,
     // Add BGP-LS types
-};
-
-/**
-  * struct is used for nlri prefixes
-  */
-struct prefix_tuple {
-    /**
-    * len in bits of the IP address prefix
-    *      length of 0 indicates a prefix that matches all IP addresses
-    */
-    prefix_type   type;                 ///< Prefix type - RIB type
-    unsigned char len;                  ///< Length of prefix in bits
-    std::string   prefix;               ///< Printed form of the IP address
-    uint8_t       prefix_bin[16];       ///< Prefix in binary form
-    uint32_t      path_id;              ///< Path ID (add path draft-ietf-idr-add-paths-15)
-    bool          is_ipv4;               ///< True if IPv4, false if IPv6
-
-    std::string   labels;               ///< Labels in the format of label, label, ...
 };
 
 /**

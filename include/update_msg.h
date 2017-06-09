@@ -12,46 +12,11 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-#include <string>
 #include <list>
 #include <array>
 #include <map>
 
 using namespace std;
-
-/**
- * OBJECT: ls_node
- *
- * BGP-LS Node table schema
- */
-struct obj_ls_node {
-    uint64_t    id;                         ///< Routing universe identifier
-    char        protocol[32];               ///< String representation of the protocol name
-    };
-
-
-/**
- * OBJECT: ls_link
- *
- * BGP-LS Link table schema
- */
-struct obj_ls_link {
-    uint64_t    id;                         ///< Routing universe identifier
-    char        protocol[32];               ///< String representation of the protocol name
-    };
-
-/**
- * OBJECT: ls_prefix
- *
- * BGP-LS Prefix table schema
- */
-struct obj_ls_prefix {
-    uint64_t    id;                     ///< Routing universe identifier
-    char        protocol[32];           ///< String representation of the protocol name
-};
-
-//############################################################################
-
 
 enum update_attr_types {
     ATTR_TYPE_ORIGIN=1,
@@ -90,13 +55,6 @@ enum update_attr_types {
     ATTR_TYPE_INTERNAL_AS_ORIGIN             // The AS that originated the entry
 };
 
-/**
- * parsed path attributes map
- */
-typedef std::map<update_attr_types, std::string>    parsed_attrs_map;
-
-// Parsed bgp-ls attributes map
-typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
 
 struct attr_type_tuple {
     uint8_t attr_flags;
@@ -136,6 +94,9 @@ struct node_descriptor {
     uint8_t     hash_bin[16];                  ///< binary hash for node descriptor
 };
 
+/**
+ * Link Descriptor common fields
+ */
 struct link_descriptor {
     uint16_t    type;
     uint16_t    len;
@@ -148,7 +109,7 @@ struct link_descriptor {
 };
 
 /**
- * Node (local and remote) common fields
+ * Prefix descriptor common fields
  */
 struct prefix_descriptor {
     uint16_t    type;
@@ -215,17 +176,6 @@ struct extcomm_hdr {
     string       val;
 };
 
-typedef  std::map<uint16_t, std::array<uint8_t, 255>>        parsed_ls_attrs_map;
-
-///**
-//     * Parsed data structure for BGP-LS
-//     */
-//struct parsed_data_ls {
-//
-//    list<obj_ls_node>   nodes;        ///< List of Link state nodes
-//    list<obj_ls_link>   links;        ///< List of link state links
-//    list<obj_ls_prefix> prefixes;     ///< List of link state prefixes
-//};
 
 typedef struct bgp_link_state_attrs{
     uint16_t            type;
@@ -277,10 +227,6 @@ struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
-//    list<vpn_tuple>         vpn_withdrawn;      ///< List of vpn prefixes withdrawn
-//    parsed_ls_attrs_map     ls_attrs;
-//    parsed_data_ls          ls;                 ///< REACH: Link state parsed data
-    //libparsebgp_addpath_map add_path_map;
 };
 
 
@@ -320,6 +266,20 @@ struct libparsebgp_update_msg_data {
  */
 ssize_t libparsebgp_update_msg_parse_attributes(libparsebgp_addpath_map &add_path_map, update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker);
 
+/**
+ * Parse attribute data based on attribute type
+ *
+ * \details
+ *      Parses the attribute data based on the passed attribute type.
+ *      Parsed_data will be updated based on the attribute data parsed.
+ *
+ *
+ * \param [in]   add_path_map           Attribute type
+ * \param [in]   path_attrs             Length of the attribute data
+ * \param [in]   data                   Pointer to the attribute data
+ * \param [in]   has_end_of_rib_marker
+ * \param [out]  read_bytes             Bytes read in parsing this message.
+ */
 ssize_t libparsebgp_update_msg_parse_attr_data(libparsebgp_addpath_map &add_path_map, update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker);
 
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);

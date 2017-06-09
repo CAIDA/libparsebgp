@@ -8,7 +8,6 @@
  */
 
 #include <arpa/inet.h>
-#include <string>
 #include "../include/mp_link_state_attr.h"
 
 /* BGP-LS Node flags : https://tools.ietf.org/html/rfc7752#section-3.3.1.1
@@ -157,34 +156,6 @@ static uint32_t ieee_float_to_kbps(int32_t float_val) {
     return bits_value;
 }
 
-/*******************************************************************************//**
- * Parse flags to string
- *
- * \details   Will parse flags from binary representation to string.
- *            Bits are read left to right as documented in RFC/drafts.   Left most
- *            bit == index 0 in array and so on.
- *
- * \param [in]   data             Flags byte
- * \param [in]   flags_array      Array of flags - Array item equals the bit position for flag
- *                                Must have a size of 8 or less.
- * \param [in]   flags_array_len  Length of flags array
- *
- * \returns string with flags
- */
-static std::string parse_flags_to_string(u_char data, const char * const flags_array[], int flags_array_len) {
-    std::string flags_string = "";
-    u_char current_mask = 0x80;
-
-    for (int i=0; i < (flags_array_len / sizeof(char *)); i++)  {
-
-        if(current_mask & data) {
-            flags_string += flags_array[i];
-        }
-        current_mask >>= 1;
-    }
-
-    return flags_string;
-}
 
 /*******************************************************************************//**
  * Parse SID/Label value to string
