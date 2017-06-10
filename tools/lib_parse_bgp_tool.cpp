@@ -252,11 +252,36 @@ int shift(u_char *&buffer, int bytes_read)
 int main(int argc, char * argv[]) {
 
     char file_path[20];
+    int msg_type = 1;
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
         strcpy(file_path, "../testfile.txt");
-    int position = 0, total_bytes_read = 0, msg_type = 1, len = BUFFER_SIZE, count = 0;
+
+    for (int i=1; i < argc; i++) {
+        if (!strcmp(argv[i], "-f")) {
+            // We expect the next arg to be the filename
+            if (i + 1 >= argc) {
+                cout << "INVALID ARG: -f expects the filename to be specified" << endl;
+                return true;
+            }
+
+            // Set the new filename
+            strcpy(file_path, argv[++i]);
+        }
+        else if (!strcmp(argv[i], "-t")) {
+            // We expect the next arg to be the type of message
+            if (i + 1 >= argc) {
+                cout << "INVALID ARG: -t expects the type to be specified" << endl;
+                return true;
+            }
+
+            // Set the message type
+            msg_type = argv[++i];
+        }
+    }
+
+    int position = 0, total_bytes_read = 0, len = BUFFER_SIZE, count = 0;
     ssize_t bytes_read = 0;
     u_char *buffer;
     bool msg_read = true;
