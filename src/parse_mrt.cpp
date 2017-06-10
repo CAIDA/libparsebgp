@@ -333,7 +333,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
  */
 static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffer, int& buf_len, libparsebgp_peer_index_table *peer_index_table) {
     uint16_t count = 0;
-    int  as_num;
+    int  as_num = 0;
     uint8_t  addr_fam;
     int read_size=0;
 

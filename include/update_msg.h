@@ -63,7 +63,7 @@ struct attr_type_tuple {
 typedef struct as_path_segment {
     uint8_t         seg_type;
     uint8_t         seg_len;
-    uint8_t         num_seg_asn;
+    uint8_t         count_seg_asn;
     uint32_t        *seg_asn;
 }as_path_segment;
 
@@ -75,10 +75,10 @@ struct mp_unreach_nlri {
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     struct withdrawn_routes_nlri {
         uint16_t                        count_wdrawn_routes;
-        update_prefix_tuple             *wdrawn_routes;       ///< Withdrawn routes
         uint16_t                        count_wdrawn_routes_label;
-        update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
         uint16_t                        count_evpn_withdrawn;
+        update_prefix_tuple             *wdrawn_routes;       ///< Withdrawn routes
+        update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
         evpn_tuple                      *evpn_withdrawn;      ///< List of evpn nlris withdrawn
     }withdrawn_routes_nlri;
 };
@@ -133,21 +133,27 @@ struct mp_reach_ls {
         struct node_nlri {
             uint16_t    type;
             uint16_t    len;
+            uint16_t         count_local_nodes;
             node_descriptor *local_nodes;
         }node_nlri;
 
         struct link_nlri {
             uint16_t    type;
             uint16_t    len;
+            uint16_t         count_local_nodes;
             node_descriptor* local_nodes;
+            uint16_t         count_remote_nodes;
             node_descriptor* remote_nodes;
+            uint16_t         count_link_desc;
             link_descriptor* link_desc;
         }link_nlri;
 
         struct prefix_nlri_ipv4_ipv6 {
             uint16_t    type;
             uint16_t    len;
+            uint16_t          count_local_nodes;
             node_descriptor   *local_nodes;
+            uint16_t          count_prefix_desc;
             prefix_descriptor *prefix_desc;
         }prefix_nlri_ipv4_ipv6;
     }nlri_ls;
@@ -215,6 +221,7 @@ typedef struct bgp_link_state_attrs{
 
 typedef struct attr_value{
     uint8_t                 origin;
+    uint16_t                count_as_path;
     as_path_segment         *as_path;
     u_char                  next_hop[4];
     u_char                  originator_id[4];
@@ -222,11 +229,15 @@ typedef struct attr_value{
     uint32_t                local_pref;
     uint16_t                value16bit;
     string                  aggregator;
+    uint16_t                count_cluster_list;
     u_char                  **cluster_list;
+    uint16_t                count_attr_type_comm;
     uint16_t                *attr_type_comm;
+    uint16_t                count_ext_comm;
     extcomm_hdr             *ext_comm;
     mp_unreach_nlri         mp_unreach_nlri_data;
     mp_reach_nlri           mp_reach_nlri_data;
+    uint16_t                count_bgp_ls;
     bgp_link_state_attrs    *bgp_ls;
 }attr_val;
 

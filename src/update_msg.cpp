@@ -290,7 +290,8 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
 //        }
 
         // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
-        int seg_len = as_segment->seg_len, count_seg_asn=0;
+        int seg_len = as_segment->seg_len;
+        uint16_t count_seg_asn=0;
         as_segment->seg_asn = (uint32_t *)malloc(as_segment->seg_len*sizeof(uint32_t));
         for (; seg_len > 0; seg_len--) {
             uint32_t seg_asn = 0;
@@ -303,9 +304,10 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
             ++as_path_cnt;
             as_segment->seg_asn[count_seg_asn++]=seg_asn;
         }
-
+        as_segment->count_seg_asn = count_seg_asn;
         path_attrs->attr_value.as_path[count_as_segment++]=*as_segment;
     }
+    path_attrs->attr_value.count_as_path = count_as_segment;
     free(as_segment);
 
     //SELF_DEBUG("%s: rtr=%s: Parsed AS_PATH count %hu : %s", peer_addr.c_str(), router_addr.c_str(), as_path_cnt, decoded_path.c_str());

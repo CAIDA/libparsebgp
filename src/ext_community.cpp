@@ -488,7 +488,7 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
     }
 
     path_attrs->attr_value.ext_comm = (extcomm_hdr *)malloc(path_attrs->attr_len/8*sizeof(extcomm_hdr));
-    int count = 0;
+    uint16_t count = 0;
     /*
      * Loop through consecutive entries
      */
@@ -548,7 +548,8 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
         ec_hdr->val = decode_str;
         path_attrs->attr_value.ext_comm[count++]=*ec_hdr;
     }
-
+    path_attrs->attr_value.count_ext_comm = count;
+    free(ec_hdr);
 //        parsed_data.attrs[ATTR_TYPE_EXT_COMMUNITY] = decode_str;
 }
 
@@ -637,7 +638,7 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
     path_attrs->attr_value.ext_comm = (extcomm_hdr *)malloc(path_attrs->attr_len/20*sizeof(extcomm_hdr));
     memset(path_attrs->attr_value.ext_comm ,0 , sizeof(path_attrs->attr_value.ext_comm));
 
-    int count = 0;
+    uint16_t count = 0;
 
     /*
      * Loop through consecutive entries
@@ -665,6 +666,7 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
         ec_hdr->val=decode_str;
         path_attrs->attr_value.ext_comm[count++] = *ec_hdr;
     }
+    path_attrs->attr_value.count_ext_comm = count;
     free(ec_hdr);
     free(value);
 }

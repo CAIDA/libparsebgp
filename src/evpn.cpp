@@ -238,7 +238,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
     else
         path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn = (evpn_tuple *)malloc(sizeof(evpn_tuple));
 
-    int count1=0,count2=0;
+    uint16_t count_evpn_withdrawn=0,count_evpn=0;
     while ((data_read + 10 /* min read */) < data_len) {
 
         memset(tuple, 0, sizeof(tuple));
@@ -499,17 +499,19 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
         }
 
         if (is_unreach) {
-            if (count1)
+            if (count_evpn_withdrawn)
                 path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn =
-                        (evpn_tuple *)realloc(path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn, (count1 + 1) * sizeof(evpn_tuple));
-            path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn[count1++] = *tuple;
+                        (evpn_tuple *)realloc(path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn, (count_evpn_withdrawn + 1) * sizeof(evpn_tuple));
+            path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn[count_evpn_withdrawn++] = *tuple;
         }
         else {
-            if(count2)
+            if(count_evpn)
                 path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn =
-                        (evpn_tuple *)realloc(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn, (count2+1)*sizeof(evpn_tuple));
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn[count2++]=*tuple;
+                        (evpn_tuple *)realloc(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn, (count_evpn+1)*sizeof(evpn_tuple));
+            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn[count_evpn++]=*tuple;
         }
     }
+    path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_evpn = count_evpn;
+    path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.count_evpn_withdrawn = count_evpn_withdrawn;
     free(tuple);
 }

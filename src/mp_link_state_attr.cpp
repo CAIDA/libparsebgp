@@ -97,7 +97,8 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
     /*
      * Loop through all TLV's for the attribute
      */
-    int tlv_len, count =0;
+    int tlv_len;
+    uint16_t count =0;
     path_attrs->attr_value.bgp_ls = (bgp_link_state_attrs *)malloc(sizeof(bgp_link_state_attrs));
     while (attr_len > 0) {
         if(count)
@@ -110,6 +111,7 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
             data += tlv_len;
         count++;
     }
+    path_attrs->attr_value.count_bgp_ls = count;
 }
 
 static uint32_t ieee_float_to_kbps(int32_t float_val) {

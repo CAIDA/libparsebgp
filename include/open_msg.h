@@ -70,6 +70,7 @@ struct open_capabilities {
 struct open_param {
   uint8_t param_type;                           ///< Parameter type, 1 octet
   uint8_t param_len;                            ///< Parameter length, 1 octet
+  uint8_t count_param_val;
   open_capabilities *param_values;    ///< Parameter values
 };
 
@@ -79,6 +80,7 @@ typedef struct libparsebgp_open_msg_data{
   uint16_t          hold_time;           ///< 2 byte hold time - can be zero or >= 3 seconds
   unsigned char     bgp_id[4];           ///< 4 byte bgp id of sender - router_id
   uint8_t           opt_param_len;       ///< optional parameter length - 0 means no params
+  uint8_t           count_opt_param;
   open_param        *opt_param;          ///< optional parameters
 }libparsebgp_open_msg_data;
 

@@ -97,7 +97,7 @@ struct peer_entry{
   * Peer Index Table Message format
   */
 struct libparsebgp_peer_index_table{
-    char                collector_bgp_id[4];    ///< 4-octet, Collector BGP ID
+    unsigned char       collector_bgp_id[4];    ///< 4-octet, Collector BGP ID
     uint16_t            view_name_length;       ///< 2-octet, length of view_name
     char                view_name[1024];        ///< View name, in utf8 format
     uint16_t            peer_count;             ///< 2-octet peer count, number of peer entries

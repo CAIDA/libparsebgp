@@ -114,7 +114,7 @@ typedef struct init_msg_v3_tlv {
 */
 typedef struct libparsebgp_parsed_bmp_init_msg {
     uint32_t         num_tlvs;
-    init_msg_v3_tlv *init_msg_tlvs;    ///< list of init message tlvs
+    init_msg_v3_tlv  *init_msg_tlvs;    ///< list of init message tlvs
 }libparsebgp_parsed_bmp_init_msg;
 
 /**

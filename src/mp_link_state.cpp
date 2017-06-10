@@ -225,7 +225,8 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *dat
     }
 
     // Parse the local descriptor sub-tlv's
-    int data_read, len = mp_reach_ls->nlri_ls.node_nlri.len, count = 0;
+    int data_read, len = mp_reach_ls->nlri_ls.node_nlri.len;
+    uint16_t count = 0;
     /*
     * Parse the local node descriptor sub-tlv
     */
@@ -245,6 +246,7 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls, u_char *dat
         data_len -= data_read;
         mp_reach_ls->nlri_ls.node_nlri.local_nodes[count++]=*info;
     }// Save the parsed data
+    mp_reach_ls->nlri_ls.node_nlri.count_local_nodes = count;
     free(info);
     return mp_reach_ls->nlri_ls.node_nlri.len;
 }
@@ -441,7 +443,8 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, 
     node_descriptor *info = (node_descriptor *)malloc(sizeof(node_descriptor));
 
     // Parse the local descriptor sub-tlv's
-    int data_read, count=0;
+    int data_read;
+    uint16_t count=0;
     while (mp_reach_ls->nlri_ls.link_nlri.len > 0) {
         if(count)
             mp_reach_ls->nlri_ls.link_nlri.local_nodes = (node_descriptor *)realloc(mp_reach_ls->nlri_ls.node_nlri.local_nodes ,(count+1)*sizeof(node_descriptor));
@@ -454,6 +457,7 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, 
         data += data_read;
         data_len -= data_read;
     }
+    mp_reach_ls->nlri_ls.link_nlri.count_local_nodes = count;
 
     memcpy(&mp_reach_ls->nlri_ls.link_nlri.type, data, 2);
     SWAP_BYTES(&mp_reach_ls->nlri_ls.link_nlri.type);
@@ -482,7 +486,7 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, 
         data += data_read;
         data_len -= data_read;
     }
-
+    mp_reach_ls->nlri_ls.link_nlri.count_remote_nodes = count;
     free(info);
 
     /*
@@ -502,6 +506,7 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char *data, 
         data += data_read;
         data_len -= data_read;
     }
+    mp_reach_ls->nlri_ls.link_nlri.count_link_desc = count;
     free(link_info);
 }
 
@@ -722,7 +727,8 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
     mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes = (node_descriptor *)malloc(sizeof(node_descriptor));
 
     // Parse the local descriptor sub-tlv's
-    int data_read, count = 0;
+    int data_read;
+    uint16_t count = 0;
     while (mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len > 0) {
         memset(local_node, 0,sizeof(local_node));
         if(count)
@@ -736,6 +742,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
         data += data_read;
         data_len -= data_read;
     }
+    mp_reach_ls->nlri_ls.node_nlri.count_local_nodes = count;
     free(local_node);
 
     /*
@@ -755,6 +762,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls, u_char *data
         data += data_read;
         data_len -= data_read;
     }
+    mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.count_prefix_desc = count;
     free(info);
 }
 /**********************************************************************************//*
@@ -832,6 +840,7 @@ static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_at
         data += mp_nlri_ls->nlri_len;
         nlri_len_read += mp_nlri_ls->nlri_len;
     }
+    path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_mp_rch_ls = count;
     free(mp_nlri_ls);
     return nlri_len_read;
 }
@@ -861,7 +870,6 @@ ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path
     }
 }
 
-
 /**
  * MP UnReach Link State NLRI parse
  *
@@ -870,14 +878,11 @@ ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path
  * \param [in]   nlri           Reference to parsed NLRI struct
  */
 void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char *nlri_data, int len) {
-    //data->ls_data = &data->parsed_data->ls_withdrawn;
-
         /*
          * Decode based on SAFI
          */
         switch (path_attrs->attr_value.mp_unreach_nlri_data.safi) {
             case BGP_SAFI_BGPLS: // Unicast BGP-LS
-                //SELF_DEBUG("UNREACH: bgp-ls: len=%d", nlri.nlri_len);
                 libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, len);
                 break;
 
@@ -887,4 +892,3 @@ void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_
             return;
     }
 }
-

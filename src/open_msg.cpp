@@ -24,7 +24,8 @@
  * \return negative values for error, otherwise a positive value indicating the number of bytes read
  */
 static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
-    int      read_size   = 0, count_param = 0, count_cap = 0;
+    int      read_size   = 0;
+    uint8_t count_param = 0, count_cap = 0;
     u_char   *bufPtr     = data;
     open_param      *opt_param = (open_param *)malloc(sizeof(open_param));
     open_msg_data->opt_param = (open_param *)malloc(sizeof(open_param));
@@ -165,7 +166,6 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                             memcpy(&open_cap->cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap->cap_values.mpbgp_data));
                             SWAP_BYTES(&open_cap->cap_values.mpbgp_data.afi);
                             opt_param->param_values[count_cap++]=*open_cap;
-
                         }
                         else {
                             //LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
@@ -181,12 +181,12 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
 
                         //                   SELF_DEBUG("%s: Ignoring capability %d, not implemented", peer_addr.c_str(), cap->code);
                         break;
-                }
-
-                // Move the pointer to the next capability
-                c += 2 + open_cap->cap_len;
-                cap_ptr += 2 + open_cap->cap_len;
+                    }
+//                // Move the pointer to the next capability
+                    c += 2 + open_cap->cap_len;
+                    cap_ptr += 2 + open_cap->cap_len;
             }
+            opt_param->count_param_val = count_cap;
         }
 
         // Move index to next param
@@ -195,6 +195,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
         read_size += 2 + opt_param->param_len;
         open_msg_data->opt_param[count_param++] = *opt_param;
     }
+    open_msg_data->count_opt_param = count_param;
     free(opt_param);
     return read_size;
 }
