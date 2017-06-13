@@ -16,22 +16,7 @@
 void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data) {
     switch (mrt_parsed_data->c_hdr.type) {
         case TABLE_DUMP: {
-            int n_path_attrs = 0;
-            for (int read=0;  read < mrt_parsed_data->parsed_data.table_dump.attribute_len; read += 2) {
-                // Check if the length field is 1 or 2 bytes
-                if (ATTR_FLAG_EXTENDED(mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_type.attr_flags))
-                    read += 2;
-                else
-                    read++;
-
-                if (mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_len > 0 and
-                    (read + mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_len) <=
-                    mrt_parsed_data->parsed_data.table_dump.attribute_len) {
-                    read += mrt_parsed_data->parsed_data.table_dump.bgp_attrs[n_path_attrs]->attr_len;
-                    n_path_attrs++;
-                }
-            }
-            for (int i = 0; i < n_path_attrs; ++i) {
+            for (int i = 0; i < mrt_parsed_data->parsed_data.table_dump.bgp_attrs_count; ++i) {
                 libparsebgp_parse_update_path_attrs_destructor(mrt_parsed_data->parsed_data.table_dump.bgp_attrs[i]);
             }
             free(mrt_parsed_data->parsed_data.table_dump.bgp_attrs);
@@ -55,22 +40,7 @@ void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_par
                 case RIB_IPV4_UNICAST:
                 case RIB_IPV6_UNICAST: {
                     for (int i = 0; i < mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.entry_count; ++i) {
-                        int n_path_attrs = 0;
-                        for (int read=0;  read < mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].attribute_len; read += 2) {
-                            // Check if the length field is 1 or 2 bytes
-                            if (ATTR_FLAG_EXTENDED(mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_type.attr_flags))
-                                read += 2;
-                            else
-                                read++;
-
-                            if (mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len > 0 and
-                                (read + mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len) <=
-                                        mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].attribute_len) {
-                                read += mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len;
-                                n_path_attrs++;
-                            }
-                        }
-                        for (int j = 0; j < n_path_attrs; ++j) {
+                        for (int j = 0; j < mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                             libparsebgp_parse_update_path_attrs_destructor(
                                     mrt_parsed_data->parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]);
                         }
@@ -83,23 +53,7 @@ void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_par
                 }
                 case RIB_GENERIC: {
                     for (int i = 0; i < mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count; ++i) {
-                        int n_path_attrs = 0;
-                        for (int read=0;  read < mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].attribute_len;
-                             read += 2) {
-                            // Check if the length field is 1 or 2 bytes
-                            if (ATTR_FLAG_EXTENDED(mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_type.attr_flags))
-                                read += 2;
-                            else
-                                read++;
-
-                            if (mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len > 0 and
-                                (read + mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len) <=
-                                mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].attribute_len) {
-                                read += mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[n_path_attrs]->attr_len;
-                                n_path_attrs++;
-                            }
-                        }
-                        for (int j = 0; j < n_path_attrs; ++j) {
+                        for (int j = 0; j < mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                             libparsebgp_parse_update_path_attrs_destructor(
                                     mrt_parsed_data->parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]);
                         }
@@ -172,10 +126,10 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.address_family, 2) != 2)
                 return ERR_READING_MSG;
                 //throw;
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.local_asn);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.interface_index);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.address_family);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn, asn_len);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.local_asn, asn_len);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.interface_index, 2);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.address_family, 2);
             if (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.address_family == AFI_IPv6)
                 ip_addr_len = 16;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_ip, ip_addr_len) != ip_addr_len)
@@ -186,8 +140,8 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
                 return ERR_READING_MSG; //throw;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state, 2) != 2)
                 return ERR_READING_MSG; //throw;
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.old_state);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.old_state,2);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state,2);
             read_size += 2*asn_len + ip_addr_len*2 + 8;
             break;
         }
@@ -206,10 +160,10 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int& bu
                 return ERR_READING_MSG; //throw;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family, 2) != 2)
                 return ERR_READING_MSG; //throw;
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.interface_index);
-            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_asn, asn_len);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.local_asn, asn_len);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.interface_index,2);
+            SWAP_BYTES(&mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family,2);
             if (mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv6)
                 ip_addr_len = 16;
             if (extract_from_buffer(buffer, buf_len, &mrt_parsed_data->parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_addr_len) != ip_addr_len)
@@ -240,22 +194,26 @@ static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& 
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr, 12) != 12)
         return ERR_READING_MSG; //throw "Error in parsing MRT common header";
     read_size+=12;
-    SWAP_BYTES(&mrt_parsed_hdr.len);
-    SWAP_BYTES(&mrt_parsed_hdr.type);
-    SWAP_BYTES(&mrt_parsed_hdr.sub_type);
-    SWAP_BYTES(&mrt_parsed_hdr.time_stamp);
+    SWAP_BYTES(&mrt_parsed_hdr.len, 4);
+    SWAP_BYTES(&mrt_parsed_hdr.type, 2);
+    SWAP_BYTES(&mrt_parsed_hdr.sub_type, 2);
+    SWAP_BYTES(&mrt_parsed_hdr.time_stamp, 4);
 
     mrt_len = mrt_parsed_hdr.len;
     if (mrt_parsed_hdr.type == BGP4MP_ET || mrt_parsed_hdr.type == ISIS_ET || mrt_parsed_hdr.type == OSPFv3_ET) {
         if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr.microsecond_timestamp, 4) != 4)
             return ERR_READING_MSG; //throw "Error in parsing MRT Common header: microsecond timestamp";
         read_size+=4;
-        SWAP_BYTES(&mrt_parsed_hdr.microsecond_timestamp);
+        SWAP_BYTES(&mrt_parsed_hdr.microsecond_timestamp,4);
         mrt_len -= 4;
     }
     else
         mrt_parsed_hdr.microsecond_timestamp = 0;
     mrt_sub_type = mrt_parsed_hdr.sub_type;
+
+    if(mrt_len > buf_len)       //checking if the complete message is contained in the buffer
+        return INCOMPLETE_MSG;
+
     return read_size;
 }
 
@@ -356,7 +314,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
     if (extract_from_buffer(buffer, buf_len, &peer_index_table->peer_count, 2) != 2)
         return ERR_READING_MSG; //throw "Error in parsing peer count";
     read_size+=2;
-    SWAP_BYTES(&peer_index_table->peer_count);
+    SWAP_BYTES(&peer_index_table->peer_count, 2);
 
     peer_index_table->peer_entries = (peer_entry *)malloc(peer_index_table->peer_count*sizeof(peer_entry));
     peer_entry *p_entry = (peer_entry *)malloc(sizeof(peer_entry));
@@ -417,7 +375,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
     if (extract_from_buffer(buffer, buf_len, &rib_entry_data->prefix_length, 1) != 1)
         return ERR_READING_MSG; //throw "Error in parsing sequence number";
 
-    SWAP_BYTES(&rib_entry_data->sequence_number);
+    SWAP_BYTES(&rib_entry_data->sequence_number, 4);
     read_size+=5;
 
     if (rib_entry_data->prefix_length>0) {
@@ -445,7 +403,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
         return ERR_READING_MSG; //throw "Error in parsing peer count";
 
     read_size+=2;
-    SWAP_BYTES(&rib_entry_data->entry_count);
+    SWAP_BYTES(&rib_entry_data->entry_count, 2);
 
     rib_entry_data->rib_entries = (rib_entry *)malloc(rib_entry_data->entry_count*sizeof(rib_entry));
     rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
@@ -466,9 +424,9 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 
         read_size+=8;
 
-        SWAP_BYTES(&r_entry->peer_index);
-        SWAP_BYTES(&r_entry->originated_time);
-        SWAP_BYTES(&r_entry->attribute_len);
+        SWAP_BYTES(&r_entry->peer_index, 2);
+        SWAP_BYTES(&r_entry->originated_time, 4);
+        SWAP_BYTES(&r_entry->attribute_len, 2);
 
         bool has_end_of_rib_marker;
 //        libparsebgp_addpath_map add_path_map;
@@ -519,7 +477,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
         return ERR_READING_MSG; //throw "Error in parsing peer count";
     read_size+=2;
 
-    SWAP_BYTES(&rib_gen_entry_hdr->entry_count);
+    SWAP_BYTES(&rib_gen_entry_hdr->entry_count, 2);
 
     rib_gen_entry_hdr->rib_entries = (rib_entry *)malloc(rib_gen_entry_hdr->entry_count*sizeof(rib_entry));
     rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
@@ -540,9 +498,9 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
 
         read_size+=8;
 
-        SWAP_BYTES(&r_entry->peer_index);
-        SWAP_BYTES(&r_entry->originated_time);
-        SWAP_BYTES(&r_entry->attribute_len);
+        SWAP_BYTES(&r_entry->peer_index, 2);
+        SWAP_BYTES(&r_entry->originated_time, 4);
+        SWAP_BYTES(&r_entry->attribute_len, 2);
 
         bool has_end_of_rib_marker;
 //        libparsebgp_addpath_map add_path_map;

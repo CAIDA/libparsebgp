@@ -42,12 +42,12 @@ static std::string decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, 
         memcpy(&val_32b, value, 4);
         memcpy(&val_16b, value + 4, 2);
 
-        SWAP_BYTES(&val_16b);
+        SWAP_BYTES(&val_16b, 2);
 
         if (is_global_ipv4) {
             inet_ntop(AF_INET, &val_32b, ipv4_char, sizeof(ipv4_char));
         } else
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
 
     } else {
         // Two-byte global field
@@ -55,8 +55,8 @@ static std::string decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, 
         memcpy(&val_32b, value + 2, 4);
 
         // Chagne to host order
-        SWAP_BYTES(&val_16b);
-        SWAP_BYTES(&val_32b);
+        SWAP_BYTES(&val_16b, 2);
+        SWAP_BYTES(&val_32b, 4);
     }
 
     /*
@@ -207,7 +207,7 @@ static std::string decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
             val_ss << flags;
 
             memcpy(&val_32b, value + 2, 4);
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
 
             val_ss << " mac_mob_seq_num=";
             val_ss << val_32b;
@@ -220,7 +220,7 @@ static std::string decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
             val_ss << flags;
 
             memcpy(&val_32b, value + 3, 3);
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
             val_32b = val_32b >> 8;
 
             val_ss << " esi_label=";
@@ -266,7 +266,7 @@ static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) 
             u_char poi = value[0];  // Point of Insertion
             u_char cid = value[1];  // Community-ID
             memcpy(&val_32b, value + 2, 4);
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
 
             val_ss << "cost=";
 
@@ -299,7 +299,7 @@ static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) 
 
         case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
             memcpy(&val_32b, value, 4);
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
 
             val_ss << "ospf-rt=area-" << val_32b << ":";
 
@@ -331,7 +331,7 @@ static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) 
 
         case EXT_OPAQUE_COLOR :
             memcpy(&val_32b, value + 2, 4);
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
 
             val_ss << "color=" << val_32b;
             break;
@@ -374,12 +374,12 @@ static std::string decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value,
         memcpy(&val_32b, value, 4);
         memcpy(&val_16b, value + 4, 2);
 
-        SWAP_BYTES(&val_16b);
+        SWAP_BYTES(&val_16b, 2);
 
         if (is_global_ipv4) {
             inet_ntop(AF_INET, &val_32b, ipv4_char, sizeof(ipv4_char));
         } else
-            SWAP_BYTES(&val_32b);
+            SWAP_BYTES(&val_32b, 4);
 
     } else {
         // Two-byte global field
@@ -387,8 +387,8 @@ static std::string decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value,
         memcpy(&val_32b, value + 2, 4);
 
         // Chagne to host order
-        SWAP_BYTES(&val_16b);
-        SWAP_BYTES(&val_32b);
+        SWAP_BYTES(&val_16b, 2);
+        SWAP_BYTES(&val_32b, 4);
     }
 
     switch (ec_hdr->low_type) {
@@ -403,7 +403,7 @@ static std::string decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value,
             u_char encap_type    = value[0];
             u_char ctrl_flags   = value[1];
             memcpy(&val_16b, value + 2, 2);          // Layer 2 MTU
-            SWAP_BYTES(&val_16b);
+            SWAP_BYTES(&val_16b, 2);
 
             val_ss << "l2info=";
 
@@ -575,7 +575,7 @@ std::string decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
         return "";
 
     memcpy(&val_16b, value + 16, 2);
-    SWAP_BYTES(&val_16b);
+    SWAP_BYTES(&val_16b, 2);
 
     switch (ec_hdr->low_type) {
 

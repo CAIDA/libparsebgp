@@ -25,8 +25,6 @@
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, u_char *data, uint16_t len, update_prefix_label_tuple *prefixes, uint16_t *prefix_count) {
-    u_char            ip_raw[16];
-    char              ip_char[40];
     int               addr_bytes, count = 0;
     update_prefix_label_tuple *tuple = (update_prefix_label_tuple *)malloc(sizeof(update_prefix_label_tuple));
     prefixes = (update_prefix_label_tuple *)malloc(sizeof(update_prefix_label_tuple));
@@ -64,8 +62,6 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
         tuple->path_id.safi = 0;
         tuple->path_id.send_recieve = 0;
 
-        bzero(ip_raw, sizeof(ip_raw));
-
         // set the address in bits length
         tuple->len = *data++;
 
@@ -96,22 +92,11 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
 
         // Parse the prefix if it isn't a default route
         if (addr_bytes > 0) {
-            memcpy(ip_raw, data, addr_bytes);
+            memcpy(tuple->prefix, data, addr_bytes);
             data += addr_bytes;
             read_size += addr_bytes;
 
-            // Convert the IP to string printed format
-            inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
-
-            tuple->prefix.assign(ip_char);
-
-            // set the raw/binary address
-            //memcpy(tuple.prefix_bin, ip_raw, sizeof(ip_raw));
-
-        } else {
-            tuple->prefix.assign(is_ipv4 ? "0.0.0.0" : "::");
         }
-
         prefixes[count++]=*tuple;
     }
     *prefix_count = count;
@@ -282,7 +267,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_
     // Read address family
     unsigned char  *nlri_data, *next_hop;
     memcpy(&path_attrs->attr_value.mp_reach_nlri_data.afi, data, 2); data += 2; attr_len -= 2; read_size += 2;
-    SWAP_BYTES(&path_attrs->attr_value.mp_reach_nlri_data.afi);                     // change to host order
+    SWAP_BYTES(&path_attrs->attr_value.mp_reach_nlri_data.afi, 2);                     // change to host order
 
     path_attrs->attr_value.mp_reach_nlri_data.safi = *data++; attr_len--; read_size++;   // Set the SAFI - 1 octet
     path_attrs->attr_value.mp_reach_nlri_data.nh_len = *data++; attr_len--; read_size++; // Set the next-hop length - 1 octet
@@ -424,7 +409,7 @@ inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels) {
         bzero(&label, sizeof(label));
 
         memcpy(&label.data, data_ptr, 3);
-        SWAP_BYTES(&label.data);     // change to host order
+        SWAP_BYTES(&label.data, 3);     // change to host order
 
         data_ptr += 3;
         read_size += 3;

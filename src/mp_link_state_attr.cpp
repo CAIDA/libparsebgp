@@ -192,7 +192,7 @@ static std::string parse_sid_value(u_char *data, int len) {
     } else if (len == 4) {
         // 4-octet encoded offset in the SID/Label space advertised by this router using the encodings
         memcpy(&value_32bit, data, 4);
-        SWAP_BYTES(&value_32bit);
+        SWAP_BYTES(&value_32bit, 4);
 
         val_ss << value_32bit;
 
@@ -230,10 +230,10 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
 
     bgp_link_state_attrs *bgp_ls_attr = (bgp_link_state_attrs *)malloc(sizeof(bgp_link_state_attrs));
     memcpy(&bgp_ls_attr->type, data, 2);
-    SWAP_BYTES(&bgp_ls_attr->type);
+    SWAP_BYTES(&bgp_ls_attr->type, 2);
 
     memcpy(&bgp_ls_attr->len, data+2, 2);
-    SWAP_BYTES(&bgp_ls_attr->len);
+    SWAP_BYTES(&bgp_ls_attr->len, 2);
 
     data += 4;
 
@@ -285,7 +285,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             for (int i=0; i < bgp_ls_attr->len; i += 2) {
                 value_16bit = 0;
                 memcpy(&value_16bit, data, 2);
-                SWAP_BYTES(&value_16bit);
+                SWAP_BYTES(&value_16bit, 2);
                 data += 2;
 
                 if (!i)
@@ -586,7 +586,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             for (int i=0; i < 32; i += 4) {
                 float_val = 0;
                 memcpy(&float_val, data, 4);
-                SWAP_BYTES(&float_val);
+                SWAP_BYTES(&float_val, 4);
                 float_val = ieee_float_to_kbps(float_val);
 
                 data += 4;
@@ -676,7 +676,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
 
             if (bgp_ls_attr->len == 4) {
                 memcpy(&value_32bit, data, bgp_ls_attr->len);
-                SWAP_BYTES(&value_32bit);
+                SWAP_BYTES(&value_32bit, 4);
 
                 memcpy(bgp_ls_attr->prefix.prefix_route_tag, &value_32bit, 4);
 //                memcpy(path_attrs->ls_attrs[ATTR_PREFIX_ROUTE_TAG].data(), &value_32bit, 4);

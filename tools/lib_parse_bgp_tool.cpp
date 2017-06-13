@@ -258,7 +258,7 @@ int main(int argc, char * argv[]) {
     else
         strcpy(file_path, "../../test_file.txt");
 
-    for (int i=1; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
             // We expect the next arg to be the filename
             if (i + 1 >= argc) {
@@ -306,6 +306,7 @@ int main(int argc, char * argv[]) {
                 if (bytes_read < 0) {
                     msg_read = false;
                     cout << "Crashed. Error code: " << bytes_read << endl;
+                    goto x;
                 } else if (bytes_read == 0)
                     msg_read = false;
                 else {
@@ -323,12 +324,13 @@ int main(int argc, char * argv[]) {
             position = shift(buffer, position);
         }
     } else
-        cout<<"File could not be opened";
+        cout << "File could not be opened";
 
-    cout<<count<<endl;
-//    for (int i=0;i<count;i++)
-//    {
-//        cout<<int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len)<<" "<<int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
+    x:
+    cout << count << endl;
+//    for (int i = 0; i < count; i++) {
+//        cout << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len) << " "
+//             << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.time_stamp) << endl;
 //    }
     return 0;
 }

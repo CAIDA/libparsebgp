@@ -117,7 +117,7 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *pa
      */
     // Read address family
     memcpy(&path_attrs->attr_value.mp_unreach_nlri_data.afi, data, 2); data += 2; attr_len -= 2;
-    SWAP_BYTES(&path_attrs->attr_value.mp_unreach_nlri_data.afi);                     // change to host order
+    SWAP_BYTES(&path_attrs->attr_value.mp_unreach_nlri_data.afi, 2);                     // change to host order
 
     path_attrs->attr_value.mp_unreach_nlri_data.safi = *data++; attr_len--;                // Set the SAFI - 1 octet
 //    mp_unreach_data->nlri_data = data;                          // Set pointer position for nlri data

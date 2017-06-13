@@ -120,8 +120,8 @@ struct add_path_capability {
  */
 struct update_prefix_tuple {
     add_path_capability path_id;        ///< 4-octet Path identifier
-    uint8_t len;                        ///< 1-octet Length of prefix in bits
-    char prefix[40];                 ///< Address prefix
+    uint8_t             len;            ///< 1-octet Length of prefix in bits
+    char                prefix[16];     ///< Address prefix
 };
 
 /**
@@ -129,35 +129,9 @@ struct update_prefix_tuple {
  */
 struct update_prefix_label_tuple {
     add_path_capability path_id;        ///< 4-octet path identifier
-    uint8_t len;                        ///< 1-octet Length of prefix in bits
-    std::string label;                  ///< Labels
-    std::string prefix;                 ///< Address prefix
-};
-
-/**
-* Struct for Route Distinguisher
-*/
-struct rd_tuple {
-    std::string    rd_administrator_subfield;
-    std::string    rd_assigned_number;
-    uint8_t        rd_type;
-};
-
-/**
-* struct is used for l3vpn
-*/
-struct vpn_tuple {
-    prefix_type   type;                 ///< Prefix type - RIB type
-    unsigned char len;                  ///< Length of prefix in bits
-    std::string   prefix;               ///< Printed form of the IP address
-    uint8_t       prefix_bin[16];       ///< Prefix in binary form
-    uint32_t      path_id;              ///< Path ID (add path draft-ietf-idr-add-paths-15)
-    bool          is_ipv4;               ///< True if IPv4, false if IPv6
-
-    std::string   labels;               ///< Labels in the format of label, label, ...
-    std::string    rd_administrator_subfield;
-    std::string    rd_assigned_number;
-    uint8_t        rd_type;
+    uint8_t             len;            ///< 1-octet Length of prefix in bits
+    std::string         label;          ///< Labels
+    char                prefix[16];         ///< Address prefix
 };
 
 /**
@@ -165,8 +139,20 @@ struct vpn_tuple {
  */
 struct route_distinguisher {
     uint8_t        rd_type;
-    std::string    rd_administrator_subfield;
-    std::string    rd_assigned_number;
+    struct rd_type_msg {
+        struct rd_type_0 {
+            uint16_t rd_administrator_subfield;
+            uint32_t rd_assigned_number;
+        }rd_type_0;
+        struct rd_type_1 {
+            uint16_t rd_administrator_subfield;
+            uint32_t rd_assigned_number;
+        }rd_type_1;
+        struct rd_type_2 {
+            uint32_t rd_administrator_subfield;
+            uint16_t rd_assigned_number;
+        }rd_type_2;
+    }rd_type_msg;
 };
 
 /**
@@ -257,8 +243,7 @@ inline std::string parse_mac(u_char *data_pointer) {
  * @param [in/out] var   Variable containing data to update
  * @param [in]     size  Size of var - Default is size of var
  */
-template <typename VarT>
-void SWAP_BYTES(VarT *var, int size=sizeof(VarT)) {
+void inline SWAP_BYTES(void *var, int size) {
     if (size <= 1)
         return;
 
@@ -273,7 +258,6 @@ void SWAP_BYTES(VarT *var, int size=sizeof(VarT)) {
     int i2 = 0;
     for (int i=size-1; i >= 0; i--)
         v[i2++] = buf[i];
-
 }
 
 /**

@@ -60,9 +60,9 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_
     bmp_len -= BMP_PEER_HDR_LEN;
 
     // Save the advertised timestamp
-    SWAP_BYTES(&parsed_peer_header.peer_as);
-    SWAP_BYTES(&parsed_peer_header.ts_secs);
-    SWAP_BYTES(&parsed_peer_header.ts_usecs);
+    SWAP_BYTES(&parsed_peer_header.peer_as, 4);
+    SWAP_BYTES(&parsed_peer_header.ts_secs, 4);
+    SWAP_BYTES(&parsed_peer_header.ts_usecs, 4);
     return read_size;
 }
 
@@ -80,7 +80,7 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_
 */
 static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int& buf_len) {
     int read_size=0;
-    size_t i;
+    ssize_t i;
     char buf[256] = {0};
 
     bmp_len = 0;
@@ -91,11 +91,11 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
 
     read_size+=BMP_HDRv1v2_LEN;
 
-    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.peer_as);
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.peer_as, 4);
 
     // Save the advertised timestamp
-    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ts_secs);
-    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ts_usecs);
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ts_secs, 4);
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ts_usecs, 4);
 
 
     // Process the message based on type
@@ -106,7 +106,7 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
             if ((i=extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
                 uint16_t len;
                 memcpy(&len, (buf+16), 2);
-                SWAP_BYTES(&len);
+                SWAP_BYTES(&len, 2);
                 bmp_len = len;
                 read_size+=i;
 
@@ -125,7 +125,7 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
                 if (buf[0] == 1 or buf[0] == 3) {
                     if ((i = extract_from_buffer(buffer, buf_len, buf, 18)) == 18) {
                         memcpy(&bmp_len, buf + 16, 2);
-                        SWAP_BYTES(&bmp_len);
+                        SWAP_BYTES(&bmp_len, 2);
                         read_size+=i;
                     } else
                         return ERR_READING_MSG;
@@ -137,6 +137,9 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(libparsebgp_parsed_bmp_parsed_
         case 3: // Peer Up notification
             return NOT_YET_IMPLEMENTED;     //ERROR: Will need to add support for peer up if it's really used.
     }
+
+    if (bmp_len > buf_len)
+        return INCOMPLETE_MSG;
     return read_size;
 }
 
@@ -169,13 +172,16 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
     read_size+=1;
 
     // Change to host order
-    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len);
+    SWAP_BYTES(&parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len, 4);
 
     // Adjust length to remove common header size
     bmp_len = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.len - 1 - BMP_HDRv3_LEN;
 
     if (bmp_len > BGP_MAX_MSG_SIZE)
         return LARGER_MSG_LEN;
+
+    if (bmp_len > buf_len)
+        return INCOMPLETE_MSG;
 
     //Parsing per peer header for every type except init and term since these messages doesn't contain peer headers
     switch (parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type) {
@@ -285,8 +291,8 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
         buf_ptr+= 2;
 
         memset(init_msg_tlv->info, 0, sizeof(init_msg_tlv->info));
-        SWAP_BYTES(&init_msg_tlv->len);
-        SWAP_BYTES(&init_msg_tlv->type);
+        SWAP_BYTES(&init_msg_tlv->len,2);
+        SWAP_BYTES(&init_msg_tlv->type,2);
 
         if (init_msg_tlv->len > 0) {
             info_len = sizeof(init_msg_tlv->info) < init_msg_tlv->len ? sizeof(init_msg_tlv->info) : init_msg_tlv->len;
@@ -341,8 +347,8 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
         read_bytes += BMP_TERM_MSG_LEN;
 
         memset(term_msg_tlv->info, 0, sizeof term_msg_tlv->info);
-        SWAP_BYTES(&term_msg_tlv->len);
-        SWAP_BYTES(&term_msg_tlv->type);
+        SWAP_BYTES(&term_msg_tlv->len,2);
+        SWAP_BYTES(&term_msg_tlv->type,2);
 
         buf_ptr += BMP_TERM_MSG_LEN;                // Move pointer past the info header
 
@@ -381,7 +387,7 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
     if ((extract_from_buffer(buffer, buf_len, &stat_rep_msg->stats_count, 4)) != 4)
         return ERR_READING_MSG;
 
-    SWAP_BYTES(&stat_rep_msg->stats_count);
+    SWAP_BYTES(&stat_rep_msg->stats_count,4);
     read_size+=4;
 
     stat_rep_msg->total_stats_counter = (stat_counter *)malloc(stat_rep_msg->stats_count*sizeof(stat_counter));
@@ -402,8 +408,8 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
 
         read_size+=2;
         // convert integer from network to host bytes
-        SWAP_BYTES(&stat_info->stat_type);
-        SWAP_BYTES(&stat_info->stat_len);
+        SWAP_BYTES(&stat_info->stat_type,2);
+        SWAP_BYTES(&stat_info->stat_len,2);
 
         // check if this is a 32 bit number  (default)
         if (stat_info->stat_len == 4 or stat_info->stat_len == 8) {
@@ -525,7 +531,7 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_
         is_parse_good = false;
     else if (is_parse_good) {
         read_size += 2;
-        SWAP_BYTES(&up_event->local_port);
+        SWAP_BYTES(&up_event->local_port,2);
     }
 
     // Get the remote port
@@ -533,7 +539,7 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_
         is_parse_good = false;
     else if (is_parse_good) {
         read_size += 2;
-        SWAP_BYTES(&up_event->remote_port);
+        SWAP_BYTES(&up_event->remote_port,2);
     }
 
     // Update bytes read
@@ -601,7 +607,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
                         // Read two byte code corresponding to the FSM event
                         uint16_t fsm_event = 0 ;
                         memcpy(&fsm_event, bmp_data, 2);
-                        SWAP_BYTES(&fsm_event);
+                        SWAP_BYTES(&fsm_event,2);
                         read_size += 2;
                         break;
                     }

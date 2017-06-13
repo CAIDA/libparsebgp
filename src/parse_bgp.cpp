@@ -141,8 +141,7 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_
     memcpy(&c_hdr, data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
-    SWAP_BYTES(&(c_hdr.len));
-    SWAP_BYTES(&(c_hdr.type));
+    SWAP_BYTES(&(c_hdr.len), 2);
 
     /*
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer

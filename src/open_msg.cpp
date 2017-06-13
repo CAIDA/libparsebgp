@@ -66,7 +66,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                     case BGP_CAP_4OCTET_ASN :
                         if (open_cap->cap_len == 4) {
                             memcpy(&open_cap->cap_values.asn, cap_ptr + 2, 4);
-                            SWAP_BYTES(&open_cap->cap_values.asn);
+                            SWAP_BYTES(&open_cap->cap_values.asn, 4);
 
                             //snprintf(capStr, sizeof(capStr), "4 Octet ASN (%d)", BGP_CAP_4OCTET_ASN);
                             //capabilities.push_back(capStr);
@@ -108,7 +108,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                                 memcpy(&open_cap->cap_values.add_path_data, cap_ptr, 4);
                                 cap_ptr += 4;
 
-                                SWAP_BYTES(&open_cap->cap_values.add_path_data.afi);
+                                SWAP_BYTES(&open_cap->cap_values.add_path_data.afi, 4);
 
                                 /*snprintf(capStr, sizeof(capStr), "ADD Path (%d) : afi=%d safi=%d send/receive=%d",
                                          BGP_CAP_ADD_PATH, data.afi, data.safi, data.send_recieve);
@@ -164,14 +164,13 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                         //cap_mpbgp_data data;
                         if (open_cap->cap_len == sizeof(open_cap->cap_values.mpbgp_data)) {
                             memcpy(&open_cap->cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap->cap_values.mpbgp_data));
-                            SWAP_BYTES(&open_cap->cap_values.mpbgp_data.afi);
+                            SWAP_BYTES(&open_cap->cap_values.mpbgp_data.afi, sizeof(open_cap->cap_values.mpbgp_data));
                             opt_param->param_values[count_cap++]=*open_cap;
                         }
                         else {
                             //LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
                             return INVALID_MSG;
                         }
-
                         break;
                     }
 
@@ -213,12 +212,9 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
 ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
-//    char     bgp_id_char[16];
     int      read_size       = 0;
     u_char   *bufPtr         = data;
     int      buf_size = size;
-//    open_bgp_hdr open_hdr       = {0};
-    //capabilities.clear();
 
     /*
      * Make sure available size is large enough for an open message
@@ -243,16 +239,8 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
 //    bufPtr += read_size;                                       // Move pointer past the open header
 
     // Change to host order
-    SWAP_BYTES(&open_msg_data->hold_time);
-    SWAP_BYTES(&open_msg_data->asn);
-
-//    // Update the output params
-//    open_msg_data->hold_time = open_hdr.hold;
-//    open_msg_data->asn = open_hdr.asn;
-//    open_msg_data->bgp_id = open_hdr.bgp_id;
-
-    //inet_ntop(AF_INET, &open_msg_data->bgp_id, bgp_id_char, sizeof(bgp_id_char));
-    //bgp_id.assign(bgp_id_char);
+    SWAP_BYTES(&open_msg_data->hold_time, 2);
+    SWAP_BYTES(&open_msg_data->asn, 2);
 
     /*
      * Make sure the buffer contains the rest of the open message, but allow a zero length in case the
@@ -278,11 +266,8 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
   //          LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
             return INVALID_MSG;
         }
-
         read_size += open_msg_data->opt_param_len;
     }
-
-
     return read_size;
 }
 
@@ -294,7 +279,7 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
 //}
 
 void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data) {
-    for (int i = 0; i < open_msg_data->opt_param_len; i++) {
+    for (int i = 0; i < open_msg_data->count_opt_param; i++) {
         free(open_msg_data->opt_param[i].param_values);
     }
     free(open_msg_data->opt_param);

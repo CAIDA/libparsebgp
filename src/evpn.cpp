@@ -131,83 +131,45 @@ static void libparsebgp_evpn_parse_ethernet_segment_identifier(update_path_attrs
  * \param [out]     rd_administrator_subfield  Reference to Administrator subfield
  */
 static void libparsebgp_evpn_parse_route_distinguisher(u_char *data_pointer, route_distinguisher &rd) {
-    std::stringstream   val_ss;
 
+    memset(&rd, 0, sizeof(rd));
     data_pointer++;
     rd.rd_type = *data_pointer;
     data_pointer++;
 
     switch (rd.rd_type) {
         case 0: {
-            uint16_t administration_subfield;
-            bzero(&administration_subfield, 2);
-            memcpy(&administration_subfield, data_pointer, 2);
-
+            memcpy(&rd.rd_type_msg.rd_type_0.rd_administrator_subfield, data_pointer, 2);
             data_pointer += 2;
 
-            uint32_t assigned_number_subfield;
-            bzero(&assigned_number_subfield, 4);
-            memcpy(&assigned_number_subfield, data_pointer, 4);
+            memcpy(&rd.rd_type_msg.rd_type_0.rd_assigned_number, data_pointer, 4);
+            data_pointer += 4;
 
-            SWAP_BYTES(&administration_subfield);
-            SWAP_BYTES(&assigned_number_subfield);
-
-            val_ss << assigned_number_subfield;
-
-            rd.rd_assigned_number = val_ss.str();
-
-            val_ss.clear();
-            val_ss << administration_subfield;
-            rd.rd_administrator_subfield = val_ss.str();
-
+            SWAP_BYTES(&rd.rd_type_msg.rd_type_0.rd_assigned_number, 4);
+            SWAP_BYTES(&rd.rd_type_msg.rd_type_0.rd_administrator_subfield, 2);
             break;
         };
 
         case 1: {
-            u_char administration_subfield[4];
-            bzero(&administration_subfield, 4);
-            memcpy(&administration_subfield, data_pointer, 4);
-
+            memcpy(&rd.rd_type_msg.rd_type_1.rd_administrator_subfield, data_pointer, 4);
             data_pointer += 4;
 
-            uint16_t assigned_number_subfield;
-            bzero(&assigned_number_subfield, 2);
-            memcpy(&assigned_number_subfield, data_pointer, 2);
+            memcpy(&rd.rd_type_msg.rd_type_1.rd_assigned_number, data_pointer, 2);
+            data_pointer += 2;
 
-            SWAP_BYTES(&assigned_number_subfield);
-
-            char administration_subfield_chars[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, administration_subfield, administration_subfield_chars, INET_ADDRSTRLEN);
-
-            val_ss << assigned_number_subfield;
-            rd.rd_assigned_number = val_ss.str();
-
-            rd.rd_administrator_subfield = administration_subfield_chars;
-
+            SWAP_BYTES(&rd.rd_type_msg.rd_type_1.rd_assigned_number, 2);
             break;
         };
 
         case 2: {
-            uint32_t administration_subfield;
-            bzero(&administration_subfield, 4);
-            memcpy(&administration_subfield, data_pointer, 4);
-
+            memcpy(&rd.rd_type_msg.rd_type_2.rd_administrator_subfield, data_pointer, 4);
             data_pointer += 4;
 
-            uint16_t assigned_number_subfield;
-            bzero(&assigned_number_subfield, 2);
-            memcpy(&assigned_number_subfield, data_pointer, 2);
+            memcpy(&rd.rd_type_msg.rd_type_2.rd_assigned_number, data_pointer, 2);
+            data_pointer +=2;
 
-            SWAP_BYTES(&administration_subfield);
-            SWAP_BYTES(&assigned_number_subfield);
-
-            val_ss << assigned_number_subfield;
-            rd.rd_assigned_number = val_ss.str();
-
-            val_ss.clear();
-            val_ss << administration_subfield;
-            rd.rd_administrator_subfield = val_ss.str();
-
+            SWAP_BYTES(&rd.rd_type_msg.rd_type_2.rd_administrator_subfield, 4);
+            SWAP_BYTES(&rd.rd_type_msg.rd_type_2.rd_assigned_number, 2);
             break;
         };
     }
@@ -242,13 +204,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
     while ((data_read + 10 /* min read */) < data_len) {
 
         memset(tuple, 0, sizeof(tuple));
-        //Cleanup variables in case of not modified
-//        tuple.mpls_label_1 = 0;
-//        tuple.mpls_label_2 = 0;
-//        tuple.mac_len = 0;
-//        tuple.ip_len = 0;
-//
-//
+
         // TODO: Keep an eye on this, as we might need to support add-paths for evpn
 //        tuple.path_id = 0;
 //        tuple.originating_router_ip_len = 0;
@@ -294,7 +250,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
 
                     //MPLS Label (3 bytes)
                     memcpy(&tuple->route_type_specific.eth_ad_route.mpls_label, data_pointer, 3);
-                    SWAP_BYTES(&tuple->route_type_specific.eth_ad_route.mpls_label);
+                    SWAP_BYTES(&tuple->route_type_specific.eth_ad_route.mpls_label, 3);
                     tuple->route_type_specific.eth_ad_route.mpls_label >>= 8;
 
                     data_pointer += 3;
@@ -371,7 +327,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
 
                         // MPLS Label1 (3 bytes)
                         memcpy(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_1, data_pointer, 3);
-                        SWAP_BYTES(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_1);
+                        SWAP_BYTES(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_1, 3);
                         tuple->route_type_specific.mac_ip_adv_route.mpls_label_1 >>= 8;
 
                         data_pointer += 3;
@@ -384,7 +340,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                         //SELF_DEBUG("%s: parsing second evpn label\n", peer_addr.c_str());
 
                         memcpy(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_2, data_pointer, 3);
-                        SWAP_BYTES(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_2);
+                        SWAP_BYTES(&tuple->route_type_specific.mac_ip_adv_route.mpls_label_2, 3);
                         tuple->route_type_specific.mac_ip_adv_route.mpls_label_2 >>= 8;
 
                         data_pointer += 3;
