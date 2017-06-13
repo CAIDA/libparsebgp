@@ -345,6 +345,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
         return ERR_READING_MSG; //throw "Error in parsing collector_BGPID and view_name_length";
     read_size+=2;
 
+    SWAP_BYTES(&peer_index_table->view_name_length);
     if (peer_index_table->view_name_length) {
         if (extract_from_buffer(buffer, buf_len, &peer_index_table->view_name, peer_index_table->view_name_length) !=
                 peer_index_table->view_name_length)

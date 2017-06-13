@@ -207,12 +207,12 @@ using namespace std;
 
 #define BUFFER_SIZE 2048
 
-u_char *file_read(FILE *&fp, int position)
+void file_read(FILE *&fp, u_char *&buffer, int position)
 {
     int array_size = 100, line = 0; // define the size of character array
     char * array = new char[array_size]; // allocating an array of 1kb
-    u_char *array2 = new u_char[BUFFER_SIZE];
-    int read_lines = 128 - position%16;
+//    u_char *array2 = new u_char[BUFFER_SIZE];
+    int read_lines = 128 - position/16;
     int j = 0;
     if(fp!=NULL)
     {
@@ -227,7 +227,7 @@ u_char *file_read(FILE *&fp, int position)
                     i++;
                 else {
                     sscanf(array + i, "%2x", &tmp);
-                    array2[position++] = tmp;
+                    buffer[position++] = tmp;
                 }
             }
             line++;
@@ -236,7 +236,7 @@ u_char *file_read(FILE *&fp, int position)
     }
     else //file could not be opened
         cout << "File could not be opened." << endl;
-    return array2;
+//    return array2;
 }
 
 int shift(u_char *&buffer, int bytes_read)
@@ -256,7 +256,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../testfile.txt");
+        strcpy(file_path, "../../test_file.txt");
 
     for (int i=1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
@@ -277,29 +277,31 @@ int main(int argc, char * argv[]) {
             }
 
             // Set the message type
-            msg_type = argv[++i];
+            msg_type = atoi(argv[++i]);
         }
     }
 
-    int position = 0, total_bytes_read = 0, len = BUFFER_SIZE, count = 0;
+    int position = 0, len = BUFFER_SIZE, count = 0;
     ssize_t bytes_read = 0;
-    u_char *buffer;
+    u_char *buffer= (u_char *)malloc(BUFFER_SIZE*sizeof(u_char));
     bool msg_read = true;
-    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
+//    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
     FILE *fp = fopen(file_path, "r");
     if (fp != NULL) {
         while (!feof(fp)) {
-            buffer = file_read(fp, position);
+            if (position)
+                buffer = (u_char *)realloc(buffer, (BUFFER_SIZE)*sizeof(u_char));
+            file_read(fp, buffer, position);
             cout << endl;
-            len = BUFFER_SIZE;
-            total_bytes_read = 0;
+            len = BUFFER_SIZE + position;
 
+            position = 0;
             libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
             while (msg_read && len > 0) {
-                if(count)
-                    all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,(count+1)*sizeof(libparsebgp_parse_msg *));
+//                if(count)
+//                    all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,(count+1)*sizeof(libparsebgp_parse_msg *));
                 memset(parse_msg, 0, sizeof(parse_msg));
-                bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, buffer + total_bytes_read, len, msg_type);
+                bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, buffer + position, len, msg_type);
                 cout <<endl<< "out of parser" << endl;
                 if (bytes_read < 0) {
                     msg_read = false;
@@ -311,15 +313,14 @@ int main(int argc, char * argv[]) {
                     cout <<endl<< "Message Parsed Successfully" << endl;
                     len -= bytes_read;
                     cout << bytes_read << " " << position << " " << len << endl;
-                    total_bytes_read += bytes_read;
-                    all_parsed_msg[count] = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
-                    memcpy(all_parsed_msg[count], parse_msg, sizeof(libparsebgp_parse_msg));
-                    cout<<int(parse_msg->parsed_mrt_msg.c_hdr.len)<<" "<<int(parse_msg->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
-                    cout<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.len)<<" "<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
+//                    all_parsed_msg[count] = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
+//                    memcpy(all_parsed_msg[count], parse_msg, sizeof(libparsebgp_parse_msg));
+//                    cout<<int(parse_msg->parsed_mrt_msg.c_hdr.len)<<" "<<int(parse_msg->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
+//                    cout<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.len)<<" "<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
                     count++;
                 }
             }
-            position = shift(buffer, bytes_read);
+            position = shift(buffer, position);
         }
     } else
         cout<<"File could not be opened";
@@ -331,4 +332,3 @@ int main(int argc, char * argv[]) {
 //    }
     return 0;
 }
-
