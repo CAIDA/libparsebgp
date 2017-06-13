@@ -90,7 +90,7 @@ static ssize_t libparsebgp_parse_mrt_buffer_mrt_message(u_char *& buffer, int& b
     if (mrt_len <= 0)
         return 0;
 
-    if (mrt_len > sizeof(mrt_data)) {
+    if (mrt_len > buf_len) {
         //throw "MRT message length is too large for buffer, invalid MRT sender";
         return INCOMPLETE_MSG;
     }
@@ -303,7 +303,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
         return ERR_READING_MSG; //throw "Error in parsing collector_BGPID and view_name_length";
     read_size+=2;
 
-    SWAP_BYTES(&peer_index_table->view_name_length);
+    SWAP_BYTES(&peer_index_table->view_name_length, 2);
     if (peer_index_table->view_name_length) {
         if (extract_from_buffer(buffer, buf_len, &peer_index_table->view_name, peer_index_table->view_name_length) !=
                 peer_index_table->view_name_length)

@@ -212,12 +212,12 @@ void file_read(FILE *&fp, u_char *&buffer, int position)
     int array_size = 100, line = 0; // define the size of character array
     char * array = new char[array_size]; // allocating an array of 1kb
 //    u_char *array2 = new u_char[BUFFER_SIZE];
-    int read_lines = 128 - position/16;
-    int j = 0;
+    int read_lines = 128;
+
     if(fp!=NULL)
     {
         cout << "File Opened successfully!!!. Reading data from file into array" << endl;
-        while(line<=read_lines && !feof(fp))
+        while(line<read_lines && !feof(fp))
         {
             fgets(array, 80 , fp);
 
@@ -239,14 +239,14 @@ void file_read(FILE *&fp, u_char *&buffer, int position)
 //    return array2;
 }
 
-int shift(u_char *&buffer, int bytes_read)
+int shift(u_char *&buffer, int bytes_read, int buf_len)
 {
-    for(int i = 0;i<(BUFFER_SIZE-bytes_read);i++)
+    for(int i = 0;i<(buf_len-bytes_read);i++)
     {
         buffer[i] = buffer[bytes_read+i];
     }
-    memset(buffer+(BUFFER_SIZE-bytes_read), 0, (BUFFER_SIZE-bytes_read));
-    return (BUFFER_SIZE-bytes_read);
+    memset(buffer+(buf_len-bytes_read), 0, (buf_len-bytes_read));
+    return (buf_len-bytes_read);
 }
 
 int main(int argc, char * argv[]) {
@@ -256,7 +256,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../../test_file.txt");
+        strcpy(file_path, "../testfile.txt");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
@@ -290,11 +290,12 @@ int main(int argc, char * argv[]) {
     if (fp != NULL) {
         while (!feof(fp)) {
             if (position)
-                buffer = (u_char *)realloc(buffer, (BUFFER_SIZE)*sizeof(u_char));
+                buffer = (u_char *)realloc(buffer, (BUFFER_SIZE+position)*sizeof(u_char));
             file_read(fp, buffer, position);
             cout << endl;
             len = BUFFER_SIZE + position;
-
+            int tlen = len;
+            msg_read = true;
             position = 0;
             libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
             while (msg_read && len > 0) {
@@ -302,11 +303,9 @@ int main(int argc, char * argv[]) {
 //                    all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,(count+1)*sizeof(libparsebgp_parse_msg *));
                 memset(parse_msg, 0, sizeof(parse_msg));
                 bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, buffer + position, len, msg_type);
-                cout <<endl<< "out of parser" << endl;
                 if (bytes_read < 0) {
                     msg_read = false;
                     cout << "Crashed. Error code: " << bytes_read << endl;
-                    goto x;
                 } else if (bytes_read == 0)
                     msg_read = false;
                 else {
@@ -321,12 +320,11 @@ int main(int argc, char * argv[]) {
                     count++;
                 }
             }
-            position = shift(buffer, position);
+            position = shift(buffer, position, tlen);
         }
     } else
         cout << "File could not be opened";
 
-    x:
     cout << count << endl;
 //    for (int i = 0; i < count; i++) {
 //        cout << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len) << " "
