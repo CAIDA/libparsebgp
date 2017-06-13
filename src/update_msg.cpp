@@ -348,39 +348,21 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
 static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_attrs, u_char *data) {
-    std::string decodeStr;
-    uint32_t    value32bit = 0;
-    uint16_t    value16bit = 0;
-    u_char      ipv4_raw[4];
-    char        ipv4_char[16];
 
     // If using RFC6793, the len will be 8 instead of 6
     if (path_attrs->attr_len == 8) { // RFC6793 ASN of 4 octets
-        memcpy(&value32bit, data, 4); data += 4;
-        SWAP_BYTES(&value32bit, 4);
-        std::ostringstream numString;
-        numString << value32bit;
-        decodeStr.assign(numString.str());
+        memcpy(&path_attrs->attr_value.aggregator, data, 4);
+        data += 4;
 
     } else if (path_attrs->attr_len == 6) {
-        memcpy(&value16bit, data, 2); data += 2;
-        SWAP_BYTES(&value16bit, 2);
-        std::ostringstream numString;
-        numString << value16bit;
-        decodeStr.assign(numString.str());
+        memcpy(&path_attrs->attr_value.aggregator, data, 2);
+        data += 2;
 
     } else {
         //LOG_ERR("%s: rtr=%s: path attribute is not the correct size of 6 or 8 octets.", peer_addr.c_str(), router_addr.c_str());
         //throw "path attribute is not the correct size of 6 or 8 octets";
         return;
     }
-
-    decodeStr.append(" ");
-    memcpy(ipv4_raw, data, 4);
-    inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-    decodeStr.append(ipv4_char);
-
-    path_attrs->attr_value.aggregator = decodeStr;
 }
 
 /**

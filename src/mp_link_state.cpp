@@ -152,6 +152,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
  * \return string representation for the protocol that matches the DB enum string value
  *          empty will be returned if invalid/unknown.
  */
+/*
 static std::string libparsebgp_mp_link_state_decode_nlri_protocol_id(uint8_t proto_id) {
     std::string value = "";
 
@@ -189,6 +190,7 @@ static std::string libparsebgp_mp_link_state_decode_nlri_protocol_id(uint8_t pro
     }
     return value;
 }
+*/
 
 /**********************************************************************************//*
  * Parse NODE NLRI

@@ -446,7 +446,6 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, libparsebgp_rib_generic_entry_header *rib_gen_entry_hdr) {
     uint16_t count = 0;
     int read_size=0;
-    string peer_info_key;
 
     if (extract_from_buffer(buffer, buf_len, &rib_gen_entry_hdr->sequence_number, 4) != 4)
         return ERR_READING_MSG; //throw "Error in parsing sequence number";

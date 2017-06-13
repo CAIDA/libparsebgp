@@ -228,7 +228,7 @@ typedef struct attr_value{
     uint32_t                med;
     uint32_t                local_pref;
     uint16_t                value16bit;
-    string                  aggregator;
+    char                    aggregator[4];
     uint16_t                count_cluster_list;
     u_char                  **cluster_list;
     uint16_t                count_attr_type_comm;
