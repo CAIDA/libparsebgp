@@ -71,6 +71,6 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool isIPv4, u
  * \returns number of bytes read to decode the label(s) and updates string labels
  *
  */
-static inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels);
+static inline uint16_t decode_label(u_char *data, uint16_t len, mpls_label *&labels);
 
 #endif /* MPREACHATTR_H_ */

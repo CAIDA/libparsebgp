@@ -115,6 +115,17 @@ struct add_path_capability {
     uint8_t        send_recieve;
 } __attribute__ ((__packed__));
 
+
+typedef union {
+    struct {
+        uint8_t   ttl     : 8;          // TTL - not present since only 3 octets are used
+        uint8_t   bos     : 1;          // Bottom of stack
+        uint8_t   exp     : 3;          // EXP - not really used
+        uint32_t  value   : 20;         // Label value
+    } decode;
+    uint32_t  data;                 // Raw label - 3 octets only per RFC3107
+} mpls_label;
+
 /**
  * Defines the prefix tuple in update message
  */
@@ -124,13 +135,15 @@ struct update_prefix_tuple {
     char                prefix[16];     ///< Address prefix
 };
 
+
+
 /**
  * Defines prefix tuple with label
  */
 struct update_prefix_label_tuple {
     add_path_capability path_id;        ///< 4-octet path identifier
     uint8_t             len;            ///< 1-octet Length of prefix in bits
-    std::string         label;          ///< Labels
+    mpls_label          *label;          ///< Labels
     char                prefix[16];         ///< Address prefix
 };
 

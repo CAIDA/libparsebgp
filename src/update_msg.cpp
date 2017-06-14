@@ -510,8 +510,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs,
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg,
-                                                u_char *&data, uint16_t len, bool &has_end_of_rib_marker, uint16_t *count_path_attrs) {
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker, uint16_t *count_path_attrs) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
@@ -532,6 +531,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg,
         path_attrs->attr_type.attr_flags = *data++;
         path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
+
         // Check if the length field is 1 or two bytes
         if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
             memcpy(&path_attrs->attr_len, data, 2);
@@ -558,9 +558,6 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg,
             data += path_attrs->attr_len;
             read += path_attrs->attr_len;
             read_size += path_attrs->attr_len;
-
-            //SELF_DEBUG("%s: rtr=%s: parsed attr type=%d, size=%hu", peer_addr.c_str(), router_addr.c_str(),
-            //            attr_type, attr_len);
 
         } else if (path_attrs->attr_len) {
             return INCOMPLETE_MSG;

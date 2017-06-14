@@ -307,7 +307,6 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char *data,
                                                             uint16_t len, update_prefix_tuple *prefixes, uint16_t *prefix_count) {
     u_char              ip_raw[16];
-    char                ip_char[40];
     int                 addr_bytes;
 
     if (len <= 0 or data == NULL)
@@ -354,15 +353,9 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
         if (tuple->len % 8)
            ++addr_bytes;
 
-        memcpy(ip_raw, data, addr_bytes);
+        memcpy(tuple->prefix, data, addr_bytes);
         data += addr_bytes;
         read_size += addr_bytes;
-
-        // Convert the IP to string printed format
-        inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
-
-//        tuple->prefix.assign(ip_char);
-        strcpy(tuple->prefix, ip_char);
 
         // Add tuple to prefix list
         prefixes[count++] = *tuple;
@@ -385,47 +378,25 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
  * \returns number of bytes read to decode the label(s) and updates string labels
  *
  */
-inline uint16_t decode_label(u_char *data, uint16_t len, std::string &labels) {
-    int read_size = 0;
-    typedef union {
-        struct {
-            uint8_t   ttl     : 8;          // TTL - not present since only 3 octets are used
-            uint8_t   bos     : 1;          // Bottom of stack
-            uint8_t   exp     : 3;          // EXP - not really used
-            uint32_t  value   : 20;         // Label value
-        } decode;
-        uint32_t  data;                 // Raw label - 3 octets only per RFC3107
-    } mpls_label;
-
-    mpls_label label;
-
-    labels.clear();
-
+inline uint16_t decode_label(u_char *data, uint16_t len, mpls_label *&labels) {
+    int read_size = 0, count = 0;
+    mpls_label *label = (mpls_label *)malloc(sizeof(mpls_label));
+    labels = (mpls_label *)malloc(sizeof(mpls_label));
     u_char *data_ptr = data;
 
     // the label is 3 octets long
     while (read_size <= len)
     {
-        bzero(&label, sizeof(label));
+        if(count)
+            labels = (mpls_label *)realloc(labels, (count+1)*sizeof(mpls_label));
+        memset(&label, 0, sizeof(label));
 
-        memcpy(&label.data, data_ptr, 3);
-        SWAP_BYTES(&label.data, 3);     // change to host order
+        memcpy(&label->data, data_ptr, 3);
+        SWAP_BYTES(&label->data, 3);     // change to host order
 
         data_ptr += 3;
         read_size += 3;
-
-        ostringstream convert;
-        convert << label.decode.value;
-        labels.append(convert.str());
-
-        printf("label data = %x\n", label.data);
-        if (label.decode.bos == 1 or label.data == 0x80000000 /* withdrawn label as 32bits instead of 24 */
-                or label.data == 0 /* l3vpn seems to use zero instead of rfc3107 suggested value */) {
-            break;               // Reached EoS
-
-        } else {
-            labels.append(",");
-        }
+        labels[count++] = *label;
     }
 
     return read_size;
