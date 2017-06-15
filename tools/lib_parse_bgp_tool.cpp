@@ -32,7 +32,6 @@ void file_read(FILE *&fp, u_char *&buffer, int position)
     }
     else //file could not be opened
         cout << "File could not be opened." << endl;
-//    return array2;
 }
 
 int shift(u_char *&buffer, int bytes_read, int buf_len)
@@ -101,30 +100,30 @@ int main(int argc, char * argv[]) {
                 bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, buffer + position, len, msg_type);
                 if (bytes_read < 0) {
                     msg_read = false;
-                    cout << "Crashed. Error code: " << bytes_read << endl;
+                    cout <<endl <<"Crashed. Error code: " << bytes_read << endl;
                 } else if (bytes_read == 0)
                     msg_read = false;
                 else {
                     position += bytes_read;
-                    cout <<endl<< "Message Parsed Successfully" << endl;
+                    cout <<endl<< "Message "<< count+1<<" Parsed Successfully" << endl;
                     len -= bytes_read;
-                    cout << bytes_read << " " << position << " " << len << endl;
+                    cout <<"Bytes read in parsing this message: "<< bytes_read << " Remaining Length of Buffer: " << len << endl;
                     all_parsed_msg[count] = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
                     memcpy(all_parsed_msg[count], parse_msg, sizeof(libparsebgp_parse_msg));
-//                    cout<<int(parse_msg->parsed_mrt_msg.c_hdr.len)<<" "<<int(parse_msg->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
-//                    cout<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.len)<<" "<<int(all_parsed_msg[count]->parsed_mrt_msg.c_hdr.time_stamp)<<endl;
                     count++;
                 }
             }
             position = shift(buffer, position, tlen);
         }
+        cout<<"*******File Parsed completely*******"<<endl;
     } else
         cout << "File could not be opened";
 
-    cout << count << endl;
     for (int i = 0; i < count; i++) {
-        cout << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len) << " "
-             << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.time_stamp) << endl;
+        cout<< "Message "<<i+1<<" Details"<<endl;
+        cout <<"length :"<< int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len) << " Message type "
+             << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.type) << " Message Sub type "
+             << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.sub_type) << endl;
     }
     return 0;
 }
