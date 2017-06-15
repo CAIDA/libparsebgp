@@ -222,59 +222,41 @@ static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is
  * \return  Decoded string value
  */
 static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
-//    std::stringstream   val_ss;
     uint32_t            val_32b;
 
     switch(ec_hdr->low_type) {
         case EXT_EVPN_MAC_MOBILITY: {
-//            val_ss << "mac_mob_flags=";
             u_char flags = value[0];
-
-//            val_ss << flags;
 
             memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
-//            val_ss << " mac_mob_seq_num=";
-//            val_ss << val_32b;
             sprintf(ec_hdr->val, "mac_mob_flags=%c mac_mob_seq_num=%d", flags, val_32b);
             break;
         }
         case EXT_EVPN_MPLS_LABEL: {
-//            val_ss << "esi_label_flags=";
             u_char flags = value[0];
-
-//            val_ss << flags;
 
             memcpy(&val_32b, value + 3, 3);
             SWAP_BYTES(&val_32b, 4);
             val_32b = val_32b >> 8;
 
-//            val_ss << " esi_label=";
-//            val_ss << val_32b;
             sprintf(ec_hdr->val, "esi_label_flags=%c esi_label=%d", flags, val_32b);
             break;
         }
         case EXT_EVPN_ES_IMPORT: {
-//            val_ss << "es_import=";
-//            val_ss << parse_mac(value);
-            sprintf(ec_hdr->val, "es_import=%s", parse_mac(value));
+            sprintf(ec_hdr->val, "es_import=%s", value);
             break;
         }
         case EXT_EVPN_ROUTER_MAC: {
 
-//            val_ss << "router_mac=";
-//            val_ss << parse_mac(value);
-            sprintf(ec_hdr->val, "router_mac=%s", parse_mac(value));
+            sprintf(ec_hdr->val, "router_mac=%s", value);
             break;
         }
         default: {
-            //LOG_INFO("Extended community eVPN subtype is not implemented %d", ec_hdr.low_type);
             break;
         }
     }
-
-//    return val_ss.str();
 }
 
 /**
@@ -299,70 +281,52 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
             memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
-//            val_ss << "cost=";
-
             switch (poi) {
                 case 128 : // Absolute_value
                     sprintf(ec_hdr->val, "cost=abs:%d:%d", (int)cid, val_32b);
-//                    val_ss << "abs:";
                     break;
                 case 129 : // IGP Cost
                     sprintf(ec_hdr->val, "cost=igp:%d:%d", (int)cid, val_32b);
-//                    val_ss << "igp:";
                     break;
                 case 130: // External_Internal
                     sprintf(ec_hdr->val, "cost=ext:%d:%d", (int)cid, val_32b);
-//                    val_ss << "ext:";
                     break;
                 case 131: // BGP_ID
                     sprintf(ec_hdr->val, "cost=bgp_id:%d:%d", (int)cid, val_32b);
-//                    val_ss << "bgp_id:";
                     break;
                 default:
                     sprintf(ec_hdr->val, "cost=unkn:%d:%d", (int)cid, val_32b);
-//                    val_ss << "unkn";
                     break;
             }
-
-//            val_ss << (int)cid << ":" << val_32b;
-
             break;
         }
 
         case EXT_OPAQUE_CP_ORF:
             sprintf(ec_hdr->val, "cp-orf=%d:%d", val_16b, val_32b);
-//            val_ss << "cp-orf=" << val_16b << ":" << val_32b;
             break;
 
         case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
             memcpy(&val_32b, value, 4);
             SWAP_BYTES(&val_32b, 4);
 
-//            val_ss << "ospf-rt=area-" << val_32b << ":";
-
             // Get the route type
             switch (value[4]) {
                 case 1: // intra-area routes
                 case 2: // intra-area routes
                     sprintf(ec_hdr->val, "ospf-rt=area-%d:O:%d", val_32b, (int)value[5]);
-//                    val_ss << "O:";
                     break;
                 case 3: // Inter-area routes
                     sprintf(ec_hdr->val, "ospf-rt=area-%d:IA:%d", val_32b, (int)value[5]);
-//                    val_ss << "IA:";
                     break;
                 case 5: // External routes
                     sprintf(ec_hdr->val, "ospf-rt=area-%d:E:%d", val_32b, (int)value[5]);
-//                    val_ss << "E:";
-                    break;
+                   break;
                 case 7: // NSSA routes
                     sprintf(ec_hdr->val, "ospf-rt=area-%d:N:%d", val_32b, (int)value[5]);
-//                    val_ss << "N:";
-                    break;
+                   break;
                 default:
                     sprintf(ec_hdr->val, "ospf-rt=area-%d:unkn:%d", val_32b, (int)value[5]);
-//                    val_ss << "unkn:";
-                    break;
+                   break;
             }
 
             // Add the options

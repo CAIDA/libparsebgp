@@ -186,7 +186,7 @@ struct mac_ip_advertisement_route {
     std::string         ethernet_segment_identifier;
     std::string         ethernet_tag_id_hex;
     uint8_t             mac_addr_len;
-    std::string         mac_addr;
+    u_char              mac_addr[6];
     uint8_t             ip_addr_len;
     std::string         ip_addr;
     int                 mpls_label_1;
@@ -228,25 +228,23 @@ struct evpn_tuple {
     }route_type_specific;
 };
 
- /**
-  * Function to parse mac
-  * @param data_pointer buffer containing data to read
-  * @return string containing mac
-  */
-inline std::string parse_mac(u_char *data_pointer) {
-    u_char *pointer = data_pointer;
-
-    std::ostringstream mac_stringstream;
-
-    for (int i = 0; i < 6; ++i) {
-        if (i != 0) mac_stringstream << ':';
-        mac_stringstream.width(2);
-        mac_stringstream.fill('0');
-        mac_stringstream << std::hex << (int)(pointer[i]);
-    }
-
-    return mac_stringstream.str();
-}
+// /**
+//  * Function to parse mac
+//  * @param data_pointer buffer containing data to read
+//  * @return string containing mac
+//  */
+//inline u_char* parse_mac(u_char *data_pointer) {
+//     u_char *pointer = data_pointer;
+//     u_char parsed_mac[6];
+//     int tmp=0;
+//
+//    for (int i = 0; i < 6; ++i) {
+//        sscanf((char *)pointer + i, "%2x", &tmp);
+//        parsed_mac[i] = tmp;
+//    }
+//
+//    return parsed_mac;
+//}
 
 /**
  *  Simple function to swap bytes around from network to host or

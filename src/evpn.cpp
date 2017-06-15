@@ -297,7 +297,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
                     data_pointer++;
 
                     // MAC Address (6 byte)
-                    tuple->route_type_specific.mac_ip_adv_route.mac_addr.assign(parse_mac(data_pointer));
+                    memcpy(tuple->route_type_specific.mac_ip_adv_route.mac_addr, (data_pointer), 6);
                     data_pointer += 6;
 
                     // IP Address Length (1 byte)

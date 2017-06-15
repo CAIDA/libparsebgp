@@ -141,7 +141,6 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_
 
     // Change length to host byte order
     SWAP_BYTES(&(c_hdr.len), 2);
-
     /*
      * Error out if the remaining size of the BGP message is grater than passed bgp message buffer
      *      It is expected that the passed bgp message buffer holds the complete BGP message to be parsed

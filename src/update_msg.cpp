@@ -29,10 +29,8 @@
  */
 static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
                                                          update_prefix_tuple **&prefixes, uint16_t *count_prefix) {
-    u_char       ipv4_raw[4];
-    char         ipv4_char[16];
     int          addr_bytes = 0;
-    int          count = 0;
+    uint16_t          count = 0;
     //prefix_tuple tuple;
     update_prefix_tuple *prefix_tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
     prefixes = (update_prefix_tuple **)malloc(sizeof(update_prefix_tuple*));
@@ -80,13 +78,9 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
         //           router_addr.c_str(), tuple.len, addr_bytes);
 
         if (addr_bytes <= 4) {
-            memcpy(ipv4_raw, data, addr_bytes);
+            memcpy(prefix_tuple->prefix, data, addr_bytes);
             read_size += addr_bytes;
             data += addr_bytes;
-
-            // Convert the IP to string printed format
-            inet_ntop(AF_INET, ipv4_raw, ipv4_char, sizeof(ipv4_char));
-            strcpy(prefix_tuple->prefix, ipv4_char);
 
             // Add tuple to prefix list
             prefixes[count++]=prefix_tuple;
