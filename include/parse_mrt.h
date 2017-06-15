@@ -17,7 +17,6 @@
 #ifndef PARSEMRT_H_
 #define PARSEMRT_H_
 
-#include <vector>
 #include "parse_bgp.h"
 #include "parse_utils.h"
 

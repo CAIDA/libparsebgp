@@ -9,8 +9,6 @@
  * 
  */
 
-#include <sstream>
-#include <iostream>
 #include <arpa/inet.h>
 #include "../include/update_msg.h"
 #include "../include/ext_community.h"
@@ -22,14 +20,14 @@
  *      Decodes the common 2-octet, 4-octet, and IPv4 specific common subtypes.
  *      Converts to human readable form.
  *
- * \param [in]   ec_hdr          Reference to the extended community header
- * \param [in]   isGlobal4Bytes  True if the global admin field is 4 bytes, false if 2
+ * \param [in]   ec_hdr            Reference to the extended community header
+ * \param [in]   is_global_4bytes  True if the global admin field is 4 bytes, false if 2
  * \param [in]   is_global_ipv4    True if the global admin field is an IPv4 address, false if not
  *
  * \return  Decoded string value
  */
-static std::string decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
-    std::stringstream   val_ss;
+static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
+//    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
     char                ipv4_char[16] = {0};
@@ -66,114 +64,144 @@ static std::string decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, 
 
         case EXT_COMMON_BGP_DATA_COL :
             if (is_global_4bytes)
-                val_ss << "colc=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "colc=%d:%d", val_32b, val_16b);
+//                val_ss << "colc=" << val_32b << ":" << val_16b;
 
             else
-                val_ss << "colc=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "colc=%d:%d", val_16b, val_32b);
+//                val_ss << "colc=" << val_16b << ":" << val_32b;
 
             break;
 
         case EXT_COMMON_ROUTE_ORIGIN :
             if (is_global_ipv4)
-                val_ss << "soo=" << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "soo=%s:%d", ipv4_char, val_16b);
+//                val_ss << "soo=" << ipv4_char << ":" << val_16b;
 
             else if (is_global_4bytes)
-                val_ss << "soo=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "soo=%d:%d", val_32b, val_16b);
+//                val_ss << "soo=" << val_32b << ":" << val_16b;
 
             else
-                val_ss << "soo=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "soo=%d:%d", val_16b, val_32b);
+//                val_ss << "soo=" << val_16b << ":" << val_32b;
             break;
 
         case EXT_COMMON_ROUTE_TARGET :
             if (is_global_ipv4)
-                val_ss << "rt=" << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "rt=%s:%d", ipv4_char, val_16b);
+//                val_ss << "rt=" << ipv4_char << ":" << val_16b;
 
             else if (is_global_4bytes)
-                val_ss << "rt=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "rt=%d:%d", val_32b, val_16b);
+//                val_ss << "rt=" << val_32b << ":" << val_16b;
 
             else
-                val_ss << "rt=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "rt=%d:%d", val_16b, val_32b);
+//                val_ss << "rt=" << val_16b << ":" << val_32b;
             break;
 
         case EXT_COMMON_SOURCE_AS :
             if (is_global_4bytes)
-                val_ss << "sas=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "sas=%d:%d", val_32b, val_16b);
+//                val_ss << "sas=" << val_32b << ":" << val_16b;
 
             else
-                val_ss << "sas=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "sas=%d:%d", val_16b, val_32b);
+//                val_ss << "sas=" << val_16b << ":" << val_32b;
 
             break;
 
         case EXT_COMMON_CISCO_VPN_ID :
             if (is_global_ipv4)
-                val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
+                //TODO: check
+                sprintf(ec_hdr->val, "vpn-id=%s:%d", ipv4_char, val_16b);
+//                val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
 
             else if (is_global_4bytes)
-                val_ss << "vpn-id=" << val_32b << ":0x" << std::hex << val_16b;
+                sprintf(ec_hdr->val, "vpn-id=%d:%d", val_32b, val_16b);
+//                val_ss << "vpn-id=" << val_32b << ":0x" << std::hex << val_16b;
 
             else
-                val_ss << "vpn-id=" << val_16b << ":0x" << std::hex << val_32b;
+                sprintf(ec_hdr->val, "vpn-id=%d:%d", val_16b, val_32b);
+//                val_ss << "vpn-id=" << val_16b << ":0x" << std::hex << val_32b;
 
             break;
 
         case EXT_COMMON_L2VPN_ID :
             if (is_global_ipv4)
-                val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
+                sprintf(ec_hdr->val, "vpn-id=%s:%d", ipv4_char, val_16b);
+//                val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
 
             else if (is_global_4bytes)
-                val_ss << "vpn-id=" << val_32b << ":0x" << std::hex << val_16b;
+                sprintf(ec_hdr->val, "vpn-id=%d:%d", val_32b, val_16b);
+//                val_ss << "vpn-id=" << val_32b << ":0x" << std::hex << val_16b;
 
             else
-                val_ss << "vpn-id=" << val_16b << ":0x" << std::hex << val_32b;
+                sprintf(ec_hdr->val, "vpn-id=%d:%d", val_16b, val_32b);
+//                val_ss << "vpn-id=" << val_16b << ":0x" << std::hex << val_32b;
 
             break;
 
         case EXT_COMMON_LINK_BANDWIDTH : // is same as EXT_COMMON_GENERIC
             if (is_global_4bytes)
-                val_ss << "link-bw=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "link-bw=%d:%d", val_32b, val_16b);
+//                val_ss << "link-bw=" << val_32b << ":" << val_16b;
 
             else
-                val_ss << "link-bw=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "link-bw=%d:%d", val_16b, val_32b);
+//                val_ss << "link-bw=" << val_16b << ":" << val_32b;
 
             break;
 
         case EXT_COMMON_OSPF_DOM_ID :
             if (is_global_ipv4)
-                val_ss << "ospf-did=" << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "ospf-did=%s:%d", ipv4_char, val_16b);
+//                val_ss << "ospf-did=" << ipv4_char << ":" << val_16b;
             else if (is_global_4bytes)
-                val_ss << "ospf-did=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "ospf-did=%d:%d", val_32b, val_16b);
+//                val_ss << "ospf-did=" << val_32b << ":" << val_16b;
             else
-                val_ss << "ospf-did=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "ospf-did=%d:%d", val_16b, val_32b);
+//                val_ss << "ospf-did=" << val_16b << ":" << val_32b;
             break;
 
         case EXT_COMMON_VRF_IMPORT :
             if (is_global_ipv4)
-                val_ss << "import=" << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "import=%s:%d", ipv4_char, val_16b);
+//                val_ss << "import=" << ipv4_char << ":" << val_16b;
 
-            else if (is_global_ipv4)
-                val_ss << "import=" << val_32b << ":" << val_16b;
+            else if (is_global_4bytes)
+                sprintf(ec_hdr->val, "import=%d:%d", val_32b, val_16b);
+//                val_ss << "import=" << val_32b << ":" << val_16b;
 
             else
-                val_ss << "import=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "import=%d:%d", val_16b, val_32b);
+//                val_ss << "import=" << val_16b << ":" << val_32b;
 
             break;
 
         case EXT_COMMON_IA_P2MP_SEG_NH :
             if (is_global_ipv4)
-                val_ss << "p2mp-nh=" << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "p2mp-nh=%s:%d", ipv4_char, val_16b);
+//                val_ss << "p2mp-nh=" << ipv4_char << ":" << val_16b;
 
             else
-                val_ss << "p2mp-nh=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "p2mp-nh=%d:%d", val_16b, val_32b);
+//                val_ss << "p2mp-nh=" << val_16b << ":" << val_32b;
 
             break;
 
         case EXT_COMMON_OSPF_ROUTER_ID :
             if (is_global_ipv4)
-                val_ss << "ospf-rid=" << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "ospf-rid=%s:%d", ipv4_char, val_16b);
+//                val_ss << "ospf-rid=" << ipv4_char << ":" << val_16b;
             else if (is_global_4bytes)
-                val_ss << "ospf-rid=" << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "ospf-rid=%d:%d", val_32b, val_16b);
+//                val_ss << "ospf-rid=" << val_32b << ":" << val_16b;
             else
-                val_ss << "ospf-rid=" << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "ospf-rid=%d:%d", val_16b, val_32b);
+//                val_ss << "ospf-rid=" << val_16b << ":" << val_32b;
             break;
 
         default :
@@ -181,8 +209,6 @@ static std::string decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, 
             //        ec_hdr.high_type, ec_hdr.low_type);
             break;
     }
-
-    return val_ss.str();
 }
 
 /**
@@ -195,46 +221,51 @@ static std::string decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, 
  *
  * \return  Decoded string value
  */
-static std::string decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
-    std::stringstream   val_ss;
+static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
+//    std::stringstream   val_ss;
     uint32_t            val_32b;
 
     switch(ec_hdr->low_type) {
         case EXT_EVPN_MAC_MOBILITY: {
-            val_ss << "mac_mob_flags=";
+//            val_ss << "mac_mob_flags=";
             u_char flags = value[0];
 
-            val_ss << flags;
+//            val_ss << flags;
 
             memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
-            val_ss << " mac_mob_seq_num=";
-            val_ss << val_32b;
+//            val_ss << " mac_mob_seq_num=";
+//            val_ss << val_32b;
+            sprintf(ec_hdr->val, "mac_mob_flags=%c mac_mob_seq_num=%d", flags, val_32b);
             break;
         }
         case EXT_EVPN_MPLS_LABEL: {
-            val_ss << "esi_label_flags=";
+//            val_ss << "esi_label_flags=";
             u_char flags = value[0];
 
-            val_ss << flags;
+//            val_ss << flags;
 
             memcpy(&val_32b, value + 3, 3);
             SWAP_BYTES(&val_32b, 4);
             val_32b = val_32b >> 8;
 
-            val_ss << " esi_label=";
-            val_ss << val_32b;
+//            val_ss << " esi_label=";
+//            val_ss << val_32b;
+            sprintf(ec_hdr->val, "esi_label_flags=%c esi_label=%d", flags, val_32b);
             break;
         }
         case EXT_EVPN_ES_IMPORT: {
-            val_ss << "es_import=";
-            val_ss << parse_mac(value);
+//            val_ss << "es_import=";
+//            val_ss << parse_mac(value);
+            sprintf(ec_hdr->val, "es_import=%s", parse_mac(value));
             break;
         }
         case EXT_EVPN_ROUTER_MAC: {
-            val_ss << "router_mac=";
-            val_ss << parse_mac(value);
+
+//            val_ss << "router_mac=";
+//            val_ss << parse_mac(value);
+            sprintf(ec_hdr->val, "router_mac=%s", parse_mac(value));
             break;
         }
         default: {
@@ -243,7 +274,7 @@ static std::string decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
         }
     }
 
-    return val_ss.str();
+//    return val_ss.str();
 }
 
 /**
@@ -256,8 +287,8 @@ static std::string decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
  *
  * \return  Decoded string value
  */
-static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
-    std::stringstream   val_ss;
+static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
+//    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
 
@@ -268,63 +299,74 @@ static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) 
             memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
-            val_ss << "cost=";
+//            val_ss << "cost=";
 
             switch (poi) {
                 case 128 : // Absolute_value
-                    val_ss << "abs:";
+                    sprintf(ec_hdr->val, "cost=abs:%d:%d", (int)cid, val_32b);
+//                    val_ss << "abs:";
                     break;
                 case 129 : // IGP Cost
-                    val_ss << "igp:";
+                    sprintf(ec_hdr->val, "cost=igp:%d:%d", (int)cid, val_32b);
+//                    val_ss << "igp:";
                     break;
                 case 130: // External_Internal
-                    val_ss << "ext:";
+                    sprintf(ec_hdr->val, "cost=ext:%d:%d", (int)cid, val_32b);
+//                    val_ss << "ext:";
                     break;
                 case 131: // BGP_ID
-                    val_ss << "bgp_id:";
+                    sprintf(ec_hdr->val, "cost=bgp_id:%d:%d", (int)cid, val_32b);
+//                    val_ss << "bgp_id:";
                     break;
                 default:
-                    val_ss << "unkn";
+                    sprintf(ec_hdr->val, "cost=unkn:%d:%d", (int)cid, val_32b);
+//                    val_ss << "unkn";
                     break;
             }
 
-            val_ss << (int)cid << ":" << val_32b;
+//            val_ss << (int)cid << ":" << val_32b;
 
             break;
         }
 
         case EXT_OPAQUE_CP_ORF:
-            val_ss << "cp-orf=" << val_16b << ":" << val_32b;
+            sprintf(ec_hdr->val, "cp-orf=%d:%d", val_16b, val_32b);
+//            val_ss << "cp-orf=" << val_16b << ":" << val_32b;
             break;
 
         case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
             memcpy(&val_32b, value, 4);
             SWAP_BYTES(&val_32b, 4);
 
-            val_ss << "ospf-rt=area-" << val_32b << ":";
+//            val_ss << "ospf-rt=area-" << val_32b << ":";
 
             // Get the route type
             switch (value[4]) {
                 case 1: // intra-area routes
                 case 2: // intra-area routes
-                    val_ss << "O:";
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:O:%d", val_32b, (int)value[5]);
+//                    val_ss << "O:";
                     break;
                 case 3: // Inter-area routes
-                    val_ss << "IA:";
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:IA:%d", val_32b, (int)value[5]);
+//                    val_ss << "IA:";
                     break;
                 case 5: // External routes
-                    val_ss << "E:";
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:E:%d", val_32b, (int)value[5]);
+//                    val_ss << "E:";
                     break;
                 case 7: // NSSA routes
-                    val_ss << "N:";
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:N:%d", val_32b, (int)value[5]);
+//                    val_ss << "N:";
                     break;
                 default:
-                    val_ss << "unkn:";
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:unkn:%d", val_32b, (int)value[5]);
+//                    val_ss << "unkn:";
                     break;
             }
 
             // Add the options
-            val_ss << (int)value[5];
+//            val_ss << (int)value[5];
 
             break;
         }
@@ -333,19 +375,22 @@ static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) 
             memcpy(&val_32b, value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
-            val_ss << "color=" << val_32b;
+            sprintf(ec_hdr->val, "color=%d", val_32b);
+//            val_ss << "color=" << val_32b;
             break;
 
         case EXT_OPAQUE_ENCAP :
-            val_ss << "encap=" << (int)value[5];
+            sprintf(ec_hdr->val, "encap=%d", (int)value[5]);
+//            val_ss << "encap=" << (int)value[5];
             break;
 
         case EXT_OPAQUE_DEFAULT_GW : // draft-ietf-l2vpn-evpn (value is zero/reserved)
-            val_ss << "default-gw";
+            sprintf(ec_hdr->val, "default-gw");
+//            val_ss << "default-gw";
             break;
     }
 
-    return val_ss.str();
+//    return val_ss.str();
 }
 
 /**
@@ -360,8 +405,8 @@ static std::string decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) 
  *
  * \return  Decoded string value
  */
-static std::string decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
-    std::stringstream   val_ss;
+static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
+//    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
     char                ipv4_char[16] = {0};
@@ -405,63 +450,72 @@ static std::string decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value,
             memcpy(&val_16b, value + 2, 2);          // Layer 2 MTU
             SWAP_BYTES(&val_16b, 2);
 
-            val_ss << "l2info=";
+//            val_ss << "l2info=";
 
             switch (encap_type) {
                 case 19 : // VPLS
-                    val_ss << "vpls:";
+                    sprintf(ec_hdr->val, "12info=vpls:%c:mtu:%d", ctrl_flags, val_16b);
+//                    val_ss << "vpls:";
                     break;
 
                 default:
-                    val_ss << (int) encap_type << ":";
+                    sprintf(ec_hdr->val, "12info=%d:%c:mtu:%d", (int)encap_type, ctrl_flags, val_16b);
+//                    val_ss << (int) encap_type << ":";
                     break;
             }
 
-            val_ss << ctrl_flags << ":mtu:" << val_16b;
+//            val_ss << ctrl_flags << ":mtu:" << val_16b;
             break;
         }
 
         case EXT_GENERIC_FLOWSPEC_TRAFFIC_RATE : {
             // 4 byte float
             // TODO: would prefer to use std::defaultfloat, but this is not available in centos6.5 gcc
-            val_ss << "flow-rate=" << val_16b << ":" << (float) val_32b;
+//            val_ss << "flow-rate=" << val_16b << ":" << (float) val_32b;
+            sprintf(ec_hdr->val, "flow-rate=%d:%f", val_16b, (float)val_32b);
 
             break;
         }
 
         case EXT_GENERIC_FLOWSPEC_TRAFFIC_ACTION : {
-            val_ss << "flow-act=";
+//            val_ss << "flow-act=";
 
             // TODO: need to validate if byte 0 or 5, using 5 here
             if (value[5] & 0x02)             // Terminal action
-                val_ss << "S";
+                sprintf(ec_hdr->val, "flow-act=S");
+//                val_ss << "S";
 
             if (value[5] & 0x01)             // Sample and logging enabled
-                val_ss << "T";
+                sprintf(ec_hdr->val, "flow-act=T");
+//                val_ss << "T";
 
             break;
         }
 
         case EXT_GENERIC_FLOWSPEC_REDIRECT : {
-            val_ss << "flow-redir=";
+//            val_ss << "flow-redir=";
 
             // Route target
             if (is_global_ipv4)
-                val_ss << ipv4_char << ":" << val_16b;
+                sprintf(ec_hdr->val, "flow-redir=%s:%d", ipv4_char, val_16b);
+//                val_ss << ipv4_char << ":" << val_16b;
 
             else if (is_global_4bytes)
-                val_ss << val_32b << ":" << val_16b;
+                sprintf(ec_hdr->val, "flow-redir=%d:%d", val_32b, val_16b);
+//                val_ss << val_32b << ":" << val_16b;
 
             else
-                val_ss << val_16b << ":" << val_32b;
+                sprintf(ec_hdr->val, "flow-redir=%d:%d", val_16b, val_32b);
+//                val_ss << val_16b << ":" << val_32b;
             break;
         }
 
         case EXT_GENERIC_FLOWSPEC_TRAFFIC_REMARK :
-            val_ss << "flow-remark=" << (int)value[5];
+            sprintf(ec_hdr->val, "flow-remark=%d", (int)value[5]);
+//            val_ss << "flow-remark=" << (int)value[5];
     }
 
-    return val_ss.str();
+//    return val_ss.str();
 }
 
 /**
@@ -478,8 +532,9 @@ static std::string decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value,
  */
 void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char *data) {
 
-    std::string decode_str = "";
-    extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));;
+//    std::string decode_str = "";
+    extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));
+    ec_hdr->val = (char *)malloc(20*sizeof(char));
     u_char *value;
 
     if ( (path_attrs->attr_len % 8) ) {
@@ -493,7 +548,7 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
      * Loop through consecutive entries
      */
     for (int i = 0; i < path_attrs->attr_len; i += 8) {
-        decode_str = "";
+//        decode_str = "";
         // Setup extended community header
         ec_hdr->high_type = data[0];
         ec_hdr->low_type  = data[1];
@@ -504,35 +559,38 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
          */
         switch (ec_hdr->high_type << 2 >> 2) {
             case EXT_TYPE_IPV4 :
-                decode_str.append(decode_type_common(ec_hdr, value, true, true));
+//                decode_str.append(decode_type_common(ec_hdr, value, true, true));
+                decode_type_common(ec_hdr, value, true, true);
                 break;
 
             case EXT_TYPE_2OCTET_AS :
-                decode_str.append(decode_type_common(ec_hdr, value));
+                decode_type_common(ec_hdr, value);
+//                decode_str.append(decode_type_common(ec_hdr, value));
                 break;
 
             case EXT_TYPE_4OCTET_AS :
-                decode_str.append(decode_type_common(ec_hdr, value, true));
+                decode_type_common(ec_hdr, value, true);
+//                decode_str.append(decode_type_common(ec_hdr, value, true));
                 break;
 
             case EXT_TYPE_GENERIC :
-                decode_str.append(decode_type_generic(ec_hdr, value));
+                decode_type_generic(ec_hdr, value);
                 break;
 
             case EXT_TYPE_GENERIC_4OCTET_AS :
-                decode_str.append(decode_type_generic(ec_hdr, value, true));
+                decode_type_generic(ec_hdr, value, true);
                 break;
 
             case EXT_TYPE_GENERIC_IPV4 :
-                decode_str.append(decode_type_generic(ec_hdr, value, true, true));
+                decode_type_generic(ec_hdr, value, true, true);
                 break;
 
             case EXT_TYPE_OPAQUE :
-                decode_str.append(decode_type_opaque(ec_hdr, value));
+                decode_type_opaque(ec_hdr, value);
                 break;
 
             case EXT_TYPE_EVPN :
-                decode_str.append(decode_type_evpn(ec_hdr, value));
+                decode_type_evpn(ec_hdr, value);
                 break;
 
             case EXT_TYPE_QOS_MARK  : break;// TODO: Implement
@@ -545,10 +603,11 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
         data += 8;
 //            if ((i + 8) < attr_len)
 //                decode_str.append(" ");
-        ec_hdr->val = decode_str;
+//        ec_hdr->val = decode_str;
         path_attrs->attr_value.ext_comm[count++]=*ec_hdr;
     }
     path_attrs->attr_value.count_ext_comm = count;
+    free(ec_hdr->val);
     free(ec_hdr);
 //        parsed_data.attrs[ATTR_TYPE_EXT_COMMUNITY] = decode_str;
 }
@@ -564,15 +623,15 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
  *
  * \return  Decoded string value
  */
-std::string decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
-    std::stringstream   val_ss;
+static void decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
+//    std::stringstream   val_ss;
     uint16_t            val_16b;
     u_char              ipv6_raw[16] = {0};
     char                ipv6_char[40] = {0};
 
     memcpy(ipv6_raw, value, 16);
     if (inet_ntop(AF_INET6, ipv6_raw, ipv6_char, sizeof(ipv6_char)) != NULL)
-        return "";
+        return;
 
     memcpy(&val_16b, value + 16, 2);
     SWAP_BYTES(&val_16b, 2);
@@ -580,25 +639,31 @@ std::string decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
     switch (ec_hdr->low_type) {
 
         case EXT_IPV6_ROUTE_ORIGIN :
-            val_ss << "soo=" << ipv6_char << ":" << val_16b;
+            sprintf(ec_hdr->val, "soo=%s:%d", ipv6_char, val_16b);
+//            val_ss << "soo=" << ipv6_char << ":" << val_16b;
             break;
 
         case EXT_IPV6_ROUTE_TARGET :
-            val_ss << "rt=" << ipv6_char << ":" << val_16b;
+            sprintf(ec_hdr->val, "rt=%s:%d", ipv6_char, val_16b);
+//            val_ss << "rt=" << ipv6_char << ":" << val_16b;
             break;
 
         case EXT_IPV6_CISCO_VPN_ID :
-            val_ss << "vpn-id=" << ipv6_char << ":0x" << std::hex << val_16b;
+            //TODO: hex, check
+            sprintf(ec_hdr->val, "vpn-id=%s:%d", ipv6_char, val_16b);
+//            val_ss << "vpn-id=" << ipv6_char << ":0x" << std::hex << val_16b;
 
             break;
 
         case EXT_IPV6_VRF_IMPORT :
-            val_ss << "import=" << ipv6_char << ":" << val_16b;
+            sprintf(ec_hdr->val, "import=%s:%d", ipv6_char, val_16b);
+//            val_ss << "import=" << ipv6_char << ":" << val_16b;
 
             break;
 
         case EXT_IPV6_IA_P2MP_SEG_NH :
-            val_ss << "p2mp-nh=" << ipv6_char << ":" << val_16b;
+            sprintf(ec_hdr->val, "p2mp-nh=%s:%d", ipv6_char, val_16b);
+//            val_ss << "p2mp-nh=" << ipv6_char << ":" << val_16b;
 
             break;
 
@@ -608,7 +673,7 @@ std::string decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
             break;
     }
 
-    return val_ss.str();
+//    return val_ss.str();
 }
 
 /**
@@ -624,7 +689,7 @@ std::string decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
  *
  */
 void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data) {
-    std::string decode_str = "";
+//    std::string decode_str = "";
     extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));;
     u_char       *value;
 
@@ -655,7 +720,7 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
          */
         switch (ec_hdr->high_type << 2 >> 2) {
             case 0 :  // Currently IPv6 specific uses this type field
-                decode_str.append(decodeType_ipv6_specific(ec_hdr, value));
+                decodeType_ipv6_specific(ec_hdr, value);
                 break;
 
             default :
@@ -663,10 +728,11 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
                 //        ec_hdr.high_type, ec_hdr.low_type);
                 break;
         }
-        ec_hdr->val=decode_str;
+//        ec_hdr->val=decode_str;
         path_attrs->attr_value.ext_comm[count++] = *ec_hdr;
     }
     path_attrs->attr_value.count_ext_comm = count;
+    free(ec_hdr->val);
     free(ec_hdr);
     free(value);
 }

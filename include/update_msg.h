@@ -186,7 +186,7 @@ struct mp_reach_nlri {
 struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
-    string       val;
+    char         *val;
 };
 
 

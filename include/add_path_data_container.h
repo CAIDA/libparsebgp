@@ -29,7 +29,7 @@ struct send_receive_codes_for_sent_and_received_open_message_structure {
  *
  * @return string unique for AFI and SAFI combination
  */
-std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi);
+//std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi);
 
 /**
  * Add Add Path data to persistent storage

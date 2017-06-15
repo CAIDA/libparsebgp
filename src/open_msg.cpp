@@ -7,7 +7,6 @@
  *
  */
 #include "../include/open_msg.h"
-#include "../include/bgp_common.h"
 #include "../include/parse_utils.h"
 
 /**

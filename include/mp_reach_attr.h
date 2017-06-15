@@ -10,8 +10,6 @@
 #define MPREACHATTR_H_
 
 #include "bgp_common.h"
-#include <list>
-#include <string>
 #include "update_msg.h"
 
 /**

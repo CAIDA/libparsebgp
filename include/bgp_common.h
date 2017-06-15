@@ -278,6 +278,7 @@ void inline SWAP_BYTES(void *var, int size) {
  * @param code AFI http://www.iana.org/assignments/address-family-numbers/address-family-numbers.xhtml
  * @return string like "IPv6" or "IPv4"
  */
+/*
 inline std::string GET_AFI_STRING_BY_CODE(int code) {
     std::string afi_string;
 
@@ -300,13 +301,14 @@ inline std::string GET_AFI_STRING_BY_CODE(int code) {
     }
     return afi_string;
 }
+*/
 
 /**
  * Function to get string representation of SAFI code.
  * @param code SAFI http://www.iana.org/assignments/safi-namespace/safi-namespace.xhtml
  * @return string like "Unicast" or "Multicast"
  */
-inline std::string GET_SAFI_STRING_BY_CODE(int code) {
+/*inline std::string GET_SAFI_STRING_BY_CODE(int code) {
     std::string safi_string;
 
     switch (code) {
@@ -364,6 +366,6 @@ inline std::string GET_SAFI_STRING_BY_CODE(int code) {
 
     }
     return safi_string;
-}
+}*/
 
 #endif /* BGPCOMMON_H */

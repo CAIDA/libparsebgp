@@ -7,7 +7,6 @@
  *
  */
 
-#include <algorithm>
 #include "../include/parse_bgp.h"
 #include "../include/parse_utils.h"
 
