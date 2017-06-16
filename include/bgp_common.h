@@ -169,12 +169,45 @@ struct route_distinguisher {
 };
 
 /**
+* Struct for Ethernet Segment Identifier
+*/
+typedef struct ethernet_segment_identifier{
+    uint8_t         type;
+    struct type_0{
+        char        eth_segment_iden[9];
+    }type_0;
+    struct type_1{
+        char        eth_segment_iden[6];
+        uint16_t    CE_LACP_port_key;
+    }type_1;
+    struct type_2{
+        char        eth_segment_iden[6];
+        uint16_t    root_bridge_priority;
+
+    }type_2;
+    struct type_3{
+        char        eth_segment_iden[6];
+        uint32_t    local_discriminator_value;
+
+    }type_3;
+    struct type_4{
+        uint32_t    router_id;
+        uint32_t    local_discriminator_value;
+
+    }type_4;
+    struct type_5{
+        uint32_t    as_number;
+        uint32_t local_discriminator_value;
+    }type_5;
+}ethernet_segment_identifier;
+
+/**
  * Struct for ethernet Auto-discovery route
  */
 struct ethernet_ad_route {
     route_distinguisher rd;
-    std::string         ethernet_segment_identifier;
-    std::string         ethernet_tag_id_hex;
+    ethernet_segment_identifier eth_seg_iden;
+    char         ethernet_tag_id_hex[4];
     int                 mpls_label;
 };
 
@@ -183,12 +216,12 @@ struct ethernet_ad_route {
  */
 struct mac_ip_advertisement_route {
     route_distinguisher rd;
-    std::string         ethernet_segment_identifier;
-    std::string         ethernet_tag_id_hex;
+    ethernet_segment_identifier eth_seg_iden;
+    char                ethernet_tag_id_hex[4];
     uint8_t             mac_addr_len;
     u_char              mac_addr[6];
     uint8_t             ip_addr_len;
-    std::string         ip_addr;
+    char                ip_addr[16];
     int                 mpls_label_1;
     int                 mpls_label_2;
 };
@@ -198,20 +231,22 @@ struct mac_ip_advertisement_route {
  */
 struct inclusive_multicast_ethernet_tag_route {
     route_distinguisher rd;
-    std::string         ethernet_segment_identifier;
-    std::string         ethernet_tag_id_hex;
+    ethernet_segment_identifier eth_seg_iden;
+    char                ethernet_tag_id_hex[4];
     uint8_t             ip_addr_len;
-    std::string         originating_router_ip;
+    char                originating_router_ip[16];
 };
+
+
 
 /**
  * Struct for Ethernet Segment Route
  */
 struct ethernet_segment_route {
-    route_distinguisher rd;
-    std::string         ethernet_segment_identifier;
-    uint8_t             ip_addr_len;
-    std::string         originating_router_ip;
+    route_distinguisher         rd;
+    ethernet_segment_identifier eth_seg_iden;
+    uint8_t                     ip_addr_len;
+    char                        originating_router_ip[16];
 };
 
 /**

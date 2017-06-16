@@ -12,8 +12,6 @@
 
 #include "bgp_common.h"
 #include "add_path_data_container.h"
-#include <string>
-#include <array>
 
 using namespace std;
 
