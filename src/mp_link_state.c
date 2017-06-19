@@ -99,7 +99,7 @@ int libparsebgp_mp_link_state_parse_descr_local_remote_node(u_char *data, int da
 
         case NODE_DESCR_IGP_ROUTER_ID:
         {
-            if (info->len > data_len or info->len > 8) {
+            if (info->len > data_len || info->len > 8) {
                 //LOG_NOTICE("%s: bgp-ls: failed to parse node descriptor IGP Router ID sub-tlv; len (%d) is invalid",peer_addr.c_str(), len);
                 data_read += info->len;
                 break;

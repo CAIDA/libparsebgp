@@ -28,14 +28,14 @@
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
 static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
-                                                         update_prefix_tuple **&prefixes, uint16_t *count_prefix) {
+                                                         update_prefix_tuple **prefixes, uint16_t *count_prefix) {
     int          addr_bytes = 0;
     uint16_t          count = 0;
     //prefix_tuple tuple;
     update_prefix_tuple *prefix_tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
     prefixes = (update_prefix_tuple **)malloc(sizeof(update_prefix_tuple*));
 
-    if (len <= 0 or data == NULL)
+    if (len <= 0 || data == NULL)
         return 0;
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4
@@ -108,7 +108,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker) {
     ssize_t     read_size       = 0, bytes_read = 0, bytes_check = 0;
     u_char      *buf_ptr        = data;
 //    libparsebgp_addpath_map add_path_map;
@@ -153,8 +153,8 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
     /*
      * Check if End-Of-RIB
      */
-    if (not update_msg->wdrawn_route_len and (size - bytes_check) <= 0 and not update_msg->total_path_attr_len) {
-        has_end_of_rib_marker = true;
+    if (!update_msg->wdrawn_route_len || (size - bytes_check) <= 0 || !update_msg->total_path_attr_len) {
+        *has_end_of_rib_marker = true;
         //LOG_INFO("%s: rtr=%s: End-Of-RIB marker", peer_addr.c_str(), router_addr.c_str());
 
     } else {
@@ -371,8 +371,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs,
-                                               u_char *data, bool &has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker) {
     uint16_t    value16bit;
 
     /*
@@ -504,7 +503,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs,
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker, uint16_t *count_path_attrs) {
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count_path_attrs) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
@@ -541,7 +540,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg,
         }
 
         // Get the attribute data, if we have any; making sure to not overrun buffer
-        if (path_attrs->attr_len > 0 and (read + path_attrs->attr_len) <= len) {
+        if (path_attrs->attr_len > 0 || (read + path_attrs->attr_len) <= len) {
             // Data pointer is currently at the data position of the attribute
 
             /*

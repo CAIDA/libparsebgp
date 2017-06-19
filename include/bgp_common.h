@@ -10,11 +10,13 @@
 #ifndef BGPCOMMON_H_
 #define BGPCOMMON_H_
 
-#include <cstdint>
-#include <sstream>
-#include <cinttypes>
-#include <cstring>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 #include <sys/types.h>
+#include "parse_utils.h"
 
 #define BGP_MAX_MSG_SIZE        65535                   // Max payload size - Larger than RFC4271 of 4096
 #define BGP_MSG_HDR_LEN         19                      // BGP message header size
@@ -109,11 +111,11 @@ enum prefix_type {
 /**
 * Defines the Add Path capability
 */
-struct add_path_capability {
+typedef struct add_path_capability {
     uint16_t       afi;
     uint8_t        safi;
     uint8_t        send_recieve;
-} __attribute__ ((__packed__));
+}add_path_capability;
 
 
 typedef union {
@@ -129,28 +131,28 @@ typedef union {
 /**
  * Defines the prefix tuple in update message
  */
-struct update_prefix_tuple {
+typedef struct update_prefix_tuple {
     add_path_capability path_id;        ///< 4-octet Path identifier
     uint8_t             len;            ///< 1-octet Length of prefix in bits
     char                prefix[16];     ///< Address prefix
-};
+}update_prefix_tuple;
 
 
 
 /**
  * Defines prefix tuple with label
  */
-struct update_prefix_label_tuple {
+typedef struct update_prefix_label_tuple {
     add_path_capability path_id;        ///< 4-octet path identifier
     uint8_t             len;            ///< 1-octet Length of prefix in bits
     mpls_label          *label;          ///< Labels
     char                prefix[16];         ///< Address prefix
-};
+}update_prefix_label_tuple;
 
 /**
  * Struct for route distinguisher
  */
-struct route_distinguisher {
+typedef struct route_distinguisher {
     uint8_t        rd_type;
     struct rd_type_msg {
         struct rd_type_0 {
@@ -166,7 +168,7 @@ struct route_distinguisher {
             uint16_t rd_assigned_number;
         }rd_type_2;
     }rd_type_msg;
-};
+}route_distinguisher;
 
 /**
 * Struct for Ethernet Segment Identifier
@@ -204,17 +206,17 @@ typedef struct ethernet_segment_identifier{
 /**
  * Struct for ethernet Auto-discovery route
  */
-struct ethernet_ad_route {
+typedef struct ethernet_ad_route {
     route_distinguisher rd;
     ethernet_segment_identifier eth_seg_iden;
     char         ethernet_tag_id_hex[4];
     int                 mpls_label;
-};
+}ethernet_ad_route;
 
 /**
  * Struct for MAC/IP Advertisement Route
  */
-struct mac_ip_advertisement_route {
+typedef struct mac_ip_advertisement_route {
     route_distinguisher rd;
     ethernet_segment_identifier eth_seg_iden;
     char                ethernet_tag_id_hex[4];
@@ -224,35 +226,33 @@ struct mac_ip_advertisement_route {
     char                ip_addr[16];
     int                 mpls_label_1;
     int                 mpls_label_2;
-};
+}mac_ip_advertisement_route;
 
 /**
  * Struct for Inclusive Multicast Ethernet Tag Route
  */
-struct inclusive_multicast_ethernet_tag_route {
+typedef struct inclusive_multicast_ethernet_tag_route {
     route_distinguisher rd;
     ethernet_segment_identifier eth_seg_iden;
     char                ethernet_tag_id_hex[4];
     uint8_t             ip_addr_len;
     char                originating_router_ip[16];
-};
-
-
+}inclusive_multicast_ethernet_tag_route;
 
 /**
  * Struct for Ethernet Segment Route
  */
-struct ethernet_segment_route {
+typedef struct ethernet_segment_route {
     route_distinguisher         rd;
     ethernet_segment_identifier eth_seg_iden;
     uint8_t                     ip_addr_len;
     char                        originating_router_ip[16];
-};
+}ethernet_segment_route;
 
 /**
 * Struct is used for evpn
 */
-struct evpn_tuple {
+typedef struct evpn_tuple {
     uint8_t route_type;
     uint8_t length;
     struct route_specific {
@@ -261,7 +261,7 @@ struct evpn_tuple {
         inclusive_multicast_ethernet_tag_route  incl_multicast_eth_tag_route;
         ethernet_segment_route                  eth_segment_route;
     }route_type_specific;
-};
+}evpn_tuple;
 
 // /**
 //  * Function to parse mac
@@ -280,31 +280,6 @@ struct evpn_tuple {
 //
 //    return parsed_mac;
 //}
-
-/**
- *  Simple function to swap bytes around from network to host or
- *  host to networking.  This method will convert any size byte variable,
- *  unlike ntohs and ntohl.
- *
- * @param [in/out] var   Variable containing data to update
- * @param [in]     size  Size of var - Default is size of var
- */
-void inline SWAP_BYTES(void *var, int size) {
-    if (size <= 1)
-        return;
-
-    u_char *v = (u_char *)var;
-
-    // Allocate a working buffer
-    u_char buf[size];
-
-    // Make a copy
-    memcpy(buf, var, size);
-
-    int i2 = 0;
-    for (int i=size-1; i >= 0; i--)
-        v[i2++] = buf[i];
-}
 
 /**
  * Function to get string representation of AFI code.

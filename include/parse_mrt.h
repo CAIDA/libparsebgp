@@ -21,9 +21,6 @@
 #include "parse_utils.h"
 
 #define MRT_PACKET_BUF_SIZE 4096   ///< Size of the MRT packet buffer (memory)
-
-using namespace std;
-
 /**
   * MRT Message Types
   */
@@ -85,50 +82,50 @@ typedef struct libparsebgp_table_dump_message{
 //4.3.1
 //view name is optional if not present viewname length is set to 0
 
-struct peer_entry{
+typedef struct peer_entry{
     uint8_t     peer_type;                     ///< 1-octet Peer type
     char        peer_bgp_id[4];                ///< 4-octet Peer BGP Id
     char        peer_ip[16];                   ///< Peer IP address
     uint32_t    peer_as;                       ///< Peer AS number
-};
+}peer_entry;
 
 /**
   * Peer Index Table Message format
   */
-struct libparsebgp_peer_index_table{
+typedef struct libparsebgp_peer_index_table{
     unsigned char       collector_bgp_id[4];    ///< 4-octet, Collector BGP ID
     uint16_t            view_name_length;       ///< 2-octet, length of view_name
     char                view_name[1024];        ///< View name, in utf8 format
     uint16_t            peer_count;             ///< 2-octet peer count, number of peer entries
     peer_entry*         peer_entries;           ///< List of peer entries
-};
+}libparsebgp_peer_index_table;
 
 /**
   * RIB Entry Message format
   */
-struct rib_entry{
+typedef struct rib_entry{
     uint16_t                     peer_index;        ///< 2-octet Peer index
     uint32_t                     originated_time;   ///< 4-octet, originated time for the RIB Entry
     uint16_t                     attribute_len;     ///< 2-octet, length of the BGP attributes field
     uint16_t                     bgp_attrs_count;
     update_path_attrs            **bgp_attrs;         ///< List of BGP attributes
-};
+}rib_entry;
 
 /**
   * RIB Entry Header Message format
   */
-struct libparsebgp_rib_entry_header{
+typedef struct libparsebgp_rib_entry_header{
     uint32_t        sequence_number;                ///< 4-octet sequence number
     uint8_t         prefix_length;                  ///< 1-octet, length of the prefix
     char            prefix[46];                     ///< Prefix
     uint16_t        entry_count;                    ///< 2-octet entry count, number of RIB entries
     rib_entry*      rib_entries;                    ///< List of RIB Entries
-};
+}libparsebgp_rib_entry_header;
 
 /**
   * RIB generic entry header
   */
-struct libparsebgp_rib_generic_entry_header{
+typedef struct libparsebgp_rib_generic_entry_header{
     uint32_t        sequence_number;                ///< 4-octet sequence number
     uint16_t        address_family_identifier;      ///< 2-octet address family identifier
     uint8_t         subsequent_afi;                 ///< 1-octet Subsequent AFI (SAFI)
@@ -138,12 +135,12 @@ struct libparsebgp_rib_generic_entry_header{
     }nlri_entry;                                    ///< single NLRI entry
     uint16_t        entry_count;                    ///< 2-octet entry count, number of RIB Entries
     rib_entry*      rib_entries;                    ///< List of RIB Entries
-};
+}libparsebgp_rib_generic_entry_header;
 
 /**
   * BGP4MP State Change Format
   */
-struct libparsebgp_bgp4mp_state_change{
+typedef struct libparsebgp_bgp4mp_state_change{
     uint32_t    peer_asn;                           ///< 2-octet or 4-octet (depending on type) peer Autonomous System (AS) number
     uint32_t    local_asn;                          ///< 2-octet or 4-octet (depending on type) local Autonomous System (AS) number
     uint16_t    interface_index;                    ///< 2-octet interface index
@@ -152,12 +149,12 @@ struct libparsebgp_bgp4mp_state_change{
     char        local_ip[40];                       ///< 4-octet of 16-octet (depending on type) local IP address
     uint16_t    old_state;                          ///< 2-octet old FSM state
     uint16_t    new_state;                          ///< 2-octet new FSM state
-};
+}libparsebgp_bgp4mp_state_change;
 
 /**
  * Structure holding BGP4MP Messages
  */
-struct libparsebgp_bgp4mp_msg{
+typedef struct libparsebgp_bgp4mp_msg{
     uint32_t                          peer_asn;         ///< 2-octet or 4-octet (depending on type) peer Autonomous System (AS) number
     uint32_t                          local_asn;        ///< 2-octet or 4-octet (depending on type) local Autonomous System (AS) number
     uint16_t                          interface_index;  ///< 2-octet interface index
@@ -165,7 +162,7 @@ struct libparsebgp_bgp4mp_msg{
     u_char                            peer_ip[16];      ///< 4-octet of 16-octet (depending on type) Peer IP address
     u_char                              local_ip[16];     ///< 4-octet of 16-octet (depending on type) local IP address
     libparsebgp_parse_bgp_parsed_data bgp_msg;          ///< Contains the BGP message
-};
+}libparsebgp_bgp4mp_msg;
 
 u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
 int mrt_data_len;                   ///< Length/size of data in the data buffer
@@ -176,16 +173,16 @@ uint32_t mrt_len;                   ///< Length of the BMP message - does not in
  * Structure for table_dump_v2 type as per RFC 6396
  */
 //union needed
-struct libparsebgp_parsed_table_dump_v2 {
+typedef struct libparsebgp_parsed_table_dump_v2 {
     libparsebgp_peer_index_table          peer_index_tbl;           ///< Contains parsed message of type PEER_INDEX_TABLE
     libparsebgp_rib_entry_header          rib_entry_hdr;            ///< Contains parsed messages of type RIB_IPV4_UNICAST and RIB_IPV6_UNICAST
     libparsebgp_rib_generic_entry_header  rib_generic_entry_hdr;    ///< Contains parsed messages of type RIB_GENERIC
-};
+}libparsebgp_parsed_table_dump_v2;
 
 /*
  * Structure for parsed MRT message as per RFC 6396
  */
-struct libparsebgp_parse_mrt_parsed_data {
+typedef struct libparsebgp_parse_mrt_parsed_data {
     libparsebgp_mrt_common_hdr c_hdr;                                   ///< MRT Common header
     //union needed:
     struct libparsebgp_parsed_mrt_data {                                ///< Union for the different types of MRT messages
@@ -198,7 +195,7 @@ struct libparsebgp_parse_mrt_parsed_data {
         }bgp4mp;
     }parsed_data;
     bool has_end_of_rib_marker;                                         ///< Indicates if end of RIB marker is present
-};
+}libparsebgp_parse_mrt_parsed_data;
 
 /**
  * Function to parse MRT message

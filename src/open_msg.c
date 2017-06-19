@@ -46,7 +46,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
         /*
          * Process the capabilities if present
          */
-        else if (opt_param->param_len >= 2 and (read_size + 2 + opt_param->param_len) <= size) {
+        else if (opt_param->param_len >= 2 && (read_size + 2 + opt_param->param_len) <= size) {
             u_char *cap_ptr = bufPtr + 2;
             open_capabilities *open_cap = (open_capabilities *)malloc(sizeof(open_capabilities));
             opt_param->param_values = (open_capabilities *)malloc(sizeof(open_capabilities));
@@ -223,15 +223,15 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
         return INCOMPLETE_MSG;
     }
 
-    if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->ver, 1) != 1)
+    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->ver, 1) != 1)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->asn, 2) != 2)
+    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->asn, 2) != 2)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->hold_time, 2) != 2)
+    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->hold_time, 2) != 2)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->bgp_id, 4) != 4)
+    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->bgp_id, 4) != 4)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, buf_size, &open_msg_data->opt_param_len, 1) != 1)
+    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->opt_param_len, 1) != 1)
         return ERR_READING_MSG;
 //    memcpy(&open_msg_data, bufPtr,10); //reading the first few parameters
       read_size = 10;

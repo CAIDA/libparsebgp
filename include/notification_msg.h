@@ -72,13 +72,13 @@ enum cease_subcodes {
 /**
  * Decoded/parsed BGP notification message
  */
-struct libparsebgp_notify_msg {
+typedef struct libparsebgp_notify_msg {
     u_char       error_code;                ///< Indicates the type of error
                                             ///<   NOTIFY_ERROR_CODES enum for errors
     u_char       error_subcode;             ///< specific info about the nature of the reported error
                                             ///<   values depend on the error code
     char         error_text[255];           ///< Decoded notification message
-};
+}libparsebgp_notify_msg;
 
 
 /**
@@ -94,6 +94,6 @@ struct libparsebgp_notify_msg {
 *
 * @return True if error, false if no error reading/parsing the notification message
 */
-ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg &parsed_msg, u_char *data, size_t size);
+ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg, u_char *data, size_t size);
 
 #endif /* NOTIFICATIONMSG_H_ */

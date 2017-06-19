@@ -10,8 +10,7 @@
 #ifndef _OPENBMP_LINKSTATEATTR_H_
 #define _OPENBMP_LINKSTATEATTR_H_
 
-#include <cstdint>
-#include <cinttypes>
+#include <stdint.h>
 #include <sys/types.h>
 #include "update_msg.h"
 

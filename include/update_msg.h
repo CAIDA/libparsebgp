@@ -13,8 +13,6 @@
 #include "bgp_common.h"
 #include "add_path_data_container.h"
 
-using namespace std;
-
 enum update_attr_types {
     ATTR_TYPE_ORIGIN=1,
     ATTR_TYPE_AS_PATH,
@@ -53,10 +51,10 @@ enum update_attr_types {
 };
 
 
-struct attr_type_tuple {
+typedef struct attr_type_tuple {
     uint8_t attr_flags;
     uint8_t attr_type_code;
-};
+}attr_type_tuple;
 
 typedef struct as_path_segment {
     uint8_t         seg_type;
@@ -68,7 +66,7 @@ typedef struct as_path_segment {
 /**
  * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
  */
-struct mp_unreach_nlri {
+typedef struct mp_unreach_nlri {
     uint16_t       afi;                 ///< Address Family Identifier
     uint8_t        safi;                ///< Subsequent Address Family Identifier
     struct withdrawn_routes_nlri {
@@ -79,12 +77,12 @@ struct mp_unreach_nlri {
         update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
         evpn_tuple                      *evpn_withdrawn;      ///< List of evpn nlris withdrawn
     }withdrawn_routes_nlri;
-};
+}mp_unreach_nlri;
 
 /**
 * Node (local and remote) common fields
 */
-struct node_descriptor {
+typedef struct node_descriptor {
     uint16_t    type;
     uint16_t    len;
     uint32_t    asn;                           ///< BGP ASN
@@ -93,12 +91,12 @@ struct node_descriptor {
     uint8_t     ospf_area_Id[4];               ///< OSPF area ID
     uint32_t    bgp_router_id;                 ///< BGP router ID (draft-ietf-idr-bgpls-segment-routing-epe)
     uint8_t     hash_bin[16];                  ///< binary hash for node descriptor
-};
+}node_descriptor;
 
 /**
  * Link Descriptor common fields
  */
-struct link_descriptor {
+typedef struct link_descriptor {
     uint16_t    type;
     uint16_t    len;
     uint32_t    local_id;                           ///< Link Local ID
@@ -107,12 +105,12 @@ struct link_descriptor {
     uint8_t     nei_addr[16];                       ///< Neighbor binary address
     uint32_t    mt_id;                              ///< Multi-Topology ID
     bool        is_ipv4;                             ///< True if IPv4, false if IPv6
-};
+}link_descriptor;
 
 /**
  * Prefix descriptor common fields
  */
-struct prefix_descriptor {
+typedef struct prefix_descriptor {
     uint16_t    type;
     uint16_t    len;
     char        ospf_route_type[32];                ///< OSPF Route type in string form for DB enum
@@ -120,9 +118,9 @@ struct prefix_descriptor {
     uint8_t     prefix[16];                         ///< Prefix binary address
     uint8_t     prefix_bcast[16];                   ///< Prefix broadcast/ending binary address
     uint8_t     prefix_len;                         ///< Length of prefix in bits
-};
+}prefix_descriptor;
 
-struct mp_reach_ls {
+typedef struct mp_reach_ls {
     uint16_t        nlri_type;
     uint16_t        nlri_len;
     uint8_t         proto_id;
@@ -155,18 +153,18 @@ struct mp_reach_ls {
             prefix_descriptor *prefix_desc;
         }prefix_nlri_ipv4_ipv6;
     }nlri_ls;
-};
+}mp_reach_ls;
 
-struct link_peer_epe_node_sid
+typedef struct link_peer_epe_node_sid
 {
     bool     L_flag;
     bool     V_flag;
     uint32_t sid_3;
     uint32_t sid_4;
     char     ip_raw[16];
-};
+}link_peer_epe_node_sid;
 
-struct mp_reach_nlri {
+typedef struct mp_reach_nlri {
     uint16_t afi;                ///< Address Family Identifier
     uint8_t safi;                ///< Subsequent Address Family Identifier
     uint8_t nh_len;              ///< Length of next hop
@@ -182,18 +180,18 @@ struct mp_reach_nlri {
         mp_reach_ls                      *mp_rch_ls;
         evpn_tuple                       *evpn;               ///< List of evpn nlris advertised
     }nlri_info;
-};
+}mp_reach_nlri;
 
 /**
  * Extended Community header
  *      RFC4360 size is 8 bytes total (6 for value)
  *      RFC5701 size is 20 bytes total (16 for global admin, 2 for local admin)
  */
-struct extcomm_hdr {
+typedef struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
     char         *val;
-};
+}extcomm_hdr;
 
 
 typedef struct bgp_link_state_attrs{
@@ -247,14 +245,14 @@ typedef struct attr_value{
     bgp_link_state_attrs    *bgp_ls;
 }attr_val;
 
-struct update_path_attrs {
+typedef struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
-};
+}update_path_attrs;
 
 
-struct libparsebgp_update_msg_data {
+typedef struct libparsebgp_update_msg_data {
     uint16_t                    count_wdrawn_route;
     uint16_t                    count_path_attr;
     uint16_t                    count_nlri;
@@ -264,7 +262,7 @@ struct libparsebgp_update_msg_data {
     uint16_t                    total_path_attr_len;
     update_path_attrs           **path_attributes;
     update_prefix_tuple         **nlri;
-};
+}libparsebgp_update_msg_data;
 
  /**
   * Parses the update message
@@ -279,8 +277,7 @@ struct libparsebgp_update_msg_data {
   *
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
- ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size,
-                                                bool &has_end_of_rib_marker);
+  ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker);
 
 /**
  * Parses the BGP attributes in the update
@@ -292,7 +289,7 @@ struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg, u_char *&data, uint16_t len, bool &has_end_of_rib_marker, uint16_t *count);
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
 
 /**
  * Parse attribute data based on attribute type
@@ -308,7 +305,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg,
  * \param [in]   has_end_of_rib_marker
  * \param [out]  read_bytes             Bytes read in parsing this message.
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool &has_end_of_rib_marker, uint16_t *count);
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker);
 
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
 

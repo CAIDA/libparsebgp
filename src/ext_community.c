@@ -26,7 +26,7 @@
  *
  * \return  Decoded string value
  */
-static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
+static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes, bool is_global_ipv4) {
 //    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
@@ -364,7 +364,7 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
  *
  * \return  Decoded string value
  */
-static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
+static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes, bool is_global_ipv4) {
     uint16_t            val_16b;
     uint32_t            val_32b;
     char                ipv4_char[16] = {0};
@@ -522,21 +522,21 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
                 break;
 
             case EXT_TYPE_2OCTET_AS :
-                decode_type_common(ec_hdr, value);
+                decode_type_common(ec_hdr, value, false, false);
 //                decode_str.append(decode_type_common(ec_hdr, value));
                 break;
 
             case EXT_TYPE_4OCTET_AS :
-                decode_type_common(ec_hdr, value, true);
+                decode_type_common(ec_hdr, value, true, false);
 //                decode_str.append(decode_type_common(ec_hdr, value, true));
                 break;
 
             case EXT_TYPE_GENERIC :
-                decode_type_generic(ec_hdr, value);
+                decode_type_generic(ec_hdr, value,false, false);
                 break;
 
             case EXT_TYPE_GENERIC_4OCTET_AS :
-                decode_type_generic(ec_hdr, value, true);
+                decode_type_generic(ec_hdr, value, true, false);
                 break;
 
             case EXT_TYPE_GENERIC_IPV4 :

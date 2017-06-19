@@ -29,7 +29,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
     update_prefix_label_tuple *tuple = (update_prefix_label_tuple *)malloc(sizeof(update_prefix_label_tuple));
     prefixes = (update_prefix_label_tuple *)malloc(sizeof(update_prefix_label_tuple));
 
-    if (len <= 0 or data == NULL)
+    if (len <= 0 || data == NULL)
         return 0;
 
     //tuple.type = is_ipv4 ? PREFIX_LABEL_UNICAST_V4 : PREFIX_LABEL_UNICAST_V6;
@@ -309,7 +309,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
     u_char              ip_raw[16];
     int                 addr_bytes;
 
-    if (len <= 0 or data == NULL)
+    if (len <= 0 || data == NULL)
         return 0;
 
     // TODO: Can extend this to support multicast, but right now we set it to unicast v4/v6
@@ -378,7 +378,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
  * \returns number of bytes read to decode the label(s) and updates string labels
  *
  */
-inline uint16_t decode_label(u_char *data, uint16_t len, mpls_label *&labels) {
+inline uint16_t decode_label(u_char *data, uint16_t len, mpls_label *labels) {
     int read_size = 0, count = 0;
     mpls_label *label = (mpls_label *)malloc(sizeof(mpls_label));
     labels = (mpls_label *)malloc(sizeof(mpls_label));

@@ -6,7 +6,7 @@ project (bmp_tool C CXX)
 include_directories(../include)
 
 #However, the file(GLOB...) allows for wildcard additions:
-file(GLOB SOURCES "../src/*.cpp")
+file(GLOB SOURCES "../src/*.c")
  
 #Generate the static library from the sources
 add_library(parse SHARED ${SOURCES})
@@ -15,5 +15,5 @@ add_library(parse SHARED ${SOURCES})
 # not really necessary in this example. Use "sudo make install" to apply
 install(TARGETS parse DESTINATION parselib_shared/)
 
-add_executable(libtest lib_parse_bgp_tool.cpp)
+add_executable(libtest lib_parse_bgp_tool.c)
 target_link_libraries(libtest parse)

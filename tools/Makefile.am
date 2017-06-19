@@ -7,7 +7,7 @@ bin_PROGRAMS = parsebgp
 
 # TODO: rename this source file
 parsebgp_SOURCES = \
-	lib_parse_bgp_tool.cpp
+	lib_parse_bgp_tool.c
 parsebgp_LDADD = -lparsebgp
 parsebgp_LDFLAGS = -L$(top_builddir)/src
 

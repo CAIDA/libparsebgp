@@ -10,8 +10,7 @@
 #ifndef _OPENBMP_MPLINKSTATE_H_
 #define _OPENBMP_MPLINKSTATE_H_
 
-#include <cstdint>
-#include <cinttypes>
+#include <stdint.h>
 #include <sys/types.h>
 #include "mp_un_reach_attr.h"
 
@@ -125,7 +124,7 @@ void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_
  *
  * \returns number of bytes read
  */
-int libparsebgp_mp_link_state_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor &info, bool is_ipv4);
+int libparsebgp_mp_link_state_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor *info, bool is_ipv4);
 
 
 #endif //_OPENBMP_MPLINKSTATE_H_

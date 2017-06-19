@@ -1,10 +1,8 @@
 #ifndef _OPENBMP_EVPN_H_
 #define _OPENBMP_EVPN_H_
 
-#include <cstdint>
-#include <cinttypes>
+#include <stdint.h>
 #include <sys/types.h>
-#include <iomanip>
 #include <arpa/inet.h>
 #include "update_msg.h"
 

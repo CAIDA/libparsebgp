@@ -5,7 +5,6 @@
 #ifndef PARSE_LIB_PARSE_BMPV1_H
 #define PARSE_LIB_PARSE_BMPV1_H
 
-#include <iostream>
 #include "parse_utils.h"
 #include "parse_bgp.h"
 
@@ -20,8 +19,6 @@
 #define BMP_PEER_UP_HDR_LEN 20      ///< BMP peer up event header size not including the recv/sent open param message
 #define BMP_PACKET_BUF_SIZE 68000   ///< Size of the BMP packet buffer (memory)
 
-
-using namespace std;
 
 /**
  * BMP common header types
@@ -64,7 +61,7 @@ enum bmp_term_type1_reason {
 /**
  * BMP peer header
  */
-struct libparsebgp_parsed_peer_hdr_v3 {
+typedef struct libparsebgp_parsed_peer_hdr_v3 {
     uint8_t         peer_type;            ///< 1 byte peer type
     uint8_t         peer_flags;           ///< 1 byte peer flags
     unsigned char   peer_dist_id[8];      ///< 8 byte peer route distinguisher
@@ -73,12 +70,12 @@ struct libparsebgp_parsed_peer_hdr_v3 {
     unsigned char   peer_bgp_id[4];       ///< 4 byte peer bgp id
     uint32_t        ts_secs;              ///< 4 byte timestamp in seconds
     uint32_t        ts_usecs;             ///< 4 byte timestamp microseconds
-} __attribute__ ((__packed__));
+} libparsebgp_parsed_peer_hdr_v3;
 
 /**
 *  BMP headers for older versions (BMPv1)
 */
-struct common_hdr_bmp_old {
+typedef struct common_hdr_bmp_old {
     uint8_t         type;                ///< 1 byte message type
     uint8_t         peer_type;           ///< 1 byte peer type
     uint8_t         peer_flags;          ///< 1 byte peer flag
@@ -89,16 +86,16 @@ struct common_hdr_bmp_old {
     uint32_t        ts_secs ;            ///< 4 byte timestamp in seconds
     uint32_t        ts_usecs ;           ///< 4 byte timestamp microseconds
     uint8_t         ver;                 ///< 1 byte -- At last since it's read before
-} __attribute__ ((__packed__));
+} common_hdr_bmp_old;
 
 /**
  * BMP common header
  */
-struct common_hdr_bmp_v3 {          ///< 6 bytes total length for the common header
+typedef struct common_hdr_bmp_v3 {          ///< 6 bytes total length for the common header
     uint8_t     ver;                ///< 1 byte; version of BMP header
     uint32_t    len;                ///< 4 bytes; BMP msg length in bytes including all headers
     uint8_t     type;               ///< 1 byte; BMP Msg type
-} __attribute__ ((__packed__));
+}common_hdr_bmp_v3;
 
 /**
 * BMP initiation message TLV
@@ -223,7 +220,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
  *
  * @returns Bytes that have been successfully read by the bmp parser.
  */
-ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *&buffer, int buf_len);
+ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
 
 /**
  * Destructor function to free bmp_parsed_data

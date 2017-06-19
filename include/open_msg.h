@@ -10,8 +10,6 @@
 #ifndef OPENMSG_H_
 #define OPENMSG_H_
 
-#include <iostream>
-#include <list>
 #include "../include/bgp_common.h"
 
 /**
@@ -49,30 +47,30 @@ enum bgp_cap_add_path_send_receive_codes {
 /**
  * Open message capability value
  */
-union capability_value {
+typedef union capability_value {
     uint32_t asn;
     add_path_capability add_path_data;
     add_path_capability mpbgp_data;
-};
+}capability_value;
 
 /**
  * Open message capabilities optional parameters
  */
-struct open_capabilities {
+typedef struct open_capabilities {
   uint8_t cap_code;             ///< Capability code, 1 octect
   uint8_t cap_len;              ///< Capability length, 1 octet
   capability_value cap_values;  ///< Capability values
-};
+}open_capabilities;
 
 /**
  * Open message optional parameters
  */
-struct open_param {
-  uint8_t param_type;                    ///< Parameter type, 1 octet
-  uint8_t param_len;                     ///< Parameter length, 1 octet
-  uint8_t count_param_val;               ///< Number of optional parameter values
-  open_capabilities *param_values;       ///< Parameter values
-};
+typedef struct open_param {
+  uint8_t param_type;                           ///< Parameter type, 1 octet
+  uint8_t param_len;                            ///< Parameter length, 1 octet
+  uint8_t count_param_val;
+  open_capabilities *param_values;    ///< Parameter values
+}open_param;
 
 typedef struct libparsebgp_open_msg_data{
   uint8_t           ver;                 ///< Version, currently 4

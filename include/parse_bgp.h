@@ -18,26 +18,22 @@
 #ifndef PARSEBGP_H_
 #define PARSEBGP_H_
 
-#include <vector>
-#include <list>
 #include "bgp_common.h"
 #include "update_msg.h"
 #include "open_msg.h"
 #include "notification_msg.h"
 
 
-using namespace std;
-
 /**
  * Below defines the common BGP header per RFC4271
  */
 enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE, BGP_MSG_ROUTE_REFRESH };
 
-struct libparsebgp_common_bgp_hdr {
+typedef struct libparsebgp_common_bgp_hdr {
     uint8_t   marker[16];                           ///< 16-octet field is included for compatibility. All ones (required).
     uint16_t  len;                           ///< Total length of the message, including the header in octets. min length is 19, max is 4096
     uint8_t   type;                          ///< type code of the message
-}__attribute__((__packed__));
+}libparsebgp_common_bgp_hdr;
 
 /**
  * This struct holds the parsed BGP data according to RFC 4271
@@ -63,7 +59,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
  *
  * @return the number of bytes read
  */
-ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *&data, size_t size, bool is_local_msg = true);
+ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, bool is_local_msg);
 
 
 /**
@@ -76,7 +72,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data &bgp_p
  *
  * \returns number of bytes read
  */
-ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &bgp_update_msg, u_char *data, size_t size);
+ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_update_msg, u_char *data, size_t size);
 
 /**
  * handle BGP notify event
@@ -90,7 +86,7 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data &b
  *
  * @returns number of bytes read
  */
-ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data, u_char *data, size_t size);
+ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
 
 /**
  * Parses the BGP common header
@@ -106,13 +102,13 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
  *
  * @returns Bytes read in parsing the header
  */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr &c_hdr, u_char *data, size_t size);
+ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr, u_char *data, size_t size);
 
 /**
  * Destructor function to free the memory allocated in parse_bgp
  * @param bgp_parsed_data  Struct containing bgp data
  *
  */
-void libparsebgp_parse_bgp_destructor(libparsebgp_parse_bgp_parsed_data &bgp_parsed_data);
+void libparsebgp_parse_bgp_destructor(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data);
 
 #endif /* PARSEBGP_H_ */
