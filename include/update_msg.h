@@ -157,6 +157,14 @@ struct mp_reach_ls {
     }nlri_ls;
 };
 
+struct link_peer_epe_node_sid
+{
+    bool     L_flag;
+    bool     V_flag;
+    uint32_t sid_3;
+    uint32_t sid_4;
+    char     ip_raw[16];
+};
 
 struct mp_reach_nlri {
     uint16_t afi;                ///< Address Family Identifier
@@ -200,20 +208,20 @@ typedef struct bgp_link_state_attrs{
         char mt_id[256];
     }node;
     struct link_attr{
-        char link_admin_group [4];
-        char link_igp_metric[4];
-        char link_ipv4_router_id_remote[4];
-        char link_ipv6_router_id_remote[4];
-        char link_max_link_bw[4];
-        char link_max_resv_bw[4];
-        char link_name[256];
-        char link_te_def_metric[4];
-        char link_unresv_bw[32];
-        char link_peer_epe_node_sid[32];
+        char        link_admin_group [4];
+        uint32_t    link_igp_metric;
+        char        link_ipv4_router_id_remote[4];
+        char        link_ipv6_router_id_remote[4];
+        int32_t     link_max_link_bw;
+        int32_t     link_max_resv_bw;
+        char        link_name[256];
+        uint32_t    link_te_def_metric;
+        int32_t     link_unresv_bw[8];
+        link_peer_epe_node_sid link_peer_epe_sid;
     }link;
     struct prefix_attr {
-        char prefix_prefix_metric[4];
-        char prefix_route_tag[4];
+        uint32_t    prefix_prefix_metric;
+        uint32_t    prefix_route_tag;
     }prefix;
 }bgp_link_state_attrs;
 

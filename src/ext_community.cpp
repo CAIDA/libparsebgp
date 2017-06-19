@@ -270,7 +270,6 @@ static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
  * \return  Decoded string value
  */
 static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
-//    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
 
@@ -329,9 +328,6 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
                    break;
             }
 
-            // Add the options
-//            val_ss << (int)value[5];
-
             break;
         }
 
@@ -370,7 +366,6 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
  * \return  Decoded string value
  */
 static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes = false, bool is_global_ipv4 = false) {
-//    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
     char                ipv4_char[16] = {0};
