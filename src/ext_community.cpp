@@ -114,7 +114,6 @@ static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is
 
         case EXT_COMMON_CISCO_VPN_ID :
             if (is_global_ipv4)
-                //TODO: check
                 sprintf(ec_hdr->val, "vpn-id=%s:%d", ipv4_char, val_16b);
 //                val_ss << "vpn-id=" << ipv4_char << ":0x" << std::hex << val_16b;
 
@@ -608,7 +607,6 @@ static void decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
             break;
 
         case EXT_IPV6_CISCO_VPN_ID :
-            //TODO: hex, check
             sprintf(ec_hdr->val, "vpn-id=%s:%d", ipv6_char, val_16b);
 //            val_ss << "vpn-id=" << ipv6_char << ":0x" << std::hex << val_16b;
 

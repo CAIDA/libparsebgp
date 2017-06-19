@@ -74,7 +74,7 @@ typedef struct libparsebgp_table_dump_message{
     char                    peer_ip[16];        ///< 4-octe ot 16-octet (depending on type) peer IP address
     uint16_t                peer_as;            ///< 2-octet peer AS number
     uint16_t                attribute_len;      ///< 2-octet, contains the length of the Attribute field
-    uint16_t                bgp_attrs_count;
+    uint16_t                bgp_attrs_count;    ///< indicates the number of bgp attributes, not in RFC
     update_path_attrs       **bgp_attrs;        ///< contains the BGP attribute information for the RIB entry
 }libparsebgp_table_dump_message;
 
@@ -135,7 +135,7 @@ struct libparsebgp_rib_generic_entry_header{
     struct nlri_entry{
         uint8_t     len;                            ///< 1-octet Length of prefix in bits
         char        *prefix;                        ///< Address prefix
-    }nlri_entry;                                          ///< single NLRI entry
+    }nlri_entry;                                    ///< single NLRI entry
     uint16_t        entry_count;                    ///< 2-octet entry count, number of RIB Entries
     rib_entry*      rib_entries;                    ///< List of RIB Entries
 };
@@ -162,8 +162,8 @@ struct libparsebgp_bgp4mp_msg{
     uint32_t                          local_asn;        ///< 2-octet or 4-octet (depending on type) local Autonomous System (AS) number
     uint16_t                          interface_index;  ///< 2-octet interface index
     uint16_t                          address_family;   ///< 2-octet address family
-    char                              peer_ip[40];      ///< 4-octet of 16-octet (depending on type) Peer IP address
-    char                              local_ip[40];     ///< 4-octet of 16-octet (depending on type) local IP address
+    u_char                            peer_ip[16];      ///< 4-octet of 16-octet (depending on type) Peer IP address
+    u_char                              local_ip[16];     ///< 4-octet of 16-octet (depending on type) local IP address
     libparsebgp_parse_bgp_parsed_data bgp_msg;          ///< Contains the BGP message
 };
 
@@ -197,6 +197,7 @@ struct libparsebgp_parse_mrt_parsed_data {
             libparsebgp_bgp4mp_state_change bgp4mp_state_change_msg;    ///< Contains BGP4MP state change messages
         }bgp4mp;
     }parsed_data;
+    bool has_end_of_rib_marker;                                         ///< Indicates if end of RIB marker is present
 };
 
 /**

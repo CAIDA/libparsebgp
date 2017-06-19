@@ -220,7 +220,7 @@ static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char *& buffer, int& 
 /**
  * Process the incoming Table Dump message
  */
-static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, libparsebgp_table_dump_message *table_dump_msg) {
+static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_len, bool &has_end_of_rib_marker, libparsebgp_table_dump_message *table_dump_msg) {
     int read_size=0;
     if (extract_from_buffer(buffer, buf_len, &table_dump_msg, 4) != 4)
         return ERR_READING_MSG; //throw "Error in parsing view number";
@@ -277,7 +277,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char *buffer, int& buf_l
 
     read_size+=4;
 
-    bool has_end_of_rib_marker;
+//    bool has_end_of_rib_marker;
 //    libparsebgp_addpath_map add_path_map;
     libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker, &table_dump_msg->bgp_attrs_count);
     read_size += table_dump_msg->attribute_len;
@@ -364,7 +364,8 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char *buffe
 /**
  * Process the incoming Table Dump message
  */
-static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, libparsebgp_rib_entry_header *rib_entry_data) {
+static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, int& buf_len, bool &has_end_of_rib_marker,
+                                                       libparsebgp_rib_entry_header *rib_entry_data) {
     uint16_t count = 0;
     int addr_bytes=0;
     int read_size=0;
@@ -428,7 +429,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
         SWAP_BYTES(&r_entry->originated_time, 4);
         SWAP_BYTES(&r_entry->attribute_len, 2);
 
-        bool has_end_of_rib_marker;
+//        bool has_end_of_rib_marker;
 //        libparsebgp_addpath_map add_path_map;
         libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
         read_size += r_entry->attribute_len;
@@ -443,7 +444,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char *buffer, in
 /**
  * Process the incoming RIB generic entry header
  */
-static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, libparsebgp_rib_generic_entry_header *rib_gen_entry_hdr) {
+static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, int& buf_len, bool &has_end_of_rib_marker,
+                                                       libparsebgp_rib_generic_entry_header *rib_gen_entry_hdr) {
     uint16_t count = 0;
     int read_size=0;
 
@@ -501,7 +503,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
         SWAP_BYTES(&r_entry->originated_time, 4);
         SWAP_BYTES(&r_entry->attribute_len, 2);
 
-        bool has_end_of_rib_marker;
+//        bool has_end_of_rib_marker;
 //        libparsebgp_addpath_map add_path_map;
         libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
         read_size += r_entry->attribute_len;
@@ -516,7 +518,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char *buffer, in
 /**
  * Process the incoming Table Dump v2 message
  */
-static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
+static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& buf_len, bool &has_end_of_rib_marker, libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
     int ret = 0, read_size = 0;
     switch (mrt_sub_type) {
         case PEER_INDEX_TABLE: {
@@ -528,7 +530,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& bu
         }
         case RIB_IPV4_UNICAST:
         case RIB_IPV6_UNICAST: {
-            ret = libparsebgp_parse_mrt_parse_rib_unicast(buffer, buf_len, &table_dump_v2_msg->rib_entry_hdr);
+            ret = libparsebgp_parse_mrt_parse_rib_unicast(buffer, buf_len, has_end_of_rib_marker, &table_dump_v2_msg->rib_entry_hdr);
             if (ret < 0)
                 return ret;
             read_size += ret;
@@ -539,7 +541,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char *buffer, int& bu
             break;
         }
         case RIB_GENERIC: {
-            ret = libparsebgp_parse_mrt_parse_rib_generic(buffer, buf_len, &table_dump_v2_msg->rib_generic_entry_hdr);
+            ret = libparsebgp_parse_mrt_parse_rib_generic(buffer, buf_len, has_end_of_rib_marker, &table_dump_v2_msg->rib_generic_entry_hdr);
             if (ret < 0)
                 return ret;
             read_size += ret;
@@ -577,7 +579,8 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
                 read_size = ret_val;
                 break;
             }
-            ret_val = libparsebgp_parse_mrt_parse_table_dump(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump);
+            ret_val = libparsebgp_parse_mrt_parse_table_dump(mrt_data, mrt_data_len, mrt_parsed_data->has_end_of_rib_marker,
+                                                             &mrt_parsed_data->parsed_data.table_dump);
             if (ret_val < 0)
                 read_size = ret_val;
             else
@@ -591,7 +594,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
                 break;
             }
 
-            ret_val = libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, &mrt_parsed_data->parsed_data.table_dump_v2);
+            ret_val = libparsebgp_parse_mrt_parse_table_dump_v2(mrt_data, mrt_data_len, mrt_parsed_data->has_end_of_rib_marker, &mrt_parsed_data->parsed_data.table_dump_v2);
             if (ret_val < 0)
                 read_size = ret_val;
             else
@@ -630,6 +633,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
     return read_size;
 }
 
+/*
 int main() {
     //len = 109;
 //    u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x01, 0x00, 0x00, 0x03, 0x96, 0x80, 0xdf, 0x33, 0x66, 0x00,
@@ -693,4 +697,4 @@ int main() {
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
 //    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
     return 1;
-}
+}*/

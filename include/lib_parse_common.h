@@ -4,6 +4,7 @@
 
 #ifndef PARSE_LIB_LIB_PARSE_COMMON_H_H
 #define PARSE_LIB_LIB_PARSE_COMMON_H_H
+
 #include "parse_bmp.h"
 #include "parse_mrt.h"
 #include "parse_bgp.h"
@@ -22,6 +23,7 @@ struct libparsebgp_parse_msg{
     libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
     libparsebgp_parsed_bmp_parsed_data parsed_bmp_msg;
     libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
+    int msg_type;
 };
 
 /**
@@ -36,6 +38,7 @@ struct libparsebgp_parse_msg{
  */
 ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, u_char* buffer, int buf_len, int type) {
     ssize_t read_size = 0;
+    parsed_msg->msg_type = type;
     switch (type) {
         case MRT_MESSAGE_TYPE: {
             read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg->parsed_mrt_msg, buffer, buf_len);

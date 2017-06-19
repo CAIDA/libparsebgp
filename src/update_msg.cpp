@@ -567,13 +567,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **&update_msg,
 void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attrs) {
     switch (path_attrs->attr_type.attr_type_code) {
         case ATTR_TYPE_AS_PATH: {
-            int n_as_path = 0, path_len = path_attrs->attr_len;
-            while (path_len > 0) {
-                // Count of AS's, not bytes
-                path_len -= (2* path_attrs->attr_value.as_path[n_as_path].seg_len + 2);
-                n_as_path++;
-            }
-            for (int i = 0; i < n_as_path; ++i) {
+            for (int i = 0; i < path_attrs->attr_value.count_as_path; ++i) {
                 free(path_attrs->attr_value.as_path[i].seg_asn);
                 path_attrs->attr_value.as_path[i].seg_asn = NULL;
             }
@@ -582,7 +576,7 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
             break;
         }
         case ATTR_TYPE_CLUSTER_LIST: {
-            for (int i = 0; i < path_attrs->attr_len/4; ++i) {
+            for (int i = 0; i < path_attrs->attr_value.count_cluster_list; ++i) {
                 free(path_attrs->attr_value.cluster_list[i]);
                 path_attrs->attr_value.cluster_list[i] = NULL;
             }
@@ -619,10 +613,7 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
             free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info);
             path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info = NULL;
 
-            int nlri_len_read = 0, count = 0, len = path_attrs->attr_len - path_attrs->attr_value.mp_reach_nlri_data.nh_len - 5;
-            while (nlri_len_read < len) {
-                nlri_len_read += 13;
-
+            for (int count = 0; count < path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_mp_rch_ls; ++count) {
                 switch (path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_type) {
                     case NLRI_TYPE_NODE: {
                         free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes);
@@ -670,7 +661,6 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
 }
 
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size) {
-    int addr_bytes, n_wdrawn_routes = 0, data_remaining = update_msg->wdrawn_route_len, n_path_attrs = 0;
 
     for (int i = 0; i < update_msg->count_wdrawn_route; ++i) {
         free(update_msg->wdrawn_routes[i]);
