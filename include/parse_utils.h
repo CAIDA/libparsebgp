@@ -6,6 +6,7 @@
 #define PARSE_LIB_PARSEUTILS_H
 
 #include <stdlib.h>
+#include <unistd.h>
 
 enum parse_msg_error {
     INCOMPLETE_MSG      = -1,        ///< Buffer does not contain the entire message
