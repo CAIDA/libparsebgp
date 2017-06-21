@@ -40,12 +40,13 @@ typedef struct libparsebgp_common_bgp_hdr {
  */
 typedef struct libparsebgp_parse_bgp_parsed_data {
     libparsebgp_common_bgp_hdr c_hdr;               ///< Has the bgp common header
-    //union needed
-    struct parsed_bgp_data {                        ///< Union of the different types of BGP messages
+
+    union parsed_bgp_data {                        ///< Union of the different types of BGP messages
         libparsebgp_open_msg_data open_msg;         ///< Stores the open message
         libparsebgp_update_msg_data update_msg;     ///< Stores update message
         libparsebgp_notify_msg notification_msg;    ///< Stores notification message
-    }parsed_data;
+    }parsed_data;                                   ///< Union for BGP data
+
     bool has_end_of_rib_marker;                     ///< Indicates whether this message has the end of rib marker
 }libparsebgp_parse_bgp_parsed_data;
 

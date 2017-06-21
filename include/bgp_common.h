@@ -134,7 +134,7 @@ typedef union {
 typedef struct update_prefix_tuple {
     add_path_capability path_id;        ///< 4-octet Path identifier
     uint8_t             len;            ///< 1-octet Length of prefix in bits
-    char                prefix[16];     ///< Address prefix
+    u_char              prefix[16];     ///< Address prefix
 }update_prefix_tuple;
 
 
@@ -146,7 +146,7 @@ typedef struct update_prefix_label_tuple {
     add_path_capability path_id;        ///< 4-octet path identifier
     uint8_t             len;            ///< 1-octet Length of prefix in bits
     mpls_label          *label;          ///< Labels
-    char                prefix[16];         ///< Address prefix
+    u_char              prefix[16];         ///< Address prefix
 }update_prefix_label_tuple;
 
 /**
@@ -176,19 +176,19 @@ typedef struct route_distinguisher {
 typedef struct ethernet_segment_identifier{
     uint8_t         type;
     struct type_0{
-        char        eth_segment_iden[9];
+        u_char        eth_segment_iden[9];
     }type_0;
     struct type_1{
-        char        eth_segment_iden[6];
+        u_char        eth_segment_iden[6];
         uint16_t    CE_LACP_port_key;
     }type_1;
     struct type_2{
-        char        eth_segment_iden[6];
+        u_char        eth_segment_iden[6];
         uint16_t    root_bridge_priority;
 
     }type_2;
     struct type_3{
-        char        eth_segment_iden[6];
+        u_char        eth_segment_iden[6];
         uint32_t    local_discriminator_value;
 
     }type_3;
@@ -209,7 +209,7 @@ typedef struct ethernet_segment_identifier{
 typedef struct ethernet_ad_route {
     route_distinguisher rd;
     ethernet_segment_identifier eth_seg_iden;
-    char         ethernet_tag_id_hex[4];
+    u_char         ethernet_tag_id_hex[4];
     int                 mpls_label;
 }ethernet_ad_route;
 
@@ -219,11 +219,11 @@ typedef struct ethernet_ad_route {
 typedef struct mac_ip_advertisement_route {
     route_distinguisher rd;
     ethernet_segment_identifier eth_seg_iden;
-    char                ethernet_tag_id_hex[4];
+    u_char                ethernet_tag_id_hex[4];
     uint8_t             mac_addr_len;
     u_char              mac_addr[6];
     uint8_t             ip_addr_len;
-    char                ip_addr[16];
+    u_char                ip_addr[16];
     int                 mpls_label_1;
     int                 mpls_label_2;
 }mac_ip_advertisement_route;
@@ -234,9 +234,9 @@ typedef struct mac_ip_advertisement_route {
 typedef struct inclusive_multicast_ethernet_tag_route {
     route_distinguisher rd;
     ethernet_segment_identifier eth_seg_iden;
-    char                ethernet_tag_id_hex[4];
+    u_char                ethernet_tag_id_hex[4];
     uint8_t             ip_addr_len;
-    char                originating_router_ip[16];
+    u_char                originating_router_ip[16];
 }inclusive_multicast_ethernet_tag_route;
 
 /**
@@ -246,7 +246,7 @@ typedef struct ethernet_segment_route {
     route_distinguisher         rd;
     ethernet_segment_identifier eth_seg_iden;
     uint8_t                     ip_addr_len;
-    char                        originating_router_ip[16];
+    u_char                        originating_router_ip[16];
 }ethernet_segment_route;
 
 /**

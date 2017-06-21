@@ -137,7 +137,7 @@ typedef struct libparsebgp_parsed_bmp_term_msg {
  * Peer Up Events schema
  */
 typedef struct libparsebgp_parsed_bmp_peer_up_event {
-    char                                local_ip[16];           ///< IPv4 or IPv6 printed IP address
+    u_char                              local_ip[16];           ///< IPv4 or IPv6 printed IP address
     uint16_t                            local_port;             ///< Local port number
     uint16_t                            remote_port;            ///< Remote port number
     libparsebgp_parse_bgp_parsed_data   sent_open_msg;          ///< sent open message
@@ -161,7 +161,7 @@ typedef struct libparsebgp_parsed_bmp_peer_down_event {
 typedef struct stat_counter {
     uint16_t    stat_type;              ///< 2 bytes - Information type
     uint16_t    stat_len;               ///< 2 bytes - Length of the information that follows
-    char        stat_data[8];           ///< Information - variable
+    u_char      stat_data[8];           ///< Information - variable
 }stat_counter;
 
 /**
@@ -184,27 +184,23 @@ uint8_t     ver;
  * BMP Message Structure
  */
 typedef struct libparsebgp_parsed_bmp_parsed_data{
-    /**
-     *  Union of BMP common header
-     */
-    struct libparsebgp_parsed_bmp_hdr {
+    uint8_t version;
+
+    union libparsebgp_parsed_bmp_hdr {
         common_hdr_bmp_v3 c_hdr_v3;         ///< structure for bmp header version 3
         common_hdr_bmp_old c_hdr_old;       ///< structure for bmp header version 1 or 2
-    }libparsebgp_parsed_bmp_hdr;
+    }libparsebgp_parsed_bmp_hdr;            ///< union of BMP common header
 
     libparsebgp_parsed_peer_hdr_v3 libparsebgp_parsed_peer_hdr;
 
-    /**
-     *  Union of BMP Message
-     */
-    struct libparsebgp_parsed_bmp_msg{
+    union libparsebgp_parsed_bmp_msg{
         libparsebgp_parsed_bmp_init_msg           parsed_init_msg;                  ///< structure for bmp init msg
         libparsebgp_parsed_bmp_term_msg           parsed_term_msg;                  ///< structure for bmp term msg
         libparsebgp_parsed_bmp_peer_up_event      parsed_peer_up_event_msg;         ///< structure for bmp peer up event msg
         libparsebgp_parsed_bmp_peer_down_event    parsed_peer_down_event_msg;       ///< structure for bmp peer down event msg
         libparsebgp_parse_bgp_parsed_data         parsed_rm_msg;                    ///< structure for bmp route monitoring msg
         libparsebgp_parsed_bmp_stat_rep           parsed_stat_rep;                  ///< structure for bmp stats report msg
-    }libparsebgp_parsed_bmp_msg;
+    }libparsebgp_parsed_bmp_msg;                                                    ///< Union of BMP messages
 }libparsebgp_parsed_bmp_parsed_data;
 
 /**

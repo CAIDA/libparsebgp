@@ -161,7 +161,7 @@ typedef struct link_peer_epe_node_sid
     bool     V_flag;
     uint32_t sid_3;
     uint32_t sid_4;
-    char     ip_raw[16];
+    u_char     ip_raw[16];
 }link_peer_epe_node_sid;
 
 typedef struct mp_reach_nlri {
@@ -190,7 +190,7 @@ typedef struct mp_reach_nlri {
 typedef struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
-    char         *val;
+    u_char       *val;
 }extcomm_hdr;
 
 
@@ -198,21 +198,21 @@ typedef struct bgp_link_state_attrs{
     uint16_t            type;
     uint16_t            len;
     struct node_attr{
-        char node_flag_bits;
-        char node_ipv4_router_id_local[4];
-        char node_ipv6_router_id_local[16];
-        char node_isis_area_id[8];
-        char node_name[256];
-        char mt_id[256];
+        u_char node_flag_bits;
+        u_char node_ipv4_router_id_local[4];
+        u_char node_ipv6_router_id_local[16];
+        u_char node_isis_area_id[8];
+        u_char node_name[256];
+        u_char mt_id[256];
     }node;
     struct link_attr{
-        char        link_admin_group [4];
+        u_char        link_admin_group [4];
         uint32_t    link_igp_metric;
-        char        link_ipv4_router_id_remote[4];
-        char        link_ipv6_router_id_remote[4];
+        u_char        link_ipv4_router_id_remote[4];
+        u_char        link_ipv6_router_id_remote[4];
         int32_t     link_max_link_bw;
         int32_t     link_max_resv_bw;
-        char        link_name[256];
+        u_char        link_name[256];
         uint32_t    link_te_def_metric;
         int32_t     link_unresv_bw[8];
         link_peer_epe_node_sid link_peer_epe_sid;
@@ -232,7 +232,7 @@ typedef struct attr_value{
     uint32_t                med;
     uint32_t                local_pref;
     uint16_t                value16bit;
-    char                    aggregator[4];
+    u_char                    aggregator[4];
     uint16_t                count_cluster_list;
     u_char                  **cluster_list;
     uint16_t                count_attr_type_comm;
