@@ -188,9 +188,9 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char* buffer, int* bu
 /**
  * Process the incoming MRT message header
  */
-static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char * buffer, int *buf_len, libparsebgp_mrt_common_hdr *mrt_parsed_hdr) {
+static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char *buffer, int *buf_len, libparsebgp_mrt_common_hdr *mrt_parsed_hdr) {
     int read_size=0;
-    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr, 12) != 12)
+    if (extract_from_buffer(buffer, buf_len, mrt_parsed_hdr, 12) != 12)
         return ERR_READING_MSG; //throw "Error in parsing MRT common header";
     read_size+=12;
     SWAP_BYTES(&mrt_parsed_hdr->len, 4);
