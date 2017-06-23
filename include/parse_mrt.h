@@ -164,7 +164,8 @@ typedef struct libparsebgp_bgp4mp_msg{
     libparsebgp_parse_bgp_parsed_data bgp_msg;          ///< Contains the BGP message
 }libparsebgp_bgp4mp_msg;
 
-u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
+u_char *mrt_data;
+//u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
 int mrt_data_len;                   ///< Length/size of data in the data buffer
 uint16_t mrt_sub_type;              ///< MRT sub type
 uint32_t mrt_len;                   ///< Length of the BMP message - does not include the common header size
@@ -206,7 +207,7 @@ typedef struct libparsebgp_parse_mrt_parsed_data {
  *
  * @return number of bytes read
  */
-ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
+ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char **buffer, int buf_len);
 
 /**
  * Destructor function to free memory allocated to libparsebgp_parse_mrt_parsed_data

@@ -17,7 +17,7 @@ enum parse_msg_error {
     NOT_YET_IMPLEMENTED = -6         ///< A feature not yet implemented
 };
 
-ssize_t extract_from_buffer (unsigned char *buffer, int *buf_len, void *output_buf, ssize_t output_len);
+ssize_t extract_from_buffer (unsigned char **buffer, int *buf_len, void *output_buf, ssize_t output_len);
 
 /**
  *  Simple function to swap bytes around from network to host or

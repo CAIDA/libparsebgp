@@ -37,7 +37,7 @@ typedef struct libparsebgp_parse_msg{
  *
  * @return number of bytes read
  */
-ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, u_char* buffer, int buf_len, int type) {
+ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, u_char** buffer, int buf_len, int type) {
     ssize_t read_size = 0;
     parsed_msg->msg_type = type;
     switch (type) {

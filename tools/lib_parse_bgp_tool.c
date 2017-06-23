@@ -486,7 +486,8 @@ int main(int argc, char * argv[]) {
 //                if(count)
 //                    all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,(count+1)*sizeof(libparsebgp_parse_msg *));
                 memset(parse_msg, 0, sizeof(parse_msg));
-                bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, buffer + position, len, msg_type);
+                u_char *buffer_to_pass = buffer+position;
+                bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, &buffer_to_pass, len, msg_type);
                 if (bytes_read < 0) {
                     msg_read = false;
                     printf("\n Crashed. Error code: %d\n", bytes_read);
@@ -499,7 +500,7 @@ int main(int argc, char * argv[]) {
                     printf("Bytes read in parsing this message: %d Remaining Length of Buffer: %d\n", bytes_read, len);
 //                    all_parsed_msg[count] = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
 //                    memcpy(all_parsed_msg[count], parse_msg, sizeof(libparsebgp_parse_msg));
-//                    elem_generate(parse_msg);
+                    elem_generate(parse_msg);
                     count++;
                 }
             }
