@@ -137,7 +137,7 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr, u_
     if (size < BGP_MSG_HDR_LEN)
        return INCOMPLETE_MSG;
 
-    memcpy(&c_hdr, data, BGP_MSG_HDR_LEN);
+    memcpy(c_hdr, *data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
     SWAP_BYTES(&(c_hdr->len), 2);
