@@ -22,10 +22,10 @@
  *
  * \return negative values for error, otherwise a positive value indicating the number of bytes read
  */
-static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char *data, size_t size, bool openMessageIsSent) {
+static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char **data, size_t size, bool openMessageIsSent) {
     int      read_size   = 0;
     uint8_t count_param = 0, count_cap = 0;
-    u_char   *bufPtr     = data;
+    u_char   **bufPtr     = data;
     open_param      *opt_param = (open_param *)malloc(sizeof(open_param));
     open_msg_data->opt_param = (open_param *)malloc(sizeof(open_param));
 
@@ -35,8 +35,8 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
             open_msg_data->opt_param = (open_param *)realloc(open_msg_data->opt_param, (count_param+1)*sizeof(open_param));
         memset(opt_param, 0, sizeof(opt_param));
 
-        memcpy(&opt_param->param_type, bufPtr, 1);  //reading type
-        memcpy(&opt_param->param_len, bufPtr+1, 1);   //reading length
+        memcpy(&opt_param->param_type, *bufPtr, 1);  //reading type
+        memcpy(&opt_param->param_len, *bufPtr+1, 1);   //reading length
 
         if (opt_param->param_type != BGP_CAP_PARAM_TYPE) {
             return INVALID_MSG;
@@ -47,7 +47,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
          * Process the capabilities if present
          */
         else if (opt_param->param_len >= 2 && (read_size + 2 + opt_param->param_len) <= size) {
-            u_char *cap_ptr = bufPtr + 2;
+            u_char *cap_ptr = *bufPtr + 2;
             open_capabilities *open_cap = (open_capabilities *)malloc(sizeof(open_capabilities));
             opt_param->param_values = (open_capabilities *)malloc(sizeof(open_capabilities));
             for (int c=0; c < opt_param->param_len; ) {
@@ -189,7 +189,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
 
         // Move index to next param
         i += 2 + opt_param->param_len;
-        bufPtr += 2 + opt_param->param_len;
+        *bufPtr += 2 + opt_param->param_len;
         read_size += 2 + opt_param->param_len;
         open_msg_data->opt_param[count_param++] = *opt_param;
     }
@@ -210,9 +210,9 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
-ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
+ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char **data, size_t size, bool openMessageIsSent) {
     int      read_size       = 0;
-    u_char   *bufPtr         = data;
+    u_char   **bufPtr         = data;
     int      buf_size = size;
 
     /*

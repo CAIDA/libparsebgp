@@ -174,7 +174,8 @@ typedef struct libparsebgp_parsed_bmp_stat_rep {
     stat_counter*           total_stats_counter;    ///< 2 bytes - Information type
 }libparsebgp_parsed_bmp_stat_rep;
 
-u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];
+u_char *bmp_data;
+//u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];
 uint32_t    bmp_data_len;               ///< Length/size of data in the data buffer
 uint32_t    bmp_len;                    ///< Length of the BMP message - does not include the common header size
 uint8_t     bmp_type;                   ///< Type of the BMP message
@@ -216,7 +217,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
  *
  * @returns Bytes that have been successfully read by the bmp parser.
  */
-ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
+ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char **buffer, int buf_len);
 
 /**
  * Destructor function to free bmp_parsed_data

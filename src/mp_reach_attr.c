@@ -24,7 +24,7 @@
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<label, prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, u_char *data, uint16_t len, update_prefix_label_tuple *prefixes, uint16_t *prefix_count) {
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, u_char **data, uint16_t len, update_prefix_label_tuple *prefixes, uint16_t *prefix_count) {
     int               addr_bytes, count = 0;
     update_prefix_label_tuple *tuple = (update_prefix_label_tuple *)malloc(sizeof(update_prefix_label_tuple));
     prefixes = (update_prefix_label_tuple *)malloc(sizeof(update_prefix_label_tuple));
@@ -63,7 +63,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
         tuple->path_id.send_recieve = 0;
 
         // set the address in bits length
-        tuple->len = *data++;
+        tuple->len = **data++;
 
         // Figure out how many bytes the bits requires
         addr_bytes = tuple->len / 8;
@@ -74,7 +74,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
             label_bytes = decode_label(data, addr_bytes, tuple->label);
 
             tuple->len -= (8 * label_bytes);      // Update prefix len to not include the label(s)
-            data += label_bytes;               // move data pointer past labels
+            *data += label_bytes;               // move data pointer past labels
             addr_bytes -= label_bytes;
             read_size += label_bytes;
         //}
@@ -92,8 +92,8 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
 
         // Parse the prefix if it isn't a default route
         if (addr_bytes > 0) {
-            memcpy(tuple->prefix, data, addr_bytes);
-            data += addr_bytes;
+            memcpy(tuple->prefix, *data, addr_bytes);
+            *data += addr_bytes;
             read_size += addr_bytes;
 
         }
@@ -114,7 +114,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(bool is_ipv4, 
 * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
 */
 static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, update_path_attrs *path_attrs, int nlri_len,
-                                                             unsigned char *next_hop, unsigned char *nlri_data) {
+                                                             unsigned char **next_hop, unsigned char **nlri_data) {
     ssize_t read_size = 0;
     /*
      * Decode based on SAFI
@@ -124,9 +124,9 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
 
             // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
             if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, 16);
             else
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
             //inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
@@ -139,9 +139,9 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
         case BGP_SAFI_NLRI_LABEL:
             // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
             if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, 16);
             else
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
             //inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
@@ -156,15 +156,15 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
 
             if (is_ipv4) {
                 //Next hop encoded in 12 bytes, last 4 bytes = IPv4
-                next_hop += 8;
+                *next_hop += 8;
                 path_attrs->attr_value.mp_reach_nlri_data.nh_len -= 8;
             }
 
             // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
             if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, 16);
             else
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
             //inet_ntop(is_ipv4 ? AF_INET : AF_INET6, ip_raw, ip_char, sizeof(ip_char));
 
@@ -194,7 +194,7 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs, int nlri_len, unsigned char *nlri_data, unsigned char *next_hop) {
+static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs, int nlri_len, unsigned char **nlri_data, unsigned char **next_hop) {
     ssize_t read_size = 0;
     switch (path_attrs->attr_value.mp_reach_nlri_data.afi) {
         case BGP_AFI_IPV6 :  // IPv6
@@ -215,9 +215,9 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs, int nlri_len
         {
             // Next-hop is an IP address - Change/set the next-hop attribute in parsed data to use this next-hop
             if (path_attrs->attr_value.mp_reach_nlri_data.nh_len > 16)
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, 16);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, 16);
             else
-                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
+                memcpy(path_attrs->attr_value.mp_reach_nlri_data.next_hop, *next_hop, path_attrs->attr_value.mp_reach_nlri_data.nh_len);
 
             // parse by safi
             switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
@@ -259,21 +259,21 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs, int nlri_len
  * \param [in]   data                   Pointer to the attribute data
  * \param [out]  parsed_data            Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data) {
+ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char **data) {
     ssize_t read_size = 0;
     /*
      * Set the MP NLRI struct
      */
     // Read address family
-    unsigned char  *nlri_data, *next_hop;
-    memcpy(&path_attrs->attr_value.mp_reach_nlri_data.afi, data, 2); data += 2; attr_len -= 2; read_size += 2;
+    unsigned char  **nlri_data, **next_hop;
+    memcpy(&path_attrs->attr_value.mp_reach_nlri_data.afi, *data, 2); *data += 2; attr_len -= 2; read_size += 2;
     SWAP_BYTES(&path_attrs->attr_value.mp_reach_nlri_data.afi, 2);                     // change to host order
 
-    path_attrs->attr_value.mp_reach_nlri_data.safi = *data++; attr_len--; read_size++;   // Set the SAFI - 1 octet
-    path_attrs->attr_value.mp_reach_nlri_data.nh_len = *data++; attr_len--; read_size++; // Set the next-hop length - 1 octet
-    next_hop = data;  data += path_attrs->attr_value.mp_reach_nlri_data.nh_len;
+    path_attrs->attr_value.mp_reach_nlri_data.safi = **data++; attr_len--; read_size++;   // Set the SAFI - 1 octet
+    path_attrs->attr_value.mp_reach_nlri_data.nh_len = **data++; attr_len--; read_size++; // Set the next-hop length - 1 octet
+    next_hop = data;  *data += path_attrs->attr_value.mp_reach_nlri_data.nh_len;
     attr_len -= path_attrs->attr_value.mp_reach_nlri_data.nh_len; read_size += path_attrs->attr_value.mp_reach_nlri_data.nh_len;    // Set pointer position for nh data
-    path_attrs->attr_value.mp_reach_nlri_data.reserved = *data++; attr_len--; read_size++; // Set the reserve octet
+    path_attrs->attr_value.mp_reach_nlri_data.reserved = **data++; attr_len--; read_size++; // Set the reserve octet
     nlri_data = data;                          // Set pointer position for nlri data
 
     /*
@@ -304,7 +304,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_
  * \param [in]   peer_info              Persistent Peer info pointer
  * \param [out]  prefixes               Reference to a list<prefix_tuple> to be updated with entries
  */
-ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char *data,
+ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char **data,
                                                             uint16_t len, update_prefix_tuple *prefixes, uint16_t *prefix_count) {
     u_char              ip_raw[16];
     int                 addr_bytes;
@@ -346,15 +346,15 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
         tuple->path_id.send_recieve = 0;
 
         // set the address in bits length
-        tuple->len = *data++;
+        tuple->len = **data++;
 
         // Figure out how many bytes the bits requires
         addr_bytes = tuple->len / 8;
         if (tuple->len % 8)
            ++addr_bytes;
 
-        memcpy(tuple->prefix, data, addr_bytes);
-        data += addr_bytes;
+        memcpy(tuple->prefix, *data, addr_bytes);
+        *data += addr_bytes;
         read_size += addr_bytes;
 
         // Add tuple to prefix list
@@ -378,11 +378,11 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(bool is_ipv4, u_char
  * \returns number of bytes read to decode the label(s) and updates string labels
  *
  */
-inline uint16_t decode_label(u_char *data, uint16_t len, mpls_label *labels) {
+inline uint16_t decode_label(u_char **data, uint16_t len, mpls_label *labels) {
     int read_size = 0, count = 0;
     mpls_label *label = (mpls_label *)malloc(sizeof(mpls_label));
     labels = (mpls_label *)malloc(sizeof(mpls_label));
-    u_char *data_ptr = data;
+    u_char **data_ptr = data;
 
     // the label is 3 octets long
     while (read_size <= len)
@@ -391,10 +391,10 @@ inline uint16_t decode_label(u_char *data, uint16_t len, mpls_label *labels) {
             labels = (mpls_label *)realloc(labels, (count+1)*sizeof(mpls_label));
         memset(&label, 0, sizeof(label));
 
-        memcpy(&label->data, data_ptr, 3);
+        memcpy(&label->data, *data_ptr, 3);
         SWAP_BYTES(&label->data, 3);     // change to host order
 
-        data_ptr += 3;
+        *data_ptr += 3;
         read_size += 3;
         labels[count++] = *label;
     }

@@ -94,7 +94,7 @@ const char * const LS_FLAGS_PREFIX_SID_OSPF[] = {
  * \param [in]   attr_len       Length of the attribute data
  * \param [in]   data           Pointer to the attribute data
  */
-void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *path_attrs, int attr_len, u_char *data) {
+void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *path_attrs, int attr_len, u_char **data) {
     /*
      * Loop through all TLV's for the attribute
      */
@@ -170,19 +170,19 @@ static uint32_t ieee_float_to_kbps(int32_t float_val) {
  *
  * \returns string value of SID
  */
-static void parse_sid_value(link_peer_epe_node_sid *sid, u_char *data, int len) {
+static void parse_sid_value(link_peer_epe_node_sid *sid, u_char **data, int len) {
 
     if (len == 3) {
         // 3-octet -  20 rightmost bits are used for encoding the label value.
-        memcpy(&sid->sid_3, data, 3);
+        memcpy(&sid->sid_3, *data, 3);
         SWAP_BYTES(&sid->sid_3, 3);
 
     } else if (len >= 16) {
-        memcpy(&sid->ip_raw, data, 16);
+        memcpy(&sid->ip_raw, *data, 16);
 
     } else if (len == 4) {
         // 4-octet encoded offset in the SID/Label space advertised by this router using the encodings
-        memcpy(&sid->sid_4, data, 4);
+        memcpy(&sid->sid_4, *data, 4);
         SWAP_BYTES(&sid->sid_4, 4);
     } else {
    //     LOG_WARN("%s: bgp-ls: SID/Label has unexpected length of %d", peer_addr.c_str(), len);
@@ -199,7 +199,7 @@ static void parse_sid_value(link_peer_epe_node_sid *sid, u_char *data, int len) 
  *
  * \returns length of the TLV attribute parsed (including the tlv header lenght)
  */
-int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char *data, int count) {
+int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char **data, int count) {
 
     char                ip_char[46];
     uint32_t            value_32bit;
@@ -213,13 +213,13 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
     }
 
     bgp_link_state_attrs *bgp_ls_attr = (bgp_link_state_attrs *)malloc(sizeof(bgp_link_state_attrs));
-    memcpy(&bgp_ls_attr->type, data, 2);
+    memcpy(&bgp_ls_attr->type, *data, 2);
     SWAP_BYTES(&bgp_ls_attr->type, 2);
 
-    memcpy(&bgp_ls_attr->len, data+2, 2);
+    memcpy(&bgp_ls_attr->len, *data+2, 2);
     SWAP_BYTES(&bgp_ls_attr->len, 2);
 
-    data += 4;
+    *data += 4;
 
     switch (bgp_ls_attr->type) {
         case ATTR_NODE_FLAG: {
@@ -227,7 +227,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             if (bgp_ls_attr->len != 1) {
 //   //             LOG_INFO("%s: bgp-ls: node flag attribute length is too long %d should be 1",peer_addr.c_str(), len);
             }
-            memcpy(&bgp_ls_attr->node.node_flag_bits, data, 1);
+            memcpy(&bgp_ls_attr->node.node_flag_bits, *data, 1);
             data++;
             }
         break;
@@ -236,7 +236,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             if (bgp_ls_attr->len != 4)
                 break;
 
-            memcpy(&bgp_ls_attr->node.node_ipv4_router_id_local, data, 4);
+            memcpy(&bgp_ls_attr->node.node_ipv4_router_id_local, *data, 4);
             break;
 
         case ATTR_NODE_IPV6_ROUTER_ID_LOCAL:  // Includes ATTR_LINK_IPV6_ROUTER_ID_LOCAL
@@ -244,12 +244,12 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
  //               LOG_NOTICE("%s: bgp-ls: failed to parse attribute local router id IPv6 sub-tlv; too short",peer_addr.c_str());
                 break;
             }
-            memcpy(&bgp_ls_attr->node.node_ipv6_router_id_local, data, 16);
+            memcpy(&bgp_ls_attr->node.node_ipv6_router_id_local, *data, 16);
             break;
 
         case ATTR_NODE_ISIS_AREA_ID:
             if (bgp_ls_attr->len <= 8)
-                memcpy(&bgp_ls_attr->node.node_isis_area_id, data, bgp_ls_attr->len);
+                memcpy(&bgp_ls_attr->node.node_isis_area_id, *data, bgp_ls_attr->len);
             break;
 
         case ATTR_NODE_MT_ID: {
@@ -257,14 +257,14 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             for (int i = 0; i < bgp_ls_attr->len; i += 2) {
                 memcpy(&node_mt_id[i / 2], data, 2);
                 SWAP_BYTES(&node_mt_id[i / 2], 2);
-                data += 2;
+                *data += 2;
             }
             strncpy(bgp_ls_attr->node.mt_id, node_mt_id, bgp_ls_attr->len / 2);
             break;
         }
 
         case ATTR_NODE_NAME:
-            strncpy(bgp_ls_attr->node.node_name, (char *)data, bgp_ls_attr->len);
+            strncpy(bgp_ls_attr->node.node_name, (char *)*data, bgp_ls_attr->len);
             break;
 
         case ATTR_NODE_OPAQUE:
@@ -356,7 +356,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
                 break;
             } else {
                 value_32bit = 0;
-                memcpy(&value_32bit, data, bgp_ls_attr->len);
+                memcpy(&value_32bit, *data, bgp_ls_attr->len);
                 SWAP_BYTES(&value_32bit, bgp_ls_attr->len);
                 memcpy(bgp_ls_attr->link.link_admin_group, &value_32bit, 4);
             }
@@ -365,7 +365,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
         case ATTR_LINK_IGP_METRIC:
             if (bgp_ls_attr->len <= 4) {
                 value_32bit = 0;
-                memcpy(&value_32bit, data, bgp_ls_attr->len);
+                memcpy(&value_32bit, *data, bgp_ls_attr->len);
                 SWAP_BYTES(&value_32bit, bgp_ls_attr->len);
             }
 
@@ -376,14 +376,14 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             if (bgp_ls_attr->len != 4)
                 return INVALID_MSG;
 
-            memcpy(bgp_ls_attr->link.link_ipv4_router_id_remote, data, 4);
+            memcpy(bgp_ls_attr->link.link_ipv4_router_id_remote, *data, 4);
             break;
 
         case ATTR_LINK_IPV6_ROUTER_ID_REMOTE:
             if (bgp_ls_attr->len != 16)
                 return INVALID_MSG;
 
-            memcpy(bgp_ls_attr->link.link_ipv6_router_id_remote, data, 16);
+            memcpy(bgp_ls_attr->link.link_ipv6_router_id_remote, *data, 16);
             break;
 
         case ATTR_LINK_MAX_LINK_BW:
@@ -391,7 +391,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
                 return INVALID_MSG;
 
             float_val = 0;
-            memcpy(&float_val, data, bgp_ls_attr->len);
+            memcpy(&float_val, *data, bgp_ls_attr->len);
             SWAP_BYTES(&float_val, bgp_ls_attr->len);
             float_val = ieee_float_to_kbps(float_val);
             bgp_ls_attr->link.link_max_link_bw = float_val;
@@ -401,7 +401,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             if (bgp_ls_attr->len != 4)
                 return INVALID_MSG;
             float_val = 0;
-            memcpy(&float_val, data, bgp_ls_attr->len);
+            memcpy(&float_val, *data, bgp_ls_attr->len);
             SWAP_BYTES(&float_val, bgp_ls_attr->len);
             float_val = ieee_float_to_kbps(float_val);
             bgp_ls_attr->link.link_max_resv_bw = float_val;
@@ -414,7 +414,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             break;
 
         case ATTR_LINK_NAME: {
-            strncpy(bgp_ls_attr->link.link_name, (char *)data, bgp_ls_attr->len);
+            strncpy(bgp_ls_attr->link.link_name, (char *)*data, bgp_ls_attr->len);
             break;
         }
 
@@ -472,7 +472,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             } else if (bgp_ls_attr->len > 4)
                 return INVALID_MSG;
             else {
-                memcpy(&bgp_ls_attr->link.link_te_def_metric, data, bgp_ls_attr->len);
+                memcpy(&bgp_ls_attr->link.link_te_def_metric, *data, bgp_ls_attr->len);
                 SWAP_BYTES(&bgp_ls_attr->link.link_te_def_metric, bgp_ls_attr->len);
             }
 
@@ -487,11 +487,11 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
 
             for (int i=0; i < 32; i += 4) {
                 float_val = 0;
-                memcpy(&float_val, data, 4);
+                memcpy(&float_val, *data, 4);
                 SWAP_BYTES(&float_val, 4);
                 bgp_ls_attr->link.link_unresv_bw[i/4] = ieee_float_to_kbps(float_val);
 
-                data += 4;
+                *data += 4;
             }
             break;
         }
@@ -507,10 +507,10 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
              *      L flag indicates locally significant
              */
 
-            if (*data & 0x80)
+            if (**data & 0x80)
                 bgp_ls_attr->link.link_peer_epe_sid.V_flag = true;
 
-            if (*data & 0x40)
+            if (**data & 0x40)
                 bgp_ls_attr->link.link_peer_epe_sid.L_flag = true;
 
             parse_sid_value(&bgp_ls_attr->link.link_peer_epe_sid, (data+4), bgp_ls_attr->len - 4);
@@ -531,7 +531,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
         case ATTR_PREFIX_PREFIX_METRIC:
             value_32bit = 0;
             if (bgp_ls_attr->len <= 4) {
-                memcpy(&value_32bit, data, bgp_ls_attr->len);
+                memcpy(&value_32bit, *data, bgp_ls_attr->len);
                 SWAP_BYTES(&value_32bit, bgp_ls_attr->len);
             }
 
@@ -546,7 +546,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *
             value_32bit = 0;
 
             if (bgp_ls_attr->len == 4) {
-                memcpy(&value_32bit, data, bgp_ls_attr->len);
+                memcpy(&value_32bit, *data, bgp_ls_attr->len);
                 SWAP_BYTES(&value_32bit, 4);
 
                 bgp_ls_attr->prefix.prefix_route_tag = value_32bit;

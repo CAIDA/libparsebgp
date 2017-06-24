@@ -278,7 +278,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char **buffer, int * buf
 
 //    bool has_end_of_rib_marker;
 //    libparsebgp_addpath_map add_path_map;
-    libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, *buffer, table_dump_msg->attribute_len, has_end_of_rib_marker, &table_dump_msg->bgp_attrs_count);
+    libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker, &table_dump_msg->bgp_attrs_count);
     read_size += table_dump_msg->attribute_len;
     buf_len-=table_dump_msg->attribute_len;
 
@@ -430,7 +430,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char **buffer, i
 
 //        bool has_end_of_rib_marker;
 //        libparsebgp_addpath_map add_path_map;
-        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, *buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
+        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
@@ -508,7 +508,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char **buffer, i
 
 //        bool has_end_of_rib_marker;
 //        libparsebgp_addpath_map add_path_map;
-        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, *buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
+        libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;
 
@@ -522,7 +522,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char **buffer, i
  * Process the incoming Table Dump v2 message
  */
 static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char **buffer, int *buf_len, bool *has_end_of_rib_marker, libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
-    int ret = 0, read_size = 0;
+    ssize_t ret = 0, read_size = 0;
     switch (mrt_sub_type) {
         case PEER_INDEX_TABLE: {
             ret = libparsebgp_parse_mrt_parse_peer_index_table(buffer, buf_len, &table_dump_v2_msg->peer_index_tbl);

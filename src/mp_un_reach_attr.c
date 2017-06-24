@@ -20,7 +20,7 @@
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_unreach_nlri *nlri, u_char *data, int len) {
+static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_unreach_nlri *nlri, u_char **data, int len) {
 
     /*
      * Decode based on SAFI
@@ -54,7 +54,7 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, mp_un
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-static void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_char *data, int len) {
+static void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs, u_char **data, int len) {
 
     switch (path_attrs->attr_value.mp_unreach_nlri_data.afi) {
         case BGP_AFI_IPV6 :  // IPv6
@@ -110,16 +110,16 @@ static void libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char *data, bool *has_end_of_rib_marker) {
+void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *path_attrs, int attr_len, u_char **data, bool *has_end_of_rib_marker) {
     //mp_unreach_nlri nlri;
     /*
      * Set the MP Unreach NLRI struct
      */
     // Read address family
-    memcpy(&path_attrs->attr_value.mp_unreach_nlri_data.afi, data, 2); data += 2; attr_len -= 2;
+    memcpy(&path_attrs->attr_value.mp_unreach_nlri_data.afi, *data, 2); *data += 2; attr_len -= 2;
     SWAP_BYTES(&path_attrs->attr_value.mp_unreach_nlri_data.afi, 2);                     // change to host order
 
-    path_attrs->attr_value.mp_unreach_nlri_data.safi = *data++; attr_len--;                // Set the SAFI - 1 octet
+    path_attrs->attr_value.mp_unreach_nlri_data.safi = **data++; attr_len--;                // Set the SAFI - 1 octet
 //    mp_unreach_data->nlri_data = data;                          // Set pointer position for nlri data
 //    mp_unreach_data->nlri_len = attr_len;                       // Remaining attribute length is for NLRI data
 

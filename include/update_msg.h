@@ -277,7 +277,7 @@ typedef struct libparsebgp_update_msg_data {
   *
   * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
   */
-  ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker);
+  ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char **data, ssize_t size, bool *has_end_of_rib_marker);
 
 /**
  * Parses the BGP attributes in the update
@@ -289,7 +289,7 @@ typedef struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char **data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
 
 /**
  * Parse attribute data based on attribute type
@@ -305,7 +305,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, 
  * \param [in]   has_end_of_rib_marker
  * \param [out]  read_bytes             Bytes read in parsing this message.
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker);
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char **data, bool *has_end_of_rib_marker);
 
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
 

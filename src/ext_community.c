@@ -26,7 +26,7 @@
  *
  * \return  Decoded string value
  */
-static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes, bool is_global_ipv4) {
+static void decode_type_common(const extcomm_hdr *ec_hdr, u_char **value, bool is_global_4bytes, bool is_global_ipv4) {
 //    std::stringstream   val_ss;
     uint16_t            val_16b;
     uint32_t            val_32b;
@@ -37,8 +37,8 @@ static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is
      */
     if (is_global_4bytes) {
         // Four-byte global field
-        memcpy(&val_32b, value, 4);
-        memcpy(&val_16b, value + 4, 2);
+        memcpy(&val_32b, *value, 4);
+        memcpy(&val_16b, *value + 4, 2);
 
         SWAP_BYTES(&val_16b, 2);
 
@@ -49,8 +49,8 @@ static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is
 
     } else {
         // Two-byte global field
-        memcpy(&val_16b, value, 2);
-        memcpy(&val_32b, value + 2, 4);
+        memcpy(&val_16b, *value, 2);
+        memcpy(&val_32b, *value + 2, 4);
 
         // Chagne to host order
         SWAP_BYTES(&val_16b, 2);
@@ -220,23 +220,23 @@ static void decode_type_common(const extcomm_hdr *ec_hdr, u_char *value, bool is
  *
  * \return  Decoded string value
  */
-static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
+static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char **value) {
     uint32_t            val_32b;
 
     switch(ec_hdr->low_type) {
         case EXT_EVPN_MAC_MOBILITY: {
-            u_char flags = value[0];
+            u_char flags = *value[0];
 
-            memcpy(&val_32b, value + 2, 4);
+            memcpy(&val_32b, *value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
             sprintf(ec_hdr->val, "mac_mob_flags=%c mac_mob_seq_num=%d", flags, val_32b);
             break;
         }
         case EXT_EVPN_MPLS_LABEL: {
-            u_char flags = value[0];
+            u_char flags = *value[0];
 
-            memcpy(&val_32b, value + 3, 3);
+            memcpy(&val_32b, *value + 3, 3);
             SWAP_BYTES(&val_32b, 4);
             val_32b = val_32b >> 8;
 
@@ -244,12 +244,12 @@ static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
             break;
         }
         case EXT_EVPN_ES_IMPORT: {
-            sprintf(ec_hdr->val, "es_import=%s", value);
+            sprintf(ec_hdr->val, "es_import=%s", *value);
             break;
         }
         case EXT_EVPN_ROUTER_MAC: {
 
-            sprintf(ec_hdr->val, "router_mac=%s", value);
+            sprintf(ec_hdr->val, "router_mac=%s", *value);
             break;
         }
         default: {
@@ -268,15 +268,15 @@ static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char *value) {
  *
  * \return  Decoded string value
  */
-static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
+static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char **value) {
     uint16_t            val_16b;
     uint32_t            val_32b;
 
     switch(ec_hdr->low_type) {
         case EXT_OPAQUE_COST_COMMUNITY: {
-            u_char poi = value[0];  // Point of Insertion
-            u_char cid = value[1];  // Community-ID
-            memcpy(&val_32b, value + 2, 4);
+            u_char poi = *value[0];  // Point of Insertion
+            u_char cid = *value[1];  // Community-ID
+            memcpy(&val_32b, *value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
             switch (poi) {
@@ -304,26 +304,26 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
             break;
 
         case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
-            memcpy(&val_32b, value, 4);
+            memcpy(&val_32b, *value, 4);
             SWAP_BYTES(&val_32b, 4);
 
             // Get the route type
-            switch (value[4]) {
+            switch (*value[4]) {
                 case 1: // intra-area routes
                 case 2: // intra-area routes
-                    sprintf(ec_hdr->val, "ospf-rt=area-%d:O:%d", val_32b, (int)value[5]);
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:O:%d", val_32b, (int)*value[5]);
                     break;
                 case 3: // Inter-area routes
-                    sprintf(ec_hdr->val, "ospf-rt=area-%d:IA:%d", val_32b, (int)value[5]);
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:IA:%d", val_32b, (int)*value[5]);
                     break;
                 case 5: // External routes
-                    sprintf(ec_hdr->val, "ospf-rt=area-%d:E:%d", val_32b, (int)value[5]);
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:E:%d", val_32b, (int)*value[5]);
                    break;
                 case 7: // NSSA routes
-                    sprintf(ec_hdr->val, "ospf-rt=area-%d:N:%d", val_32b, (int)value[5]);
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:N:%d", val_32b, (int)*value[5]);
                    break;
                 default:
-                    sprintf(ec_hdr->val, "ospf-rt=area-%d:unkn:%d", val_32b, (int)value[5]);
+                    sprintf(ec_hdr->val, "ospf-rt=area-%d:unkn:%d", val_32b, (int)*value[5]);
                    break;
             }
 
@@ -331,7 +331,7 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
         }
 
         case EXT_OPAQUE_COLOR :
-            memcpy(&val_32b, value + 2, 4);
+            memcpy(&val_32b, *value + 2, 4);
             SWAP_BYTES(&val_32b, 4);
 
             sprintf(ec_hdr->val, "color=%d", val_32b);
@@ -339,7 +339,7 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
             break;
 
         case EXT_OPAQUE_ENCAP :
-            sprintf(ec_hdr->val, "encap=%d", (int)value[5]);
+            sprintf(ec_hdr->val, "encap=%d", (int)*value[5]);
 //            val_ss << "encap=" << (int)value[5];
             break;
 
@@ -364,7 +364,7 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char *value) {
  *
  * \return  Decoded string value
  */
-static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool is_global_4bytes, bool is_global_ipv4) {
+static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char **value, bool is_global_4bytes, bool is_global_ipv4) {
     uint16_t            val_16b;
     uint32_t            val_32b;
     char                ipv4_char[16] = {0};
@@ -374,8 +374,8 @@ static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool i
      */
     if (is_global_4bytes) {
         // Four-byte global field
-        memcpy(&val_32b, value, 4);
-        memcpy(&val_16b, value + 4, 2);
+        memcpy(&val_32b, *value, 4);
+        memcpy(&val_16b, *value + 4, 2);
 
         SWAP_BYTES(&val_16b, 2);
 
@@ -386,8 +386,8 @@ static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool i
 
     } else {
         // Two-byte global field
-        memcpy(&val_16b, value, 2);
-        memcpy(&val_32b, value + 2, 4);
+        memcpy(&val_16b, *value, 2);
+        memcpy(&val_32b, *value + 2, 4);
 
         // Chagne to host order
         SWAP_BYTES(&val_16b, 2);
@@ -403,9 +403,9 @@ static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool i
             break;
 
         case EXT_GENERIC_LAYER2_INFO : {    // rfc4761
-            u_char encap_type    = value[0];
-            u_char ctrl_flags   = value[1];
-            memcpy(&val_16b, value + 2, 2);          // Layer 2 MTU
+            u_char encap_type    = *value[0];
+            u_char ctrl_flags   = *value[1];
+            memcpy(&val_16b, *value + 2, 2);          // Layer 2 MTU
             SWAP_BYTES(&val_16b, 2);
 
 //            val_ss << "l2info=";
@@ -439,11 +439,11 @@ static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool i
 //            val_ss << "flow-act=";
 
             // TODO: need to validate if byte 0 or 5, using 5 here
-            if (value[5] & 0x02)             // Terminal action
+            if (*value[5] & 0x02)             // Terminal action
                 sprintf(ec_hdr->val, "flow-act=S");
 //                val_ss << "S";
 
-            if (value[5] & 0x01)             // Sample and logging enabled
+            if (*value[5] & 0x01)             // Sample and logging enabled
                 sprintf(ec_hdr->val, "flow-act=T");
 //                val_ss << "T";
 
@@ -469,7 +469,7 @@ static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool i
         }
 
         case EXT_GENERIC_FLOWSPEC_TRAFFIC_REMARK :
-            sprintf(ec_hdr->val, "flow-remark=%d", (int)value[5]);
+            sprintf(ec_hdr->val, "flow-remark=%d", (int)*value[5]);
 //            val_ss << "flow-remark=" << (int)value[5];
     }
 
@@ -488,12 +488,12 @@ static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char *value, bool i
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char *data) {
+void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char **data) {
 
 //    std::string decode_str = "";
     extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));
     ec_hdr->val = (char *)malloc(20*sizeof(char));
-    u_char *value;
+    u_char **value;
 
     if ( (path_attrs->attr_len % 8) ) {
         //LOG_NOTICE("%s: Parsing extended community len=%d is invalid, expecting divisible by 8", peer_addr.c_str(), attr_len);
@@ -508,8 +508,8 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
     for (int i = 0; i < path_attrs->attr_len; i += 8) {
 //        decode_str = "";
         // Setup extended community header
-        ec_hdr->high_type = data[0];
-        ec_hdr->low_type  = data[1];
+        ec_hdr->high_type = *data[0];
+        ec_hdr->low_type  = *data[1];
         value     = data + 2;
 
         /*
@@ -558,7 +558,7 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
                 //LOG_INFO("%s: Extended community type %d,%d is not yet supported", peer_addr.c_str(),ec_hdr.high_type, ec_hdr.low_type);
         }
         // Move data pointer to next entry
-        data += 8;
+        *data += 8;
 //            if ((i + 8) < attr_len)
 //                decode_str.append(" ");
 //        ec_hdr->val = decode_str;
@@ -581,17 +581,17 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
  *
  * \return  Decoded string value
  */
-static void decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
+static void decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char **value) {
 //    std::stringstream   val_ss;
     uint16_t            val_16b;
     u_char              ipv6_raw[16] = {0};
     char                ipv6_char[40] = {0};
 
-    memcpy(ipv6_raw, value, 16);
+    memcpy(ipv6_raw, *value, 16);
     if (inet_ntop(AF_INET6, ipv6_raw, ipv6_char, sizeof(ipv6_char)) != NULL)
         return;
 
-    memcpy(&val_16b, value + 16, 2);
+    memcpy(&val_16b, *value + 16, 2);
     SWAP_BYTES(&val_16b, 2);
 
     switch (ec_hdr->low_type) {
@@ -645,10 +645,10 @@ static void decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char *value) {
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  *
  */
-void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data) {
+void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char **data) {
 //    std::string decode_str = "";
     extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));;
-    u_char       *value;
+    u_char       **value;
 
     //LOG_INFO("%s: Parsing IPv6 extended community len=%d", peer_addr.c_str(), attr_len);
 
@@ -668,8 +668,8 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
     for (int i = 0; i < path_attrs->attr_len; i += 20) {
         memset(ec_hdr, 0, sizeof(ec_hdr));
         // Setup extended community header
-        ec_hdr->high_type = data[0];
-        ec_hdr->low_type = data[1];
+        ec_hdr->high_type = *data[0];
+        ec_hdr->low_type = *data[1];
         value = data + 2;
 
         /*

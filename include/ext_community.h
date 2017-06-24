@@ -134,7 +134,7 @@ enum ext_comm_subtype_generic {
  * @param [in]   path_attrs     Reference to update_path_attrs struct; will be updated with all parsed data
  *
  */
-void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char *data);
+void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_attrs, u_char **data);
 
 /**
  * Parse the extended communities path attribute (20 byte as per RFC5701)
@@ -147,6 +147,6 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
  * @param [in]   path_attrs     Reference to update_path_attrs struct; will be updated with all parsed data
  *
  */
-void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char *data);
+void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *path_attrs, u_char **data);
 
 #endif /* __EXTCOMMUNITY_H__ */

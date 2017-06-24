@@ -22,15 +22,15 @@
  *
  * \return True if error, false if no error reading/parsing the notification message
  */
-ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg, u_char *data, size_t size) {
-    u_char *dataPtr = data;
+ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg, u_char **data, size_t size) {
+    u_char **dataPtr = data;
     int read_size = 0;
 
     // Reset the storage buffer for parsed data
     bzero(&parsed_msg, sizeof(parsed_msg));
 
     if (read_size < size) {
-        parsed_msg->error_code = *dataPtr++, size++;
+        parsed_msg->error_code = **dataPtr++, size++;
         read_size++;
     }
     else {
@@ -38,7 +38,7 @@ ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg
     }
 
     if (read_size < size) {
-        parsed_msg->error_subcode = *dataPtr++, size++;
+        parsed_msg->error_subcode = **dataPtr++, size++;
         read_size++;
     }
     else {

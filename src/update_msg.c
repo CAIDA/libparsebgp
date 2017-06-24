@@ -27,8 +27,7 @@
  * @param [in]   len        Length of the data in bytes to be read
  * @param [out]  prefixes   Reference to a list<prefix_tuple> to be updated with entries
  */
-static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
-                                                         update_prefix_tuple **prefixes, uint16_t *count_prefix) {
+static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char **data, uint16_t len, update_prefix_tuple **prefixes, uint16_t *count_prefix) {
     int          addr_bytes = 0;
     uint16_t          count = 0;
     //prefix_tuple tuple;
@@ -67,7 +66,8 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
 
         // set the address in bits length
         //tuple.len = *data++;
-        prefix_tuple->len = *data++;
+        //TODO: check and fix the following line
+        prefix_tuple->len = **data++;
 
         // Figure out how many bytes the bits requires
         addr_bytes = prefix_tuple->len / 8;
@@ -78,9 +78,9 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
         //           router_addr.c_str(), tuple.len, addr_bytes);
 
         if (addr_bytes <= 4) {
-            memcpy(prefix_tuple->prefix, data, addr_bytes);
+            memcpy(prefix_tuple->prefix, *data, addr_bytes);
             read_size += addr_bytes;
-            data += addr_bytes;
+            *data += addr_bytes;
 
             // Add tuple to prefix list
             prefixes[count++]=prefix_tuple;
@@ -108,9 +108,9 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char **data, ssize_t size, bool *has_end_of_rib_marker) {
     ssize_t     read_size       = 0, bytes_read = 0, bytes_check = 0;
-    u_char      *buf_ptr        = data;
+    u_char      **buf_ptr        = data;
 //    libparsebgp_addpath_map add_path_map;
     if (size < 2) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
@@ -118,9 +118,9 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
     }
 
     // Get the withdrawn length
-    memcpy(&update_msg->wdrawn_route_len, buf_ptr, sizeof(update_msg->wdrawn_route_len));
+    memcpy(&update_msg->wdrawn_route_len, *buf_ptr, sizeof(update_msg->wdrawn_route_len));
     SWAP_BYTES(&update_msg->wdrawn_route_len, sizeof(update_msg->wdrawn_route_len));
-    buf_ptr += sizeof(update_msg->wdrawn_route_len);
+    *buf_ptr += sizeof(update_msg->wdrawn_route_len);
     read_size += sizeof(update_msg->wdrawn_route_len);
     bytes_check += sizeof(update_msg->wdrawn_route_len);
 
@@ -130,14 +130,14 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
         return INCOMPLETE_MSG;
     }
 
-    u_char *withdrawn_ptr, *attr_ptr, *nlri_ptr;
+    u_char **withdrawn_ptr, **attr_ptr, **nlri_ptr;
     withdrawn_ptr = buf_ptr;
-    buf_ptr += update_msg->wdrawn_route_len; bytes_check += update_msg->wdrawn_route_len;
+    *buf_ptr += update_msg->wdrawn_route_len; bytes_check += update_msg->wdrawn_route_len;
 
     // Get the attributes length
-    memcpy(&update_msg->total_path_attr_len, buf_ptr, sizeof(update_msg->total_path_attr_len));
+    memcpy(&update_msg->total_path_attr_len, *buf_ptr, sizeof(update_msg->total_path_attr_len));
     SWAP_BYTES(&update_msg->total_path_attr_len, sizeof(update_msg->total_path_attr_len));
-    buf_ptr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len); bytes_check += sizeof(update_msg->wdrawn_route_len);
+    *buf_ptr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len); bytes_check += sizeof(update_msg->wdrawn_route_len);
 
     // Set the attributes data pointer
     if ((size - bytes_check) < update_msg->total_path_attr_len) {
@@ -145,7 +145,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
         return INCOMPLETE_MSG;
     }
     attr_ptr = buf_ptr;
-    buf_ptr += update_msg->total_path_attr_len; bytes_check += update_msg->total_path_attr_len;
+    *buf_ptr += update_msg->total_path_attr_len; bytes_check += update_msg->total_path_attr_len;
 
     // Set the NLRI data pointer
     nlri_ptr = buf_ptr;
@@ -199,7 +199,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs, u_char *data) {
+static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs, u_char **data) {
     int         path_len    = path_attrs->attr_len;
     uint16_t    as_path_cnt = 0;
     as_path_segment *as_segment = (as_path_segment *)malloc(sizeof(as_path_segment));
@@ -261,8 +261,8 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
             path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(count_as_segment+1)*sizeof(as_path_segment));
         memset(as_segment, 0, sizeof(as_segment));
 
-        as_segment->seg_type = *data++;
-        as_segment->seg_len  = *data++;                  // Count of AS's, not bytes
+        as_segment->seg_type = **data++;
+        as_segment->seg_len  = **data++;                  // Count of AS's, not bytes
         path_len -= 2;
 
 //        if (as_segment.seg_type == 1) {                 // If AS-SET open with a brace
@@ -290,7 +290,7 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
         for (; seg_len > 0; seg_len--) {
             uint32_t seg_asn = 0;
             seg_asn = 0;
-            memcpy(&seg_asn, data, asn_octet_size);  data += asn_octet_size;
+            memcpy(&seg_asn, *data, asn_octet_size);  *data += asn_octet_size;
             path_len -= asn_octet_size;                               // Adjust the path length for what was read
 
             SWAP_BYTES(&seg_asn, asn_octet_size);
@@ -341,16 +341,16 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_attrs, u_char *data) {
+static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_attrs, u_char **data) {
 
     // If using RFC6793, the len will be 8 instead of 6
     if (path_attrs->attr_len == 8) { // RFC6793 ASN of 4 octets
-        memcpy(&path_attrs->attr_value.aggregator, data, 4);
-        data += 4;
+        memcpy(&path_attrs->attr_value.aggregator, *data, 4);
+        *data += 4;
 
     } else if (path_attrs->attr_len == 6) {
-        memcpy(&path_attrs->attr_value.aggregator, data, 2);
-        data += 2;
+        memcpy(&path_attrs->attr_value.aggregator, *data, 2);
+        *data += 2;
 
     } else {
         //LOG_ERR("%s: rtr=%s: path attribute is not the correct size of 6 or 8 octets.", peer_addr.c_str(), router_addr.c_str());
@@ -371,7 +371,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char **data, bool *has_end_of_rib_marker) {
     uint16_t    value16bit;
 
     /*
@@ -380,7 +380,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
     switch (path_attrs->attr_type.attr_type_code) {
 
         case ATTR_TYPE_ORIGIN : // Origin
-            path_attrs->attr_value.origin = data[0];
+            path_attrs->attr_value.origin = *data[0];
             break;
 
         case ATTR_TYPE_AS_PATH : // AS_PATH
@@ -388,18 +388,18 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
             break;
 
         case ATTR_TYPE_NEXT_HOP : // Next hop v4
-            memcpy(path_attrs->attr_value.next_hop, data, 4);
+            memcpy(path_attrs->attr_value.next_hop, *data, 4);
             break;
 
         case ATTR_TYPE_MED : // MED value
         {
-            memcpy(&path_attrs->attr_value.med, data, 4);
+            memcpy(&path_attrs->attr_value.med, *data, 4);
             SWAP_BYTES(&path_attrs->attr_value.med, 4);
             break;
         }
         case ATTR_TYPE_LOCAL_PREF : // local pref value
         {
-            memcpy(&path_attrs->attr_value.local_pref, data, 4);
+            memcpy(&path_attrs->attr_value.local_pref, *data, 4);
             SWAP_BYTES(&path_attrs->attr_value.local_pref, 4);
             break;
         }
@@ -413,7 +413,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
             break;
 
         case ATTR_TYPE_ORIGINATOR_ID : // Originator ID
-            memcpy(path_attrs->attr_value.originator_id, data, 4);
+            memcpy(path_attrs->attr_value.originator_id, *data, 4);
             break;
 
         case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
@@ -422,9 +422,9 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
             int count = 0;
             for (int i = 0; i < path_attrs->attr_len; i += 4) {
                 path_attrs->attr_value.cluster_list[count] = (u_char *) malloc(4 * sizeof(u_char));
-                memcpy(path_attrs->attr_value.cluster_list[count], data, 4);
+                memcpy(path_attrs->attr_value.cluster_list[count], *data, 4);
                 count++;
-                data += 4;
+                *data += 4;
             }
             break;
         }
@@ -434,12 +434,12 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
             int count=0;
             for (int i = 0; i < path_attrs->attr_len; i += 4) {
                 // Add entry
-                memcpy(&value16bit, data, 2);
+                memcpy(&value16bit, *data, 2);
                 data += 2;
                 SWAP_BYTES(&value16bit, 2);
                 path_attrs->attr_value.attr_type_comm[count++]=value16bit;
 
-                memcpy(&value16bit, data, 2);
+                memcpy(&value16bit, *data, 2);
                 data += 2;
                 SWAP_BYTES(&value16bit, 2);
                 path_attrs->attr_value.attr_type_comm[count++]=value16bit;
@@ -503,7 +503,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count_path_attrs) {
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char **data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count_path_attrs) {
 
     ssize_t bytes_read = 0, read_size = 0;
     if (len <= 3)
@@ -521,20 +521,25 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, 
             update_msg = (update_path_attrs **)realloc(update_msg,(count+1)*sizeof(update_path_attrs *));
         memset(path_attrs, 0, sizeof(path_attrs));
 
-        path_attrs->attr_type.attr_flags = *data++;
-        path_attrs->attr_type.attr_type_code = *data++;
+        //TODO: Check this while debugging:
+        if (extract_from_buffer(data, &len, &path_attrs->attr_type, 2) != 2)
+            return ERR_READING_MSG;
+//        path_attrs->attr_type.attr_flags = *data++;
+//        path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
 
         // Check if the length field is 1 or two bytes
         if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
-            memcpy(&path_attrs->attr_len, data, 2);
-            data += 2;
+            memcpy(&path_attrs->attr_len, *data, 2);
+            *data += 2;
             read += 2;
             read_size += 2;
             SWAP_BYTES(&path_attrs->attr_len, 2);
 
         } else {
-            path_attrs->attr_len = *data++;
+            if (extract_from_buffer(data, &len, &path_attrs->attr_len, 1) != 1)
+                return ERR_READING_MSG;
+//            path_attrs->attr_len = *data++;
             read++;
             read_size++;
         }
@@ -548,7 +553,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, 
              */
             bytes_read = libparsebgp_update_msg_parse_attr_data(path_attrs, data, has_end_of_rib_marker);
             if(bytes_read<0) return bytes_read;
-            data += path_attrs->attr_len;
+            *data += path_attrs->attr_len;
             read += path_attrs->attr_len;
             read_size += path_attrs->attr_len;
 

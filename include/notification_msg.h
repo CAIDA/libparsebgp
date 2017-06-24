@@ -94,6 +94,6 @@ typedef struct libparsebgp_notify_msg {
 *
 * @return True if error, false if no error reading/parsing the notification message
 */
-ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg, u_char *data, size_t size);
+ssize_t libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg, u_char **data, size_t size);
 
 #endif /* NOTIFICATIONMSG_H_ */

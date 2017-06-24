@@ -99,7 +99,7 @@ enum ospf_route_types {
  * @param [in]  next_hop            Buffer containing next_hop data, to be parsed
  * @param [in]  nlri_data           Buffer containing nlri_data to be parsed
  */
-ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char *next_hop, unsigned char *nlri_data);
+ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path_attrs, int nlri_len, unsigned char **next_hop, unsigned char **nlri_data);
 
 /**
  * MP UnReach Link State NLRI parse
@@ -109,7 +109,7 @@ ssize_t libparsebgp_mp_link_state_parse_reach_link_state(update_path_attrs *path
  * @param nlri_data      Buffer containing nlri_data to be parsed
  * @param len            Length of nlri_data
  */
-void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char *nlri_data, int len);
+void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_attrs, unsigned char **nlri_data, int len);
 
 
 /**********************************************************************************//*
@@ -124,7 +124,7 @@ void libparsebgp_mp_link_state_parse_unreach_link_state(update_path_attrs *path_
  *
  * \returns number of bytes read
  */
-int libparsebgp_mp_link_state_parse_descr_prefix(u_char *data, int data_len, prefix_descriptor *info, bool is_ipv4);
+int libparsebgp_mp_link_state_parse_descr_prefix(u_char **data, int data_len, prefix_descriptor *info, bool is_ipv4);
 
 
 #endif //_OPENBMP_MPLINKSTATE_H_

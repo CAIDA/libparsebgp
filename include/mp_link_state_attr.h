@@ -82,18 +82,6 @@ enum ATTR_PREFIX_TYPES {
     ATTR_PREFIX_SID                                     ///< Prefix-SID TLV (len=variable)
 };
 
-/**
- * Parse Link State attribute
- *
- * @details Will handle parsing the link state attributes
- *
- * @param [in]   path_attrs     Reference to the struct update_path_attrs
- * @param [in]   attr_len       Length of the attribute data
- * @param [in]   data           Pointer to the attribute data
- */
-void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *path_attrs, int attr_len, u_char *data);
-
-
 #define IEEE_INFINITY            0x7F800000
 #define MINUS_INFINITY          (int32_t)0x80000000L
 #define PLUS_INFINITY           0x7FFFFFFF
@@ -108,6 +96,19 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
 #define IEEE_INFINITE           ((1 << IEEE_EXP_WIDTH) - 1)
 #define IEEE_BIAS               ((1 << (IEEE_EXP_WIDTH - 1)) - 1)
 
+
+/**
+ * Parse Link State attribute
+ *
+ * @details Will handle parsing the link state attributes
+ *
+ * @param [in]   path_attrs     Reference to the struct update_path_attrs
+ * @param [in]   attr_len       Length of the attribute data
+ * @param [in]   data           Pointer to the attribute data
+ */
+void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *path_attrs, int attr_len, u_char **data);
+
+
 /**
  * Parse Link State attribute TLV
  *
@@ -119,6 +120,6 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
  *
  * @returns length of the TLV attribute parsed
  */
-int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char *data, int count);
+int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(update_path_attrs *path_attrs, int attr_len, u_char **data, int count);
 
 #endif //_OPENBMP_LINKSTATEATTR_H_
