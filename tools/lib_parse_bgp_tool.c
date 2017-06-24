@@ -312,7 +312,15 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
             break;
         }
         case BMP_MESSAGE_TYPE: {
-            switch (parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.type) {
+            uint8_t type = 0;
+            if (parse_msg->parsed_bmp_msg.version == 3)
+                type = parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_v3.type;
+            else if (parse_msg->parsed_bmp_msg.version == 1 || parse_msg->parsed_bmp_msg.version == 2)
+                type = parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_hdr.c_hdr_old.type;
+            else
+                break;
+
+            switch (type) {
                 case TYPE_ROUTE_MON: {
                     if (parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.has_end_of_rib_marker)
                         printf("R|E|"); //End of RIB

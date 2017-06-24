@@ -179,7 +179,6 @@ u_char *bmp_data;
 uint32_t    bmp_data_len;               ///< Length/size of data in the data buffer
 uint32_t    bmp_len;                    ///< Length of the BMP message - does not include the common header size
 uint8_t     bmp_type;                   ///< Type of the BMP message
-uint8_t     ver;
 
 /**
  * BMP Message Structure

@@ -221,18 +221,18 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
  */
 static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char **buffer, int *buf_len) {
 //    uint8_t         ver = 0;
-    ver = 0;
+    parsed_msg->version = 0;
     ssize_t         read_size = 0, bytes_read = 0;
 
     // Reading the version to parse the header accordingly
-    if(extract_from_buffer(buffer, buf_len, &ver, 1)!=1)
+    if(extract_from_buffer(buffer, buf_len, &parsed_msg->version, 1)!=1)
         return INVALID_MSG;
 
     read_size += 1;
 
     // check the version
-    if (ver == 3) { // draft-ietf-grow-bmp-04 - 07
-        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver = ver;
+    if (parsed_msg->version == 3) { // draft-ietf-grow-bmp-04 - 07
+        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.ver = parsed_msg->version;
         //parsing the rest of the message as per the version
         bytes_read =  libparsebgp_parse_bmp_parse_bmp_v3(parsed_msg, buffer, buf_len);
         if(bytes_read<0) return bytes_read;
@@ -241,8 +241,8 @@ static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_da
         bmp_type = parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_v3.type;
     }
         // Handle the older versions
-    else if (ver == 1 || ver == 2) {
-        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver = ver;
+    else if (parsed_msg->version == 1 || parsed_msg->version == 2) {
+        parsed_msg->libparsebgp_parsed_bmp_hdr.c_hdr_old.ver = parsed_msg->version;
         //parsing the rest of the message as per the version
         bytes_read = libparsebgp_parse_bmp_parse_bmp_v2(parsed_msg, buffer, buf_len);
         if(bytes_read<0) return bytes_read;
