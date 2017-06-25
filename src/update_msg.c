@@ -66,8 +66,9 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char **data, uint16_t
 
         // set the address in bits length
         //tuple.len = *data++;
-        //TODO: check and fix the following line
-        prefix_tuple->len = **data++;
+        if (extract_from_buffer(data, &len, &prefix_tuple->len, 1) != 1)
+            return ERR_READING_MSG;
+//        prefix_tuple->len = **data++;
 
         // Figure out how many bytes the bits requires
         addr_bytes = prefix_tuple->len / 8;
@@ -78,7 +79,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char **data, uint16_t
         //           router_addr.c_str(), tuple.len, addr_bytes);
 
         if (addr_bytes <= 4) {
-            memcpy(prefix_tuple->prefix, *data, addr_bytes);
+            memcpy(&prefix_tuple->prefix, *data, addr_bytes);
             read_size += addr_bytes;
             *data += addr_bytes;
 

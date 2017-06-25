@@ -27,7 +27,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
         return ret_val;
     }
     int data_bytes_remaining = bgp_parsed_data->c_hdr.len - BGP_MSG_HDR_LEN;
-    data += BGP_MSG_HDR_LEN;
+    *data += BGP_MSG_HDR_LEN;
 
     /*
      * Parsing the bgp msg according to the type of the message
