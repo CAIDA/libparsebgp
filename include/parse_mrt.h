@@ -207,7 +207,7 @@ typedef struct libparsebgp_parse_mrt_parsed_data {
  *
  * @return number of bytes read
  */
-ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char **buffer, int buf_len);
+ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len);
 
 /**
  * Destructor function to free memory allocated to libparsebgp_parse_mrt_parsed_data

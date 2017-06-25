@@ -190,7 +190,13 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char** buffer, int* b
  */
 static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char **buffer, int *buf_len, libparsebgp_mrt_common_hdr *mrt_parsed_hdr) {
     int read_size=0;
-    if (extract_from_buffer(buffer, buf_len, mrt_parsed_hdr, 12) != 12)
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->time_stamp, 4) != 4)
+        return ERR_READING_MSG; //throw "Error in parsing MRT common header";
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->type, 2) != 2)
+        return ERR_READING_MSG; //throw "Error in parsing MRT common header";
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->sub_type, 2) != 2)
+        return ERR_READING_MSG; //throw "Error in parsing MRT common header";
+    if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->len, 4) != 4)
         return ERR_READING_MSG; //throw "Error in parsing MRT common header";
     read_size+=12;
     SWAP_BYTES(&mrt_parsed_hdr->len, 4);
@@ -559,9 +565,9 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char **buffer, int *b
 /**
  * Function to parse MRT message
  */
-ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char **buffer, int buf_len) {
+ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
     ssize_t read_size=0, ret_val = 0;
-    ret_val = libparsebgp_parse_mrt_parse_common_header(buffer, &buf_len, &mrt_parsed_data->c_hdr);
+    ret_val = libparsebgp_parse_mrt_parse_common_header(&buffer, &buf_len, &mrt_parsed_data->c_hdr);
     if (ret_val < 0) {
         //Error found, call destructor and return error code
         libparsebgp_parse_mrt_destructor(mrt_parsed_data);
@@ -577,7 +583,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
         }
 
         case TABLE_DUMP : {
-            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, &buf_len);
+            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len);
             if (ret_val < 0) {
                 read_size = ret_val;
                 break;
@@ -592,7 +598,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
         }
 
         case TABLE_DUMP_V2 : {
-            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, &buf_len))<0) {
+            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len))<0) {
                 read_size = ret_val;
                 break;
             }
@@ -607,7 +613,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
 
         case BGP4MP :
         case BGP4MP_ET : {
-            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(buffer, &buf_len);
+            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len);
             if (ret_val < 0) {
                 read_size = ret_val;
                 break;
@@ -636,7 +642,6 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
     return read_size;
 }
 
-/*
 int main() {
     //len = 109;
 //    u_char temp[] = {0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x01, 0x00, 0x00, 0x03, 0x96, 0x80, 0xdf, 0x33, 0x66, 0x00,
@@ -692,17 +697,16 @@ int main() {
     libparsebgp_parse_mrt_parsed_data mrt_data;
     int read_size = libparsebgp_parse_mrt_parse_msg(&mrt_data, tmp, len);
     libparsebgp_parse_mrt_destructor(&mrt_data);
-    cout << "Hello Ojas and Induja"<<endl;
-    cout << read_size;
+    printf("ready");
 
 //    cout << "Peer Address" << int(.peer_index_tbl.peer_entries.begin()->peer_type);
     //cout<<"Peer Address "<<int(p->peer_index_table.peer_entries.begin()->peer_type);
 //    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
 //    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
     return 1;
-}*/
-int main()
-{
-    printf("hello moto");
-    return 0;
 }
+//int main()
+//{
+//    printf("hello moto");
+//    return 0;
+//}
