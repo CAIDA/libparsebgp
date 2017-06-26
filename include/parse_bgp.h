@@ -103,7 +103,7 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
  *
  * @returns Bytes read in parsing the header
  */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr, u_char **data, size_t size);
+ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr, u_char *data, size_t size);
 
 /**
  * Destructor function to free the memory allocated in parse_bgp

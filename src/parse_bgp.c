@@ -21,7 +21,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
     /*
      * Parsing the bgp message header
      */
-    ssize_t ret_val = libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, data, size);
+    ssize_t ret_val = libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, *data, size);
     if (ret_val < 0) {
         libparsebgp_parse_bgp_destructor(bgp_parsed_data);
         return ret_val;
@@ -77,14 +77,14 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
 ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *bgp_update_msg, u_char **data, size_t size) {
     ssize_t read_size = 0, bytes_read =0;
     //Process the BGP message header
-    if((bytes_read = libparsebgp_parse_bgp_parse_header(&bgp_update_msg->c_hdr, data, size))<0)
+    if((bytes_read = libparsebgp_parse_bgp_parse_header(&bgp_update_msg->c_hdr, *data, size))<0)
         return bytes_read;
     read_size += bytes_read;
-    data += bytes_read;
+    *data += bytes_read;
 
     if (bgp_update_msg->c_hdr.type == BGP_MSG_UPDATE) {  //checking for proper message type
         ssize_t data_bytes_remaining = bgp_update_msg->c_hdr.len - BGP_MSG_HDR_LEN;
-        if((bytes_read=libparsebgp_update_msg_parse_update_msg(&bgp_update_msg->parsed_data.update_msg, data, data_bytes_remaining,
+        if((bytes_read=libparsebgp_update_msg_parse_update_msg(&bgp_update_msg->parsed_data.update_msg, *data, data_bytes_remaining,
                                                           &bgp_update_msg->has_end_of_rib_marker))<0)
             return bytes_read;
 
@@ -104,7 +104,7 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *b
 ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char **data, size_t size) {
     ssize_t     read_size = 0, ret_val = 0;
     // Process the BGP message normally
-    ret_val = libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, data, size);
+    ret_val = libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, *data, size);
     if (ret_val < 0)
         return ret_val;
     if (bgp_parsed_data->c_hdr.type == BGP_MSG_NOTIFICATION) {   //checking for valid bgp message type
@@ -130,14 +130,14 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_dat
 /**
  * Parses the BGP common header
  */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr, u_char **data, size_t size) {
+ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr, u_char *data, size_t size) {
     /*
      * Error out if data size is not large enough for common header
      */
     if (size < BGP_MSG_HDR_LEN)
        return INCOMPLETE_MSG;
 
-    memcpy(c_hdr, *data, BGP_MSG_HDR_LEN);
+    memcpy(c_hdr, data, BGP_MSG_HDR_LEN);
 
     // Change length to host byte order
     SWAP_BYTES(&(c_hdr->len), 2);

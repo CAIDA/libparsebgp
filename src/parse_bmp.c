@@ -53,8 +53,32 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char **buffer, 
 */
 static ssize_t libparsebgp_parse_bmp_parse_peer_hdr(libparsebgp_parsed_peer_hdr_v3 *parsed_peer_header, unsigned char **buffer, int *buf_len) {
     int read_size=0;
-    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header, BMP_PEER_HDR_LEN)!= BMP_PEER_HDR_LEN)
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->peer_type, 1)!= 1)
         return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->peer_flags, 1)!= 1)
+        return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->peer_dist_id, 8)!= 8)
+        return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->peer_addr, 16)!= 16)
+        return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->peer_as, 4)!= 4)
+        return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->peer_bgp_id, 4)!= 4)
+        return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->ts_secs, 4)!= 4)
+        return ERR_READING_MSG;
+
+    if (extract_from_buffer(buffer, buf_len, &parsed_peer_header->ts_usecs, 4)!= 4)
+        return ERR_READING_MSG;
+
+
 
     // Adding the peer header len to the read_size
     read_size+=BMP_PEER_HDR_LEN;
@@ -452,17 +476,18 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
  */
 static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char **data, size_t size) {
     ssize_t    read_size = 0, bytes_read = 0;
+
     /*
     * Process the sent open message
     */
     if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, data, size))>0)
     {
         if(up_event->sent_open_msg.c_hdr.type == BGP_MSG_OPEN) {
-            *data += BGP_MSG_HDR_LEN;
-            size -= BGP_MSG_HDR_LEN;
-            read_size += BGP_MSG_HDR_LEN;
+            *data += bytes_read;
+            size -= bytes_read;
+            read_size += bytes_read;
 
-            bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
+            bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, *data, size, true);
 
             if (!bytes_read)
                 return ERR_READING_MSG; //throw "Failed to read sent open message";
@@ -483,11 +508,11 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
     if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, data, size))>0)
     {
         if (up_event->sent_open_msg.c_hdr.type == BGP_MSG_OPEN) {
-            *data += BGP_MSG_HDR_LEN;
+            *data += bytes_read;
             size -= BGP_MSG_HDR_LEN;
             read_size += BGP_MSG_HDR_LEN;
 
-            bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg, data, size, false);
+            bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->received_open_msg.parsed_data.open_msg, *data, size, false);
 
             if (!bytes_read) {
                 return ERR_READING_MSG; //throw "Failed to read received open message";
@@ -565,15 +590,15 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_
  *
  * @returns Bytes that have been successfully read by the bmp parser.
  */
-ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char **buffer, int buf_len) {
+ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len) {
     ssize_t read_size = 0, bytes_read = 0;
-    memset(bmp_data, 0, sizeof(bmp_data));
+//    memset(bmp_data, 0, sizeof(bmp_data));
     bmp_len=0;
 
     /*
      * Parsing the bmp message header: Version 1, 2, 3 are supported
      */
-    if((bytes_read= libparsebgp_parse_bmp_msg_header(parsed_msg, buffer, &buf_len))<0) {
+    if((bytes_read= libparsebgp_parse_bmp_msg_header(parsed_msg, &buffer, &buf_len))<0) {
         libparsebgp_parse_bmp_destructor(parsed_msg);
         return bytes_read;      //checking for the error code returned in parsing bmp header.
     }
@@ -585,9 +610,9 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
      */
     switch (bmp_type) {
         case TYPE_PEER_DOWN : { // Parsing Peer down type
-            if (extract_from_buffer(buffer, &buf_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.bmp_reason, 1) == 1) {
+            if (extract_from_buffer(&buffer, &buf_len, &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_down_event_msg.bmp_reason, 1) == 1) {
                 read_size += 1;
-                bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, &buf_len);
+                bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(&buffer, &buf_len);
                 if(bytes_read<0) {
                     read_size = bytes_read;
                     break;
@@ -638,7 +663,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
              * Parsing the up event header except open messages
              */
             if((bytes_read = libparsebgp_parse_bmp_parse_peer_up_event_hdr(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_peer_up_event_msg,
-                                                                           buffer, &buf_len))<0) {
+                                                                           &buffer, &buf_len))<0) {
                 libparsebgp_parse_bmp_destructor(parsed_msg);
                 return bytes_read;
             }
@@ -648,7 +673,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Reading the message into buffer bmp_data
              */
-            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, &buf_len))<0) {
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(&buffer, &buf_len))<0) {
                 libparsebgp_parse_bmp_destructor(parsed_msg);
                 return bytes_read;
             }
@@ -669,7 +694,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Reading the message into buffer bmp_data
              */
-            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, &buf_len))<0) {
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(&buffer, &buf_len))<0) {
                 libparsebgp_parse_bmp_destructor(parsed_msg);
                 return bytes_read;
             }
@@ -689,7 +714,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Reading the message into buffer bmp_data
              */
-            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, &buf_len))<0) {
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(&buffer, &buf_len))<0) {
                 libparsebgp_parse_bmp_destructor(parsed_msg);
                 return bytes_read;
             }
@@ -709,7 +734,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Reading the message into buffer bmp_data
              */
-            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, &buf_len))<0) {
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(&buffer, &buf_len))<0) {
                 libparsebgp_parse_bmp_destructor(parsed_msg);
                 return bytes_read;
             }
@@ -728,7 +753,7 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Reading the message into buffer bmp_data
              */
-            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(buffer, &buf_len))<0) {
+            if((bytes_read = libparsebgp_parse_bmp_buffer_bmp_message(&buffer, &buf_len))<0) {
                 libparsebgp_parse_bmp_destructor(parsed_msg);
                 return bytes_read;
             }

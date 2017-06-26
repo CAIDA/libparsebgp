@@ -210,9 +210,9 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read for the open message
  */
-ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char **data, size_t size, bool openMessageIsSent) {
+ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent) {
     int      read_size       = 0;
-    u_char   **bufPtr         = data;
+    u_char   *bufPtr         = data;
     int      buf_size = size;
 
     /*
@@ -223,15 +223,15 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
         return INCOMPLETE_MSG;
     }
 
-    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->ver, 1) != 1)
+    if ( extract_from_buffer(&bufPtr, &buf_size, &open_msg_data->ver, 1) != 1)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->asn, 2) != 2)
+    if ( extract_from_buffer(&bufPtr, &buf_size, &open_msg_data->asn, 2) != 2)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->hold_time, 2) != 2)
+    if ( extract_from_buffer(&bufPtr, &buf_size, &open_msg_data->hold_time, 2) != 2)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->bgp_id, 4) != 4)
+    if ( extract_from_buffer(&bufPtr, &buf_size, &open_msg_data->bgp_id, 4) != 4)
         return ERR_READING_MSG;
-    if ( extract_from_buffer(bufPtr, &buf_size, &open_msg_data->opt_param_len, 1) != 1)
+    if ( extract_from_buffer(&bufPtr, &buf_size, &open_msg_data->opt_param_len, 1) != 1)
         return ERR_READING_MSG;
 //    memcpy(&open_msg_data, bufPtr,10); //reading the first few parameters
       read_size = 10;
@@ -255,13 +255,13 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
  //                peer_addr.c_str(), open_hdr.param_len, (size - read_size));
 
         // Parse as many capabilities as possible
-        libparsebgp_open_msg_parse_capabilities(open_msg_data,bufPtr, (size - read_size), openMessageIsSent);
+        libparsebgp_open_msg_parse_capabilities(open_msg_data,&bufPtr, (size - read_size), openMessageIsSent);
 
         read_size += (size - read_size);
 
     } else {
 
-        if (!libparsebgp_open_msg_parse_capabilities(open_msg_data,bufPtr, open_msg_data->opt_param_len, openMessageIsSent)) {
+        if (!libparsebgp_open_msg_parse_capabilities(open_msg_data,&bufPtr, open_msg_data->opt_param_len, openMessageIsSent)) {
   //          LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
             return INVALID_MSG;
         }

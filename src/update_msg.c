@@ -109,9 +109,9 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char **data, uint16_t
  *
  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
  */
-ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char **data, ssize_t size, bool *has_end_of_rib_marker) {
+ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker) {
     ssize_t     read_size       = 0, bytes_read = 0, bytes_check = 0;
-    u_char      **buf_ptr        = data;
+    u_char      *buf_ptr        = data;
 //    libparsebgp_addpath_map add_path_map;
     if (size < 2) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
@@ -119,9 +119,9 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
     }
 
     // Get the withdrawn length
-    memcpy(&update_msg->wdrawn_route_len, *buf_ptr, sizeof(update_msg->wdrawn_route_len));
+    memcpy(&update_msg->wdrawn_route_len, buf_ptr, sizeof(update_msg->wdrawn_route_len));
     SWAP_BYTES(&update_msg->wdrawn_route_len, sizeof(update_msg->wdrawn_route_len));
-    *buf_ptr += sizeof(update_msg->wdrawn_route_len);
+    buf_ptr += sizeof(update_msg->wdrawn_route_len);
     read_size += sizeof(update_msg->wdrawn_route_len);
     bytes_check += sizeof(update_msg->wdrawn_route_len);
 
@@ -131,14 +131,14 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
         return INCOMPLETE_MSG;
     }
 
-    u_char **withdrawn_ptr, **attr_ptr, **nlri_ptr;
+    u_char *withdrawn_ptr, *attr_ptr, *nlri_ptr;
     withdrawn_ptr = buf_ptr;
-    *buf_ptr += update_msg->wdrawn_route_len; bytes_check += update_msg->wdrawn_route_len;
+    buf_ptr += update_msg->wdrawn_route_len; bytes_check += update_msg->wdrawn_route_len;
 
     // Get the attributes length
-    memcpy(&update_msg->total_path_attr_len, *buf_ptr, sizeof(update_msg->total_path_attr_len));
+    memcpy(&update_msg->total_path_attr_len, buf_ptr, sizeof(update_msg->total_path_attr_len));
     SWAP_BYTES(&update_msg->total_path_attr_len, sizeof(update_msg->total_path_attr_len));
-    *buf_ptr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len); bytes_check += sizeof(update_msg->wdrawn_route_len);
+    buf_ptr += sizeof(update_msg->total_path_attr_len); read_size += sizeof(update_msg->total_path_attr_len); bytes_check += sizeof(update_msg->total_path_attr_len);
 
     // Set the attributes data pointer
     if ((size - bytes_check) < update_msg->total_path_attr_len) {
@@ -146,7 +146,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
         return INCOMPLETE_MSG;
     }
     attr_ptr = buf_ptr;
-    *buf_ptr += update_msg->total_path_attr_len; bytes_check += update_msg->total_path_attr_len;
+    buf_ptr += update_msg->total_path_attr_len; bytes_check += update_msg->total_path_attr_len;
 
     // Set the NLRI data pointer
     nlri_ptr = buf_ptr;
@@ -164,7 +164,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          * Parse the withdrawn prefixes
          */
         if (update_msg->wdrawn_route_len > 0) {
-            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(withdrawn_ptr, update_msg->wdrawn_route_len,
+            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(&withdrawn_ptr, update_msg->wdrawn_route_len,
                                                                    update_msg->wdrawn_routes, &update_msg->count_wdrawn_route);
             if(bytes_read<0) return bytes_read;
             read_size += bytes_read;
@@ -174,7 +174,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          *      Handles MP_REACH/MP_UNREACH parsing as well
          */
         if (update_msg->total_path_attr_len > 0) {
-            bytes_read = libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker, &update_msg->count_path_attr);
+            bytes_read = libparsebgp_update_msg_parse_attributes(update_msg->path_attributes, &attr_ptr, update_msg->total_path_attr_len, has_end_of_rib_marker, &update_msg->count_path_attr);
 
             if(bytes_read<0) return bytes_read;
             read_size += bytes_read;
@@ -184,7 +184,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
          * Parse the NLRI data
          */
         if ((size - bytes_check) > 0) {
-            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(nlri_ptr, (size - read_size), update_msg->nlri, &update_msg->count_nlri);
+            bytes_read = libparsebgp_update_msg_parse_nlri_data_v4(&nlri_ptr, (size - read_size), update_msg->nlri, &update_msg->count_nlri);
 
             if(bytes_read<0) return bytes_read;
             read_size += bytes_read;

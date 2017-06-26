@@ -96,7 +96,7 @@ typedef struct libparsebgp_open_msg_data{
 *
 * @return negative values indicate error, otherwise a positive value indicating the number of bytes read
 */
-ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char **data, size_t size, bool openMessageIsSent);
+ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
 
 void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data);
 

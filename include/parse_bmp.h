@@ -70,12 +70,12 @@ typedef struct libparsebgp_parsed_peer_hdr_v3 {
     unsigned char   peer_bgp_id[4];       ///< 4 byte peer bgp id
     uint32_t        ts_secs;              ///< 4 byte timestamp in seconds
     uint32_t        ts_usecs;             ///< 4 byte timestamp microseconds
-} libparsebgp_parsed_peer_hdr_v3;
+} __attribute__((__packed__)) libparsebgp_parsed_peer_hdr_v3;
 
 /**
 *  BMP headers for older versions (BMPv1)
 */
-typedef struct common_hdr_bmp_old {
+typedef struct __attribute__((__packed__)) common_hdr_bmp_old {
     uint8_t         type;                ///< 1 byte message type
     uint8_t         peer_type;           ///< 1 byte peer type
     uint8_t         peer_flags;          ///< 1 byte peer flag
@@ -216,7 +216,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
  *
  * @returns Bytes that have been successfully read by the bmp parser.
  */
-ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char **buffer, int buf_len);
+ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
 
 /**
  * Destructor function to free bmp_parsed_data
