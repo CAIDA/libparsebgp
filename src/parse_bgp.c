@@ -34,7 +34,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
      */
     switch (bgp_parsed_data->c_hdr.type) {
         case BGP_MSG_UPDATE: {
-            read_size = libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data->parsed_data.update_msg, data, data_bytes_remaining,
+            read_size = libparsebgp_update_msg_parse_update_msg(&bgp_parsed_data->parsed_data.update_msg, *data, data_bytes_remaining,
                                                                 &bgp_parsed_data->has_end_of_rib_marker);
 
             if (read_size >= 0 && read_size != (size - BGP_MSG_HDR_LEN)) {

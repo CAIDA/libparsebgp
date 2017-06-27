@@ -702,7 +702,8 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
             /*
              * Parsing the bgp update message
              */
-            if((bytes_read = libparsebgp_parse_bgp_handle_update(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, &bmp_data, bmp_data_len))<0) {
+            if((bytes_read = libparsebgp_parse_bgp_parse_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, &bmp_data, bmp_data_len, false))<0) {
+//            if((bytes_read = libparsebgp_parse_bgp_handle_update(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, &bmp_data, bmp_data_len))<0) {
                 read_size = bytes_read;
             }
             else
