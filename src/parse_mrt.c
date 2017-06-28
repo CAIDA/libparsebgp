@@ -751,9 +751,9 @@ unsigned char temp[] = {0x03, 0x00, 0x00, 0x03, 0x66, 0x00, 0x00, 0x00, 0x00, 0x
 
     u_char *tmp;
     tmp = temp;
-    libparsebgp_parse_mrt_parsed_data mrt_data;
-    int read_size = libparsebgp_parse_bmp_parse_msg(&mrt_data, tmp, len);
-    libparsebgp_parse_bmp_destructor(&mrt_data);
+    libparsebgp_parsed_bmp_parsed_data bmp_data;
+    int read_size = libparsebgp_parse_bmp_parse_msg(&bmp_data, tmp, len);
+    libparsebgp_parse_bmp_destructor(&bmp_data);
     if(read_size>0)
         printf("parsed successfully");
     else

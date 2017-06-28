@@ -197,7 +197,7 @@ typedef struct extcomm_hdr {
 typedef struct bgp_link_state_attrs{
     uint16_t            type;
     uint16_t            len;
-    struct node_attr{
+    union node_attr{
         u_char node_flag_bits;
         u_char node_ipv4_router_id_local[4];
         u_char node_ipv6_router_id_local[16];
@@ -205,25 +205,25 @@ typedef struct bgp_link_state_attrs{
         u_char node_name[256];
         u_char mt_id[256];
     }node;
-    struct link_attr{
-        u_char        link_admin_group [4];
+    union link_attr{
+        u_char      link_admin_group [4];
         uint32_t    link_igp_metric;
-        u_char        link_ipv4_router_id_remote[4];
-        u_char        link_ipv6_router_id_remote[4];
+        u_char      link_ipv4_router_id_remote[4];
+        u_char      link_ipv6_router_id_remote[4];
         int32_t     link_max_link_bw;
         int32_t     link_max_resv_bw;
-        u_char        link_name[256];
+        u_char      link_name[256];
         uint32_t    link_te_def_metric;
         int32_t     link_unresv_bw[8];
         link_peer_epe_node_sid link_peer_epe_sid;
     }link;
-    struct prefix_attr {
+    union prefix_attr {
         uint32_t    prefix_prefix_metric;
         uint32_t    prefix_route_tag;
     }prefix;
 }bgp_link_state_attrs;
 
-typedef struct attr_value{
+typedef union attr_value{
     uint8_t                 origin;
     uint16_t                count_as_path;
     as_path_segment         *as_path;
@@ -289,7 +289,7 @@ typedef struct libparsebgp_update_msg_data {
  * \param [in]   len        Length of the data in bytes to be read
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs **update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
+ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
 
 /**
  * Parse attribute data based on attribute type
