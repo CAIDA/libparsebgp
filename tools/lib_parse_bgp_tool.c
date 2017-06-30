@@ -49,11 +49,15 @@ int shift(u_char *buffer, int bytes_read, int buf_len)
     return (buf_len-bytes_read);
 }
 
+void print_addr_from_char_array(u_char *array, int len) {
+    for(int i = 0;i<len;i++ ) {
+        if (i)
+            printf(":");
+        printf("%d", (unsigned int)array[i]);
+    }
+}
+
 void elem_generate(libparsebgp_parse_msg *parse_msg) {
-    //<dump-type>|<elem-type>|<record-ts>|<project>|<collector>|<peer-ASn>|<peer-IP>|<prefix>|<next-hop-IP>|<AS-path>|
-    //<origin-AS>|<communities>|<old-state>|<new-state>
-//    int max_buf_len = 1000, len = 0;
-//    u_char *out_buf = (u_char *)malloc(max_buf_len* sizeof(u_char));
     switch (parse_msg->msg_type) {
         case MRT_MESSAGE_TYPE: {
             switch (parse_msg->parsed_mrt_msg.c_hdr.type) {
@@ -63,32 +67,23 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         printf("E|");
                     else
                         printf("R|");
-                    printf("%d|||%d|%s|%s|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.table_dump.peer_as,
-                                   parse_msg->parsed_mrt_msg.parsed_data.table_dump.peer_ip, parse_msg->parsed_mrt_msg.parsed_data.table_dump.prefix);
-//                    out << parse_msg->parsed_mrt_msg.c_hdr.time_stamp << "|||" << parse_msg->parsed_mrt_msg.parsed_data.table_dump.peer_as
-//                            << "|" << (int)parse_msg->parsed_mrt_msg.parsed_data.table_dump.peer_ip << "|" << parse_msg->parsed_mrt_msg.parsed_data.table_dump.prefix
-//                            << "|";
-//                    int ip_len = parse_msg->parsed_mrt_msg.parsed_data.table_dump. == AFI_IPv6 ? 16 : 4;
-//                    for(int i = 0;i<ip_len;i++ ) {
-//                        if (i)
-//                            out << ":";
-//                        out<< (int)parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip[i];
-//                    }
+                    printf("%d|||%d|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.table_dump.peer_as);
+                    print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump.peer_ip, parse_msg->parsed_mrt_msg.c_hdr.sub_type == AFI_IPv6 ? 16 : 4);
+                    printf("|");
+                    print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump.prefix, parse_msg->parsed_mrt_msg.c_hdr.sub_type == AFI_IPv6 ? 16 : 4);
+                    printf("|");
                     for (int i = 0; i < parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; ++i) {
                         if (parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
-                            printf("%s", parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.next_hop);
-//                            out << parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.next_hop;
+                            print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.next_hop, 4);
                             break;
                         }
                     }
-//                    out << "|";
                     printf("|");
                     uint32_t origin_as = 0;
                     for (int i = 0; i < parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; i++) {
                         if (parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
                             for (int j = 0; j < parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.count_as_path; ++j) {
                                 for (int k = 0; k < parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path->count_seg_asn; ++k) {
-//                                    out << parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path[j].seg_asn[k] << " ";
                                     printf("%d ", parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path[j].seg_asn[k]);
                                     origin_as = parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path[j].seg_asn[k];
                                 }
@@ -96,14 +91,12 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             break;
                         }
                     }
-//                    out << "|" << origin_as << "|";
                     printf("|%d|", origin_as);
                     for (int i = 0; i < parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; ++i) {
                         if (parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
                             for(int j = 0; j < parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.count_attr_type_comm; ++j) {
                                 printf("%d ", parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.attr_type_comm[j]);
                             }
-//                            out << parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.attr_type_comm;
                             break;
                         }
                     }
@@ -111,19 +104,16 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     break;
                 }
                 case TABLE_DUMP_V2: {
-                    //<dump-type>|<elem-type>|<record-ts>|<project>|<collector>|<peer-ASn>|<peer-IP>|<prefix>|<next-hop-IP>|
-                    //<AS-path>|<origin-AS>|<communities>|<old-state>|<new-state>
                     printf("R|");
-//                    out << "R|";
                     if (parse_msg->parsed_mrt_msg.has_end_of_rib_marker)
                         printf("E|");
                     else
                         printf("R|");
                     switch (parse_msg->parsed_mrt_msg.c_hdr.sub_type) {
                         case PEER_INDEX_TABLE: {
-                            printf("%d||%s|||||||||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.peer_index_tbl.collector_bgp_id);
-//                            out << parse_msg->parsed_mrt_msg.c_hdr.time_stamp << "||" << parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.peer_index_tbl.collector_bgp_id
-//                                << "|||||||||";
+                            printf("%d||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp);
+                            print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.peer_index_tbl.collector_bgp_id, 4);
+                            printf("|||||||||");
                             break;
                         }
                         case RIB_IPV4_UNICAST:
@@ -133,7 +123,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             for (int i = 0; i < parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
-                                        printf("%s", parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.next_hop);
+                                        print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.next_hop, 4);
                                         found = true;
                                         break;
                                     }
@@ -164,7 +154,6 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                         for (int k = 0; k < parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.count_attr_type_comm; ++k) {
                                             printf("%d ", parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.attr_type_comm[k]);
                                         }
-//                                    out << parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.attr_type_comm;
                                         found = true;
                                         break;
                                     }
@@ -174,14 +163,15 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             break;
                         }
                         case RIB_GENERIC: {
-                            printf("%d|||||%s", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.nlri_entry.prefix);
-//                            out << parse_msg->parsed_mrt_msg.c_hdr.time_stamp << "|||||" << parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.nlri_entry.prefix;
+                            printf("%d|||||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp);
+                            int len = parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.address_family_identifier == AFI_IPv4 ? 4 : 16;
+                            print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.nlri_entry.prefix, len);
                             bool found = false;
-                            printf("%d||||||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp);
+                            printf("|%d||||||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp);
                             for (int i = 0; i < parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
-                                        printf("%s", parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.next_hop);
+                                        print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.next_hop, 4);
                                         found = true;
                                         break;
                                     }
@@ -212,7 +202,6 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                         for (int k = 0; k < parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.count_attr_type_comm; ++k) {
                                             printf("%d ", parse_msg->parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.attr_type_comm[k]);
                                         }
-//                                    out << parse_msg->parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.attr_type_comm;
                                         found = true;
                                         break;
                                     }
@@ -224,18 +213,19 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     }
                     break;
                 }
+
                 case BGP4MP:
                 case BGP4MP_ET: {
                     switch (parse_msg->parsed_mrt_msg.c_hdr.sub_type) {
                         case BGP4MP_STATE_CHANGE:
                         case BGP4MP_STATE_CHANGE_AS4: {
-                            printf("U||%d|||%d|%s||||||%d|%d", parse_msg->parsed_mrt_msg.c_hdr.time_stamp,
-                                   parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn, parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_ip,
-                                   parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.old_state, parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state);
-//                            out << "U|S|" << parse_msg->parsed_mrt_msg.c_hdr.time_stamp << "|||" << parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn
-//                                << "|" << parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_ip << "||||||"
-//                                << parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.old_state << "|"
-//                                << parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state;
+                            printf("U||%d|||%d|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp,
+                                   parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn);
+                            int ip_len = parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.address_family == AFI_IPv4 ? 4 : 16;
+                            print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_ip, ip_len);
+                            printf("||||||%d|%d", parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.old_state,
+                                   parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state);
+
                             break;
                         }
                         case BGP4MP_MESSAGE:
@@ -244,8 +234,11 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         case BGP4MP_MESSAGE_AS4: {
                             switch (parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.c_hdr.type) {
                                 case BGP_MSG_OPEN: {
-                                    printf("R|R|%d|||%d|%s|||||||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn,
-                                           parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip);
+                                    printf("R|R|%d|||%d|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp,
+                                           parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
+                                    int ip_len = parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv4 ? 4 : 16;
+                                    print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_len);
+                                    printf("|||||||");
                                     break;
                                 }
                                 case BGP_MSG_UPDATE: {
@@ -256,18 +249,13 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                         printf("A|");
                                     else
                                         printf("U|");
-                                    printf("%d|||%d|%s|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn,
-                                           parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip);
-//                                    int ip_len = parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv6 ? 16 : 4;
-//                                    for(int i = 0;i<ip_len;i++ ) {
-//                                        if (i)
-//                                            out << ":";
-//                                        out<< (int)parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip[i];
-//                                    }
-//                                    out<<"||";
+                                    printf("%d|||%d|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
+                                    int ip_len = parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv6 ? 16 : 4;
+                                    print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_len);
+                                    printf("|");
                                     for (int i = 0; i < parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                                         if (parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
-                                            printf("%s|", parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop);
+                                            print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop, 4);
                                             break;
                                         }
                                     }
@@ -298,8 +286,11 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     break;
                                 }
                                 case BGP_MSG_NOTIFICATION: {
-                                    printf("R|R|%d|||%d|%s|||||||", parse_msg->parsed_mrt_msg.c_hdr.time_stamp, parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn,
-                                            parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip);
+                                    printf("R|R|%d|||%d|", parse_msg->parsed_mrt_msg.c_hdr.time_stamp,
+                                           parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
+                                    int ip_len = parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv4 ? 4 : 16;
+                                    print_addr_from_char_array(parse_msg->parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_len);
+                                    printf("|||||||");
                                     break;
                                 }
                             }
@@ -326,11 +317,13 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         printf("R|E|"); //End of RIB
                     else
                         printf("U||");
-                    printf("%d|||%d|%s||", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs, parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as,
-                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr);
+                    printf("%d|||%d|", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs,
+                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as);
+                    print_addr_from_char_array(parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr, 16);
+                    printf("||");
                     for (int i = 0; i < parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
-                            printf("%s|", parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop);
+                            print_addr_from_char_array(parse_msg->parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop, 4);
                             break;
                         }
                     }
@@ -364,23 +357,31 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     break;
                 }
                 case TYPE_TERM_MSG: {
-                    printf("R|R|%d|||%d|%s|||||||", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs, parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as,
-                            parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr);
+                    printf("R|R|%d|||%d|", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs,
+                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as);
+                    print_addr_from_char_array(parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr, 16);
+                    printf("|||||||");
                     break;
                 }
                 case TYPE_INIT_MSG: {
-                    printf("R|R|%d|||%d|%s|||||||", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs, parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as,
-                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr);
+                    printf("R|R|%d|||%d|", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs,
+                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as);
+                    print_addr_from_char_array(parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr, 16);
+                    printf("|||||||");
                     break;
                 }
                 case TYPE_PEER_UP: {
-                    printf("R|R|%d|||%d|%s|||||||", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs, parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as,
-                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr);
+                    printf("R|R|%d|||%d|", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs,
+                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as);
+                    print_addr_from_char_array(parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr, 16);
+                    printf("|||||||");
                     break;
                 }
                 case TYPE_PEER_DOWN: {
-                    printf("R|R|%d|||%d|%s|||||||", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs, parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as,
-                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr);
+                    printf("R|R|%d|||%d|", parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs,
+                           parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as);
+                    print_addr_from_char_array(parse_msg->parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr, 16);
+                    printf("|||||||");
                     break;
                 }
             }
@@ -400,7 +401,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     printf("|||||||");
                     for (int i = 0; i < parse_msg->parsed_bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
-                            printf("%s|", parse_msg->parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop);
+                            print_addr_from_char_array(parse_msg->parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop, 4);
                             break;
                         }
                     }

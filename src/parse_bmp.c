@@ -244,7 +244,7 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v3(libparsebgp_parsed_bmp_parsed_
  *
  */
 static ssize_t libparsebgp_parse_bmp_msg_header(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char **buffer, int *buf_len) {
-//    uint8_t         ver = 0;
+
     parsed_msg->version = 0;
     ssize_t         read_size = 0, bytes_read = 0;
 

@@ -42,11 +42,11 @@ ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, 
     parsed_msg->msg_type = type;
     switch (type) {
         case MRT_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg->parsed_mrt_msg, buffer, buf_len);
+            read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg->parsed_mrt_msg, *buffer, buf_len);
             break;
         }
         case BMP_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_bmp_parse_msg(&parsed_msg->parsed_bmp_msg, buffer, buf_len);
+            read_size=libparsebgp_parse_bmp_parse_msg(&parsed_msg->parsed_bmp_msg, *buffer, buf_len);
             break;
         }
         case BGP_MESSAGE_TYPE: {
