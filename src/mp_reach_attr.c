@@ -133,7 +133,7 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
             //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             // Data is an IP address - parse the address and save it
-            read_size = libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info, &path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_nlri_info);
+            read_size = libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(is_ipv4, nlri_data, nlri_len, path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_info, &path_attrs->attr_value.mp_reach_nlri_data.count_nlri_info);
             break;
 
         case BGP_SAFI_NLRI_LABEL:
@@ -149,7 +149,7 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
 
             // Data is an Label, IP address tuple parse and save it
             read_size = libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len,
-                                                                      path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_label_info, &path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_nlri_label_info);
+                                                                      path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_label_info, &path_attrs->attr_value.mp_reach_nlri_data.count_nlri_label_info);
             break;
 
         case BGP_SAFI_MPLS: {
@@ -171,7 +171,7 @@ static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(bool is_ipv4, updat
             //path_attrs->attrs[ATTR_TYPE_NEXT_HOP] = std::string(ip_char);
 
             read_size = libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(is_ipv4, nlri_data, nlri_len,
-                                                                      path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_label_info, &path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_nlri_label_info);
+                                                                      path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_label_info, &path_attrs->attr_value.mp_reach_nlri_data.count_nlri_label_info);
 
             break;
         }

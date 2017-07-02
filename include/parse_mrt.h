@@ -107,8 +107,8 @@ typedef struct rib_entry{
     uint16_t                     peer_index;        ///< 2-octet Peer index
     uint32_t                     originated_time;   ///< 4-octet, originated time for the RIB Entry
     uint16_t                     attribute_len;     ///< 2-octet, length of the BGP attributes field
-    uint16_t                     bgp_attrs_count;
-    update_path_attrs            **bgp_attrs;         ///< List of BGP attributes
+    uint16_t                     bgp_attrs_count;   ///< Number of BGP attributes
+    update_path_attrs            **bgp_attrs;       ///< List of BGP attributes
 }rib_entry;
 
 /**
@@ -131,7 +131,7 @@ typedef struct libparsebgp_rib_generic_entry_header{
     uint8_t         subsequent_afi;                 ///< 1-octet Subsequent AFI (SAFI)
     struct nlri_entry{
         uint8_t     len;                            ///< 1-octet Length of prefix in bits
-        u_char        *prefix;                        ///< Address prefix
+        u_char        *prefix;                      ///< Address prefix
     }nlri_entry;                                    ///< single NLRI entry
     uint16_t        entry_count;                    ///< 2-octet entry count, number of RIB Entries
     rib_entry*      rib_entries;                    ///< List of RIB Entries
@@ -165,7 +165,6 @@ typedef struct libparsebgp_bgp4mp_msg{
 }libparsebgp_bgp4mp_msg;
 
 u_char *mrt_data;
-//u_char mrt_data[MRT_PACKET_BUF_SIZE + 1];
 int mrt_data_len;                   ///< Length/size of data in the data buffer
 uint16_t mrt_sub_type;              ///< MRT sub type
 uint32_t mrt_len;                   ///< Length of the BMP message - does not include the common header size
@@ -173,8 +172,7 @@ uint32_t mrt_len;                   ///< Length of the BMP message - does not in
 /*
  * Structure for table_dump_v2 type as per RFC 6396
  */
-//union needed
-typedef struct libparsebgp_parsed_table_dump_v2 {
+typedef union libparsebgp_parsed_table_dump_v2 {
     libparsebgp_peer_index_table          peer_index_tbl;           ///< Contains parsed message of type PEER_INDEX_TABLE
     libparsebgp_rib_entry_header          rib_entry_hdr;            ///< Contains parsed messages of type RIB_IPV4_UNICAST and RIB_IPV6_UNICAST
     libparsebgp_rib_generic_entry_header  rib_generic_entry_hdr;    ///< Contains parsed messages of type RIB_GENERIC

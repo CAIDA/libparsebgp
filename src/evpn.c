@@ -147,7 +147,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
     if (is_unreach)
         path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.evpn_withdrawn = (evpn_tuple *)malloc(sizeof(evpn_tuple));
     else
-        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn = (evpn_tuple *)malloc(sizeof(evpn_tuple));
+        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.evpn = (evpn_tuple *)malloc(sizeof(evpn_tuple));
 
     uint16_t count_evpn_withdrawn=0,count_evpn=0;
     while ((data_read + 10 /* min read */) < data_len) {
@@ -369,12 +369,12 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs, u_char *
         }
         else {
             if(count_evpn)
-                path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn =
-                        (evpn_tuple *)realloc(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn, (count_evpn+1)*sizeof(evpn_tuple));
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn[count_evpn++]=*tuple;
+                path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.evpn =
+                        (evpn_tuple *)realloc(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.evpn, (count_evpn+1)*sizeof(evpn_tuple));
+            path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.evpn[count_evpn++]=*tuple;
         }
     }
-    path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_evpn = count_evpn;
-    path_attrs->attr_value.mp_unreach_nlri_data.withdrawn_routes_nlri.count_evpn_withdrawn = count_evpn_withdrawn;
+    path_attrs->attr_value.mp_reach_nlri_data.count_evpn = count_evpn;
+    path_attrs->attr_value.mp_unreach_nlri_data.count_evpn_withdrawn = count_evpn_withdrawn;
     free(tuple);
 }

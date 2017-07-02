@@ -67,12 +67,12 @@ typedef struct as_path_segment {
  * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
  */
 typedef struct mp_unreach_nlri {
-    uint16_t       afi;                 ///< Address Family Identifier
-    uint8_t        safi;                ///< Subsequent Address Family Identifier
-    struct withdrawn_routes_nlri {
-        uint16_t                        count_wdrawn_routes;
-        uint16_t                        count_wdrawn_routes_label;
-        uint16_t                        count_evpn_withdrawn;
+    uint16_t       afi;                         ///< Address Family Identifier
+    uint8_t        safi;                        ///< Subsequent Address Family Identifier
+    uint16_t       count_wdrawn_routes;         ///< Number of withdrawn routes
+    uint16_t       count_wdrawn_routes_label;   ///< Number of withdrawn routes with label
+    uint16_t       count_evpn_withdrawn;        ///< Number of EVPN NLRIs withdrawn
+    union withdrawn_routes_nlri {
         update_prefix_tuple             *wdrawn_routes;       ///< Withdrawn routes
         update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
         evpn_tuple                      *evpn_withdrawn;      ///< List of evpn nlris withdrawn
@@ -125,7 +125,7 @@ typedef struct mp_reach_ls {
     uint16_t        nlri_len;
     uint8_t         proto_id;
     uint64_t        id;
-    struct nlri_ls{
+    union nlri_ls{
         struct node_nlri {
             uint16_t    type;
             uint16_t    len;
@@ -165,21 +165,21 @@ typedef struct link_peer_epe_node_sid
 }link_peer_epe_node_sid;
 
 typedef struct mp_reach_nlri {
-    uint16_t afi;                ///< Address Family Identifier
-    uint8_t safi;                ///< Subsequent Address Family Identifier
-    uint8_t nh_len;              ///< Length of next hop
-    unsigned char next_hop[16];  ///< Next hop address - Pointer to data (normally does not require freeing)
-    uint8_t reserved;            ///< Reserved
-    struct nlri_info {
-        uint16_t                         count_nlri_info;
-        uint16_t                         count_nlri_label_info;
-        uint16_t                         count_mp_rch_ls;
-        uint16_t                         count_evpn;
+    uint16_t afi;                       ///< Address Family Identifier
+    uint8_t safi;                       ///< Subsequent Address Family Identifier
+    uint8_t nh_len;                     ///< Length of next hop
+    unsigned char next_hop[16];         ///< Next hop address - Pointer to data (normally does not require freeing)
+    uint8_t reserved;                   ///< Reserved
+    uint16_t count_nlri_info;           ///< Number of nlri_info
+    uint16_t count_nlri_label_info;     ///< Number of nlri with label
+    uint16_t count_mp_rch_ls;           ///< number of mp_reach_ls
+    uint16_t count_evpn;                ///< number of evpn
+    union mp_reach_nlri_info {
         update_prefix_tuple              *nlri_info;               ///< Withdrawn routes
         update_prefix_label_tuple        *nlri_label_info;
         mp_reach_ls                      *mp_rch_ls;
         evpn_tuple                       *evpn;               ///< List of evpn nlris advertised
-    }nlri_info;
+    }mp_reach_nlri_info;
 }mp_reach_nlri;
 
 /**

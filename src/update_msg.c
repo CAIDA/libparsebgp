@@ -608,48 +608,48 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
             break;
         }
         case ATTR_TYPE_MP_REACH_NLRI: {
-            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn);
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.evpn = NULL;
+            free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.evpn);
+            path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.evpn = NULL;
 
-            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info);
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_info = NULL;
+            free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_info);
+            path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_info = NULL;
 
-            for (int count = 0; count < path_attrs->attr_value.mp_reach_nlri_data.nlri_info.count_mp_rch_ls; ++count) {
-                switch (path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_type) {
+            for (int count = 0; count < path_attrs->attr_value.mp_reach_nlri_data.count_mp_rch_ls; ++count) {
+                switch (path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_type) {
                     case NLRI_TYPE_NODE: {
-                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes);
-                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes = NULL;
+                        free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.node_nlri.local_nodes = NULL;
                         break;
                     }
 
                     case NLRI_TYPE_LINK: {
-                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.local_nodes);
-                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.local_nodes = NULL;
+                        free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.local_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.local_nodes = NULL;
 
-                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.link_desc);
-                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.link_desc = NULL;
+                        free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.link_desc);
+                        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.link_desc = NULL;
 
-                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.remote_nodes);
-                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.remote_nodes = NULL;
+                        free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.remote_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.link_nlri.remote_nodes = NULL;
 
                         break;
                     }
 
                     case NLRI_TYPE_IPV4_PREFIX:
                     case NLRI_TYPE_IPV6_PREFIX: {
-                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes);
-                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes = NULL;
+                        free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes);
+                        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes = NULL;
 
-                        free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc);
-                        path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc = NULL;
+                        free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc);
+                        path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls[count].nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc = NULL;
                         break;
                     }
                 }
             }
-            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.mp_rch_ls);
+            free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls);
 
-            free(path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_label_info);
-            path_attrs->attr_value.mp_reach_nlri_data.nlri_info.nlri_label_info = NULL;
+            free(path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_label_info);
+            path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.nlri_label_info = NULL;
 
 //            free(&path_attrs->attr_value.mp_reach_nlri_data);
             break;

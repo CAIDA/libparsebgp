@@ -35,7 +35,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
                                                                 &bgp_parsed_data->has_end_of_rib_marker);
 
             if (read_size >= 0 && read_size != (size - BGP_MSG_HDR_LEN))
-                read_size = ERR_READING_MSG; //throw "Failed to parse BGP update message";
+                read_size = ERR_READING_MSG;
             break;
         }
         case BGP_MSG_NOTIFICATION: {
@@ -48,7 +48,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
         case BGP_MSG_OPEN: {
             read_size = libparsebgp_open_msg_parse_open_msg(&bgp_parsed_data->parsed_data.open_msg, *data, data_bytes_remaining, is_local_msg);
             if (!read_size)
-                read_size = ERR_READING_MSG; //Failed to read open message;
+                read_size = ERR_READING_MSG;
             break;
         }
         default: {

@@ -6,10 +6,12 @@
 #include <string.h>
 /**
  * Function to extract data from buffer
+ *
  * @param buffer    Containes the data
  * @param buf_len    Length of buffer provided
  * @param output_buf Data from buffer is stored into this
  * @param output_len Length to be stored in output buffer
+ *
  * @return  size of data stored in output_buf
  */
 ssize_t extract_from_buffer (unsigned char **buffer, int *buf_len, void *output_buf, ssize_t output_len)

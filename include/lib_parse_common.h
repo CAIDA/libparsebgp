@@ -21,9 +21,11 @@ enum libparsebgp_parse_msg_types {MRT_MESSAGE_TYPE = 1, BMP_MESSAGE_TYPE, BGP_ME
  * Parse Message schema
  */
 typedef struct libparsebgp_parse_msg{
-    libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
-    libparsebgp_parsed_bmp_parsed_data parsed_bmp_msg;
-    libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
+    union libparsebgp_parse_msg_parsed {
+        libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
+        libparsebgp_parsed_bmp_parsed_data parsed_bmp_msg;
+        libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
+    }libparsebgp_parse_msg_parsed;
     int msg_type;
 }libparsebgp_parse_msg;
 
@@ -42,15 +44,15 @@ ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, 
     parsed_msg->msg_type = type;
     switch (type) {
         case MRT_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg->parsed_mrt_msg, *buffer, buf_len);
+            read_size=libparsebgp_parse_mrt_parse_msg(&parsed_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg, *buffer, buf_len);
             break;
         }
         case BMP_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_bmp_parse_msg(&parsed_msg->parsed_bmp_msg, *buffer, buf_len);
+            read_size=libparsebgp_parse_bmp_parse_msg(&parsed_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg, *buffer, buf_len);
             break;
         }
         case BGP_MESSAGE_TYPE: {
-            read_size=libparsebgp_parse_bgp_parse_msg(&parsed_msg->parsed_bgp_msg, buffer, buf_len, true);
+            read_size=libparsebgp_parse_bgp_parse_msg(&parsed_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg, buffer, buf_len, true);
             break;
         }
         default: {

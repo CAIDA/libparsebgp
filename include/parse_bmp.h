@@ -142,7 +142,6 @@ typedef struct libparsebgp_parsed_bmp_peer_up_event {
     uint16_t                            remote_port;            ///< Remote port number
     libparsebgp_parse_bgp_parsed_data   sent_open_msg;          ///< sent open message
     libparsebgp_parse_bgp_parsed_data   received_open_msg;      ///< received open message
-    //char                                info_data[4096];        ///< Inforamtional data for peer
 }libparsebgp_parsed_bmp_peer_up_event;
 
 /**
@@ -174,8 +173,7 @@ typedef struct libparsebgp_parsed_bmp_stat_rep {
     stat_counter*           total_stats_counter;    ///< 2 bytes - Information type
 }libparsebgp_parsed_bmp_stat_rep;
 
-u_char *bmp_data;
-//u_char bmp_data[BMP_PACKET_BUF_SIZE + 1];
+u_char      *bmp_data;
 uint32_t    bmp_data_len;               ///< Length/size of data in the data buffer
 uint32_t    bmp_len;                    ///< Length of the BMP message - does not include the common header size
 uint8_t     bmp_type;                   ///< Type of the BMP message
@@ -184,14 +182,14 @@ uint8_t     bmp_type;                   ///< Type of the BMP message
  * BMP Message Structure
  */
 typedef struct libparsebgp_parsed_bmp_parsed_data{
-    uint8_t version;
+    uint8_t version;                        ///< Version of BMP header
 
     union libparsebgp_parsed_bmp_hdr {
         common_hdr_bmp_v3 c_hdr_v3;         ///< structure for bmp header version 3
         common_hdr_bmp_old c_hdr_old;       ///< structure for bmp header version 1 or 2
     }libparsebgp_parsed_bmp_hdr;            ///< union of BMP common header
 
-    libparsebgp_parsed_peer_hdr_v3 libparsebgp_parsed_peer_hdr;
+    libparsebgp_parsed_peer_hdr_v3 libparsebgp_parsed_peer_hdr;                     ///< structure for BMP peer header
 
     union libparsebgp_parsed_bmp_msg{
         libparsebgp_parsed_bmp_init_msg           parsed_init_msg;                  ///< structure for bmp init msg
@@ -210,9 +208,8 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
  *  This function will parse the header of the message and according to the type of the BMP message, it parses the rest of the message.
  *
  * @param [in]     parsed_msg       Pointer to the BMP Message structure
- * @param [in]     data             Pointer to the raw BGP message header
- * @param [in]     size             length of the data buffer (used to prevent overrun)
- * @param [out]    parsed_msg       Referenced to the updated bmp parsed message
+ * @param [in]     buffer           Pointer to the raw BGP message header
+ * @param [in]     buf_len          length of the data buffer (used to prevent overrun)
  *
  * @returns Bytes that have been successfully read by the bmp parser.
  */

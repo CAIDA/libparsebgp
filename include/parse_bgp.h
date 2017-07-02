@@ -29,8 +29,11 @@
  */
 enum bgp_msg_types { BGP_MSG_OPEN=1, BGP_MSG_UPDATE, BGP_MSG_NOTIFICATION, BGP_MSG_KEEPALIVE, BGP_MSG_ROUTE_REFRESH };
 
+/**
+ * Struct for BGP common header
+ */
 typedef struct libparsebgp_common_bgp_hdr {
-    uint8_t   marker[16];                           ///< 16-octet field is included for compatibility. All ones (required).
+    uint8_t   marker[16];                    ///< 16-octet field is included for compatibility. All ones (required).
     uint16_t  len;                           ///< Total length of the message, including the header in octets. min length is 19, max is 4096
     uint8_t   type;                          ///< type code of the message
 }libparsebgp_common_bgp_hdr;
@@ -45,7 +48,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
         libparsebgp_open_msg_data open_msg;         ///< Stores the open message
         libparsebgp_update_msg_data update_msg;     ///< Stores update message
         libparsebgp_notify_msg notification_msg;    ///< Stores notification message
-    }parsed_data;                                   ///< Union for BGP data
+    }parsed_data;
 
     bool has_end_of_rib_marker;                     ///< Indicates whether this message has the end of rib marker
 }libparsebgp_parse_bgp_parsed_data;
@@ -56,7 +59,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
  * @param bgp_parsed_data   Struct holding BGP data
  * @param data              Buffer containing raw data
  * @param size              Size of buffer (data)
- * @param is_local_msg      Specifies if the message is local or remote
+ * @param is_local_msg      Indicates if the message is local or remote
  *
  * @return the number of bytes read
  */

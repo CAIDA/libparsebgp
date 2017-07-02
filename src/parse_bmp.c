@@ -23,7 +23,6 @@ static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char **buffer, 
     if (bmp_len <= 0)
         return 0;
 
-//    if (bmp_len > sizeof(bmp_data))
     if (bmp_len > BMP_PACKET_BUF_SIZE + 1)
         return LARGER_MSG_LEN;      //BMP message length is too large for buffer, invalid BMP sender
 
@@ -344,8 +343,8 @@ static ssize_t libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init
         *  This method will read the expected stat counts and then parse the stat info messages.
 *
 * @param [in]     term_msg         Pointer to the termination Message structure
-* @param [in]     data             Pointer to the raw BGP message header
-* @param [in]     size             length of the data buffer (used to prevent overrun)
+* @param [in]     buffer           Pointer to the raw BGP message header
+* @param [in]     buf_len          length of the data buffer (used to prevent overrun)
 * @param [out]    term_msg         Reference to the termination message (will be updated with bmp message)
 *
 * @returns Bytes that have been successfully read by the handle termination message.
@@ -401,9 +400,9 @@ static ssize_t libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term
  *  This method will read the expected stat counts and then parse the stat info messages.
  *
  * @param [in]     stat_rep_msg     Pointer to the stat report Message structure
- * @param [in]     data             Pointer to the raw BGP message header
- * @param [in]     size             length of the data buffer (used to prevent overrun)
- * @param [out]    up_event         Reference to the stat report (will be updated with bmp message)
+ * @param [in]     buffer           Pointer to the raw BGP message header
+ * @param [in]     buf_len          length of the data buffer (used to prevent overrun)
+ * @param [out]    stat_rep_msg     Reference to the stat report (will be updated with bmp message)
  *
  * @returns Bytes that have been successfully read by the handle stats report.
  */
@@ -455,8 +454,8 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
                 extract_from_buffer(buffer, &buf_len, &b[0], 1);
         }
         stat_rep_msg->total_stats_counter[i]=*stat_info;
-//        delete stat_info;
     }
+
     free(stat_info);
     return read_size;
 }
@@ -537,8 +536,8 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
  * @details This method will update the peer_up_event struct with BMP header info.
  *
  * @param [in]     up_event         Pointer to the Up Event Message structure
- * @param [in]     data             Pointer to the raw BGP message header
- * @param [in]     size             length of the data buffer (used to prevent overrun)
+ * @param [in]     buffer           Pointer to the raw BGP message header
+ * @param [in]     buf_len          length of the data buffer (used to prevent overrun)
  * @param [out]    up_event         Reference to the peer up event storage (will be updated with bmp info)
  *
  * @returns Bytes that have been successfully read by the peer up header parser.
@@ -573,7 +572,8 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(libparsebgp_parsed_
     bmp_len -= read_size;
 
     // Validate parse is still good, if not read the remaining bytes of the message so that the next msg will work
-    if (!is_parse_good) return CORRUPT_MSG;
+    if (!is_parse_good)
+        return CORRUPT_MSG;
 
     return read_size;
 }
@@ -703,7 +703,6 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
              * Parsing the bgp update message
              */
             if((bytes_read = libparsebgp_parse_bgp_parse_msg(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, &bmp_data, bmp_data_len, false))<0) {
-//            if((bytes_read = libparsebgp_parse_bgp_handle_update(&parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, &bmp_data, bmp_data_len))<0) {
                 read_size = bytes_read;
             }
             else
