@@ -510,6 +510,12 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
         path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
 
+        int a=2;
+        if(path_attrs->attr_type.attr_type_code == 10)
+        {
+            a=0;
+        }
+
         // Check if the length field is 1 or two bytes
         if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
             memcpy(&path_attrs->attr_len, data, 2);
@@ -567,7 +573,8 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
                 free(path_attrs->attr_value.cluster_list[i]);
                 path_attrs->attr_value.cluster_list[i] = NULL;
             }
-            free(path_attrs->attr_value.cluster_list);
+            if(path_attrs->count_cluster_list)
+                free(path_attrs->attr_value.cluster_list);
             path_attrs->attr_value.cluster_list = NULL;
             break;
         }
@@ -660,7 +667,7 @@ void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update
 
     if (update_msg->count_path_attr > 0) {
         for (int i = 0; i < update_msg->count_path_attr; ++i) {
-            libparsebgp_parse_update_path_attrs_destructor(&update_msg->path_attributes[i]);
+            libparsebgp_parse_update_path_attrs_destructor(update_msg->path_attributes[i]);
         }
         free(update_msg->path_attributes);
         update_msg->path_attributes = NULL;
