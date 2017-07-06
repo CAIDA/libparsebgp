@@ -564,7 +564,7 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
 //        ec_hdr->val = decode_str;
         path_attrs->attr_value.ext_comm[count++]=*ec_hdr;
     }
-    path_attrs->attr_value.count_ext_comm = count;
+    path_attrs->count_ext_comm = count;
     free(ec_hdr->val);
     free(ec_hdr);
 //        parsed_data.attrs[ATTR_TYPE_EXT_COMMUNITY] = decode_str;
@@ -688,7 +688,7 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(update_path_attrs *pat
 //        ec_hdr->val=decode_str;
         path_attrs->attr_value.ext_comm[count++] = *ec_hdr;
     }
-    path_attrs->attr_value.count_ext_comm = count;
+    path_attrs->count_ext_comm = count;
     free(ec_hdr->val);
     free(ec_hdr);
     free(value);

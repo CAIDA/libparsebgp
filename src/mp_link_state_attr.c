@@ -112,7 +112,7 @@ void libparsebgp_mp_link_state_attr_parse_attr_link_state(update_path_attrs *pat
             data += tlv_len;
         count++;
     }
-    path_attrs->attr_value.count_bgp_ls = count;
+    path_attrs->count_bgp_ls = count;
 }
 
 static uint32_t ieee_float_to_kbps(int32_t float_val) {

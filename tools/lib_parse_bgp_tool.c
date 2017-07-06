@@ -65,7 +65,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     uint32_t origin_as = 0;
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; i++) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
-                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.count_as_path; ++j) {
+                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->count_as_path; ++j) {
                                 for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path->count_seg_asn; ++k) {
                                     printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path[j].seg_asn[k]);
                                     origin_as = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.as_path[j].seg_asn[k];
@@ -77,7 +77,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     printf("|%d|", origin_as);
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
-                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.count_attr_type_comm; ++j) {
+                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->count_attr_type_comm; ++j) {
                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.attr_type_comm[j]);
                             }
                             break;
@@ -118,7 +118,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             for(int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.entry_count && !found; ++i) {
                                 for(int l = 0; l < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++l) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
-                                        for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.count_as_path; ++j) {
+                                        for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->count_as_path; ++j) {
                                             for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.as_path->count_seg_asn; ++k) {
                                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.as_path[j].seg_asn[k]);
                                                 origin_as = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.as_path[j].seg_asn[k];
@@ -134,7 +134,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
-                                        for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.count_attr_type_comm; ++k) {
+                                        for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->count_attr_type_comm; ++k) {
                                             printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.attr_type_comm[k]);
                                         }
                                         found = true;
@@ -166,7 +166,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             for(int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count && !found; ++i) {
                                 for(int l = 0; l < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++l) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
-                                        for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.count_as_path; ++j) {
+                                        for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->count_as_path; ++j) {
                                             for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.as_path->count_seg_asn; ++k) {
                                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.as_path[j].seg_asn[k]);
                                                 origin_as = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_value.as_path[j].seg_asn[k];
@@ -182,7 +182,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
-                                        for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.count_attr_type_comm; ++k) {
+                                        for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->count_attr_type_comm; ++k) {
                                             printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_value.attr_type_comm[k]);
                                         }
                                         found = true;
@@ -247,7 +247,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     int origin_as = 0;
                                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
-                                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.count_as_path; ++j) {
+                                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->count_as_path; ++j) {
                                                 for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].count_seg_asn; ++k) {
                                                     printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].seg_asn[k]);
                                                     origin_as = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].seg_asn[k];
@@ -259,7 +259,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     printf("|%d|", origin_as);
                                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
-                                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.count_attr_type_comm; ++j) {
+                                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->count_attr_type_comm; ++j) {
                                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.attr_type_comm[j]);
                                                 break;
                                             }
@@ -315,7 +315,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     int origin_as = 0;
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
-                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.count_as_path; ++j) {
+                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->count_as_path; ++j) {
                                 for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].count_seg_asn; ++k) {
                                     printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].seg_asn[k]);
                                     origin_as = parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].seg_asn[k];
@@ -327,7 +327,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     printf("|%d|", origin_as);
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
-                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.count_attr_type_comm; ++j) {
+                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->count_attr_type_comm; ++j) {
                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.attr_type_comm[j]);
                                 break;
                             }
@@ -393,7 +393,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     int origin_as = 0;
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
-                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.count_as_path; ++j) {
+                            for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->count_as_path; ++j) {
                                 for (int k = 0; k < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].count_seg_asn; ++k) {
                                     printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].seg_asn[k]);
                                     origin_as = parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.as_path[j].seg_asn[k];
@@ -405,7 +405,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     printf("|%d|", origin_as);
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
-                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.count_attr_type_comm; ++j) {
+                            for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->count_attr_type_comm; ++j) {
                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.attr_type_comm[j]);
                                 break;
                             }
@@ -432,7 +432,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../updates.20020103.2053");
+        strcpy(file_path, "../../updates.20020103.2053");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {

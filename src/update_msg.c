@@ -249,12 +249,12 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
     /*
      * Loop through each path segment
      */
-    path_attrs->attr_value.count_as_path = 0;
+    path_attrs->count_as_path = 0;
     path_attrs->attr_value.as_path = (as_path_segment *)malloc(sizeof(as_path_segment));
     while (path_len > 0) {
 
-        if(path_attrs->attr_value.count_as_path)
-            path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(path_attrs->attr_value.count_as_path+1)*sizeof(as_path_segment));
+        if(path_attrs->count_as_path)
+            path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(path_attrs->count_as_path+1)*sizeof(as_path_segment));
         memset(as_segment, 0, sizeof(as_segment));
 
         as_segment->seg_type = *data++;
@@ -279,6 +279,7 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
         // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
         int seg_len = as_segment->seg_len;
         as_segment->seg_asn = (uint32_t *)malloc(as_segment->seg_len*sizeof(uint32_t));
+        as_segment->count_seg_asn = 0;
         for (; seg_len > 0; seg_len--) {
             uint32_t seg_asn = 0;
             seg_asn = 0;
@@ -288,7 +289,7 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
             SWAP_BYTES(&seg_asn, asn_octet_size);
             as_segment->seg_asn[as_segment->count_seg_asn++]=seg_asn;
         }
-        path_attrs->attr_value.as_path[path_attrs->attr_value.count_as_path++]=*as_segment;
+        path_attrs->attr_value.as_path[path_attrs->count_as_path++]=*as_segment;
     }
     free(as_segment);
 
@@ -407,11 +408,11 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
         case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
         {    // According to RFC 4456, the value is a sequence of cluster id's
             path_attrs->attr_value.cluster_list = (u_char **) malloc(path_attrs->attr_len / 4 * sizeof(u_char *));
-            path_attrs->attr_value.count_cluster_list = 0;
+            path_attrs->count_cluster_list = 0;
             for (int i = 0; i < path_attrs->attr_len; i += 4) {
-                path_attrs->attr_value.cluster_list[path_attrs->attr_value.count_cluster_list] = (u_char *) malloc(4 * sizeof(u_char));
-                memcpy(path_attrs->attr_value.cluster_list[path_attrs->attr_value.count_cluster_list], data, 4);
-                path_attrs->attr_value.count_cluster_list++;
+                path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list] = (u_char *) malloc(4 * sizeof(u_char));
+                memcpy(path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list], data, 4);
+                path_attrs->count_cluster_list++;
                 data += 4;
             }
             break;
@@ -427,7 +428,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
                 SWAP_BYTES(&value16bit, 2);
                 path_attrs->attr_value.attr_type_comm[count++]=value16bit;
             }
-            path_attrs->attr_value.count_attr_type_comm = count;
+            path_attrs->count_attr_type_comm = count;
             break;
         }
         case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
@@ -534,7 +535,8 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
              * Parse data based on attribute type
              */
             bytes_read = libparsebgp_update_msg_parse_attr_data(path_attrs, data, has_end_of_rib_marker);
-            if(bytes_read<0) return bytes_read;
+            if(bytes_read<0)
+                return bytes_read;
             data += path_attrs->attr_len;
             read += path_attrs->attr_len;
             read_size += path_attrs->attr_len;
@@ -552,7 +554,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
 void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attrs) {
     switch (path_attrs->attr_type.attr_type_code) {
         case ATTR_TYPE_AS_PATH: {
-            for (int i = 0; i < path_attrs->attr_value.count_as_path; ++i) {
+            for (int i = 0; i < path_attrs->count_as_path; ++i) {
                 free(path_attrs->attr_value.as_path[i].seg_asn);
                 path_attrs->attr_value.as_path[i].seg_asn = NULL;
             }
@@ -561,7 +563,7 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
             break;
         }
         case ATTR_TYPE_CLUSTER_LIST: {
-            for (int i = 0; i < path_attrs->attr_value.count_cluster_list; ++i) {
+            for (int i = 0; i < path_attrs->count_cluster_list; ++i) {
                 free(path_attrs->attr_value.cluster_list[i]);
                 path_attrs->attr_value.cluster_list[i] = NULL;
             }

@@ -225,23 +225,17 @@ typedef struct bgp_link_state_attrs{
 
 typedef union attr_value{
     uint8_t                 origin;
-    uint16_t                count_as_path;
     as_path_segment         *as_path;
     u_char                  next_hop[4];
     u_char                  originator_id[4];
     uint32_t                med;
     uint32_t                local_pref;
-    uint16_t                value16bit;
-    u_char                    aggregator[4];
-    uint16_t                count_cluster_list;
+    u_char                  aggregator[4];
     u_char                  **cluster_list;
-    uint16_t                count_attr_type_comm;
     uint16_t                *attr_type_comm;
-    uint16_t                count_ext_comm;
     extcomm_hdr             *ext_comm;
     mp_unreach_nlri         mp_unreach_nlri_data;
     mp_reach_nlri           mp_reach_nlri_data;
-    uint16_t                count_bgp_ls;
     bgp_link_state_attrs    *bgp_ls;
 }attr_val;
 
@@ -249,6 +243,12 @@ typedef struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
+
+    uint16_t                count_as_path;
+    uint16_t                count_cluster_list;
+    uint16_t                count_attr_type_comm;
+    uint16_t                count_ext_comm;
+    uint16_t                count_bgp_ls;
 }update_path_attrs;
 
 
