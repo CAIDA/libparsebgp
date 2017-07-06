@@ -29,7 +29,6 @@
  */
 static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len, update_prefix_tuple ***prefixes, uint16_t *count_prefix) {
     int          addr_bytes = 0;
-    uint16_t          count = 0;
     //prefix_tuple tuple;
     update_prefix_tuple *prefix_tuple = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
     *prefixes = (update_prefix_tuple **)malloc(sizeof(update_prefix_tuple*));
@@ -44,8 +43,8 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
 
     // Loop through all prefixes
     for (size_t read_size=0; read_size < len; read_size++) {
-        if(count)
-            *prefixes = (update_prefix_tuple **)realloc(*prefixes, (count+1)*sizeof(update_prefix_tuple*));
+        if(*count_prefix)
+            *prefixes = (update_prefix_tuple **)realloc(*prefixes, (*count_prefix+1)*sizeof(update_prefix_tuple*));
 
         memset(prefix_tuple, 0, sizeof(prefix_tuple));
 
@@ -78,15 +77,14 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
             data += addr_bytes;
 
             // Add tuple to prefix list
-            (*prefixes)[count] = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
-            memcpy((*prefixes)[count++], prefix_tuple, sizeof(update_prefix_tuple));
+            (*prefixes)[*count_prefix] = (update_prefix_tuple *)malloc(sizeof(update_prefix_tuple));
+            memcpy((*prefixes)[(*count_prefix)++], prefix_tuple, sizeof(update_prefix_tuple));
 
         } else if (addr_bytes > 4) {
             //LOG_NOTICE("%s: rtr=%s: NRLI v4 address is larger than 4 bytes bytes=%d len=%d",
             //           peer_addr.c_str(), router_addr.c_str(), addr_bytes, tuple.len);
         }
     }
-    *count_prefix = count;
     free(prefix_tuple);
     return len;
 }
@@ -107,7 +105,7 @@ static ssize_t libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t 
 ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker) {
     ssize_t     read_size       = 0, bytes_read = 0, bytes_check = 0;
     u_char      *buf_ptr        = data;
-//    libparsebgp_addpath_map add_path_map;
+
     if (size < 2) {
         //LOG_WARN("%s: rtr=%s: Update message is too short to parse header", peer_addr.c_str(), router_addr.c_str());
         return INCOMPLETE_MSG;
@@ -200,7 +198,6 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
  */
 static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs, u_char *data) {
     int         path_len    = path_attrs->attr_len;
-    uint16_t    as_path_cnt = 0;
     as_path_segment *as_segment = (as_path_segment *)malloc(sizeof(as_path_segment));
 
     if (path_len < 4) // Nothing to parse if length doesn't include at least one asn
@@ -252,21 +249,18 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
     /*
      * Loop through each path segment
      */
-    int count_as_segment = 0;
+    path_attrs->attr_value.count_as_path = 0;
     path_attrs->attr_value.as_path = (as_path_segment *)malloc(sizeof(as_path_segment));
     while (path_len > 0) {
 
-        if(count_as_segment)
-            path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(count_as_segment+1)*sizeof(as_path_segment));
+        if(path_attrs->attr_value.count_as_path)
+            path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(path_attrs->attr_value.count_as_path+1)*sizeof(as_path_segment));
         memset(as_segment, 0, sizeof(as_segment));
 
         as_segment->seg_type = *data++;
         as_segment->seg_len  = *data++;                  // Count of AS's, not bytes
         path_len -= 2;
 
-//        if (as_segment.seg_type == 1) {                 // If AS-SET open with a brace
-//            decoded_path.append(" {");
-//        }
 
         //SELF_DEBUG("%s: rtr=%s: as_path seg_len = %d seg_type = %d, path_len = %d total_len = %d as_octet_size = %d",
         //           peer_addr.c_str(), router_addr.c_str(),
@@ -284,7 +278,6 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
 
         // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
         int seg_len = as_segment->seg_len;
-        uint16_t count_seg_asn=0;
         as_segment->seg_asn = (uint32_t *)malloc(as_segment->seg_len*sizeof(uint32_t));
         for (; seg_len > 0; seg_len--) {
             uint32_t seg_asn = 0;
@@ -293,14 +286,10 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
             path_len -= asn_octet_size;                               // Adjust the path length for what was read
 
             SWAP_BYTES(&seg_asn, asn_octet_size);
-            // Increase the as path count
-            ++as_path_cnt;
-            as_segment->seg_asn[count_seg_asn++]=seg_asn;
+            as_segment->seg_asn[as_segment->count_seg_asn++]=seg_asn;
         }
-        as_segment->count_seg_asn = count_seg_asn;
-        path_attrs->attr_value.as_path[count_as_segment++]=*as_segment;
+        path_attrs->attr_value.as_path[path_attrs->attr_value.count_as_path++]=*as_segment;
     }
-    path_attrs->attr_value.count_as_path = count_as_segment;
     free(as_segment);
 
     //SELF_DEBUG("%s: rtr=%s: Parsed AS_PATH count %hu : %s", peer_addr.c_str(), router_addr.c_str(), as_path_cnt, decoded_path.c_str());
@@ -418,11 +407,11 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
         case ATTR_TYPE_CLUSTER_LIST : // Cluster List (RFC 4456)
         {    // According to RFC 4456, the value is a sequence of cluster id's
             path_attrs->attr_value.cluster_list = (u_char **) malloc(path_attrs->attr_len / 4 * sizeof(u_char *));
-            int count = 0;
+            path_attrs->attr_value.count_cluster_list = 0;
             for (int i = 0; i < path_attrs->attr_len; i += 4) {
-                path_attrs->attr_value.cluster_list[count] = (u_char *) malloc(4 * sizeof(u_char));
-                memcpy(path_attrs->attr_value.cluster_list[count], data, 4);
-                count++;
+                path_attrs->attr_value.cluster_list[path_attrs->attr_value.count_cluster_list] = (u_char *) malloc(4 * sizeof(u_char));
+                memcpy(path_attrs->attr_value.cluster_list[path_attrs->attr_value.count_cluster_list], data, 4);
+                path_attrs->attr_value.count_cluster_list++;
                 data += 4;
             }
             break;
@@ -430,19 +419,15 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
         case ATTR_TYPE_COMMUNITIES : // Community list
         {
             path_attrs->attr_value.attr_type_comm = (uint16_t *)malloc(path_attrs->attr_len/2*sizeof(uint16_t));
-            int count=0;
-            for (int i = 0; i < path_attrs->attr_len; i += 4) {
+            int count = 0;
+            for (int i = 0; i < path_attrs->attr_len; i += 2) {
                 // Add entry
                 memcpy(&value16bit, data, 2);
                 data += 2;
                 SWAP_BYTES(&value16bit, 2);
                 path_attrs->attr_value.attr_type_comm[count++]=value16bit;
-
-                memcpy(&value16bit, data, 2);
-                data += 2;
-                SWAP_BYTES(&value16bit, 2);
-                path_attrs->attr_value.attr_type_comm[count++]=value16bit;
             }
+            path_attrs->attr_value.count_attr_type_comm = count;
             break;
         }
         case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
@@ -508,7 +493,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
     if (len <= 3)
         return CORRUPT_MSG;
 
-    int count = 0;
+    *count_path_attrs = 0;
     *update_msg = (update_path_attrs **)malloc(sizeof(update_path_attrs*));
     update_path_attrs *path_attrs =(update_path_attrs *)malloc(sizeof(update_path_attrs));
     /*
@@ -516,8 +501,8 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
      */
 
     for (int read=0;  read < len; read += 2) {
-        if(count)
-            *update_msg = (update_path_attrs **)realloc(*update_msg,(count+1)*sizeof(update_path_attrs *));
+        if(*count_path_attrs)
+            *update_msg = (update_path_attrs **)realloc(*update_msg,(*count_path_attrs+1)*sizeof(update_path_attrs *));
         memset(path_attrs, 0, sizeof(path_attrs));
 
         path_attrs->attr_type.attr_flags = *data++;
@@ -557,10 +542,9 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
         } else if (path_attrs->attr_len) {
             return INCOMPLETE_MSG;
         }
-        (*update_msg)[count] = (update_path_attrs *)malloc(sizeof(update_path_attrs));
-        memcpy((*update_msg)[count++],path_attrs, sizeof(update_path_attrs));
+        (*update_msg)[*count_path_attrs] = (update_path_attrs *)malloc(sizeof(update_path_attrs));
+        memcpy((*update_msg)[(*count_path_attrs)++],path_attrs, sizeof(update_path_attrs));
     }
-    *count_path_attrs = count;
     free(path_attrs);
     return read_size;
 }

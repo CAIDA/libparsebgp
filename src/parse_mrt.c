@@ -245,7 +245,6 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char **buffer, int * buf
     SWAP_BYTES(&table_dump_msg->peer_as, 2);
     SWAP_BYTES(&table_dump_msg->attribute_len, 2);
 
-
     read_size+=4;
 
     libparsebgp_update_msg_parse_attributes(&table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker, &table_dump_msg->bgp_attrs_count);
@@ -412,7 +411,6 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char **buffer, i
         SWAP_BYTES(&r_entry->originated_time, 4);
         SWAP_BYTES(&r_entry->attribute_len, 2);
 
-//        libparsebgp_addpath_map add_path_map;
         libparsebgp_update_msg_parse_attributes(r_entry->bgp_attrs, buffer, r_entry->attribute_len, has_end_of_rib_marker, &r_entry->bgp_attrs_count);
         read_size += r_entry->attribute_len;
         buf_len-=r_entry->attribute_len;

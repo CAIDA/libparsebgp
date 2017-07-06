@@ -7,32 +7,12 @@
 void file_read(FILE *fp, u_char *buffer, int position)
 {
     char *array = (char *) malloc(BUFFER_SIZE*sizeof(char));
-//    int array_size = 100, line = 0; // define the size of character array
-//    char * array = new char[array_size]; // allocating an array of 1kb
-//    int read_lines = 128;
-
     if(fp!=NULL)
     {
         fread(array, 1, BUFFER_SIZE, fp);
         for (int i = 0; i < BUFFER_SIZE; i ++) {
             buffer[position++] = array[i];
         }
-//        cout << "File Opened successfully!!!. Reading data from file into array" << endl;
-//        while(line<read_lines && !feof(fp))
-//        {
-//            fgets(array, 80 , fp);
-//
-//            for (int i = 10; i < 57; i += 3) {
-//                int tmp;
-//                if (i == 33)
-//                    i++;
-//                else {
-//                    sscanf(array + i, "%2x", &tmp);
-//                    buffer[position++] = tmp;
-//                }
-//            }
-//            line++;
-//        }
         printf("%d", position);
     }
     else //file could not be opened
@@ -429,7 +409,6 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                 printf("%d ", parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.attr_type_comm[j]);
                                 break;
                             }
-
                         }
                     }
                     printf("||");
@@ -453,7 +432,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../rib.20020101.2234");
+        strcpy(file_path, "../updates.20020103.2053");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
@@ -483,6 +462,7 @@ int main(int argc, char * argv[]) {
     u_char *buffer= (u_char *)malloc(BUFFER_SIZE*sizeof(u_char));
     bool msg_read = true;
     FILE *fp = fopen(file_path, "r");
+    libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
     if (fp != NULL) {
         while (!feof(fp)) {
             if (position)
@@ -493,7 +473,6 @@ int main(int argc, char * argv[]) {
             int tlen = len;
             msg_read = true;
             position = 0;
-            libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
             while (msg_read && len > 0) {
                 memset(parse_msg, 0, sizeof(parse_msg));
                 u_char *buffer_to_pass = buffer+position;
@@ -517,5 +496,7 @@ int main(int argc, char * argv[]) {
         printf("*******File Parsed completely*******\n");
     } else
         printf("File could not be opened\n");
+
+    free(buffer);
     return 0;
 }
