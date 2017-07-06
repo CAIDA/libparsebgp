@@ -264,20 +264,20 @@ typedef struct libparsebgp_update_msg_data {
     update_prefix_tuple         **nlri;
 }libparsebgp_update_msg_data;
 
- /**
-  * Parses the update message
-  *
-  * \details
-  *      Reads the update message from socket and parses it.  The parsed output will
-  *      be added to the DB.
-  *
-  * \param [in]   data           Pointer to raw bgp payload data, starting at the notification message
-  * \param [in]   size           Size of the data available to read; prevent overrun when reading
-  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
-  *
-  * \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
-  */
-  ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker);
+/**
+* Parses the update message
+*
+* \details
+*      Reads the update message from socket and parses it.  The parsed output will
+*      be added to the DB.
+*
+* \param [in]   data           Pointer to raw bgp payload data, starting at the notification message
+* \param [in]   size           Size of the data available to read; prevent overrun when reading
+* \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+*
+* \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
+*/
+ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker);
 
 /**
  * Parses the BGP attributes in the update

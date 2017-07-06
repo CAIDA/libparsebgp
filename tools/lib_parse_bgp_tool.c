@@ -453,7 +453,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../../updates.20170228.2335");
+        strcpy(file_path, "../rib.20020101.2234");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
@@ -482,7 +482,6 @@ int main(int argc, char * argv[]) {
     ssize_t bytes_read = 0;
     u_char *buffer= (u_char *)malloc(BUFFER_SIZE*sizeof(u_char));
     bool msg_read = true;
-//    libparsebgp_parse_msg **all_parsed_msg = (libparsebgp_parse_msg **)malloc(sizeof(libparsebgp_parse_msg *));
     FILE *fp = fopen(file_path, "r");
     if (fp != NULL) {
         while (!feof(fp)) {
@@ -496,8 +495,6 @@ int main(int argc, char * argv[]) {
             position = 0;
             libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
             while (msg_read && len > 0) {
-//                if(count)
-//                    all_parsed_msg = (libparsebgp_parse_msg **)realloc(all_parsed_msg,(count+1)*sizeof(libparsebgp_parse_msg *));
                 memset(parse_msg, 0, sizeof(parse_msg));
                 u_char *buffer_to_pass = buffer+position;
                 bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, &buffer_to_pass, len, msg_type);
@@ -511,8 +508,6 @@ int main(int argc, char * argv[]) {
                     printf("\nMessage %d Parsed Successfully\n", count+1);
                     len -= bytes_read;
                     printf("Bytes read in parsing this message: %d Remaining Length of Buffer: %d\n", bytes_read, len);
-//                    all_parsed_msg[count] = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
-//                    memcpy(all_parsed_msg[count], parse_msg, sizeof(libparsebgp_parse_msg));
                     elem_generate(parse_msg);
                     count++;
                 }
@@ -522,12 +517,5 @@ int main(int argc, char * argv[]) {
         printf("*******File Parsed completely*******\n");
     } else
         printf("File could not be opened\n");
-
-//    for (int i = 0; i < count; i++) {
-//        cout<< "Message "<<i+1<<" Details"<<endl;
-//        cout <<"length :"<< int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.len) << " Message type "
-//             << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.type) << " Message Sub type "
-//             << int(all_parsed_msg[i]->parsed_mrt_msg.c_hdr.sub_type) << endl;
-//    }
     return 0;
 }

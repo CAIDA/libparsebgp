@@ -181,9 +181,14 @@ static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char **buffer, int *b
 static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char **buffer, int * buf_len, bool *has_end_of_rib_marker,
                                                       libparsebgp_table_dump_message *table_dump_msg) {
     int read_size=0;
-    if (extract_from_buffer(buffer, buf_len, &table_dump_msg, 4) != 4)
+    if (extract_from_buffer(buffer, buf_len, &table_dump_msg->view_number, 2) != 2)
+        return ERR_READING_MSG; //Error in parsing view number
+    if (extract_from_buffer(buffer, buf_len, &table_dump_msg->sequence, 2) != 2)
         return ERR_READING_MSG; //Error in parsing view number
     read_size+=4;
+
+    SWAP_BYTES(&table_dump_msg->view_number, 2);
+    SWAP_BYTES(&table_dump_msg->sequence, 2);
 
     switch (mrt_sub_type) {
         case AFI_IPv4:{
@@ -211,6 +216,9 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char **buffer, int * buf
 
     read_size+=6;
 
+    SWAP_BYTES(&table_dump_msg->originated_time, 4);
+
+
     switch (mrt_sub_type) {
         case AFI_IPv4:{
             if ( extract_from_buffer(buffer, buf_len, &table_dump_msg->peer_ip, 4) != 4)
@@ -234,10 +242,13 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char **buffer, int * buf
     if (extract_from_buffer(buffer, buf_len, &table_dump_msg->attribute_len, 2) != 2)
         return ERR_READING_MSG; //Error in parsing attribute length
 
+    SWAP_BYTES(&table_dump_msg->peer_as, 2);
+    SWAP_BYTES(&table_dump_msg->attribute_len, 2);
+
+
     read_size+=4;
 
-//    libparsebgp_addpath_map add_path_map;
-    libparsebgp_update_msg_parse_attributes(table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker, &table_dump_msg->bgp_attrs_count);
+    libparsebgp_update_msg_parse_attributes(&table_dump_msg->bgp_attrs, buffer, table_dump_msg->attribute_len, has_end_of_rib_marker, &table_dump_msg->bgp_attrs_count);
     read_size += table_dump_msg->attribute_len;
     buf_len-=table_dump_msg->attribute_len;
 
