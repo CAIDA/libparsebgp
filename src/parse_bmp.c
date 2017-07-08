@@ -422,7 +422,7 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(libparsebgp_parsed_bmp_
 
     // Loop through each stats object
     for (unsigned long i = 0; i < stat_rep_msg->stats_count; i++) {
-        memset(stat_info, 0, sizeof(stat_counter));
+        memset(stat_info, 0, sizeof(stat_info));
 
         bzero(b,8);
         if ((extract_from_buffer(buffer, &buf_len, &stat_info->stat_type, 2)) != 2)
@@ -479,7 +479,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
     /*
     * Process the sent open message
     */
-    if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, data, size))>0)
+    if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, *data, size))>0)
     {
         if(up_event->sent_open_msg.c_hdr.type == BGP_MSG_OPEN) {
             *data += bytes_read;
@@ -504,7 +504,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
     else
         return bytes_read; //throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
 
-    if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, data, size))>0)
+    if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, *data, size))>0)
     {
         if (up_event->sent_open_msg.c_hdr.type == BGP_MSG_OPEN) {
             *data += bytes_read;

@@ -779,6 +779,8 @@ static ssize_t libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_at
     uint16_t        nlri_len_read = 0;
     mp_reach_ls *mp_nlri_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
     path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info.mp_rch_ls = (mp_reach_ls *)malloc(sizeof(mp_reach_ls));
+    path_attrs->attr_value.mp_reach_nlri_data.count_mp_rch_ls = 0;
+
     // Process the NLRI data
     while (nlri_len_read < len) {
         if(path_attrs->attr_value.mp_reach_nlri_data.count_mp_rch_ls)

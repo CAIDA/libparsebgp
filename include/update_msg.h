@@ -243,7 +243,6 @@ typedef struct update_path_attrs {
     attr_type_tuple         attr_type;
     uint16_t                attr_len;
     attr_val                attr_value;
-
     uint16_t                count_as_path;
     uint16_t                count_cluster_list;
     uint16_t                count_attr_type_comm;
