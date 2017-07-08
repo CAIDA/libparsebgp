@@ -360,7 +360,7 @@ static void libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker) {
+void static libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker) {
     uint16_t    value16bit;
 
     /*
@@ -456,7 +456,7 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
         }
 
         case ATTR_TYPE_AS_PATHLIMIT : // deprecated
-            return NOT_YET_IMPLEMENTED;
+            break; //NOT_YET_IMPLEMENTED
 
         case ATTR_TYPE_BGP_LS:
         {
@@ -465,16 +465,16 @@ ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_
         }
 
         case ATTR_TYPE_AS4_PATH:
-            return NOT_YET_IMPLEMENTED;
+            break;  //NOT_YET_IMPLEMENTED
 
         case ATTR_TYPE_AS4_AGGREGATOR:
-            return NOT_YET_IMPLEMENTED;
+            break; //NOT_YET_IMPLEMENTED
 
         default:
             break;
 
     } // END OF SWITCH ATTR TYPE
-    return path_attrs->attr_len;
+
 }
 
 
@@ -540,9 +540,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
             /*
              * Parse data based on attribute type
              */
-            bytes_read = libparsebgp_update_msg_parse_attr_data(path_attrs, data, has_end_of_rib_marker);
-            if(bytes_read<0)
-                return bytes_read;
+            libparsebgp_update_msg_parse_attr_data(path_attrs, data, has_end_of_rib_marker);
             data += path_attrs->attr_len;
             read += path_attrs->attr_len;
             read_size += path_attrs->attr_len;

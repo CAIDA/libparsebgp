@@ -291,22 +291,6 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
  */
 ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
 
-/**
- * Parse attribute data based on attribute type
- *
- * \details
- *      Parses the attribute data based on the passed attribute type.
- *      Parsed_data will be updated based on the attribute data parsed.
- *
- *
- * \param [in]   add_path_map           Attribute type
- * \param [in]   path_attrs             Length of the attribute data
- * \param [in]   data                   Pointer to the attribute data
- * \param [in]   has_end_of_rib_marker
- * \param [out]  read_bytes             Bytes read in parsing this message.
- */
-ssize_t libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker);
-
 void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
 
 void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attrs);
