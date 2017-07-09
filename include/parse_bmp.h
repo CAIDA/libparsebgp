@@ -173,17 +173,13 @@ typedef struct libparsebgp_parsed_bmp_stat_rep {
     stat_counter*           total_stats_counter;    ///< 2 bytes - Information type
 }libparsebgp_parsed_bmp_stat_rep;
 
-u_char      *bmp_data;
-uint32_t    bmp_data_len;               ///< Length/size of data in the data buffer
-uint32_t    bmp_len;                    ///< Length of the BMP message - does not include the common header size
-uint8_t     bmp_type;                   ///< Type of the BMP message
 
 /**
  * BMP Message Structure
  */
 typedef struct libparsebgp_parsed_bmp_parsed_data{
     uint8_t version;                        ///< Version of BMP header
-
+    uint8_t bmp_type;
     union libparsebgp_parsed_bmp_hdr {
         common_hdr_bmp_v3 c_hdr_v3;         ///< structure for bmp header version 3
         common_hdr_bmp_old c_hdr_old;       ///< structure for bmp header version 1 or 2
@@ -199,7 +195,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
         libparsebgp_parse_bgp_parsed_data         parsed_rm_msg;                    ///< structure for bmp route monitoring msg
         libparsebgp_parsed_bmp_stat_rep           parsed_stat_rep;                  ///< structure for bmp stats report msg
     }libparsebgp_parsed_bmp_msg;                                                    ///< Union of BMP messages
-}libparsebgp_parsed_bmp_parsed_data;
+}libparsebgp_parse_bmp_parsed_data;
 
 /**
  * Parses a BMP message by its various types
@@ -213,7 +209,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data{
  *
  * @returns Bytes that have been successfully read by the bmp parser.
  */
-ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
+ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg, unsigned char *buffer, int buf_len);
 
 /**
  * Destructor function to free bmp_parsed_data
@@ -221,6 +217,6 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parsed_bmp_parsed_data *pars
  * @param parsed_data  Struct having parsed bmp data, that needs to be freed
  *
  */
-void libparsebgp_parse_bmp_destructor(libparsebgp_parsed_bmp_parsed_data *parsed_data);
+void libparsebgp_parse_bmp_destructor(libparsebgp_parse_bmp_parsed_data *parsed_data);
 
 #endif //PARSE_LIB_PARSE_BMPV1_H
