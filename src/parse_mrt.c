@@ -19,23 +19,25 @@
  *
  * @return number of bytes read
  */
-static ssize_t libparsebgp_parse_mrt_buffer_mrt_message(u_char **buffer, int *buf_len) {
-    if (mrt_len <= 0)
+static ssize_t libparsebgp_parse_mrt_buffer_mrt_message(u_char **buffer, int *buf_len, u_char **mrt_data, uint32_t *mrt_len) {
+
+    uint32_t mrt_data_len;
+    if (*mrt_len <= 0)
         return 0;
 
-    if (mrt_len > *buf_len) {
+    if (*mrt_len > *buf_len) {
         return INCOMPLETE_MSG;
     }
 
-    mrt_data = (u_char *)malloc(MRT_PACKET_BUF_SIZE + 1);
+    *mrt_data = (u_char *)malloc(MRT_PACKET_BUF_SIZE + 1);
 
-    if ((mrt_data_len=extract_from_buffer(buffer, buf_len, mrt_data, mrt_len)) != mrt_len) {
+    if ((mrt_data_len=extract_from_buffer(buffer, buf_len, *mrt_data, *mrt_len)) != *mrt_len) {
         return ERR_READING_MSG;
     }
 
     // Indicate no more data is left to read
-    mrt_len = 0;
-    return 0;
+    *mrt_len = 0;
+    return mrt_data_len;
 }
 
 /**
@@ -134,7 +136,7 @@ static ssize_t libparsebgp_parse_mrt_parse_bgp4mp(unsigned char** buffer, int* b
  * @param buf_len           Size of buffer
  * @param mrt_parsed_hdr    struct holding the parsed MRT header
  */
-static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char **buffer, int *buf_len, libparsebgp_mrt_common_hdr *mrt_parsed_hdr) {
+static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char **buffer, int *buf_len, libparsebgp_mrt_common_hdr *mrt_parsed_hdr, uint32_t *mrt_len) {
     int read_size=0;
     if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->time_stamp, 4) != 4)
         return ERR_READING_MSG;
@@ -150,19 +152,18 @@ static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char **buffer, int *b
     SWAP_BYTES(&mrt_parsed_hdr->sub_type, 2);
     SWAP_BYTES(&mrt_parsed_hdr->time_stamp, 4);
 
-    mrt_len = mrt_parsed_hdr->len;
+    *mrt_len = mrt_parsed_hdr->len;
     if (mrt_parsed_hdr->type == BGP4MP_ET || mrt_parsed_hdr->type == ISIS_ET || mrt_parsed_hdr->type == OSPFv3_ET) {
         if (extract_from_buffer(buffer, buf_len, &mrt_parsed_hdr->microsecond_timestamp, 4) != 4)
             return ERR_READING_MSG;
         read_size+=4;
         SWAP_BYTES(&mrt_parsed_hdr->microsecond_timestamp,4);
-        mrt_len -= 4;
+        *mrt_len -= 4;
     }
     else
         mrt_parsed_hdr->microsecond_timestamp = 0;
-    mrt_sub_type = mrt_parsed_hdr->sub_type;
 
-    if(mrt_len > *buf_len)       //checking if the complete message is contained in the buffer
+    if(*mrt_len > *buf_len)       //checking if the complete message is contained in the buffer
         return INCOMPLETE_MSG;
 
     return read_size;
@@ -179,7 +180,7 @@ static ssize_t libparsebgp_parse_mrt_parse_common_header(u_char **buffer, int *b
  * @return number of bytes read
  */
 static ssize_t libparsebgp_parse_mrt_parse_table_dump(u_char **buffer, int * buf_len, bool *has_end_of_rib_marker,
-                                                      libparsebgp_table_dump_message *table_dump_msg) {
+                                                      libparsebgp_table_dump_message *table_dump_msg, uint16_t mrt_sub_type) {
     int read_size=0;
     if (extract_from_buffer(buffer, buf_len, &table_dump_msg->view_number, 2) != 2)
         return ERR_READING_MSG; //Error in parsing view number
@@ -345,7 +346,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(unsigned char **buff
  * @return number of bytes read
  */
 static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(unsigned char **buffer, int *buf_len, bool *has_end_of_rib_marker,
-                                                       libparsebgp_rib_entry_header *rib_entry_data) {
+                                                       libparsebgp_rib_entry_header *rib_entry_data, uint16_t mrt_sub_type) {
     uint16_t count = 0;
     int addr_bytes=0;
     int read_size=0;
@@ -517,7 +518,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(unsigned char **buffer, i
  * @return number of bytes read
  */
 static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char **buffer, int *buf_len, bool *has_end_of_rib_marker,
-                                                         libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg) {
+                                                         libparsebgp_parsed_table_dump_v2 *table_dump_v2_msg,uint16_t mrt_sub_type) {
     ssize_t ret = 0, read_size = 0;
     switch (mrt_sub_type) {
         case PEER_INDEX_TABLE: {
@@ -529,7 +530,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char **buffer, int *b
         }
         case RIB_IPV4_UNICAST:
         case RIB_IPV6_UNICAST: {
-            ret = libparsebgp_parse_mrt_parse_rib_unicast(buffer, buf_len, has_end_of_rib_marker, &table_dump_v2_msg->rib_entry_hdr);
+            ret = libparsebgp_parse_mrt_parse_rib_unicast(buffer, buf_len, has_end_of_rib_marker, &table_dump_v2_msg->rib_entry_hdr, mrt_sub_type);
             if (ret < 0)
                 return ret;
             read_size += ret;
@@ -561,16 +562,25 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char **buffer, int *b
  *
  * @return number of bytes read
  */
-ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
-    ssize_t read_size=0, ret_val = 0;
 
-    ret_val = libparsebgp_parse_mrt_parse_common_header(&buffer, &buf_len, &mrt_parsed_data->c_hdr);
+
+ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
+
+    u_char *mrt_data;
+    int mrt_data_len;                   ///< Length/size of data in the data buffer
+    uint16_t mrt_sub_type;              ///< MRT sub type
+    uint32_t mrt_len;                   ///< Length of the BMP message - does not include the common header size
+
+    ssize_t read_size=0, ret_val = 0;
+    ret_val = libparsebgp_parse_mrt_parse_common_header(&buffer, &buf_len, &mrt_parsed_data->c_hdr, &mrt_len);
     if (ret_val < 0) {
         //Error found, call destructor and return error code
         libparsebgp_parse_mrt_destructor(mrt_parsed_data);
         return ret_val;
     }
     read_size += ret_val;
+
+    mrt_sub_type = mrt_parsed_data->c_hdr.sub_type;
 
     switch (mrt_parsed_data->c_hdr.type) {
         case OSPFv2 :     //do nothing
@@ -580,13 +590,14 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
         }
 
         case TABLE_DUMP : {
-            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len);
+            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len, &mrt_data, &mrt_len);
             if (ret_val < 0) {
                 read_size = ret_val;
                 break;
             }
+            mrt_data_len = ret_val;
             ret_val = libparsebgp_parse_mrt_parse_table_dump(&mrt_data, &mrt_data_len, &mrt_parsed_data->has_end_of_rib_marker,
-                                                             &mrt_parsed_data->parsed_data.table_dump);
+                                                             &mrt_parsed_data->parsed_data.table_dump, mrt_sub_type);
             if (ret_val < 0)
                 read_size = ret_val;
             else
@@ -595,13 +606,13 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
         }
 
         case TABLE_DUMP_V2 : {
-            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len))<0) {
+            if((ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len, &mrt_data, &mrt_len))<0) {
                 read_size = ret_val;
                 break;
             }
-
+            mrt_data_len = ret_val;
             ret_val = libparsebgp_parse_mrt_parse_table_dump_v2(&mrt_data, &mrt_data_len, &mrt_parsed_data->has_end_of_rib_marker,
-                                                                &mrt_parsed_data->parsed_data.table_dump_v2);
+                                                                &mrt_parsed_data->parsed_data.table_dump_v2, mrt_sub_type);
             if (ret_val < 0)
                 read_size = ret_val;
             else
@@ -611,12 +622,12 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
 
         case BGP4MP :
         case BGP4MP_ET : {
-            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len);
+            ret_val = libparsebgp_parse_mrt_buffer_mrt_message(&buffer, &buf_len, &mrt_data, &mrt_len);
             if (ret_val < 0) {
                 read_size = ret_val;
                 break;
             }
-
+            mrt_data_len = ret_val;
             ret_val = libparsebgp_parse_mrt_parse_bgp4mp(&mrt_data, &mrt_data_len, mrt_parsed_data);
             if (ret_val < 0)
                 read_size = ret_val;
@@ -633,9 +644,8 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
             read_size = INVALID_MSG;
         }
     }
-    if (read_size < 0) {
+    if (read_size < 0)
         libparsebgp_parse_mrt_destructor(mrt_parsed_data);
-    }
 
     return read_size;
 }
@@ -705,7 +715,6 @@ void libparsebgp_parse_mrt_destructor(libparsebgp_parse_mrt_parsed_data *mrt_par
         }
     }
 }
-
 
 int main() {
 //    int len = 109;
@@ -813,21 +822,13 @@ unsigned char temp[] = {0x03, 0x00, 0x00, 0x03, 0x66, 0x00, 0x00, 0x00, 0x00, 0x
 
     u_char *tmp;
     tmp = temp;
-    libparsebgp_parsed_bmp_parsed_data bmp_data;
-    int read_size = libparsebgp_parse_bmp_parse_msg(&bmp_data, tmp, len);
-    libparsebgp_parse_bmp_destructor(&bmp_data);
+    libparsebgp_parse_mrt_parsed_data mrt_data;
+    int read_size = libparsebgp_parse_mrt_parse_msg(&mrt_data, tmp, len);
+    libparsebgp_parse_mrt_destructor(&mrt_data);
     if(read_size>0)
         printf("parsed successfully");
     else
         printf("error");
-//    cout << "Peer Address" << int(.peer_index_tbl.peer_entries.begin()->peer_type);
-    //cout<<"Peer Address "<<int(p->peer_index_table.peer_entries.begin()->peer_type);
-//    cout<<p->bgpMsg.common_hdr.len<<" "<<int(p->bgpMsg.common_hdr.type)<<endl;
-//    cout<<int(p->bgpMsg.adv_obj_rib_list[0].isIPv4)<<endl;
+
     return 1;
 }
-//int main()
-//{
-//    printf("hello moto");
-//    return 0;
-//}

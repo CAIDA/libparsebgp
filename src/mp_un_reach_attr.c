@@ -129,18 +129,11 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *pa
     /*
      * Make sure the parsing doesn't exceed buffer
      */
-    if (attr_len < 0) {
-        //LOG_NOTICE("%s: MP_UNREACH NLRI data length is larger than attribute data length, skipping parse", peer_addr.c_str());
+    if (attr_len < 0)
         return;
-    }
-
-    //SELF_DEBUG("%s: afi=%d safi=%d", peer_addr.c_str(), mp_unreach_data->afi, mp_unreach_data->safi);
-
-    if (attr_len == 0) {
+    if (attr_len == 0)
         *has_end_of_rib_marker = true;
-        //LOG_INFO("%s: End-Of-RIB marker (mp_unreach len=0)", peer_addr.c_str());
-
-    } else {
+    else {
         /*
          * NLRI data depends on the AFI & SAFI
          *  Parse data based on AFI + SAFI
@@ -148,5 +141,3 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(update_path_attrs *pa
         libparsebgp_mp_un_reach_attr_parse_afi(path_attrs, data, attr_len);
     }
 }
-
-//} /* namespace bgp_msg */

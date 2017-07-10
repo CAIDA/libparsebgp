@@ -479,19 +479,17 @@ int main(int argc, char * argv[]) {
                 bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, &buffer_to_pass, len, msg_type);
                 if (bytes_read < 0) {
                     msg_read = false;
-                    printf("\n Crashed. Error code: %d\n", bytes_read);
+                    printf("\n Crashed. Error code: %lu\n", bytes_read);
                 } else if (bytes_read == 0)
                     msg_read = false;
                 else {
                     position += bytes_read;
                     printf("\nMessage %d Parsed Successfully\n", count+1);
                     len -= bytes_read;
-                    printf("Bytes read in parsing this message: %d Remaining Length of Buffer: %d\n", bytes_read, len);
+                    printf("Bytes read in parsing this message: %lu Remaining Length of Buffer: %d\n", bytes_read, len);
                     elem_generate(parse_msg);
                     count++;
                 }
-                if (count == 3858)
-                    printf("Yo");
             }
             position = shift(buffer, position, tlen);
         }
