@@ -88,37 +88,38 @@ static void libparsebgp_evpn_parse_route_distinguisher(u_char **data_pointer, ro
 
     switch (rd->rd_type) {
         case 0: {
-            memcpy(&rd->rd_type_msg.rd_type_0.rd_administrator_subfield, *data_pointer, 2);
+            memcpy(&rd->rd_value.rd_administrator_subfield, *data_pointer, 2);
             *data_pointer += 2;
 
-            memcpy(&rd->rd_type_msg.rd_type_0.rd_assigned_number, *data_pointer, 4);
+            memcpy(&rd->rd_value.rd_assigned_number, *data_pointer, 4);
             *data_pointer += 4;
 
-            SWAP_BYTES(&rd->rd_type_msg.rd_type_0.rd_assigned_number, 4);
-            SWAP_BYTES(&rd->rd_type_msg.rd_type_0.rd_administrator_subfield, 2);
+            SWAP_BYTES(&rd->rd_value.rd_assigned_number, 4);
+            SWAP_BYTES(&rd->rd_value.rd_administrator_subfield, 2);
             break;
         };
 
         case 1: {
-            memcpy(&rd->rd_type_msg.rd_type_1.rd_administrator_subfield, *data_pointer, 4);
+            memcpy(&rd->rd_value.rd_administrator_subfield, *data_pointer, 4);
             *data_pointer += 4;
 
-            memcpy(&rd->rd_type_msg.rd_type_1.rd_assigned_number, *data_pointer, 2);
+            memcpy(&rd->rd_value.rd_assigned_number, *data_pointer, 2);
             *data_pointer += 2;
 
-            SWAP_BYTES(&rd->rd_type_msg.rd_type_1.rd_assigned_number, 2);
+            SWAP_BYTES(&rd->rd_value.rd_assigned_number, 2);
+            SWAP_BYTES(&rd->rd_value.rd_administrator_subfield, 4);
             break;
         };
 
         case 2: {
-            memcpy(&rd->rd_type_msg.rd_type_2.rd_administrator_subfield, *data_pointer, 4);
+            memcpy(&rd->rd_value.rd_administrator_subfield, *data_pointer, 4);
             *data_pointer += 4;
 
-            memcpy(&rd->rd_type_msg.rd_type_2.rd_assigned_number, *data_pointer, 2);
+            memcpy(&rd->rd_value.rd_assigned_number, *data_pointer, 2);
             *data_pointer +=2;
 
-            SWAP_BYTES(&rd->rd_type_msg.rd_type_2.rd_administrator_subfield, 4);
-            SWAP_BYTES(&rd->rd_type_msg.rd_type_2.rd_assigned_number, 2);
+            SWAP_BYTES(&rd->rd_value.rd_administrator_subfield, 4);
+            SWAP_BYTES(&rd->rd_value.rd_assigned_number, 2);
             break;
         };
     }

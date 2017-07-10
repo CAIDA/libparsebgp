@@ -432,7 +432,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../../rib.20020101.1833");
+        strcpy(file_path, "../../updates.20020103.2053");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
@@ -490,6 +490,8 @@ int main(int argc, char * argv[]) {
                     elem_generate(parse_msg);
                     count++;
                 }
+                if (count == 3858)
+                    printf("Yo");
             }
             position = shift(buffer, position, tlen);
         }

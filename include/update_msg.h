@@ -56,6 +56,7 @@ typedef struct attr_type_tuple {
     uint8_t attr_type_code;
 }attr_type_tuple;
 
+
 typedef struct as_path_segment {
     uint8_t         seg_type;
     uint8_t         seg_len;

@@ -563,6 +563,7 @@ static ssize_t libparsebgp_parse_mrt_parse_table_dump_v2(u_char **buffer, int *b
  */
 ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer, int buf_len) {
     ssize_t read_size=0, ret_val = 0;
+
     ret_val = libparsebgp_parse_mrt_parse_common_header(&buffer, &buf_len, &mrt_parsed_data->c_hdr);
     if (ret_val < 0) {
         //Error found, call destructor and return error code
