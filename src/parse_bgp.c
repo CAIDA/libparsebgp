@@ -20,7 +20,6 @@ ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_p
      */
     ssize_t ret_val = libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, *data, size);
     if (ret_val < 0) {
-        libparsebgp_parse_bgp_destructor(bgp_parsed_data);
         return ret_val;
     }
     int data_bytes_remaining = bgp_parsed_data->c_hdr.len - BGP_MSG_HDR_LEN;
@@ -156,7 +155,7 @@ void libparsebgp_parse_bgp_destructor(libparsebgp_parse_bgp_parsed_data *bgp_par
             break;
         }
         case BGP_MSG_UPDATE: {
-            libparsebgp_parse_update_msg_destructor(&bgp_parsed_data->parsed_data.update_msg, bgp_parsed_data->c_hdr.len - BGP_MSG_HDR_LEN);
+            libparsebgp_parse_update_msg_destructor(&bgp_parsed_data->parsed_data.update_msg);
             break;
         }
     }

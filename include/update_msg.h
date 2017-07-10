@@ -50,10 +50,12 @@ enum update_attr_types {
     ATTR_TYPE_INTERNAL_AS_ORIGIN             // The AS that originated the entry
 };
 
-
+/*
+ * Structure for attribute type
+ */
 typedef struct attr_type_tuple {
-    uint8_t attr_flags;
-    uint8_t attr_type_code;
+    uint8_t attr_flags;     ///< Attribute flags - 1 octet
+    uint8_t attr_type_code; ///< Attribute type code - 1 octet
 }attr_type_tuple;
 
 
@@ -68,15 +70,15 @@ typedef struct as_path_segment {
  * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
  */
 typedef struct mp_unreach_nlri {
-    uint16_t       afi;                         ///< Address Family Identifier
-    uint8_t        safi;                        ///< Subsequent Address Family Identifier
-    uint16_t       count_wdrawn_routes;         ///< Number of withdrawn routes
-    uint16_t       count_wdrawn_routes_label;   ///< Number of withdrawn routes with label
-    uint16_t       count_evpn_withdrawn;        ///< Number of EVPN NLRIs withdrawn
-    union withdrawn_routes_nlri {
-        update_prefix_tuple             *wdrawn_routes;       ///< Withdrawn routes
-        update_prefix_label_tuple       *wdrawn_routes_label; ///< Withdrawn routes with label
-        evpn_tuple                      *evpn_withdrawn;      ///< List of evpn nlris withdrawn
+    uint16_t       afi;                                         ///< Address Family Identifier
+    uint8_t        safi;                                        ///< Subsequent Address Family Identifier
+    uint16_t       count_wdrawn_routes;                         ///< Number of withdrawn routes
+    uint16_t       count_wdrawn_routes_label;                   ///< Number of withdrawn routes with label
+    uint16_t       count_evpn_withdrawn;                        ///< Number of EVPN NLRIs withdrawn
+    union withdrawn_routes_nlri {                               ///< Union for withdrawn routes nlri
+        update_prefix_tuple             *wdrawn_routes;         ///< Withdrawn routes
+        update_prefix_label_tuple       *wdrawn_routes_label;   ///< Withdrawn routes with label
+        evpn_tuple                      *evpn_withdrawn;        ///< List of evpn nlris withdrawn
     }withdrawn_routes_nlri;
 }mp_unreach_nlri;
 
@@ -191,7 +193,7 @@ typedef struct mp_reach_nlri {
 typedef struct extcomm_hdr {
     uint8_t      high_type;                      ///< Type high byte
     uint8_t      low_type;                       ///< Type low byte - subtype
-    u_char       *val;
+    u_char       *val;                           ///< Value
 }extcomm_hdr;
 
 
@@ -224,75 +226,93 @@ typedef struct bgp_link_state_attrs{
     }prefix;
 }bgp_link_state_attrs;
 
+/*
+ * Union holding the different attributes types
+ */
 typedef union attr_value{
-    uint8_t                 origin;
-    as_path_segment         *as_path;
-    u_char                  next_hop[4];
-    u_char                  originator_id[4];
-    uint32_t                med;
-    uint32_t                local_pref;
-    u_char                  aggregator[4];
-    u_char                  **cluster_list;
-    uint16_t                *attr_type_comm;
-    extcomm_hdr             *ext_comm;
-    mp_unreach_nlri         mp_unreach_nlri_data;
-    mp_reach_nlri           mp_reach_nlri_data;
-    bgp_link_state_attrs    *bgp_ls;
+    uint8_t                 origin;                 ///< Origin of path information
+    as_path_segment         *as_path;               ///< sequence of AS path segments
+    u_char                  next_hop[4];            ///< IP address of the router to be used as next hop to the destinations
+                                                    ///< listed in the NLRI field of the UPDATE message
+    u_char                  originator_id[4];       ///< Originator ID
+    uint32_t                med;                    ///< contains the MED value
+    uint32_t                local_pref;             ///< contains the local pref value
+    u_char                  aggregator[4];          ///< The attribute contains the last AS number that formed the aggregate route
+    u_char                  **cluster_list;         ///< Cluster List (RFC 4456)
+    uint16_t                *attr_type_comm;        ///< Community list
+    extcomm_hdr             *ext_comm;              ///< extended community list (RFC 4360)
+    mp_unreach_nlri         mp_unreach_nlri_data;   ///< MP_REACH_NLRI RFC4760
+    mp_reach_nlri           mp_reach_nlri_data;     ///< MP_UNREACH_NLRI RFC4760
+    bgp_link_state_attrs    *bgp_ls;                ///< Link state attribute
 }attr_val;
 
+/*
+ * Structure for path attributes in update message
+ */
 typedef struct update_path_attrs {
-    attr_type_tuple         attr_type;
-    uint16_t                attr_len;
-    attr_val                attr_value;
-    uint16_t                count_as_path;
-    uint16_t                count_cluster_list;
-    uint16_t                count_attr_type_comm;
-    uint16_t                count_ext_comm;
-    uint16_t                count_bgp_ls;
+    attr_type_tuple         attr_type;              ///< Type of attribute - 2 octets
+    uint16_t                attr_len;               ///< Length of attribute
+    attr_val                attr_value;             ///< Attribute value
+    uint16_t                count_as_path;          ///< Number of as_paths
+    uint16_t                count_cluster_list;     ///< Number of cluster lists
+    uint16_t                count_attr_type_comm;   ///< Number of communities
+    uint16_t                count_ext_comm;         ///< Number of extended communities
+    uint16_t                count_bgp_ls;           ///< Number of bgp-ls
 }update_path_attrs;
 
-
+/*
+ * Structure for parsed update message
+ */
 typedef struct libparsebgp_update_msg_data {
-    uint16_t                    count_wdrawn_route;
-    uint16_t                    count_path_attr;
-    uint16_t                    count_nlri;
+    uint16_t                    count_wdrawn_route;     ///< Number of withdrawn routes
+    uint16_t                    count_path_attr;        ///< Number of path attributes
+    uint16_t                    count_nlri;             ///< Number of NLRI
 
-    uint16_t                    wdrawn_route_len;
-    update_prefix_tuple         **wdrawn_routes;
-    uint16_t                    total_path_attr_len;
-    update_path_attrs           **path_attributes;
-    update_prefix_tuple         **nlri;
+    uint16_t                    wdrawn_route_len;       ///< Length of withdrawn routes
+    update_prefix_tuple         **wdrawn_routes;        ///< Array containing withdrawn routes
+    uint16_t                    total_path_attr_len;    ///< PAth attributes length
+    update_path_attrs           **path_attributes;      ///< Array containing path attributes
+    update_prefix_tuple         **nlri;                 ///< Array containing nlri
 }libparsebgp_update_msg_data;
 
 /**
 * Parses the update message
 *
-* \details
+* @details
 *      Reads the update message from socket and parses it.  The parsed output will
 *      be added to the DB.
 *
-* \param [in]   data           Pointer to raw bgp payload data, starting at the notification message
-* \param [in]   size           Size of the data available to read; prevent overrun when reading
-* \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+* @param [in]   data           Pointer to raw bgp payload data, starting at the notification message
+* @param [in]   size           Size of the data available to read; prevent overrun when reading
+* @param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
 *
-* \return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
+* @return ZERO is error, otherwise a positive value indicating the number of bytes read from update message
 */
 ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg, u_char *data, ssize_t size, bool *has_end_of_rib_marker);
 
 /**
  * Parses the BGP attributes in the update
  *
- * \details
+ * @details
  *     Parses all attributes.  Decoded values are updated in 'parsed_data'
  *
- * \param [in]   data       Pointer to the start of the prefixes to be parsed
- * \param [in]   len        Length of the data in bytes to be read
- * \param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
+ * @param [in]   data       Pointer to the start of the prefixes to be parsed
+ * @param [in]   len        Length of the data in bytes to be read
+ * @param [out]  parsed_data    Reference to parsed_update_data; will be updated with all parsed data
  */
 ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count);
 
-void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size);
+/**
+ * Destructor for the update message struct
+ * @param update_msg struct containing the parsed update message
+ *
+ */
+void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg);
 
+/**
+ * Destructor for the structure containing path attributes
+ * @param path_attrs struct containing path attributes
+ */
 void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attrs);
 
 #endif /* UPDATEMSG_H_ */

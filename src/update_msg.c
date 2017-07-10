@@ -652,7 +652,7 @@ void libparsebgp_parse_update_path_attrs_destructor(update_path_attrs *path_attr
     }
 }
 
-void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg, int total_size) {
+void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update_msg) {
 
     if (update_msg->count_wdrawn_route > 0) {
         for (int i = 0; i < update_msg->count_wdrawn_route; ++i) {

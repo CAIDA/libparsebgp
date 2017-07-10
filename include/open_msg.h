@@ -68,8 +68,8 @@ typedef struct open_capabilities {
 typedef struct open_param {
   uint8_t param_type;                           ///< Parameter type, 1 octet
   uint8_t param_len;                            ///< Parameter length, 1 octet
-  uint8_t count_param_val;
-  open_capabilities *param_values;    ///< Parameter values
+  uint8_t count_param_val;                      ///< Number of parameter values (not in RFC)
+  open_capabilities *param_values;              ///< Parameter values
 }open_param;
 
 typedef struct libparsebgp_open_msg_data{
@@ -98,6 +98,10 @@ typedef struct libparsebgp_open_msg_data{
 */
 ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data, u_char *data, size_t size, bool openMessageIsSent);
 
+/**
+ * Destructor for open message
+ * @param open_msg_data struct for open message that needs to be freed
+ * */
 void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data);
 
 #endif /* OPENMSG_H_ */

@@ -603,7 +603,6 @@ ssize_t libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parse
      * Parsing the bmp message header: Version 1, 2, 3 are supported
      */
     if((bytes_read= libparsebgp_parse_bmp_msg_header(parsed_msg, &buffer, &buf_len, &bmp_len))<0) {
-        libparsebgp_parse_bmp_destructor(parsed_msg);
         return bytes_read;      //checking for the error code returned in parsing bmp header.
     }
 

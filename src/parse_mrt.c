@@ -574,8 +574,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
     ssize_t read_size=0, ret_val = 0;
     ret_val = libparsebgp_parse_mrt_parse_common_header(&buffer, &buf_len, &mrt_parsed_data->c_hdr, &mrt_len);
     if (ret_val < 0) {
-        //Error found, call destructor and return error code
-        libparsebgp_parse_mrt_destructor(mrt_parsed_data);
+        //Error found, return
         return ret_val;
     }
     read_size += ret_val;

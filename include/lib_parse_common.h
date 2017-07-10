@@ -21,11 +21,11 @@ enum libparsebgp_parse_msg_types {MRT_MESSAGE_TYPE = 1, BMP_MESSAGE_TYPE, BGP_ME
  * Parse Message schema
  */
 typedef struct libparsebgp_parse_msg{
-    int msg_type;
-    union libparsebgp_parse_msg_parsed {
-        libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;
-        libparsebgp_parse_bmp_parsed_data parsed_bmp_msg;
-        libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;
+    int msg_type;                                           ///< Type of message parsed
+    union libparsebgp_parse_msg_parsed {                    ///< Union of message
+        libparsebgp_parse_bgp_parsed_data parsed_bgp_msg;   ///< struct for BGP message
+        libparsebgp_parse_bmp_parsed_data parsed_bmp_msg;   ///< Struct for BMP message
+        libparsebgp_parse_mrt_parsed_data parsed_mrt_msg;   ///< Struct for MRT message
     }libparsebgp_parse_msg_parsed;
 }libparsebgp_parse_msg;
 
