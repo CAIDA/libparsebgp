@@ -269,11 +269,18 @@ ssize_t libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_
     memcpy(&path_attrs->attr_value.mp_reach_nlri_data.afi, *data, 2); *data += 2; attr_len -= 2; read_size += 2;
     SWAP_BYTES(&path_attrs->attr_value.mp_reach_nlri_data.afi, 2);                     // change to host order
 
-    path_attrs->attr_value.mp_reach_nlri_data.safi = **data++; attr_len--; read_size++;   // Set the SAFI - 1 octet
-    path_attrs->attr_value.mp_reach_nlri_data.nh_len = **data++; attr_len--; read_size++; // Set the next-hop length - 1 octet
+    path_attrs->attr_value.mp_reach_nlri_data.safi = **data; // Set the SAFI - 1 octet
+    *data += 1; attr_len--; read_size++;
+
+    path_attrs->attr_value.mp_reach_nlri_data.nh_len = **data; // Set the next-hop length - 1 octet
+    *data += 1; attr_len--; read_size++;
+
     next_hop = data;  *data += path_attrs->attr_value.mp_reach_nlri_data.nh_len;
-    attr_len -= path_attrs->attr_value.mp_reach_nlri_data.nh_len; read_size += path_attrs->attr_value.mp_reach_nlri_data.nh_len;    // Set pointer position for nh data
-    path_attrs->attr_value.mp_reach_nlri_data.reserved = **data++; attr_len--; read_size++; // Set the reserve octet
+    attr_len -= path_attrs->attr_value.mp_reach_nlri_data.nh_len;
+    read_size += path_attrs->attr_value.mp_reach_nlri_data.nh_len;    // Set pointer position for nh data
+
+    path_attrs->attr_value.mp_reach_nlri_data.reserved = **data; // Set the reserve octet
+    *data +=1; attr_len--; read_size++;
     nlri_data = data;                          // Set pointer position for nlri data
 
     /*
