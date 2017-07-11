@@ -17,6 +17,7 @@ void file_read(FILE *fp, u_char *buffer, int position)
     }
     else //file could not be opened
         printf("File could not be opened.\n");
+    free(array);
 }
 
 int shift(u_char *buffer, int bytes_read, int buf_len)
@@ -497,6 +498,7 @@ int main(int argc, char * argv[]) {
     } else
         printf("File could not be opened\n");
 
+    free(parse_msg);
     free(buffer);
     return 0;
 }
