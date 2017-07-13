@@ -63,7 +63,7 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
  *
  * @return the number of bytes read
  */
-ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char **data, size_t size, bool is_local_msg);
+ssize_t libparsebgp_parse_bgp_parse_msg(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size, bool is_local_msg);
 
 
 /**
@@ -90,7 +90,7 @@ ssize_t libparsebgp_parse_bgp_handle_update(libparsebgp_parse_bgp_parsed_data *b
  *
  * @returns number of bytes read
  */
-ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char **data, size_t size);
+ssize_t libparsebgp_parse_bgp_handle_down_event(libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size);
 
 /**
  * Parses the BGP common header

@@ -24,15 +24,14 @@
  */
 static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data *open_msg_data,u_char **data, size_t size, bool openMessageIsSent) {
     int      read_size   = 0;
-    uint8_t count_param = 0, count_cap = 0;
     u_char   **bufPtr     = data;
+    open_msg_data->count_opt_param = 0;
     open_param      *opt_param = (open_param *)malloc(sizeof(open_param));
     open_msg_data->opt_param = (open_param *)malloc(sizeof(open_param));
 
     for (int i=0; i < size; ) {
-        count_cap = 0;
-        if(count_param)
-            open_msg_data->opt_param = (open_param *)realloc(open_msg_data->opt_param, (count_param+1)*sizeof(open_param));
+        if(open_msg_data->count_opt_param)
+            open_msg_data->opt_param = (open_param *)realloc(open_msg_data->opt_param, (open_msg_data->count_opt_param+1)*sizeof(open_param));
         memset(opt_param, 0, sizeof(opt_param));
 
         memcpy(&opt_param->param_type, *bufPtr, 1);  //reading type
@@ -40,7 +39,6 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
 
         if (opt_param->param_type != BGP_CAP_PARAM_TYPE) {
             return INVALID_MSG;
-            //LOG_NOTICE("%s: Open param type %d is not supported, expected type %d", peer_addr.c_str(),param->type, BGP_CAP_PARAM_TYPE);
         }
 
         /*
@@ -48,11 +46,12 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
          */
         else if (opt_param->param_len >= 2 && (read_size + 2 + opt_param->param_len) <= size) {
             u_char *cap_ptr = *bufPtr + 2;
+            opt_param->count_param_val = 0;
             open_capabilities *open_cap = (open_capabilities *)malloc(sizeof(open_capabilities));
             opt_param->param_values = (open_capabilities *)malloc(sizeof(open_capabilities));
             for (int c=0; c < opt_param->param_len; ) {
-                if(count_cap)
-                    opt_param->param_values = (open_capabilities *)realloc(opt_param->param_values, (count_cap+1)*sizeof(open_capabilities));
+                if(opt_param->count_param_val)
+                    opt_param->param_values = (open_capabilities *)realloc(opt_param->param_values, (opt_param->count_param_val+1)*sizeof(open_capabilities));
 
                 memset(open_cap, 0, sizeof(open_cap));
                 memcpy(&open_cap->cap_code, cap_ptr, 1); //reading capability code
@@ -69,7 +68,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
 
                             //snprintf(capStr, sizeof(capStr), "4 Octet ASN (%d)", BGP_CAP_4OCTET_ASN);
                             //capabilities.push_back(capStr);
-                            opt_param->param_values[count_cap++]=*open_cap;
+                            opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                         } else {
                             return INVALID_MSG;
 //                            LOG_NOTICE("%s: 4 octet ASN capability length is invalid %d expected 4", peer_addr.c_str(), cap->len);
@@ -141,7 +140,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                                 //TODO: figure out if following is needed
 //                                libparsebgp_addpath_add(open_msg_data->add_path_capability, open_cap.cap_values.add_path_data.afi,
 //                                                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
-                                opt_param->param_values[count_cap++]=*open_cap;
+                                opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                                 //capabilities.push_back(decodeStr);
                             }
                         }
@@ -164,7 +163,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                         if (open_cap->cap_len == sizeof(open_cap->cap_values.mpbgp_data)) {
                             memcpy(&open_cap->cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap->cap_values.mpbgp_data));
                             SWAP_BYTES(&open_cap->cap_values.mpbgp_data.afi, sizeof(open_cap->cap_values.mpbgp_data));
-                            opt_param->param_values[count_cap++]=*open_cap;
+                            opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                         }
                         else {
                             //LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
@@ -184,16 +183,15 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                     c += 2 + open_cap->cap_len;
                     cap_ptr += 2 + open_cap->cap_len;
             }
-            opt_param->count_param_val = count_cap;
+            free(open_cap);
         }
 
         // Move index to next param
         i += 2 + opt_param->param_len;
         *bufPtr += 2 + opt_param->param_len;
         read_size += 2 + opt_param->param_len;
-        open_msg_data->opt_param[count_param++] = *opt_param;
+        open_msg_data->opt_param[open_msg_data->count_opt_param++] = *opt_param;
     }
-    open_msg_data->count_opt_param = count_param;
     free(opt_param);
     return read_size;
 }
@@ -233,9 +231,8 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
         return ERR_READING_MSG;
     if ( extract_from_buffer(&bufPtr, &buf_size, &open_msg_data->opt_param_len, 1) != 1)
         return ERR_READING_MSG;
-//    memcpy(&open_msg_data, bufPtr,10); //reading the first few parameters
-      read_size = 10;
-//    bufPtr += read_size;                                       // Move pointer past the open header
+
+    read_size = 10;
 
     // Change to host order
     SWAP_BYTES(&open_msg_data->hold_time, 2);
@@ -245,15 +242,10 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
      * Make sure the buffer contains the rest of the open message, but allow a zero length in case the
      *  data is missing on purpose (router implementation)
      */
-    if (open_msg_data->opt_param_len == 0) {
- //       LOG_WARN("%s: Capabilities in open message is ZERO/empty, this is abnormal and likely a router implementation issue.", peer_addr.c_str());
+    if (open_msg_data->opt_param_len == 0)
         return read_size;
-    }
 
     else if (open_msg_data->opt_param_len > (size - read_size)) {
- //       LOG_WARN("%s: Capabilities in open message are truncated, attempting parse what's there; param_len %d > bgp msg bytes remaining of %d",
- //                peer_addr.c_str(), open_hdr.param_len, (size - read_size));
-
         // Parse as many capabilities as possible
         libparsebgp_open_msg_parse_capabilities(open_msg_data,&bufPtr, (size - read_size), openMessageIsSent);
 
@@ -270,15 +262,11 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
     return read_size;
 }
 
-//static void libparsebgp_parse_open_msg_opt_param_destructor(open_param &param) {
-//    for (int i = 0; i < param.param_len; ++i) {
-//        free(&param.param_values[i]);
-//    }
-//    free(&param);
-//}
-
 void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data) {
     for (int i = 0; i < open_msg_data->count_opt_param; i++) {
+        for(int j=0; j<open_msg_data->opt_param[i].count_param_val; j++) {
+            free(&open_msg_data->opt_param[i].param_values[j]);
+        }
         free(open_msg_data->opt_param[i].param_values);
     }
     free(open_msg_data->opt_param);
