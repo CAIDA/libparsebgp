@@ -65,32 +65,19 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                         if (open_cap->cap_len == 4) {
                             memcpy(&open_cap->cap_values.asn, cap_ptr + 2, 4);
                             SWAP_BYTES(&open_cap->cap_values.asn, 4);
-
-                            //snprintf(capStr, sizeof(capStr), "4 Octet ASN (%d)", BGP_CAP_4OCTET_ASN);
-                            //capabilities.push_back(capStr);
                             opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                         } else {
                             return INVALID_MSG;
-//                            LOG_NOTICE("%s: 4 octet ASN capability length is invalid %d expected 4", peer_addr.c_str(), cap->len);
                         }
                         break;
 
                     case BGP_CAP_ROUTE_REFRESH:
-                        //                       SELF_DEBUG("%s: supports route-refresh", peer_addr.c_str());
-                        //snprintf(capStr, sizeof(capStr), "Route Refresh (%d)", BGP_CAP_ROUTE_REFRESH);
-                        //capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_ROUTE_REFRESH_ENHANCED:
-                        //                       SELF_DEBUG("%s: supports route-refresh enhanced", peer_addr.c_str());
-                        //snprintf(capStr, sizeof(capStr), "Route Refresh Enhanced (%d)", BGP_CAP_ROUTE_REFRESH_ENHANCED);
-                        //capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_ROUTE_REFRESH_OLD:
-                        //                       SELF_DEBUG("%s: supports OLD route-refresh", peer_addr.c_str());
-                        //snprintf(capStr, sizeof(capStr), "Route Refresh Old (%d)", BGP_CAP_ROUTE_REFRESH_OLD);
-                        //capabilities.push_back(capStr);
                         break;
 
                     case BGP_CAP_ADD_PATH: {
@@ -140,9 +127,9 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                                 //TODO: figure out if following is needed
 //                                libparsebgp_addpath_add(open_msg_data->add_path_capability, open_cap.cap_values.add_path_data.afi,
 //                                                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
-                                opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                                 //capabilities.push_back(decodeStr);
                             }
+                            opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                         }
 
                         break;

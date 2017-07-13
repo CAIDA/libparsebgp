@@ -411,8 +411,7 @@ void static libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs
             path_attrs->count_cluster_list = 0;
             for (int i = 0; i < path_attrs->attr_len; i += 4) {
                 path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list] = (u_char *) malloc(4 * sizeof(u_char));
-                memcpy(path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list], data, 4);
-                path_attrs->count_cluster_list++;
+                memcpy(path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list++], data, 4);
                 data += 4;
             }
             break;
@@ -420,15 +419,14 @@ void static libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs
         case ATTR_TYPE_COMMUNITIES : // Community list
         {
             path_attrs->attr_value.attr_type_comm = (uint16_t *)malloc(path_attrs->attr_len/2*sizeof(uint16_t));
-            int count = 0;
+            path_attrs->count_attr_type_comm = 0;
             for (int i = 0; i < path_attrs->attr_len; i += 2) {
                 // Add entry
                 memcpy(&value16bit, data, 2);
                 data += 2;
                 SWAP_BYTES(&value16bit, 2);
-                path_attrs->attr_value.attr_type_comm[count++]=value16bit;
+                path_attrs->attr_value.attr_type_comm[path_attrs->count_attr_type_comm ++]=value16bit;
             }
-            path_attrs->count_attr_type_comm = count;
             break;
         }
         case ATTR_TYPE_EXT_COMMUNITY : // extended community list (RFC 4360)
@@ -526,8 +524,6 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
 
         }
         else {
-//            if (extract_from_buffer(data, &len, &path_attrs->attr_len, 1) != 1)
-//                return ERR_READING_MSG;
             path_attrs->attr_len = *data++;
             read++;
             read_size++;
@@ -666,6 +662,7 @@ void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update
     if (update_msg->count_path_attr > 0) {
         for (int i = 0; i < update_msg->count_path_attr; ++i) {
             libparsebgp_parse_update_path_attrs_destructor(update_msg->path_attributes[i]);
+            free(update_msg->path_attributes[i]);
         }
         free(update_msg->path_attributes);
         update_msg->path_attributes = NULL;
