@@ -668,5 +668,4 @@ void libparsebgp_parse_update_msg_destructor(libparsebgp_update_msg_data *update
         free(update_msg->nlri);
         update_msg->nlri = NULL;
     }
-
 }

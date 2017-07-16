@@ -89,19 +89,19 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                         cap_ptr += 2;
                         if (open_cap->cap_len >= 4) {
 
-                            add_path_capability add_path;
+                            add_path_capability *add_path = (add_path_capability *)malloc(sizeof(add_path_capability));
                             open_cap->cap_values.add_path_data = (add_path_capability *)malloc(sizeof(add_path_capability));
                             open_cap->count_add_path_capabilities = 0;
                             for (int l = 0; l < open_cap->cap_len; l += 4) {
                                 memcpy(&add_path, cap_ptr, 4);
                                 cap_ptr += 4;
 
-                                SWAP_BYTES(&add_path.afi, 4);
+                                SWAP_BYTES(&add_path->afi, 4);
 
                                 if (open_cap->count_add_path_capabilities)
                                     open_cap->cap_values.add_path_data = (add_path_capability *)realloc(open_cap->cap_values.add_path_data,
                                                                                                         (open_cap->count_add_path_capabilities+1)*sizeof(add_path_capability));
-                                open_cap->cap_values.add_path_data[open_cap->count_add_path_capabilities++] = add_path;
+                                open_cap->cap_values.add_path_data[open_cap->count_add_path_capabilities++] = *add_path;
 
 //                                memcpy(&open_cap->cap_values.add_path_data, cap_ptr, 4);
 //                                cap_ptr += 4;
@@ -142,6 +142,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
 //                                                        open_cap.cap_values.add_path_data.safi, open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
                                 //capabilities.push_back(decodeStr);
                             }
+                            free(add_path);
                             opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                         }
 
@@ -159,16 +160,13 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
 
                     case BGP_CAP_MPBGP:
                     {
-                        //cap_mpbgp_data data;
                         if (open_cap->cap_len == sizeof(open_cap->cap_values.mpbgp_data)) {
                             memcpy(&open_cap->cap_values.mpbgp_data, (cap_ptr + 2), sizeof(open_cap->cap_values.mpbgp_data));
                             SWAP_BYTES(&open_cap->cap_values.mpbgp_data.afi, sizeof(open_cap->cap_values.mpbgp_data));
                             opt_param->param_values[opt_param->count_param_val++]=*open_cap;
                         }
-                        else {
-                            //LOG_NOTICE("%s: MPBGP capability but length %d is invalid expected %d.",peer_addr.c_str(), cap->len, sizeof(data));
+                        else
                             return INVALID_MSG;
-                        }
                         break;
                     }
 
@@ -254,7 +252,6 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
     } else {
 
         if (!libparsebgp_open_msg_parse_capabilities(open_msg_data,&bufPtr, open_msg_data->opt_param_len, openMessageIsSent)) {
-  //          LOG_WARN("%s: Could not read capabilities correctly in buffer, message is invalid.", peer_addr.c_str());
             return INVALID_MSG;
         }
         read_size += open_msg_data->opt_param_len;
@@ -265,9 +262,15 @@ ssize_t libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_
 void libparsebgp_parse_open_msg_destructor(libparsebgp_open_msg_data *open_msg_data) {
     for (int i = 0; i < open_msg_data->count_opt_param; i++) {
         for(int j=0; j<open_msg_data->opt_param[i].count_param_val; j++) {
+            if(open_msg_data->opt_param[i].param_values[j].cap_code == BGP_CAP_ADD_PATH)
+            {
+                for(int k=0;k<open_msg_data->opt_param[i].param_values[j].count_add_path_capabilities;k++)
+                {
+                    free(&open_msg_data->opt_param[i].param_values[j].cap_values.add_path_data[k]);
+                }
+            }
             free(&open_msg_data->opt_param[i].param_values[j]);
         }
-        free(open_msg_data->opt_param[i].param_values);
     }
     free(open_msg_data->opt_param);
 }
