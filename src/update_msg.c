@@ -196,7 +196,7 @@ ssize_t libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *upd
  * \param [in]   data           Pointer to the attribute data
  * \param [out]  attrs          Reference to the parsed attr map - will be updated
  */
-static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs, u_char *data) {
+static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs, u_char **data) {
     int         path_len    = path_attrs->attr_len;
     as_path_segment *as_segment = (as_path_segment *)malloc(sizeof(as_path_segment));
 
@@ -257,8 +257,8 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
             path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(path_attrs->count_as_path+1)*sizeof(as_path_segment));
         memset(as_segment, 0, sizeof(as_segment));
 
-        as_segment->seg_type = *data++;
-        as_segment->seg_len  = *data++;                  // Count of AS's, not bytes
+        as_segment->seg_type = **data++;
+        as_segment->seg_len  = **data++;                  // Count of AS's, not bytes
         path_len -= 2;
 
 
@@ -283,7 +283,7 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
         for (; seg_len > 0; seg_len--) {
             uint32_t seg_asn = 0;
             seg_asn = 0;
-            memcpy(&seg_asn, data, asn_octet_size);  data += asn_octet_size;
+            memcpy(&seg_asn, *data, asn_octet_size);  **data += asn_octet_size;
             path_len -= asn_octet_size;                               // Adjust the path length for what was read
 
             SWAP_BYTES(&seg_asn, asn_octet_size);
@@ -373,7 +373,7 @@ void static libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs
             break;
 
         case ATTR_TYPE_AS_PATH : // AS_PATH
-            libparsebgp_update_msg_parse_attr_as_path(path_attrs, data);
+            libparsebgp_update_msg_parse_attr_as_path(path_attrs, &data);
             break;
 
         case ATTR_TYPE_NEXT_HOP : // Next hop v4
@@ -488,17 +488,17 @@ void static libparsebgp_update_msg_parse_attr_data(update_path_attrs *path_attrs
  */
 ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg, u_char *data, uint16_t len, bool *has_end_of_rib_marker, uint16_t *count_path_attrs) {
 
-    ssize_t bytes_read = 0, read_size = 0;
+    ssize_t read_size = 0;
     if (len <= 3)
         return CORRUPT_MSG;
 
     *count_path_attrs = 0;
     *update_msg = (update_path_attrs **)malloc(sizeof(update_path_attrs*));
     update_path_attrs *path_attrs =(update_path_attrs *)malloc(sizeof(update_path_attrs));
+
     /*
      * Iterate through all attributes and parse them
      */
-
     for (int read=0;  read < len; read += 2) {
         if(*count_path_attrs)
             *update_msg = (update_path_attrs **)realloc(*update_msg,(*count_path_attrs+1)*sizeof(update_path_attrs *));
@@ -508,12 +508,6 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
         path_attrs->attr_type.attr_type_code = *data++;
         read_size += 2;
 
-        int a=2;
-        if(path_attrs->attr_type.attr_type_code == 10)
-        {
-            a=0;
-        }
-
         // Check if the length field is 1 or two bytes
         if (ATTR_FLAG_EXTENDED(path_attrs->attr_type.attr_flags)) {
             memcpy(&path_attrs->attr_len, data, 2);
@@ -521,9 +515,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
             read += 2;
             read_size += 2;
             SWAP_BYTES(&path_attrs->attr_len, 2);
-
-        }
-        else {
+        } else {
             path_attrs->attr_len = *data++;
             read++;
             read_size++;
