@@ -433,7 +433,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../files/7");
+        strcpy(file_path, "../updates.20020101.0127");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {

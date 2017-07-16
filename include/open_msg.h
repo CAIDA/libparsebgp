@@ -49,7 +49,7 @@ enum bgp_cap_add_path_send_receive_codes {
  */
 typedef union capability_value {
     uint32_t asn;
-    add_path_capability add_path_data;
+    add_path_capability *add_path_data;
     add_path_capability mpbgp_data;
 }capability_value;
 
@@ -57,9 +57,10 @@ typedef union capability_value {
  * Open message capabilities optional parameters
  */
 typedef struct open_capabilities {
-  uint8_t cap_code;             ///< Capability code, 1 octect
-  uint8_t cap_len;              ///< Capability length, 1 octet
-  capability_value cap_values;  ///< Capability values
+  uint8_t cap_code;                     ///< Capability code, 1 octect
+  uint8_t cap_len;                      ///< Capability length, 1 octet
+  capability_value cap_values;          ///< Capability values
+  uint8_t count_add_path_capabilities;  ///< Number of add_path_capability in cap_values
 }open_capabilities;
 
 /**

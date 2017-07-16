@@ -89,11 +89,24 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(libparsebgp_open_msg_data
                         cap_ptr += 2;
                         if (open_cap->cap_len >= 4) {
 
+                            add_path_capability add_path;
+                            open_cap->cap_values.add_path_data = (add_path_capability *)malloc(sizeof(add_path_capability));
+                            open_cap->count_add_path_capabilities = 0;
                             for (int l = 0; l < open_cap->cap_len; l += 4) {
-                                memcpy(&open_cap->cap_values.add_path_data, cap_ptr, 4);
+                                memcpy(&add_path, cap_ptr, 4);
                                 cap_ptr += 4;
 
-                                SWAP_BYTES(&open_cap->cap_values.add_path_data.afi, 4);
+                                SWAP_BYTES(&add_path.afi, 4);
+
+                                if (open_cap->count_add_path_capabilities)
+                                    open_cap->cap_values.add_path_data = (add_path_capability *)realloc(open_cap->cap_values.add_path_data,
+                                                                                                        (open_cap->count_add_path_capabilities+1)*sizeof(add_path_capability));
+                                open_cap->cap_values.add_path_data[open_cap->count_add_path_capabilities++] = add_path;
+
+//                                memcpy(&open_cap->cap_values.add_path_data, cap_ptr, 4);
+//                                cap_ptr += 4;
+//
+//                                SWAP_BYTES(&open_cap->cap_values.add_path_data.afi, 4);
 
                                 /*snprintf(capStr, sizeof(capStr), "ADD Path (%d) : afi=%d safi=%d send/receive=%d",
                                          BGP_CAP_ADD_PATH, data.afi, data.safi, data.send_recieve);
