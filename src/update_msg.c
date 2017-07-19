@@ -257,8 +257,8 @@ static void libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_at
             path_attrs->attr_value.as_path = (as_path_segment *)realloc(path_attrs->attr_value.as_path,(path_attrs->count_as_path+1)*sizeof(as_path_segment));
         memset(as_segment, 0, sizeof(as_segment));
 
-        as_segment->seg_type = **data++;
-        as_segment->seg_len  = **data++;                  // Count of AS's, not bytes
+        as_segment->seg_type = **data; *data += 1;
+        as_segment->seg_len  = **data; *data += 1;                  // Count of AS's, not bytes
         path_len -= 2;
 
 
