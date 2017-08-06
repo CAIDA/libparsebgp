@@ -1,5 +1,14 @@
-# bmp-bgp-parser-library
+# LIBPARSEBGP
 
-This repo includes the development of a library which includes the bgp and bmp parsers.
+LIBPARSEBGP is an open-source library for the parsing of BGP(Border Gateway Protocol) data from both MRT(Multi Threaded Routing Toolkit) and BMP(BGP Monitoring Protocol).
 
-Here we are extracting the bmp and bgp parsing code into a separate library.
+To get started using LIBPARSEBGP, either download the latest release tarball, or clone the GitHub repository.
+
+To build the library following are the steps to be followed:
+
+
+# Using LIBPARSEBGP to parse BGP data.
+
+
+
+

@@ -11,7 +11,7 @@
 #include "../include/parse_bmp.h"
 #include <arpa/inet.h>
 
-/**
+/*
  * Buffer remaining MRT message
  *
  * @param buffer    Contains the MRT message
@@ -25,10 +25,12 @@ static ssize_t libparsebgp_parse_mrt_buffer_mrt_message(u_char **buffer, int *bu
     if (*mrt_len <= 0)
         return 0;
 
+    //If the message length is less than the one specified in the header
     if (*mrt_len > *buf_len) {
         return INCOMPLETE_MSG;
     }
 
+    //Allocating the memory for the mrt_data to extract the message out of the buffer
     *mrt_data = (u_char *)malloc(MRT_PACKET_BUF_SIZE + 1);
 
     if ((mrt_data_len=extract_from_buffer(buffer, buf_len, *mrt_data, *mrt_len)) != *mrt_len) {

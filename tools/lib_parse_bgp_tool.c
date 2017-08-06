@@ -1,11 +1,8 @@
-//#include <iostream.h>
 #include "../include/lib_parse_common.h"
 
-//using namespace std;
 #define BUFFER_SIZE 2048
 
-void file_read(FILE *fp, u_char *buffer, int position)
-{
+void file_read(FILE *fp, u_char *buffer, int position) {
     char *array = (char *) malloc(BUFFER_SIZE*sizeof(char));
     if(fp!=NULL)
     {
@@ -20,14 +17,10 @@ void file_read(FILE *fp, u_char *buffer, int position)
     free(array);
 }
 
-int shift(u_char *buffer, int bytes_read, int buf_len)
-{
-    for(int i = 0;i<(buf_len-bytes_read);i++)
-    {
-        buffer[i] = buffer[bytes_read+i];
-    }
-    memset(buffer+(buf_len-bytes_read), 0, (buf_len-bytes_read));
-    return (buf_len-bytes_read);
+int shift(u_char *buffer, int bytes_read, int buf_len) {
+    memmove(buffer, buffer+bytes_read, buf_len - bytes_read);
+    memset(buffer+bytes_read, 0, buf_len - bytes_read);
+    return buf_len - bytes_read;
 }
 
 void print_addr_from_char_array(u_char *array, int len) {
@@ -428,8 +421,11 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
 
 int main(int argc, char * argv[]) {
 
+    //fie_path is used to store the path of the file to be parsed
     char file_path[20];
-    int msg_type = 1;
+
+    //Deafaut Message Type to be Parsed
+    int msg_type = MRT_MESSAGE_TYPE;
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
@@ -451,7 +447,6 @@ int main(int argc, char * argv[]) {
                 printf("INVALID ARG: -t expects the type to be specified\n");
                 return true;
             }
-
             // Set the message type
             msg_type = atoi(argv[++i]);
         }
@@ -459,46 +454,79 @@ int main(int argc, char * argv[]) {
 
     int position = 0, len = BUFFER_SIZE, count = 0;
     ssize_t bytes_read = 0;
+
+    //Allocating memory to buffer the messaged from file
     u_char *buffer= (u_char *)malloc(BUFFER_SIZE*sizeof(u_char));
+
+    //msg_read is used to determine if the message is read properly
     bool msg_read = true;
+
+    //Opening file in reading mode
     FILE *fp = fopen(file_path, "r");
+
+    //Initializing the parsed message structure.
     libparsebgp_parse_msg *parse_msg = (libparsebgp_parse_msg *)malloc(sizeof(libparsebgp_parse_msg));
     if (fp != NULL) {
+
+        //Read the file unless End Of File is encountered
         while (!feof(fp)) {
+
+            //Allocation of extra buffer to parse additional messages from file
             if (position)
                 buffer = (u_char *)realloc(buffer, (BUFFER_SIZE+position)*sizeof(u_char));
+
+            //Reading the messages from the file and storing it in buffer
             file_read(fp, buffer, position);
             printf("\n");
             len = BUFFER_SIZE + position;
             int tlen = len;
             msg_read = true;
+
+            //Setting the initial position to start parsing
             position = 0;
+
             while (msg_read && len > 0) {
+
+                //Memsetting the structure to NULL values
                 memset(parse_msg, 0, sizeof(parse_msg));
+
+                //Moving the pointer to the next message
                 u_char *buffer_to_pass = buffer+position;
+
+                //Invoking the parse message API
                 bytes_read = libparsebgp_parse_msg_common_wrapper(parse_msg, &buffer_to_pass, len, msg_type);
+
+                //Checking if error has occurred in parsing the message
                 if (bytes_read < 0) {
-                    msg_read = false;
+                    msg_read = false;       //Setting the msg_read to false
                     printf("\n Crashed. Error code: %ld\n", bytes_read);
-                } else if (bytes_read == 0)
+                }
+                //Checking if no message is read
+                else if (bytes_read == 0)
                     msg_read = false;
                 else {
+                    //Moving the pointer to point towards the next message.
                     position += bytes_read;
                     printf("\nMessage %d Parsed Successfully\n", count+1);
                     len -= bytes_read;
                     printf("Bytes read in parsing this message: %ld Remaining Length of Buffer: %d\n", bytes_read, len);
+
+                    //Generate the output in elem format
                     elem_generate(parse_msg);
+
+                    //Incrementing the Message count
                     count++;
                 }
-//                if(count == 4864)
-//                    printf("x");
             }
+            //Shift the buffer to accommodate new message from the file
             position = shift(buffer, position, tlen);
         }
         printf("*******File Parsed completely*******\n");
     } else
+        //Unable to open file.
         printf("File could not be opened\n");
 
+    //Freeing the pointers
     free(parse_msg);
     free(buffer);
     return 0;
