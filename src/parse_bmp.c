@@ -488,7 +488,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
             bytes_read = libparsebgp_open_msg_parse_open_msg(&up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
 
             if (!bytes_read)
-                return ERR_READING_MSG; //throw "Failed to read sent open message";
+                return ERR_READING_MSG; //ERROR: Failed to read sent open message
 
             if (bytes_read < 0)
                 return bytes_read;    // has the error codes
@@ -501,7 +501,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
             return CORRUPT_MSG;
     }
     else
-        return bytes_read; //throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
+        return bytes_read; //ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.
 
     if((bytes_read = libparsebgp_parse_bgp_parse_header(&up_event->sent_open_msg.c_hdr, data, size))>0)
     {
@@ -522,7 +522,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(libparsebgp_parsed_bmp_peer
             size -= bytes_read;
             read_size += bytes_read;
         } else
-            return CORRUPT_MSG; //throw "ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.";
+            return CORRUPT_MSG; //ERROR: Invalid BGP MSG for BMP Received OPEN message, expected OPEN message.
     }
     else
         return bytes_read;
