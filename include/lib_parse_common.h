@@ -62,4 +62,25 @@ ssize_t libparsebgp_parse_msg_common_wrapper(libparsebgp_parse_msg *parsed_msg, 
     return read_size;
 }
 
+/**
+ * A common destructor function for the parsed message
+ * @param parsed_msg struct storing the parsed data
+ */
+void libparsebgp_parse_msg_common_destructor(libparsebgp_parse_msg *parsed_msg) {
+    switch (parsed_msg->msg_type) {
+        case MRT_MESSAGE_TYPE: {
+            libparsebgp_parse_mrt_destructor(&parsed_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg);
+            break;
+        }
+        case BMP_MESSAGE_TYPE: {
+            libparsebgp_parse_bmp_destructor(&parsed_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg);
+            break;
+        }
+        case BGP_MESSAGE_TYPE: {
+            libparsebgp_parse_bgp_destructor(&parsed_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg);
+            break;
+        }
+    }
+}
+
 #endif //PARSE_LIB_LIB_PARSE_COMMON_H_H

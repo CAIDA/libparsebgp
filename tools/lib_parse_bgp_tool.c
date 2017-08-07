@@ -2,6 +2,12 @@
 
 #define BUFFER_SIZE 2048
 
+/**
+ * Function to read from file and store in buffer
+ * @param fp        file pointer
+ * @param buffer    char array to store data
+ * @param position  position in buffer to start adding data
+ */
 void file_read(FILE *fp, u_char *buffer, int position) {
     char *array = (char *) malloc(BUFFER_SIZE*sizeof(char));
     if(fp!=NULL)
@@ -17,12 +23,23 @@ void file_read(FILE *fp, u_char *buffer, int position) {
     free(array);
 }
 
+/**
+ * Function to shift the buffer to read more data
+ * @param buffer      array containing data
+ * @param bytes_read  number of bytes read
+ * @param buf_len     length of buffer
+ */
 int shift(u_char *buffer, int bytes_read, int buf_len) {
     memmove(buffer, buffer+bytes_read, buf_len - bytes_read);
     memset(buffer+bytes_read, 0, buf_len - bytes_read);
     return buf_len - bytes_read;
 }
 
+/**
+ * Function to print address stored in char array
+ * @param array char array containing the address
+ * @param len length of the array
+ */
 void print_addr_from_char_array(u_char *array, int len) {
     for(int i = 0;i<len;i++ ) {
         if (i)
@@ -31,6 +48,12 @@ void print_addr_from_char_array(u_char *array, int len) {
     }
 }
 
+/**
+ * Function to generate the output in ELEM format:
+ * <dump-type>|<elem-type>|<record-ts>|<project>|<collector>|<peer-ASn>|<peer-IP>|<prefix>|<next-hop-IP>|<AS-path>|
+ * <origin-AS>|<communities>|<old-state>|<new-state>
+ * @param parse_msg structure holding the parsed message
+ */
 void elem_generate(libparsebgp_parse_msg *parse_msg) {
     switch (parse_msg->msg_type) {
         case MRT_MESSAGE_TYPE: {
@@ -43,12 +66,15 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         printf("R|");
                     printf("%d|||%d|", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp,
                            parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.peer_as);
+                    //print peer IP address:
                     print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.peer_ip,
                                                parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.sub_type == AFI_IPv6 ? 16 : 4);
                     printf("|");
+                    //print prefix:
                     print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.prefix,
                                                parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.sub_type == AFI_IPv6 ? 16 : 4);
                     printf("|");
+                    //print next hop address:
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_value.next_hop, 4);
@@ -57,6 +83,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     }
                     printf("|");
                     uint32_t origin_as = 0;
+                    //print as_path
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; i++) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
                             for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->count_as_path; ++j) {
@@ -69,6 +96,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         }
                     }
                     printf("|%d|", origin_as);
+                    //print communities
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs_count; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
                             for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump.bgp_attrs[i]->count_attr_type_comm; ++j) {
@@ -89,6 +117,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     switch (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.sub_type) {
                         case PEER_INDEX_TABLE: {
                             printf("%d||", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp);
+                            //print bgp-id
                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.peer_index_tbl.collector_bgp_id, 4);
                             printf("|||||||||");
                             break;
@@ -97,6 +126,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         case RIB_IPV6_UNICAST: {
                             bool found = false;
                             printf("%d||||||", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp);
+                            //print next_hop address
                             for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
@@ -109,6 +139,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             found = false;
                             printf("|");
                             uint32_t origin_as = 0;
+                            //print as_path
                             for(int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.entry_count && !found; ++i) {
                                 for(int l = 0; l < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++l) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
@@ -125,6 +156,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             }
                             printf("|%d|", origin_as);
                             found = false;
+                            //print communities
                             for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
@@ -142,9 +174,11 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         case RIB_GENERIC: {
                             printf("%d|||||", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp);
                             int len = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.address_family_identifier == AFI_IPv4 ? 4 : 16;
+                            //print prefix
                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.nlri_entry.prefix, len);
                             bool found = false;
                             printf("|%d||||||", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp);
+                            //print next-hop address
                             for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
@@ -157,6 +191,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             found = false;
                             printf("|");
                             uint32_t origin_as = 0;
+                            //print as_path
                             for(int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count && !found; ++i) {
                                 for(int l = 0; l < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++l) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[l]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
@@ -173,6 +208,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             }
                             printf("|%d|", origin_as);
                             found = false;
+                            //print communities
                             for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.entry_count && !found; ++i) {
                                 for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs_count; ++j) {
                                     if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.table_dump_v2.rib_generic_entry_hdr.rib_entries[i].bgp_attrs[j]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
@@ -199,6 +235,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                             printf("U||%d|||%d|", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp,
                                    parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_asn);
                             int ip_len = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.address_family == AFI_IPv4 ? 4 : 16;
+                            //print peer ip address
                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.peer_ip, ip_len);
                             printf("||||||%d|%d", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.old_state,
                                    parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_state_change_msg.new_state);
@@ -214,6 +251,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     printf("R|R|%d|||%d|", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp,
                                            parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
                                     int ip_len = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv4 ? 4 : 16;
+                                    //print peer ip address
                                     print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_len);
                                     printf("|||||||");
                                     break;
@@ -229,8 +267,10 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     printf("%d|||%d|", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp,
                                            parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
                                     int ip_len = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv6 ? 16 : 4;
+                                    //print peer ip address
                                     print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_len);
                                     printf("|");
+                                    //print next hop address
                                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
                                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop, 4);
@@ -239,6 +279,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     }
                                     printf("|||");
                                     int origin_as = 0;
+                                    //print as_path
                                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
                                             for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->count_as_path; ++j) {
@@ -251,6 +292,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                         }
                                     }
                                     printf("|%d|", origin_as);
+                                    //print communities
                                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
                                             for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.bgp_msg.parsed_data.update_msg.path_attributes[i]->count_attr_type_comm; ++j) {
@@ -267,6 +309,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                                     printf("R|R|%d|||%d|", parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.c_hdr.time_stamp,
                                            parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_asn);
                                     int ip_len = parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.address_family == AFI_IPv4 ? 4 : 16;
+                                    //print peer ip address
                                     print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_mrt_msg.parsed_data.bgp4mp.bgp4mp_msg.peer_ip, ip_len);
                                     printf("|||||||");
                                     break;
@@ -297,8 +340,10 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         printf("U||");
                     printf("%d|||%d|", parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_peer_hdr.ts_secs,
                            parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_as);
+                    //print peer IP address
                     print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_peer_hdr.peer_addr, 16);
                     printf("||");
+                    //print next hop address
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop, 4);
@@ -307,6 +352,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     }
                     printf("|||");
                     int origin_as = 0;
+                    //print as_path
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
                             for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->count_as_path; ++j) {
@@ -319,6 +365,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         }
                     }
                     printf("|%d|", origin_as);
+                    //print communities
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
                             for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bmp_msg.libparsebgp_parsed_bmp_msg.parsed_rm_msg.parsed_data.update_msg.path_attributes[i]->count_attr_type_comm; ++j) {
@@ -377,6 +424,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     else
                         printf("U||");
                     printf("|||||||");
+                    //print next hop address
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_NEXT_HOP) {
                             print_addr_from_char_array(parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_value.next_hop, 4);
@@ -385,6 +433,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                     }
                     printf("|||");
                     int origin_as = 0;
+                    //print as path
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_AS_PATH) {
                             for(int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->count_as_path; ++j) {
@@ -397,6 +446,7 @@ void elem_generate(libparsebgp_parse_msg *parse_msg) {
                         }
                     }
                     printf("|%d|", origin_as);
+                    //print communities
                     for (int i = 0; i < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.count_path_attr; ++i) {
                         if (parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->attr_type.attr_type_code == ATTR_TYPE_COMMUNITIES) {
                             for (int j = 0; j < parse_msg->libparsebgp_parse_msg_parsed.parsed_bgp_msg.parsed_data.update_msg.path_attributes[i]->count_attr_type_comm; ++j) {
@@ -429,7 +479,7 @@ int main(int argc, char * argv[]) {
     if (argc>1)
         strcpy(file_path, argv[1]);
     else
-        strcpy(file_path, "../updates.20020101.0127");
+        strcpy(file_path, "../updates.20021001.2324");
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
@@ -513,6 +563,9 @@ int main(int argc, char * argv[]) {
 
                     //Generate the output in elem format
                     elem_generate(parse_msg);
+
+                    //Destructor for the message
+                    libparsebgp_parse_msg_common_destructor(parse_msg);
 
                     //Incrementing the Message count
                     count++;
