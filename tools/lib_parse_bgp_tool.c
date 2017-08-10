@@ -921,7 +921,7 @@ int main(int argc, char *argv[])
 {
 
   // fie_path is used to store the path of the file to be parsed
-  char file_path[20];
+  char file_path[1024];
 
   // Deafaut Message Type to be Parsed
   int msg_type = MRT_MESSAGE_TYPE;
