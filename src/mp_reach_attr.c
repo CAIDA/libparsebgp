@@ -466,7 +466,7 @@ inline uint16_t decode_label(u_char **data, uint16_t len, mpls_label *labels)
   while (read_size <= len) {
     if (count)
       labels = (mpls_label *)realloc(labels, (count + 1) * sizeof(mpls_label));
-    memset(&label, 0, sizeof(label));
+    memset(label, 0, sizeof(*label));
 
     memcpy(&label->data, *data_ptr, 3);
     SWAP_BYTES(&label->data, 3); // change to host order
