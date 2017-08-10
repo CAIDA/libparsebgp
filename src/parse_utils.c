@@ -4,6 +4,8 @@
 
 #include "parse_utils.h"
 #include <string.h>
+#include <sys/types.h>
+
 /**
  * Function to extract data from buffer
  *
@@ -32,6 +34,8 @@ ssize_t extract_from_buffer(unsigned char **buffer, int *buf_len,
  *
  * @param [in/out] var   Variable containing data to update
  * @param [in]     size  Size of var - Default is size of var
+ *
+ * TODO: optimize to use ntohs ntohl and ntohll if the size is appropriate
  */
 void SWAP_BYTES(void *var, int size)
 {

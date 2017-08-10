@@ -260,7 +260,7 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls,
         (node_descriptor *)realloc(mp_reach_ls->nlri_ls.node_nlri.local_nodes,
                                    (count + 1) * sizeof(node_descriptor));
 
-    memset(info, 0, sizeof(info));
+    memset(info, 0, sizeof(*info));
     data_read =
       libparsebgp_mp_link_state_parse_descr_local_remote_node(data, len, info);
     len -= data_read;
@@ -623,7 +623,7 @@ int libparsebgp_parse_descr_prefix(u_char **data, int data_len,
 
     info->prefix_len = **data;
     data_read++;
-    *data++;
+    (*data)++;
 
     char ip_char[46];
     bzero(info->prefix, sizeof(info->prefix));
@@ -815,7 +815,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls,
   int data_read;
   uint16_t count = 0;
   while (mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.len > 0) {
-    memset(local_node, 0, sizeof(local_node));
+    memset(local_node, 0, sizeof(*local_node));
     if (count)
       mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.local_nodes =
         (node_descriptor *)realloc(
@@ -850,7 +850,7 @@ static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls,
         (prefix_descriptor *)realloc(
           mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc,
           (count + 1) * sizeof(prefix_descriptor));
-    memset(info, 0, sizeof(info));
+    memset(info, 0, sizeof(*info));
     data_read = libparsebgp_parse_descr_prefix(data, data_len, info, isIPv4);
 
     mp_reach_ls->nlri_ls.prefix_nlri_ipv4_ipv6.prefix_desc[count++] = *info;
@@ -889,7 +889,7 @@ libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs,
         (path_attrs->attr_value.mp_reach_nlri_data.count_mp_rch_ls + 1) *
           sizeof(mp_reach_ls));
 
-    memset(mp_nlri_ls, 0, sizeof(mp_nlri_ls));
+    memset(mp_nlri_ls, 0, sizeof(*mp_nlri_ls));
     /*
      * Parse the NLRI TLV
      */
@@ -978,7 +978,8 @@ ssize_t libparsebgp_mp_link_state_parse_reach_link_state(
    */
   switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
   case BGP_SAFI_BGPLS: // Unicast BGP-LS
-    libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data, nlri_len);
+    return libparsebgp_parse_link_state_nlri_data(path_attrs, nlri_data,
+                                                  nlri_len);
     break;
 
   default:

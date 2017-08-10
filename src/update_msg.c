@@ -53,7 +53,7 @@ libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
       *prefixes = (update_prefix_tuple **)realloc(
         *prefixes, (*count_prefix + 1) * sizeof(update_prefix_tuple *));
 
-    memset(prefix_tuple, 0, sizeof(prefix_tuple));
+    memset(prefix_tuple, 0, sizeof(*prefix_tuple));
 
     // Parse add-paths if enabled
     //        if (libparsebgp_addpath_is_enabled(add_path_map, BGP_AFI_IPV4,
@@ -308,7 +308,7 @@ libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs,
       path_attrs->attr_value.as_path = (as_path_segment *)realloc(
         path_attrs->attr_value.as_path,
         (path_attrs->count_as_path + 1) * sizeof(as_path_segment));
-    memset(as_segment, 0, sizeof(as_segment));
+    memset(as_segment, 0, sizeof(*as_segment));
 
     as_segment->seg_type = **data;
     *data += 1;
@@ -588,7 +588,7 @@ ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
     if (*count_path_attrs)
       *update_msg = (update_path_attrs **)realloc(
         *update_msg, (*count_path_attrs + 1) * sizeof(update_path_attrs *));
-    memset(path_attrs, 0, sizeof(path_attrs));
+    memset(path_attrs, 0, sizeof(*path_attrs));
 
     path_attrs->attr_type.attr_flags = *data++;
     path_attrs->attr_type.attr_type_code = *data++;

@@ -399,7 +399,7 @@ static ssize_t libparsebgp_parse_mrt_parse_peer_index_table(
   peer_entry *p_entry = (peer_entry *)malloc(sizeof(peer_entry));
 
   memset(peer_index_table->peer_entries, 0,
-         sizeof(peer_index_table->peer_entries));
+         peer_index_table->peer_count * sizeof(peer_entry));
 
   while (peer_index_table->peer_count < count) {
     memset(p_entry, 0, sizeof(peer_entry));
@@ -460,8 +460,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(
   int addr_bytes = 0;
   int read_size = 0;
 
-  memset(rib_entry_data, 0, sizeof(rib_entry_data));
-  memset(rib_entry_data->prefix, 0, sizeof(rib_entry_data));
+  memset(rib_entry_data, 0, sizeof(*rib_entry_data));
+  memset(rib_entry_data->prefix, 0, sizeof(rib_entry_data->prefix));
   if (extract_from_buffer(buffer, buf_len, &rib_entry_data->sequence_number,
                           4) != 4)
     return ERR_READING_MSG; // Error in parsing sequence number
@@ -506,7 +506,8 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_unicast(
     (rib_entry *)malloc(rib_entry_data->entry_count * sizeof(rib_entry));
   rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
 
-  memset(rib_entry_data->rib_entries, 0, sizeof(rib_entry_data->rib_entries));
+  memset(rib_entry_data->rib_entries, 0,
+         rib_entry_data->entry_count * sizeof(rib_entry));
 
   while (rib_entry_data->entry_count < count) {
     memset(r_entry, 0, sizeof(rib_entry));
@@ -602,7 +603,7 @@ static ssize_t libparsebgp_parse_mrt_parse_rib_generic(
   rib_entry *r_entry = (rib_entry *)malloc(sizeof(rib_entry));
 
   memset(rib_gen_entry_hdr->rib_entries, 0,
-         sizeof(rib_gen_entry_hdr->rib_entries));
+         rib_gen_entry_hdr->entry_count * sizeof(rib_entry));
 
   while (rib_gen_entry_hdr->entry_count < count) {
     memset(r_entry, 0, sizeof(rib_entry));
@@ -703,7 +704,7 @@ ssize_t libparsebgp_parse_mrt_parse_msg(
   int buf_len)
 {
 
-  u_char *mrt_data;
+  u_char *mrt_data = NULL;
   int mrt_data_len = 0;      ///< Length/size of data in the data buffer
   uint16_t mrt_sub_type = 0; ///< MRT sub type
   uint32_t mrt_len =

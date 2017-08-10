@@ -19,7 +19,7 @@ static void libparsebgp_evpn_parse_ethernet_segment_identifier(
 {
   parsed_data->type = **data_pointer;
 
-  *data_pointer++;
+  (*data_pointer)++;
   switch (parsed_data->type) {
   case 0: {
     memcpy(parsed_data->type_0.eth_segment_iden, *data_pointer, 9);
@@ -92,9 +92,9 @@ static void libparsebgp_evpn_parse_route_distinguisher(u_char **data_pointer,
 {
 
   memset(&rd, 0, sizeof(rd));
-  *data_pointer++;
+  (*data_pointer)++;
   rd->rd_type = **data_pointer;
-  *data_pointer++;
+  (*data_pointer)++;
 
   switch (rd->rd_type) {
   case 0: {
@@ -157,7 +157,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
   u_char **data_pointer = data;
   u_char ip_binary[16];
   int addr_bytes;
-  char ip_char[40];
+  //char ip_char[40];
   int data_read = 0;
 
   evpn_tuple *tuple = (evpn_tuple *)malloc(sizeof(evpn_tuple));
@@ -171,17 +171,17 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
   uint16_t count_evpn_withdrawn = 0, count_evpn = 0;
   while ((data_read + 10 /* min read */) < data_len) {
 
-    memset(tuple, 0, sizeof(tuple));
+    memset(tuple, 0, sizeof(*tuple));
 
     // TODO: Keep an eye on this, as we might need to support add-paths for evpn
     //        tuple.path_id = 0;
     //        tuple.originating_router_ip_len = 0;
 
     tuple->route_type = **data_pointer;
-    *data_pointer++;
+    (*data_pointer)++;
 
     tuple->length = **data_pointer;
-    *data_pointer++;
+    (*data_pointer)++;
     uint8_t len = tuple->length;
 
     switch (tuple->route_type) {
@@ -250,17 +250,17 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
 
         tuple->route_type_specific.mac_ip_adv_route.mac_addr_len =
           mac_address_length;
-        *data_pointer++;
+        (*data_pointer)++;
 
         // MAC Address (6 byte)
         memcpy(tuple->route_type_specific.mac_ip_adv_route.mac_addr,
                (*data_pointer), 6);
-        *data_pointer += 6;
+        (*data_pointer) += 6;
 
         // IP Address Length (1 byte)
         tuple->route_type_specific.mac_ip_adv_route.ip_addr_len =
           **data_pointer;
-        *data_pointer++;
+        (*data_pointer)++;
 
         data_read += 22;
         len -= 22;
@@ -277,7 +277,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
           memcpy(&tuple->route_type_specific.mac_ip_adv_route.ip_addr,
                  *data_pointer, addr_bytes);
 
-          *data_pointer += addr_bytes;
+          (*data_pointer) += addr_bytes;
           data_read += addr_bytes;
           len -= addr_bytes;
         }
@@ -332,7 +332,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
         // IP Address Length (1 byte)
         tuple->route_type_specific.incl_multicast_eth_tag_route.ip_addr_len =
           **data_pointer;
-        *data_pointer++;
+        (*data_pointer)++;
 
         data_read += 5;
         len -= 5;
@@ -382,7 +382,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
         // IP Address Length (1 bytes)
         tuple->route_type_specific.eth_segment_route.ip_addr_len =
           **data_pointer;
-        *data_pointer++;
+        (*data_pointer)++;
 
         data_read += 11;
         len -= 11;
@@ -440,4 +440,6 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
   path_attrs->attr_value.mp_unreach_nlri_data.count_evpn_withdrawn =
     count_evpn_withdrawn;
   free(tuple);
+
+  return data_read; // XXX: AK added, not sure if correct
 }

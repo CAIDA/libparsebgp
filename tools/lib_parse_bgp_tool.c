@@ -988,7 +988,7 @@ int main(int argc, char *argv[])
       while (msg_read && len > 0) {
 
         // Memsetting the structure to NULL values
-        memset(parse_msg, 0, sizeof(parse_msg));
+        memset(parse_msg, 0, sizeof(*parse_msg));
 
         // Moving the pointer to the next message
         u_char *buffer_to_pass = buffer + position;

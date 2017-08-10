@@ -53,7 +53,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(
     if (count)
       prefixes = (update_prefix_label_tuple *)realloc(
         prefixes, (count + 1) * sizeof(update_prefix_label_tuple));
-    memset(tuple, 0, sizeof(tuple));
+    memset(tuple, 0, sizeof(*tuple));
 
     // Only check for add-paths if not mpls/vpn
     /*        if (add_path_enabled and (len - read_size) >= 4) {

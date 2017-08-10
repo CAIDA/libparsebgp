@@ -223,9 +223,9 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(
   update_path_attrs *path_attrs, int attr_len, u_char **data, int count)
 {
 
-  char ip_char[46];
+  //char ip_char[46];
   uint32_t value_32bit;
-  uint16_t value_16bit;
+  //  uint16_t value_16bit;
   int32_t float_val;
 
   if (attr_len < 4) {
@@ -279,18 +279,17 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(
     break;
 
   case ATTR_NODE_MT_ID: {
-    char *node_mt_id = (char *)malloc(bgp_ls_attr->len / 2);
+    // TODO: AK tweaked this to remove strcpy of binary data, checkme
     for (int i = 0; i < bgp_ls_attr->len; i += 2) {
-      memcpy(&node_mt_id[i / 2], data, 2);
-      SWAP_BYTES(&node_mt_id[i / 2], 2);
+      memcpy(&bgp_ls_attr->node.mt_id[i / 2], data, 2);
+      SWAP_BYTES(&bgp_ls_attr->node.mt_id[i / 2], 2);
       *data += 2;
     }
-    strncpy(bgp_ls_attr->node.mt_id, node_mt_id, bgp_ls_attr->len / 2);
     break;
   }
 
   case ATTR_NODE_NAME:
-    strncpy(bgp_ls_attr->node.node_name, (char *)*data, bgp_ls_attr->len);
+    memcpy(bgp_ls_attr->node.node_name, *data, bgp_ls_attr->len);
     break;
 
   case ATTR_NODE_OPAQUE:
@@ -402,9 +401,11 @@ val_ss.str().data(), val_ss.str().length());*/
       value_32bit = 0;
       memcpy(&value_32bit, *data, bgp_ls_attr->len);
       SWAP_BYTES(&value_32bit, bgp_ls_attr->len);
+
+      // TODO: AK moves this inside if based on compiler warning, checkme!
+      bgp_ls_attr->link.link_igp_metric = value_32bit;
     }
 
-    bgp_ls_attr->link.link_igp_metric = value_32bit;
     break;
 
   case ATTR_LINK_IPV4_ROUTER_ID_REMOTE:
@@ -449,7 +450,7 @@ val_ss.str().data(), val_ss.str().length());*/
     break;
 
   case ATTR_LINK_NAME: {
-    strncpy(bgp_ls_attr->link.link_name, (char *)*data, bgp_ls_attr->len);
+    memcpy(bgp_ls_attr->link.link_name, *data, bgp_ls_attr->len);
     break;
   }
 

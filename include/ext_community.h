@@ -13,6 +13,7 @@
 #define __EXTCOMMUNITY_H__
 
 #include "bgp_common.h"
+#include "update_msg.h"
 
 /**
  * Defines the BGP Extended communities Types

@@ -39,7 +39,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(
       open_msg_data->opt_param = (open_param *)realloc(
         open_msg_data->opt_param,
         (open_msg_data->count_opt_param) * sizeof(open_param));
-    memset(opt_param, 0, sizeof(opt_param));
+    memset(opt_param, 0, sizeof(*opt_param));
 
     open_msg_data->count_opt_param += 1;
 
@@ -68,7 +68,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(
             (opt_param->count_param_val + 1) * sizeof(open_capabilities));
 
         opt_param->count_param_val += 1;
-        memset(open_cap, 0, sizeof(open_cap));
+        memset(open_cap, 0, sizeof(*open_cap));
         memcpy(&open_cap->cap_code, cap_ptr, 1);    // reading capability code
         memcpy(&open_cap->cap_len, cap_ptr + 1, 1); // reading capability length
 

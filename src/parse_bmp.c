@@ -357,7 +357,7 @@ libparsebgp_parse_bmp_handle_init_msg(libparsebgp_parsed_bmp_init_msg *init_msg,
   init_msg_v3_tlv *init_msg_tlv =
     (init_msg_v3_tlv *)malloc(sizeof(init_msg_v3_tlv));
 
-  memset(init_msg->init_msg_tlvs, 0, sizeof(init_msg->init_msg_tlvs));
+  memset(init_msg->init_msg_tlvs, 0, sizeof(*init_msg->init_msg_tlvs));
   /*
    * Loop through the init message (in buffer) to parse each TLV
    */
@@ -423,7 +423,7 @@ libparsebgp_parse_bmp_handle_term_msg(libparsebgp_parsed_bmp_term_msg *term_msg,
   uint32_t num_tlvs = *bmp_data_len / BMP_TERM_MSG_LEN, curr_tlv = 0;
   term_msg->term_msg_tlvs =
     (term_msg_v3_tlv *)malloc(num_tlvs * sizeof(term_msg_v3_tlv));
-  memset(term_msg->term_msg_tlvs, 0, sizeof(term_msg->term_msg_tlvs));
+  memset(term_msg->term_msg_tlvs, 0, sizeof(*term_msg->term_msg_tlvs));
   /*
    * Loop through the term message (in buffer) to parse each TLV
    */
@@ -498,11 +498,11 @@ static ssize_t libparsebgp_parse_bmp_handle_stats_report(
     (stat_counter *)malloc(stat_rep_msg->stats_count * sizeof(stat_counter));
   stat_counter *stat_info = (stat_counter *)malloc(sizeof(stat_counter));
   memset(stat_rep_msg->total_stats_counter, 0,
-         sizeof(stat_rep_msg->total_stats_counter));
+         sizeof(*stat_rep_msg->total_stats_counter));
 
   // Loop through each stats object
   for (unsigned long i = 0; i < stat_rep_msg->stats_count; i++) {
-    memset(stat_info, 0, sizeof(stat_info));
+    memset(stat_info, 0, sizeof(*stat_info));
 
     bzero(b, 8);
     if ((extract_from_buffer(&buffer, &buf_len, &stat_info->stat_type, 2)) != 2)

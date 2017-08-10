@@ -13,6 +13,7 @@
 #include "ext_community.h"
 #include "update_msg.h"
 #include <arpa/inet.h>
+#include <assert.h>
 
 /**
  * Decode common Type/Subtypes
@@ -282,7 +283,7 @@ static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char **value)
  */
 static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char **value)
 {
-  uint16_t val_16b;
+  //  uint16_t val_16b;
   uint32_t val_32b;
 
   switch (ec_hdr->low_type) {
@@ -313,7 +314,8 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char **value)
   }
 
   case EXT_OPAQUE_CP_ORF:
-    sprintf(ec_hdr->val, "cp-orf=%d:%d", val_16b, val_32b);
+    assert(0 && "TODO: fixme when tim replies");
+    //sprintf(ec_hdr->val, "cp-orf=%d:%d", val_16b, val_32b);
     break;
 
   case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
@@ -514,7 +516,7 @@ void libparsebgp_ext_communities_parse_ext_communities(
 
   //    std::string decode_str = "";
   extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));
-  ec_hdr->val = (char *)malloc(20 * sizeof(char));
+  ec_hdr->val[0] = '\0';// = (char *)malloc(20 * sizeof(char));
   u_char **value;
 
   if ((path_attrs->attr_len % 8)) {
@@ -701,7 +703,7 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(
   path_attrs->attr_value.ext_comm =
     (extcomm_hdr *)malloc(path_attrs->attr_len / 20 * sizeof(extcomm_hdr));
   memset(path_attrs->attr_value.ext_comm, 0,
-         sizeof(path_attrs->attr_value.ext_comm));
+         sizeof(path_attrs->attr_len / 20 * sizeof(extcomm_hdr)));
 
   uint16_t count = 0;
 
@@ -709,7 +711,7 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(
    * Loop through consecutive entries
    */
   for (int i = 0; i < path_attrs->attr_len; i += 20) {
-    memset(ec_hdr, 0, sizeof(ec_hdr));
+    memset(ec_hdr, 0, sizeof(*ec_hdr));
     // Setup extended community header
     ec_hdr->high_type = *data[0];
     ec_hdr->low_type = *data[1];
