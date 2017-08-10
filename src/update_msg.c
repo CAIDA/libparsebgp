@@ -8,13 +8,13 @@
  */
 
 #include <arpa/inet.h>
-#include "../include/update_msg.h"
-#include "../include/ext_community.h"
-#include "../include/mp_reach_attr.h"
-#include "../include/mp_un_reach_attr.h"
-#include "../include/mp_link_state_attr.h"
-#include "../include/mp_link_state.h"
-#include "../include/parse_utils.h"
+#include "update_msg.h"
+#include "ext_community.h"
+#include "mp_reach_attr.h"
+#include "mp_un_reach_attr.h"
+#include "mp_link_state_attr.h"
+#include "mp_link_state.h"
+#include "parse_utils.h"
 
 /**
  * Parses NLRI info (IPv4) from the BGP message

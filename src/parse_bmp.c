@@ -1,8 +1,8 @@
 //
 // Created by ojas on 4/22/17.
 //
-#include "../include/parse_bgp.h"
-#include "../include/parse_bmp.h"
+#include "parse_bgp.h"
+#include "parse_bmp.h"
 
 /**
  * Buffer remaining BMP message

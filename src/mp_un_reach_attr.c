@@ -7,9 +7,9 @@
  *
  */
 
-#include "../include/mp_un_reach_attr.h"
-#include "../include/mp_link_state.h"
-#include "../include/evpn.h"
+#include "mp_un_reach_attr.h"
+#include "mp_link_state.h"
+#include "evpn.h"
 
 /**
  * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6

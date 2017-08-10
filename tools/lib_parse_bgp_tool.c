@@ -1,4 +1,4 @@
-#include "../include/lib_parse_common.h"
+#include "lib_parse_common.h"
 
 #define BUFFER_SIZE 2048
 

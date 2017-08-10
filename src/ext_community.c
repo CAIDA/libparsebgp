@@ -10,8 +10,8 @@
  */
 
 #include <arpa/inet.h>
-#include "../include/update_msg.h"
-#include "../include/ext_community.h"
+#include "update_msg.h"
+#include "ext_community.h"
 
 /**
  * Decode common Type/Subtypes

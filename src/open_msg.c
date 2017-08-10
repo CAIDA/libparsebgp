@@ -6,8 +6,8 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "../include/open_msg.h"
-#include "../include/parse_utils.h"
+#include "open_msg.h"
+#include "parse_utils.h"
 
 /**
  * Parses capabilities from buffer

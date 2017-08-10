@@ -7,8 +7,8 @@
  *
  */
 
-#include "../include/add_path_data_container.h"
-#include "../include/open_msg.h"
+#include "add_path_data_container.h"
+#include "open_msg.h"
 
 
 /**

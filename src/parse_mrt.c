@@ -7,8 +7,8 @@
  *
  */
 
-#include "../include/parse_mrt.h"
-#include "../include/parse_bmp.h"
+#include "parse_mrt.h"
+#include "parse_bmp.h"
 #include <arpa/inet.h>
 
 /*

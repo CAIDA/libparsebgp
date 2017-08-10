@@ -7,8 +7,8 @@
  *
  */
 
-#include "../include/notification_msg.h"
-#include "../include/parse_utils.h"
+#include "notification_msg.h"
+#include "parse_utils.h"
 /**
  * Parses a notification message stored in a byte parsed_msg.error_textfer
  *

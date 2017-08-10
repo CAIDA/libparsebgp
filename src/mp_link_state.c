@@ -7,8 +7,8 @@
  *
  */
 #include <arpa/inet.h>
-#include "../include/mp_link_state.h"
-#include "../include/parse_utils.h"
+#include "mp_link_state.h"
+#include "parse_utils.h"
 
 /**
  * Parse a Local or Remote Descriptor sub-tlv's

@@ -10,7 +10,7 @@
 #ifndef OPENMSG_H_
 #define OPENMSG_H_
 
-#include "../include/bgp_common.h"
+#include "bgp_common.h"
 
 /**
 * Defines the BGP capabilities

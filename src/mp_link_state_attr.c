@@ -7,9 +7,9 @@
  *
  */
 
-#include "../include/parse_utils.h"
+#include "parse_utils.h"
 #include <arpa/inet.h>
-#include "../include/mp_link_state_attr.h"
+#include "mp_link_state_attr.h"
 
 /* BGP-LS Node flags : https://tools.ietf.org/html/rfc7752#section-3.3.1.1
  *

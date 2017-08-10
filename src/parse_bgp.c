@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/parse_bgp.h"
+#include "parse_bgp.h"
 
 /**
  * function to parse BGP messages
