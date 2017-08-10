@@ -959,6 +959,8 @@ int main(int argc, char *argv[])
   // msg_read is used to determine if the message is read properly
   bool msg_read = true;
 
+  fprintf(stderr, "DEBUG: opening %s, type: %d\n", file_path, msg_type);
+
   // Opening file in reading mode
   FILE *fp = fopen(file_path, "r");
 
