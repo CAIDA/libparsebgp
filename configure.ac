@@ -19,20 +19,12 @@ AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-# TODO: change this to libparsebgp.c (or whatever the "main" C file is for the
-# library)
-AC_CONFIG_SRCDIR([src/parse_bgp.cpp])
+AC_CONFIG_SRCDIR([src/parse_bgp.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_LIBTOOL
 AC_PROG_CC_C99
-AC_PROG_CXX
-
-# Add C++11 support
-# TODO: remove this once we have ported to C
-CXXFLAGS="-std=c++11"
-#AX_CXX_COMPILE_STDCXX_11
 
 # TODO: add checks for functions/headers that we need (e.g., assert)
 

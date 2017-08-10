@@ -6,11 +6,11 @@ lib_LTLIBRARIES = libparsebgp.la
 
 libparsebgp_la_SOURCES = 		\
 	add_path_data_container.c 	\
-	evpn.c			\
-	ext_community.c		\
-	mp_link_state.c		\
+	evpn.c				\
+	ext_community.c			\
+	mp_link_state.c			\
 	mp_link_state_attr.c		\
-	mp_reach_attr.c		\
+	mp_reach_attr.c			\
 	mp_un_reach_attr.c		\
 	notification_msg.c		\
 	open_msg.c			\
