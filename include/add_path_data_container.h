@@ -14,12 +14,15 @@
 //#include <map>
 
 struct send_receive_codes_for_sent_and_received_open_message_structure {
-    int     send_receive_code_for_sent_open_message;
-    int     send_receive_code_for_received_open_message;
+  int send_receive_code_for_sent_open_message;
+  int send_receive_code_for_received_open_message;
 };
 
-// Peer related data container. First key is afi safi unique key. Second is structure with Add Path information
-//typedef std::map<std::string, send_receive_codes_for_sent_and_received_open_message_structure> libparsebgp_addpath_map;
+// Peer related data container. First key is afi safi unique key. Second is
+// structure with Add Path information
+// typedef std::map<std::string,
+// send_receive_codes_for_sent_and_received_open_message_structure>
+// libparsebgp_addpath_map;
 
 /**
  * Generates unique string from AFI and SAFI combination
@@ -29,7 +32,7 @@ struct send_receive_codes_for_sent_and_received_open_message_structure {
  *
  * @return string unique for AFI and SAFI combination
  */
-//std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi);
+// std::string libparsebgp_addpath_get_afi_safi_key_string(int afi, int safi);
 
 /**
  * Add Add Path data to persistent storage
@@ -37,9 +40,11 @@ struct send_receive_codes_for_sent_and_received_open_message_structure {
  * @param [in] afi              Afi code from RFC
  * @param [in] safi             Safi code form RFC
  * @param [in] send_receive     Send Recieve code from RFC
- * @param [in] sent_open        Is obtained from sent open message. False if from recieved
+ * @param [in] sent_open        Is obtained from sent open message. False if
+ * from recieved
  */
-//void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open);
+// void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi,
+// int safi, int send_receive, bool sent_open);
 
 /**
  * Is add path capability enabled for such AFI and SAFI
@@ -49,6 +54,7 @@ struct send_receive_codes_for_sent_and_received_open_message_structure {
  *
  * @return is enabled
  */
-//bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi);
+// bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int
+// afi, int safi);
 
-#endif //OPENBMP_ADDPATHDATACONTAINER_
+#endif // OPENBMP_ADDPATHDATACONTAINER_

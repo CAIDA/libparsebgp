@@ -10,32 +10,37 @@
 #include "add_path_data_container.h"
 #include "open_msg.h"
 
-
 /**
  * Add Add Path data to persistent storage
  */
 /*
-void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int safi, int send_receive, bool sent_open) {
-    //AddPathMap::iterator iterator = this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
-    libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
+void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int
+safi, int send_receive, bool sent_open) {
+    //AddPathMap::iterator iterator =
+this->addPathMap.find(this->getAFiSafiKeyString(afi, safi));
+    libparsebgp_addpath_map::iterator iterator =
+addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
     if(iterator == addpath_map.end()) {
-        send_receive_codes_for_sent_and_received_open_message_structure new_structure;
+        send_receive_codes_for_sent_and_received_open_message_structure
+new_structure;
 
         if (sent_open) {
-            new_structure.send_receive_code_for_sent_open_message = send_receive;
-        } else {
-            new_structure.send_receive_code_for_received_open_message = send_receive;
+            new_structure.send_receive_code_for_sent_open_message =
+send_receive; } else { new_structure.send_receive_code_for_received_open_message
+= send_receive;
         }
 
-        addpath_map.insert(std::pair<std::string, send_receive_codes_for_sent_and_received_open_message_structure>(
+        addpath_map.insert(std::pair<std::string,
+send_receive_codes_for_sent_and_received_open_message_structure>(
                 libparsebgp_addpath_get_afi_safi_key_string(afi, safi),
                 new_structure
         ));
     } else {
         if (sent_open) {
-            iterator->second.send_receive_code_for_sent_open_message = send_receive;
-        } else {
-            iterator->second.send_receive_code_for_received_open_message = send_receive;
+            iterator->second.send_receive_code_for_sent_open_message =
+send_receive; } else {
+            iterator->second.send_receive_code_for_received_open_message =
+send_receive;
         }
     }
 }
@@ -59,20 +64,24 @@ void libparsebgp_addpath_add(libparsebgp_addpath_map &addpath_map, int afi, int 
 /**
  * Is add path capability enabled for such AFI and SAFI
  */
-/*bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int afi, int safi) {
-    libparsebgp_addpath_map::iterator iterator = addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
+/*bool libparsebgp_addpath_is_enabled(libparsebgp_addpath_map &addpath_map, int
+afi, int safi) { libparsebgp_addpath_map::iterator iterator =
+addpath_map.find(libparsebgp_addpath_get_afi_safi_key_string(afi, safi));
 
     if(iterator == addpath_map.end()) {
         return false;
     } else {
         // Following the rule:
-        // add_path_<afi/safi> = true IF (SENT_OPEN has ADD-PATH sent or both) AND (RECV_OPEN has ADD-PATH recv or both)
-        return (
-            iterator->second.send_receive_code_for_sent_open_message == BGP_CAP_ADD_PATH_RECEIVE or
-                    iterator->second.send_receive_code_for_sent_open_message == BGP_CAP_ADD_PATH_SEND_RECEIVE
-            ) and (
-            iterator->second.send_receive_code_for_received_open_message == BGP_CAP_ADD_PATH_SEND or
-                    iterator->second.send_receive_code_for_received_open_message == BGP_CAP_ADD_PATH_SEND_RECEIVE
+        // add_path_<afi/safi> = true IF (SENT_OPEN has ADD-PATH sent or both)
+AND (RECV_OPEN has ADD-PATH recv or both) return (
+            iterator->second.send_receive_code_for_sent_open_message ==
+BGP_CAP_ADD_PATH_RECEIVE or
+                    iterator->second.send_receive_code_for_sent_open_message ==
+BGP_CAP_ADD_PATH_SEND_RECEIVE ) and (
+            iterator->second.send_receive_code_for_received_open_message ==
+BGP_CAP_ADD_PATH_SEND or
+                    iterator->second.send_receive_code_for_received_open_message
+== BGP_CAP_ADD_PATH_SEND_RECEIVE
             );
     }
 }*/
