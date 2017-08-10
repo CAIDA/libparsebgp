@@ -196,7 +196,7 @@ typedef struct mp_reach_nlri {
 typedef struct extcomm_hdr {
   uint8_t high_type; ///< Type high byte
   uint8_t low_type;  ///< Type low byte - subtype
-  char *val;       ///< Value
+  char val[20];       ///< Value
 } extcomm_hdr;
 
 typedef struct bgp_link_state_attrs {

@@ -30,7 +30,7 @@
  *
  * \return  Decoded string value
  */
-static void decode_type_common(const extcomm_hdr *ec_hdr, u_char **value,
+static void decode_type_common(extcomm_hdr *ec_hdr, u_char **value,
                                bool is_global_4bytes, bool is_global_ipv4)
 {
   //    std::stringstream   val_ss;
@@ -233,7 +233,7 @@ static void decode_type_common(const extcomm_hdr *ec_hdr, u_char **value,
  *
  * \return  Decoded string value
  */
-static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char **value)
+static void decode_type_evpn(extcomm_hdr *ec_hdr, u_char **value)
 {
   uint32_t val_32b;
 
@@ -282,7 +282,7 @@ static void decode_type_evpn(const extcomm_hdr *ec_hdr, u_char **value)
  *
  * \return  Decoded string value
  */
-static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char **value)
+static void decode_type_opaque(extcomm_hdr *ec_hdr, u_char **value)
 {
   //  uint16_t val_16b;
   uint32_t val_32b;
@@ -381,7 +381,7 @@ static void decode_type_opaque(const extcomm_hdr *ec_hdr, u_char **value)
  *
  * \return  Decoded string value
  */
-static void decode_type_generic(const extcomm_hdr *ec_hdr, u_char **value,
+static void decode_type_generic(extcomm_hdr *ec_hdr, u_char **value,
                                 bool is_global_4bytes, bool is_global_ipv4)
 {
   uint16_t val_16b;
@@ -599,7 +599,6 @@ void libparsebgp_ext_communities_parse_ext_communities(
     path_attrs->attr_value.ext_comm[count++] = *ec_hdr;
   }
   path_attrs->count_ext_comm = count;
-  free(ec_hdr->val);
   free(ec_hdr);
   //        parsed_data.attrs[ATTR_TYPE_EXT_COMMUNITY] = decode_str;
 }
@@ -616,7 +615,7 @@ void libparsebgp_ext_communities_parse_ext_communities(
  *
  * \return  Decoded string value
  */
-static void decodeType_ipv6_specific(const extcomm_hdr *ec_hdr, u_char **value)
+static void decodeType_ipv6_specific(extcomm_hdr *ec_hdr, u_char **value)
 {
   //    std::stringstream   val_ss;
   uint16_t val_16b;
@@ -735,7 +734,6 @@ void libparsebgp_ext_communities_parse_v6_ext_communities(
     path_attrs->attr_value.ext_comm[count++] = *ec_hdr;
   }
   path_attrs->count_ext_comm = count;
-  free(ec_hdr->val);
   free(ec_hdr);
   free(value);
 }
