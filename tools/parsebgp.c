@@ -48,7 +48,7 @@ static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
 static int parse(enum libparsebgp_parse_msg_types type, char *fname)
 {
   uint8_t buf[BUFLEN];
-  FILE *fp;
+  FILE *fp = NULL;
 
   if ((fp = fopen(fname, "r")) == NULL) {
     fprintf(stderr, "ERROR: Could not open %s (%s)\n", fname, strerror(errno));
@@ -106,12 +106,16 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
 
   fprintf(stderr, "INFO: Read %"PRIu64" messages from %s\n", cnt, fname);
 
-  fclose(fp);
+  if (fp != NULL) {
+    fclose(fp);
+  }
 
   return 0;
 
  err:
-  fclose(fp);
+  if (fp != NULL) {
+    fclose(fp);
+  }
   return -1;
 }
 
@@ -168,8 +172,8 @@ int main(int argc, char **argv)
   int i, j;
   for (i=optind; i<argc; i++) {
     int type = 0; // undefined type
-    char *fname, *tname;
-    fname = tname = strdup(argv[i]);
+    char *fname, *tname, *freeme;
+    fname = tname = freeme = strdup(argv[i]);
     assert(fname != NULL);
 
     if ((fname = strchr(fname, ':')) == NULL) {
@@ -198,6 +202,7 @@ int main(int argc, char **argv)
               "consider explicitly specifying type using type:file syntax\n",
               argv[i]);
       usage();
+      free(freeme);
       return -1;
     }
 
@@ -207,6 +212,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "WARNING: Failed to parse %s%s\n", fname,
               (i==argc-1) ? "" : ", moving on");
     }
+    free(freeme);
   }
 
   return 0;
