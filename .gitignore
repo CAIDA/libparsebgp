@@ -21,6 +21,7 @@ TAGS
 
 # Compiled programs
 *.tar.gz
+tools/parsebgp
 
 # Test results
 test/*.log
@@ -31,9 +32,6 @@ test/*.log
 Makefile.in
 Makefile
 
-#rsrc consumer
-scripts/bgpview/consumers/moas/rsrc
-scripts/bgpview/consumers/moas/logs
 *.xml
 *.db
 *.swp
