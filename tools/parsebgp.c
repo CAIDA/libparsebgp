@@ -1,10 +1,16 @@
 #include "config.h"
 #include "lib_parse_common.h"
 #include <assert.h>
+#include <errno.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NAME "parsebgp"
+
+// Read 1MB of the file at a time
+#define BUFLEN (1024*1024)
 
 char *type_strs[] = {
   NULL, // invalid
@@ -13,8 +19,99 @@ char *type_strs[] = {
   "bgp", // BGP_MESSAGE_TYPE
 };
 
+static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
+                             size_t remain)
+{
+  size_t len = 0;
+
+  if (remain > 0) {
+    // need to move remaining data to start of buffer
+    memmove(buf, buf+buflen-remain, buflen-remain);
+    len += remain;
+  }
+
+  if (feof(fp) != 0) {
+    // nothing more to read
+    return len;
+  }
+
+  // do a read, we should get something at least
+  len += fread(buf+len, 1, buflen-len, fp);
+
+  if (ferror(fp) != 0) {
+    return -1;
+  }
+
+  return len;
+}
+
 static int parse(enum libparsebgp_parse_msg_types type, char *fname)
 {
+  uint8_t buf[BUFLEN];
+  FILE *fp;
+
+  if ((fp = fopen(fname, "r")) == NULL) {
+    fprintf(stderr, "ERROR: Could not open %s (%s)\n", fname, strerror(errno));
+    goto err;
+  }
+
+  buf[0] = '\0';
+
+  ssize_t len = 0, remain = 0;
+  uint8_t *ptr;
+
+  libparsebgp_parse_msg parse_msg;
+  ssize_t parse_len = 0;
+  uint64_t cnt = 0;
+
+  while((len = refill_buffer(fp, buf, BUFLEN, remain)) > 0) {
+    if (len == remain) {
+      // failed to read anything new from the file, so give up
+      fprintf(stderr,
+              "ERROR: Failed to read anything new from file, but %ld bytes "
+              "remain. Giving up.\n",
+              remain);
+      break;
+    }
+    fprintf(stderr, "DEBUG: Refilled buffer with %ld bytes\n", len);
+    remain = len;
+    ptr = buf;
+
+    while (remain > 0) {
+      memset(&parse_msg, 0, sizeof(parse_msg));
+      fprintf(stderr, "DEBUG: About to parse message (%ld bytes remain)\n",
+              remain);
+      if ((parse_len = libparsebgp_parse_msg_common_wrapper(
+             &parse_msg, &ptr, remain, type)) < 0) {
+        fprintf(stderr, "ERROR: Failed to parse message (%ld)\n", parse_len);
+        goto err;
+      } else if (parse_len == 0) {
+        // eof or partial message in buffer, so break and we'll try and refill
+        break;
+      }
+      // else: successful read
+      fprintf(stderr, "DEBUG: Read message\n");
+      cnt++;
+      ptr += parse_len;
+      remain -= parse_len;
+      libparsebgp_parse_msg_common_destructor(&parse_msg);
+    }
+  }
+
+  if (len < 0) {
+    fprintf(stderr, "ERROR: Failed to read from %s (%s)\n", fname,
+            strerror(errno));
+    goto err;
+  }
+
+  fprintf(stderr, "INFO: Read %"PRIu64" messages from %s\n", cnt, fname);
+
+  fclose(fp);
+
+  return 0;
+
+ err:
+  fclose(fp);
   return -1;
 }
 
@@ -107,7 +204,8 @@ int main(int argc, char **argv)
     fprintf(stderr, "INFO: Parsing %s (Type: %s)\n", fname, type_strs[type]);
 
     if (parse(type, fname) != 0) {
-      fprintf(stderr, "WARNING: Failed to parse %s\n", fname);
+      fprintf(stderr, "WARNING: Failed to parse %s%s\n", fname,
+              (i==argc-1) ? "" : ", moving on");
     }
   }
 
