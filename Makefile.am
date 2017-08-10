@@ -6,3 +6,9 @@ EXTRA_DIST =
 ACLOCAL_AMFLAGS = -I m4
 
 CLEANFILES = *~
+
+format:
+	find . -type f -name "*.[ch]" -exec \
+		clang-format -style=file -i {} \;
+
+.PHONY: format
