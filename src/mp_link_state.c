@@ -9,6 +9,7 @@
 #include "mp_link_state.h"
 #include "parse_utils.h"
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 /**
  * Parse a Local or Remote Descriptor sub-tlv's

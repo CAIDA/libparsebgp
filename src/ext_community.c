@@ -14,6 +14,7 @@
 #include "update_msg.h"
 #include <arpa/inet.h>
 #include <assert.h>
+#include <sys/socket.h>
 
 /**
  * Decode common Type/Subtypes

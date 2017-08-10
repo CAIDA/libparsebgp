@@ -10,6 +10,7 @@
 #include "parse_mrt.h"
 #include "parse_bmp.h"
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 /*
  * Buffer remaining MRT message
