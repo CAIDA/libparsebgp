@@ -22,7 +22,6 @@ TAGS
 # Compiled programs
 *.tar.gz
 tools/parsebgp
-tools/parsebgp-old
 
 # Test results
 test/*.log
