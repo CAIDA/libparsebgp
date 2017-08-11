@@ -1,4 +1,4 @@
-#include "lib_parse_common.h"
+#include "parsebgp.h"
 
 #define BUFFER_SIZE 2048
 

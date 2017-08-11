@@ -1,5 +1,5 @@
 #include "config.h"
-#include "lib_parse_common.h"
+#include "parsebgp.h"
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>

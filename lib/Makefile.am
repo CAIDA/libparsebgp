@@ -2,7 +2,7 @@ SUBDIRS =
 
 AM_CPPFLAGS =
 
-include_HEADERS = 	lib_parse_common.h	\
+include_HEADERS = 	parsebgp.h		\
 			parse_bgp.h		\
 			parse_bmp.h		\
 			parse_mrt.h		\
@@ -17,7 +17,6 @@ libparsebgp_la_SOURCES = 		\
 	evpn.h				\
 	ext_community.c			\
 	ext_community.h			\
-	lib_parse_common.h		\
 	mp_link_state.c			\
 	mp_link_state.h			\
 	mp_link_state_attr.c		\
@@ -30,6 +29,7 @@ libparsebgp_la_SOURCES = 		\
 	notification_msg.h		\
 	open_msg.c			\
 	open_msg.h			\
+	parsebgp.h			\
 	parse_bgp.c			\
 	parse_bgp.h			\
 	parse_bmp.c			\
