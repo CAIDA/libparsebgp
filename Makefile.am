@@ -1,4 +1,4 @@
-SUBDIRS = include src tools
+SUBDIRS = lib tools
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
 EXTRA_DIST =
