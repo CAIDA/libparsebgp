@@ -56,3 +56,8 @@ void SWAP_BYTES(void *var, int size)
   for (int i = size - 1; i >= 0; i--)
     v[i2++] = buf[i];
 }
+
+void *malloc_zero(const size_t size)
+{
+  return calloc(size, 1);
+}

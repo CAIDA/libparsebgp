@@ -271,7 +271,7 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs,
     }
 
     default: {
-      return NOT_YET_IMPLEMENTED;
+      return NOT_IMPLEMENTED;
       // break;
       // LOG_INFO("%s: EVPN::parse SAFI=%d is not implemented yet, skipping",
       //         peer_addr.c_str(), nlri.safi);
@@ -284,7 +284,7 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs,
   default: // Unknown
     // LOG_INFO("%s: MP_REACH AFI=%d is not implemented yet, skipping",
     // peer_addr.c_str(), nlri.afi);
-    return NOT_YET_IMPLEMENTED;
+    return NOT_IMPLEMENTED;
   }
   return read_size;
 }

@@ -989,7 +989,7 @@ ssize_t libparsebgp_mp_link_state_parse_reach_link_state(
     // LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet,
     // skipping for now",
     //        peer_addr.c_str(), nlri.afi, nlri.safi);
-    return NOT_YET_IMPLEMENTED;
+    return NOT_IMPLEMENTED;
   }
 }
 

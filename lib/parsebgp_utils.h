@@ -1,11 +1,8 @@
-//
-// Created by Induja on 4/6/2017.
-//
-
 #ifndef __PARSEBGP_UTILS_H
 #define __PARSEBGP_UTILS_H
 
 #include <inttypes.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
@@ -20,5 +17,8 @@ ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
  * @param [in]     size  Size of var - Default is size of var
  */
 void SWAP_BYTES(void *var, int size);
+
+/** Convenience function to allocate and zero memory */
+void *malloc_zero(const size_t size);
 
 #endif /*  __PARSEBGP_UTILS_H */

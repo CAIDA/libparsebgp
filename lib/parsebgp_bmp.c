@@ -182,7 +182,7 @@ static ssize_t libparsebgp_parse_bmp_parse_bmp_v2(
     break;
 
   case 3:                       // Peer Up notification
-    return NOT_YET_IMPLEMENTED; // ERROR: Will need to add support for peer up
+    return NOT_IMPLEMENTED; // ERROR: Will need to add support for peer up
                                 // if it's really used.
   }
 

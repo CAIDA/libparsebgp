@@ -13,10 +13,10 @@
 #define BUFLEN (1024 * 1024)
 
 char *type_strs[] = {
-  NULL,  // invalid
-  "mrt", // MRT_MESSAGE_TYPE
-  "bmp", // BMP_MESSAGE_TYPE
-  "bgp", // BGP_MESSAGE_TYPE
+  NULL,  // PARSEBGP_MSG_TYPE_INVALID
+  "bgp", // PARSEBGP_MSG_TYPE_BGP
+  "bmp", // PARSEBGP_MSG_TYPE_BMP
+  "mrt", // PARSEBGP_MSG_TYPE_MRT
 };
 
 static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
@@ -45,10 +45,19 @@ static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
   return len;
 }
 
-static int parse(enum libparsebgp_parse_msg_types type, char *fname)
+static int parse(parsebgp_msg_type_t type, char *fname)
 {
   uint8_t buf[BUFLEN];
   FILE *fp = NULL;
+
+  ssize_t fill_len = 0, remain = 0;
+  size_t dec_len = 0;
+  uint8_t *ptr;
+
+  parsebgp_msg_t *msg = NULL;
+  parsebgp_error_t err = OK;
+
+  uint64_t cnt = 0;
 
   if ((fp = fopen(fname, "r")) == NULL) {
     fprintf(stderr, "ERROR: Could not open %s (%s)\n", fname, strerror(errno));
@@ -57,15 +66,8 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
 
   buf[0] = '\0';
 
-  ssize_t len = 0, remain = 0;
-  uint8_t *ptr;
-
-  libparsebgp_parse_msg parse_msg;
-  ssize_t parse_len = 0;
-  uint64_t cnt = 0;
-
-  while ((len = refill_buffer(fp, buf, BUFLEN, remain)) > 0) {
-    if (len == remain) {
+  while ((fill_len = refill_buffer(fp, buf, BUFLEN, remain)) > 0) {
+    if (fill_len == remain) {
       // failed to read anything new from the file, so give up
       fprintf(stderr,
               "ERROR: Failed to read anything new from file, but %ld bytes "
@@ -73,32 +75,44 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
               remain);
       break;
     }
-    fprintf(stderr, "DEBUG: Refilled buffer with %ld bytes\n", len);
-    remain = len;
+    fprintf(stderr, "DEBUG: Refilled buffer with %ld bytes\n", fill_len);
+    remain = fill_len;
     ptr = buf;
 
     while (remain > 0) {
-      memset(&parse_msg, 0, sizeof(parse_msg));
+      if ((msg = parsebgp_msg_create()) == NULL) {
+        fprintf(stderr, "ERROR: Failed to create message structure\n");
+        goto err;
+      }
+
       fprintf(stderr, "DEBUG: About to parse message (%ld bytes remain)\n",
               remain);
-      if ((parse_len = libparsebgp_parse_msg_common_wrapper(
-             &parse_msg, &ptr, remain, type)) < 0) {
-        fprintf(stderr, "ERROR: Failed to parse message (%ld)\n", parse_len);
+
+      dec_len = remain;
+      if ((err = parsebgp_decode_msg(type, msg, ptr, &dec_len)) != OK) {
+        if (err == INCOMPLETE_MSG) {
+          // refill the buffer and try again
+          break;
+        }
+        // else: its a fatal error
+
+        // TODO: add error code to string func
+        fprintf(stderr, "ERROR: Failed to parse message (%d)\n", err);
         goto err;
-      } else if (parse_len == 0) {
-        // eof or partial message in buffer, so break and we'll try and refill
-        break;
       }
       // else: successful read
       fprintf(stderr, "DEBUG: Read message\n");
+      assert(dec_len > 0);
+      ptr += dec_len;
+      remain -= dec_len;
       cnt++;
-      ptr += parse_len;
-      remain -= parse_len;
-      libparsebgp_parse_msg_common_destructor(&parse_msg);
+
+      parsebgp_msg_destroy(msg);
+      msg = NULL;
     }
   }
 
-  if (len < 0) {
+  if (fill_len < 0) {
     fprintf(stderr, "ERROR: Failed to read from %s (%s)\n", fname,
             strerror(errno));
     goto err;
@@ -110,12 +124,15 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
     fclose(fp);
   }
 
+  parsebgp_msg_destroy(msg);
+
   return 0;
 
 err:
   if (fp != NULL) {
     fclose(fp);
   }
+  parsebgp_msg_destroy(msg);
   return -1;
 }
 
@@ -178,7 +195,7 @@ int main(int argc, char **argv)
     if ((fname = strchr(fname, ':')) == NULL) {
       fname = tname;
       int len = strlen(fname);
-      for (j = MRT_MESSAGE_TYPE; j <= BGP_MESSAGE_TYPE; j++) {
+      PARSEBGP_FOREACH_MSG_TYPE(j) {
         tname = fname;
         tname += (len - strlen(type_strs[j]));
         if (strcmp(tname, type_strs[j]) == 0) {
@@ -188,7 +205,7 @@ int main(int argc, char **argv)
       }
     } else {
       *(fname++) = '\0';
-      for (j = MRT_MESSAGE_TYPE; j <= BGP_MESSAGE_TYPE; j++) {
+      PARSEBGP_FOREACH_MSG_TYPE(j) {
         if (strcmp(tname, type_strs[j]) == 0) {
           type = j;
           break;

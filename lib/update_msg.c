@@ -538,7 +538,7 @@ void static libparsebgp_update_msg_parse_attr_data(
   }
 
   case ATTR_TYPE_AS_PATHLIMIT: // deprecated
-    break;                     // NOT_YET_IMPLEMENTED
+    break;                     // NOT_IMPLEMENTED
 
   case ATTR_TYPE_BGP_LS: {
     libparsebgp_mp_link_state_attr_parse_attr_link_state(
@@ -547,10 +547,10 @@ void static libparsebgp_update_msg_parse_attr_data(
   }
 
   case ATTR_TYPE_AS4_PATH:
-    break; // NOT_YET_IMPLEMENTED
+    break; // NOT_IMPLEMENTED
 
   case ATTR_TYPE_AS4_AGGREGATOR:
-    break; // NOT_YET_IMPLEMENTED
+    break; // NOT_IMPLEMENTED
 
   default:
     break;
