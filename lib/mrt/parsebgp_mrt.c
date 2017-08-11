@@ -8,7 +8,7 @@
  */
 
 #include "parsebgp_mrt.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <arpa/inet.h>
 #include <inttypes.h>

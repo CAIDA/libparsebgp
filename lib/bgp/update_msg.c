@@ -8,7 +8,7 @@
  */
 
 #include "update_msg.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include "ext_community.h"
 #include "mp_link_state.h"

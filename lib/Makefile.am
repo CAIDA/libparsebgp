@@ -1,47 +1,20 @@
-SUBDIRS =
+SUBDIRS = bgp bmp mrt
 
-AM_CPPFLAGS =
+AM_CPPFLAGS =	-I$(top_srcdir)/lib	\
+		-I$(top_srcdir)/lib/bgp \
+		-I$(top_srcdir)/lib/bmp	\
+		-I$(top_srcdir)/lib/mrt
 
-include_HEADERS = 	parsebgp.h		\
-			parsebgp_bgp.h		\
-			parsebgp_bgp_common.h	\
-			parsebgp_bmp.h		\
-			parsebgp_mrt.h
+include_HEADERS = parsebgp.h
 
 lib_LTLIBRARIES = libparsebgp.la
 
 libparsebgp_la_SOURCES = 		\
-	add_path_data_container.c 	\
-	add_path_data_container.h 	\
-	evpn.c				\
-	evpn.h				\
-	ext_community.c			\
-	ext_community.h			\
-	mp_link_state.c			\
-	mp_link_state.h			\
-	mp_link_state_attr.c		\
-	mp_link_state_attr.h		\
-	mp_reach_attr.c			\
-	mp_reach_attr.h			\
-	mp_un_reach_attr.c		\
-	mp_un_reach_attr.h		\
-	notification_msg.c		\
-	notification_msg.h		\
-	open_msg.c			\
-	open_msg.h			\
 	parsebgp.c			\
 	parsebgp.h			\
-	parsebgp_bgp.c			\
-	parsebgp_bgp.h			\
-	parsebgp_bgp_common.h		\
-	parsebgp_bmp.c			\
-	parsebgp_bmp.h			\
-	parsebgp_mrt.c			\
-	parsebgp_mrt.h			\
+	parsebgp_error.h		\
 	parsebgp_utils.c		\
-	parsebgp_utils.h		\
-	update_msg.c			\
-	update_msg.h
+	parsebgp_utils.h
 
 libparsebgp_la_LDFLAGS = -version-info @LIBPARSEBGP_MAJOR_VERSION@:@LIBPARSEBGP_MID_VERSION@:@LIBPARSEBGP_MINOR_VERSION@
 

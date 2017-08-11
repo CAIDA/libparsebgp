@@ -8,7 +8,7 @@
  */
 
 #include "mp_reach_attr.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include "evpn.h"
 #include "mp_link_state.h"

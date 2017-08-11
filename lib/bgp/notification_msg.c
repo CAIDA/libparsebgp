@@ -8,7 +8,7 @@
  */
 
 #include "notification_msg.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include <stdio.h>
 #include <strings.h>
 

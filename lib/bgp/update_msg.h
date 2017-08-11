@@ -11,7 +11,7 @@
 #define UPDATEMSG_H_
 
 #include "parsebgp_bgp_common.h"
-#include "add_path_data_container.h"
+//#include "add_path_data_container.h"
 #include <inttypes.h>
 #include <unistd.h>
 

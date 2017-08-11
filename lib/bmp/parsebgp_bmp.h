@@ -1,27 +1,9 @@
-//
-// Created by ojas on 4/21/17.
-//
+#ifndef __PARSEBGP_BMP_H
+#define __PARSEBGP_BMP_H
 
-#ifndef PARSE_LIB_PARSE_BMPV1_H
-#define PARSE_LIB_PARSE_BMPV1_H
-
-#include "parsebgp_bgp.h"
+#include "parsebgp_error.h" //< for parsebgp_error_t
+#include "bgp/parsebgp_bgp.h" //< BMP encapsulates BGP messages
 #include <inttypes.h>
-
-/*
- * BMP Header lengths, not counting the version in the common hdr
- */
-#define BMP_HDRv3_LEN 5 ///< BMP v3 header length, not counting the version
-#define BMP_HDRv1v2_LEN 43
-#define BMP_PEER_HDR_LEN 42 ///< BMP peer header length
-#define BMP_INIT_MSG_LEN                                                       \
-  4 ///< BMP init message header length, does not count the info field
-#define BMP_TERM_MSG_LEN                                                       \
-  4 ///< BMP term message header length, does not count the info field
-#define BMP_PEER_UP_HDR_LEN                                                    \
-  20 ///< BMP peer up event header size not including the recv/sent open param
-     ///< message
-#define BMP_PACKET_BUF_SIZE 68000 ///< Size of the BMP packet buffer (memory)
 
 /**
  * BMP common header types
@@ -224,31 +206,27 @@ typedef struct libparsebgp_parsed_bmp_parsed_data {
   } libparsebgp_parsed_bmp_msg; ///< Union of BMP messages
 } libparsebgp_parse_bmp_parsed_data;
 
-/**
- * Parses a BMP message by its various types
+/** Destroy the given BMP message structure
  *
- * @details
- *  This function will parse the header of the message and according to the type
- * of the BMP message, it parses the rest of the message.
+ * @param msg           Pointer to message structure to destroy
  *
- * @param [in]     parsed_msg       Pointer to the BMP Message structure
- * @param [in]     buffer           Pointer to the raw BGP message header
- * @param [in]     buf_len          length of the data buffer (used to prevent
- * overrun)
- *
- * @returns Bytes that have been successfully read by the bmp parser.
+ * This function *does not* free the passed structure itself as it is assumed to
+ * be a member of a parsebgp_msg_t structure.
  */
-ssize_t
-libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg,
-                                unsigned char *buffer, int buf_len);
+void parsebgp_bmp_destroy_msg(libparsebgp_parse_bmp_parsed_data *msg);
 
 /**
- * Destructor function to free bmp_parsed_data
+ * Decode (parse) a single BMP message from the given buffer into the given BMP
+ * message structure.
  *
- * @param parsed_data  Struct having parsed bmp data, that needs to be freed
- *
+ * @param [in] msg      Pointer to the BMP Message structure to fill
+ * @param [in] buffer   Pointer to the start of a raw BGP message
+ * @param [in,out] len  Length of the data buffer (used to prevent overrun).
+ *                      Updated to the number of bytes read from the buffer.
+ * @return OK (0) if a message was parsed successfully, or an error code
+ * otherwise
  */
-void libparsebgp_parse_bmp_destructor(
-  libparsebgp_parse_bmp_parsed_data *parsed_data);
+parsebgp_error_t parsebgp_bmp_decode(libparsebgp_parse_bmp_parsed_data *msg,
+                                     uint8_t *buffer, size_t *len);
 
-#endif // PARSE_LIB_PARSE_BMPV1_H
+#endif /* __PARSEBGP_BMP_H */

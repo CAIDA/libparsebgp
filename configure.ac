@@ -19,7 +19,7 @@ AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CONFIG_SRCDIR([lib/parse_bgp.c])
+AC_CONFIG_SRCDIR([lib/parsebgp.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
@@ -34,6 +34,9 @@ AC_SUBST([LIBPARSEBGP_MINOR_VERSION])
 
 AC_CONFIG_FILES([Makefile
                 lib/Makefile
+                lib/bgp/Makefile
+                lib/bmp/Makefile
+                lib/mrt/Makefile
 		tools/Makefile
 		])
 AC_OUTPUT

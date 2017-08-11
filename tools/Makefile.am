@@ -1,4 +1,7 @@
-AM_CPPFLAGS =  -I$(top_srcdir)/lib
+AM_CPPFLAGS =	-I$(top_srcdir)/lib	\
+		-I$(top_srcdir)/lib/bgp	\
+		-I$(top_srcdir)/lib/bmp	\
+		-I$(top_srcdir)/lib/mrt
 
 dist_bin_SCRIPTS =
 

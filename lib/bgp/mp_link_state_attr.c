@@ -8,7 +8,7 @@
  */
 
 #include "mp_link_state_attr.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <stdlib.h>
 #include <string.h>

@@ -9,7 +9,7 @@
 #ifndef PARSEMRT_H_
 #define PARSEMRT_H_
 
-#include "parsebgp_bgp.h"
+#include "bgp/parsebgp_bgp.h"
 #include <inttypes.h>
 
 #define MRT_PACKET_BUF_SIZE 4096 ///< Size of the MRT packet buffer (memory)

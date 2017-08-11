@@ -8,7 +8,7 @@
  */
 
 #include "parsebgp_bgp.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <string.h>
 #include <unistd.h>

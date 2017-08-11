@@ -7,7 +7,7 @@
  *
  */
 #include "mp_link_state.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <arpa/inet.h>
 #include <stdio.h>

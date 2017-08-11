@@ -1,8 +1,8 @@
 #ifndef __PARSEBGP_H
 #define __PARSEBGP_H
 
-#include "parsebgp_bgp.h"
 #include "parsebgp_bmp.h"
+#include "parsebgp_bgp.h"
 #include "parsebgp_mrt.h"
 #include <inttypes.h>
 #include <unistd.h>
@@ -20,31 +20,6 @@ typedef enum parsebgp_msg_type {
 /** Convenience macro to allow iterating over all valid message types */
 #define PARSEBGP_FOREACH_MSG_TYPE(iter)         \
   for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_MRT; (iter)++)
-
-// TODO: namespace these codes
-typedef enum parsebgp_error {
-  /** No error */
-  OK = 0,
-
-  /**  Buffer does not contain an entire message */
-  INCOMPLETE_MSG = -1,
-
-  /** Message length is larger than the maximum possible message length */
-  LARGER_MSG_LEN = -2,
-
-  /** Message is corrupted */
-  CORRUPT_MSG = -3,
-
-  /** Error reading message from buffer */
-  ERR_READING_MSG = -4,
-
-  /** Part of message is different from expected */
-  INVALID_MSG = -5,
-
-  /** Feature to be parsed is not currently implemented */
-  NOT_IMPLEMENTED = -6,
-
-} parsebgp_error_t;
 
 /** Structure into which a message is parsed */
 typedef struct parsebgp_msg {
@@ -80,14 +55,11 @@ typedef struct parsebgp_msg {
  * @param [in,out] len   Number of bytes in buffer. Updated with number of bytes
  *                       read from the buffer
  *
- * @return OK (0) if a message was parsed successfully, or an error code otherwise
- *
- * TODO: better return codes, consider passing read length as parameter
+ * @return OK (0) if a message was parsed successfully, or an error code
+ * otherwise
  */
-parsebgp_error_t parsebgp_decode_msg(parsebgp_msg_type_t type,
-                                     parsebgp_msg_t *msg,
-                                     uint8_t *buffer,
-                                     size_t *len);
+parsebgp_error_t parsebgp_decode(parsebgp_msg_type_t type, parsebgp_msg_t *msg,
+                                 uint8_t *buffer, size_t *len);
 
 /** Create an empty message structure
  *
@@ -96,12 +68,12 @@ parsebgp_error_t parsebgp_decode_msg(parsebgp_msg_type_t type,
  * The caller owns the returned structure and must call parsebgp_msg_destroy to
  * free allocated memory.
  */
-parsebgp_msg_t *parsebgp_msg_create();
+parsebgp_msg_t *parsebgp_create_msg();
 
 /** Destroy the given message structure
  *
  * @param msg           Pointer to message structure to destroy
  */
-void parsebgp_msg_destroy(parsebgp_msg_t *msg);
+void parsebgp_destroy_msg(parsebgp_msg_t *msg);
 
 #endif // __PARSEBGP_H

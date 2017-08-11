@@ -7,7 +7,7 @@
  *
  */
 #include "open_msg.h"
-#include "parsebgp.h"
+#include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <stdlib.h>
 #include <string.h>

@@ -80,7 +80,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
     ptr = buf;
 
     while (remain > 0) {
-      if ((msg = parsebgp_msg_create()) == NULL) {
+      if ((msg = parsebgp_create_msg()) == NULL) {
         fprintf(stderr, "ERROR: Failed to create message structure\n");
         goto err;
       }
@@ -89,7 +89,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
               remain);
 
       dec_len = remain;
-      if ((err = parsebgp_decode_msg(type, msg, ptr, &dec_len)) != OK) {
+      if ((err = parsebgp_decode(type, msg, ptr, &dec_len)) != OK) {
         if (err == INCOMPLETE_MSG) {
           // refill the buffer and try again
           break;
@@ -107,7 +107,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
       remain -= dec_len;
       cnt++;
 
-      parsebgp_msg_destroy(msg);
+      parsebgp_destroy_msg(msg);
       msg = NULL;
     }
   }
@@ -124,7 +124,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
     fclose(fp);
   }
 
-  parsebgp_msg_destroy(msg);
+  parsebgp_destroy_msg(msg);
 
   return 0;
 
@@ -132,7 +132,7 @@ err:
   if (fp != NULL) {
     fclose(fp);
   }
-  parsebgp_msg_destroy(msg);
+  parsebgp_destroy_msg(msg);
   return -1;
 }
 
