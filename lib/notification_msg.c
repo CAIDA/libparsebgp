@@ -8,7 +8,10 @@
  */
 
 #include "notification_msg.h"
-#include "parse_utils.h"
+#include "parsebgp.h"
+#include <stdio.h>
+#include <strings.h>
+
 /**
  * Parses a notification message stored in a byte parsed_msg.error_textfer
  *
@@ -26,9 +29,9 @@
  */
 ssize_t
 libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg,
-                                      u_char **data, size_t size)
+                                      uint8_t **data, size_t size)
 {
-  u_char **dataPtr = data;
+  uint8_t **dataPtr = data;
   int read_size = 0;
 
   // Reset the storage buffer for parsed data

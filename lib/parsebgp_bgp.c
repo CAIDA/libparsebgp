@@ -7,14 +7,18 @@
  *
  */
 
-#include "parse_bgp.h"
+#include "parsebgp_bgp.h"
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
+#include <string.h>
+#include <unistd.h>
 
 /**
  * function to parse BGP messages
  */
 ssize_t libparsebgp_parse_bgp_parse_msg(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-  bool is_local_msg)
+  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
+  size_t size, int is_local_msg)
 {
   ssize_t read_size = 0;
 
@@ -77,7 +81,8 @@ ssize_t libparsebgp_parse_bgp_parse_msg(
  * handle BGP update message and store in DB
  */
 ssize_t libparsebgp_parse_bgp_handle_update(
-  libparsebgp_parse_bgp_parsed_data *bgp_update_msg, u_char **data, size_t size)
+  libparsebgp_parse_bgp_parsed_data *bgp_update_msg, uint8_t **data,
+  size_t size)
 {
   ssize_t read_size = 0, bytes_read = 0;
   // Process the BGP message header
@@ -109,7 +114,8 @@ ssize_t libparsebgp_parse_bgp_handle_update(
  * handle  BGP notify event - updates the down event with parsed data
  */
 ssize_t libparsebgp_parse_bgp_handle_down_event(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size)
+  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
+  size_t size)
 {
   ssize_t read_size = 0, ret_val = 0;
   // Process the BGP message normally
@@ -144,7 +150,7 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(
  * Parses the BGP common header
  */
 ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr,
-                                           u_char *data, size_t size)
+                                           uint8_t *data, size_t size)
 {
   /*
    * Error out if data size is not large enough for common header

@@ -12,7 +12,6 @@
 #ifndef __EXTCOMMUNITY_H__
 #define __EXTCOMMUNITY_H__
 
-#include "bgp_common.h"
 #include "update_msg.h"
 
 /**
@@ -154,7 +153,7 @@ enum ext_comm_subtype_generic {
  *
  */
 void libparsebgp_ext_communities_parse_ext_communities(
-  update_path_attrs *path_attrs, u_char **data);
+  update_path_attrs *path_attrs, uint8_t **data);
 
 /**
  * Parse the extended communities path attribute (20 byte as per RFC5701)
@@ -169,6 +168,6 @@ void libparsebgp_ext_communities_parse_ext_communities(
  *
  */
 void libparsebgp_ext_communities_parse_v6_ext_communities(
-  update_path_attrs *path_attrs, u_char **data);
+  update_path_attrs *path_attrs, uint8_t **data);
 
 #endif /* __EXTCOMMUNITY_H__ */

@@ -25,7 +25,7 @@
  *
  */
 void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(
-  update_path_attrs *path_attrs, int attr_len, u_char **data,
-  bool *has_end_of_rib_marker);
+  update_path_attrs *path_attrs, int attr_len, uint8_t **data,
+  int *has_end_of_rib_marker);
 
 #endif /* MPUNREACHATTR_H_ */

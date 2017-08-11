@@ -7,7 +7,10 @@
  *
  */
 #include "open_msg.h"
-#include "parse_utils.h"
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Parses capabilities from buffer
@@ -25,11 +28,11 @@
  * number of bytes read
  */
 static ssize_t libparsebgp_open_msg_parse_capabilities(
-  libparsebgp_open_msg_data *open_msg_data, u_char **data, size_t size,
-  bool openMessageIsSent)
+  libparsebgp_open_msg_data *open_msg_data, uint8_t **data, size_t size,
+  int openMessageIsSent)
 {
   int read_size = 0;
-  u_char **buf_ptr = data;
+  uint8_t **buf_ptr = data;
   open_msg_data->count_opt_param = 1;
   open_param *opt_param = (open_param *)malloc(sizeof(open_param));
   open_msg_data->opt_param = (open_param *)malloc(sizeof(open_param));
@@ -55,7 +58,7 @@ static ssize_t libparsebgp_open_msg_parse_capabilities(
      */
     else if (opt_param->param_len >= 2 &&
              (read_size + 2 + opt_param->param_len) <= size) {
-      u_char *cap_ptr = *buf_ptr + 2;
+      uint8_t *cap_ptr = *buf_ptr + 2;
       opt_param->count_param_val = 0;
       open_capabilities *open_cap =
         (open_capabilities *)malloc(sizeof(open_capabilities));
@@ -237,11 +240,11 @@ open_cap.cap_values.add_path_data.send_recieve, openMessageIsSent);
  */
 ssize_t
 libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data,
-                                    u_char *data, size_t size,
-                                    bool openMessageIsSent)
+                                    uint8_t *data, size_t size,
+                                    int openMessageIsSent)
 {
   int read_size = 0;
-  u_char *buf_ptr = data;
+  uint8_t *buf_ptr = data;
   int buf_size = size;
 
   /*

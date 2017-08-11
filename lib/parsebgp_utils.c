@@ -2,9 +2,11 @@
 // Created by Induja on 4/6/2017.
 //
 
-#include "parse_utils.h"
+#include "parsebgp_utils.h"
+#include "parsebgp.h"
+#include <inttypes.h>
 #include <string.h>
-#include <sys/types.h>
+#include <unistd.h>
 
 /**
  * Function to extract data from buffer
@@ -16,8 +18,8 @@
  *
  * @return  size of data stored in output_buf
  */
-ssize_t extract_from_buffer(unsigned char **buffer, int *buf_len,
-                            void *output_buf, ssize_t output_len)
+ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
+                            ssize_t output_len)
 {
   if (output_len > *buf_len)
     return INCOMPLETE_MSG; // return (output_len - buf_len);
@@ -42,10 +44,10 @@ void SWAP_BYTES(void *var, int size)
   if (size <= 1)
     return;
 
-  u_char *v = (u_char *)var;
+  uint8_t *v = (uint8_t *)var;
 
   // Allocate a working buffer
-  u_char buf[size];
+  uint8_t buf[size];
 
   // Make a copy
   memcpy(buf, var, size);

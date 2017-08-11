@@ -3,10 +3,10 @@ SUBDIRS =
 AM_CPPFLAGS =
 
 include_HEADERS = 	parsebgp.h		\
-			parse_bgp.h		\
-			parse_bmp.h		\
-			parse_mrt.h		\
-			parse_utils.h
+			parsebgp_bgp.h		\
+			parsebgp_bgp_common.h	\
+			parsebgp_bmp.h		\
+			parsebgp_mrt.h
 
 lib_LTLIBRARIES = libparsebgp.la
 
@@ -29,15 +29,17 @@ libparsebgp_la_SOURCES = 		\
 	notification_msg.h		\
 	open_msg.c			\
 	open_msg.h			\
+	parsebgp.c			\
 	parsebgp.h			\
-	parse_bgp.c			\
-	parse_bgp.h			\
-	parse_bmp.c			\
-	parse_bmp.h			\
-	parse_mrt.c			\
-	parse_mrt.h			\
-	parse_utils.c			\
-	parse_utils.h			\
+	parsebgp_bgp.c			\
+	parsebgp_bgp.h			\
+	parsebgp_bgp_common.h		\
+	parsebgp_bmp.c			\
+	parsebgp_bmp.h			\
+	parsebgp_mrt.c			\
+	parsebgp_mrt.h			\
+	parsebgp_utils.c		\
+	parsebgp_utils.h		\
 	update_msg.c			\
 	update_msg.h
 

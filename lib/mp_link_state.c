@@ -7,8 +7,12 @@
  *
  */
 #include "mp_link_state.h"
-#include "parse_utils.h"
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
 #include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 
 /**
@@ -363,7 +367,7 @@ int libparsebgp_parse_descr_link(u_char **data, int data_len,
   }
 
   case LINK_DESCR_IPV4_INTF_ADDR: {
-    info->is_ipv4 = true;
+    info->is_ipv4 = 1;
     if (info->len != 4) {
       //           LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor
       //           interface IPv4 sub-tlv; too short",peer_addr.c_str());
@@ -382,7 +386,7 @@ int libparsebgp_parse_descr_link(u_char **data, int data_len,
   }
 
   case LINK_DESCR_IPV6_INTF_ADDR: {
-    info->is_ipv4 = false;
+    info->is_ipv4 = 0;
     if (info->len != 16) {
       //              LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor
       //              interface IPv6 sub-tlv; too short",peer_addr.c_str());
@@ -401,7 +405,7 @@ int libparsebgp_parse_descr_link(u_char **data, int data_len,
   }
 
   case LINK_DESCR_IPV4_NEI_ADDR: {
-    info->is_ipv4 = true;
+    info->is_ipv4 = 1;
 
     if (info->len != 4) {
       //              LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor
@@ -421,7 +425,7 @@ int libparsebgp_parse_descr_link(u_char **data, int data_len,
   }
 
   case LINK_DESCR_IPV6_NEI_ADDR: {
-    info->is_ipv4 = false;
+    info->is_ipv4 = 0;
     if (info->len != 16) {
       // LOG_NOTICE("%s: bgp-ls: failed to parse link descriptor neighbor IPv6
       // sub-tlv; too short",peer_addr.c_str());
@@ -580,11 +584,11 @@ static void libparsebgp_parse_nlri_link(mp_reach_ls *mp_reach_ls, u_char **data,
                                                                                       * \param [in]   data           Pointer to the start of the node NLRI data
                                                                                       * \param [in]   data_len       Length of the data
                                                                                       * \param [out]  info           prefix descriptor information returned/updated
-                                                                                      * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
+                                                                                      * \param [in]   isIPv4         Int value to indicate IPv4(1) or IPv6(0)
                                                                                       * \returns number of bytes read
                                                                                       */
 int libparsebgp_parse_descr_prefix(u_char **data, int data_len,
-                                   prefix_descriptor *info, bool is_ipv4)
+                                   prefix_descriptor *info, int is_ipv4)
 {
   int data_read = 0;
 
@@ -770,11 +774,11 @@ int libparsebgp_parse_descr_prefix(u_char **data, int data_len,
                                                                                       * \param [in]   data_len       Length of the data
                                                                                       * \param [in]   id             NLRI/type identifier
                                                                                       * \param [in]   proto_id       NLRI protocol type id
-                                                                                      * \param [in]   isIPv4         Bool value to indicate IPv4(true) or IPv6(false)
+                                                                                      * \param [in]   isIPv4         Int value to indicate IPv4(1) or IPv6(0)
                                                                                       */
 static void libparsebgp_parse_nlri_prefix(mp_reach_ls *mp_reach_ls,
                                           u_char **data, int data_len,
-                                          bool isIPv4)
+                                          int isIPv4)
 {
 
   if (data_len < 4) {
@@ -937,13 +941,11 @@ libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs,
       break;
 
     case NLRI_TYPE_IPV4_PREFIX:
-      libparsebgp_parse_nlri_prefix(mp_nlri_ls, data, mp_nlri_ls->nlri_len,
-                                    true);
+      libparsebgp_parse_nlri_prefix(mp_nlri_ls, data, mp_nlri_ls->nlri_len, 1);
       break;
 
     case NLRI_TYPE_IPV6_PREFIX:
-      libparsebgp_parse_nlri_prefix(mp_nlri_ls, data, mp_nlri_ls->nlri_len,
-                                    false);
+      libparsebgp_parse_nlri_prefix(mp_nlri_ls, data, mp_nlri_ls->nlri_len, 0);
       break;
 
     default:

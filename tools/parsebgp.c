@@ -1,5 +1,5 @@
-#include "config.h"
 #include "parsebgp.h"
+#include "config.h"
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -10,10 +10,10 @@
 #define NAME "parsebgp"
 
 // Read 1MB of the file at a time
-#define BUFLEN (1024*1024)
+#define BUFLEN (1024 * 1024)
 
 char *type_strs[] = {
-  NULL, // invalid
+  NULL,  // invalid
   "mrt", // MRT_MESSAGE_TYPE
   "bmp", // BMP_MESSAGE_TYPE
   "bgp", // BGP_MESSAGE_TYPE
@@ -26,7 +26,7 @@ static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
 
   if (remain > 0) {
     // need to move remaining data to start of buffer
-    memmove(buf, buf+buflen-remain, buflen-remain);
+    memmove(buf, buf + buflen - remain, buflen - remain);
     len += remain;
   }
 
@@ -36,7 +36,7 @@ static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
   }
 
   // do a read, we should get something at least
-  len += fread(buf+len, 1, buflen-len, fp);
+  len += fread(buf + len, 1, buflen - len, fp);
 
   if (ferror(fp) != 0) {
     return -1;
@@ -64,7 +64,7 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
   ssize_t parse_len = 0;
   uint64_t cnt = 0;
 
-  while((len = refill_buffer(fp, buf, BUFLEN, remain)) > 0) {
+  while ((len = refill_buffer(fp, buf, BUFLEN, remain)) > 0) {
     if (len == remain) {
       // failed to read anything new from the file, so give up
       fprintf(stderr,
@@ -104,7 +104,7 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
     goto err;
   }
 
-  fprintf(stderr, "INFO: Read %"PRIu64" messages from %s\n", cnt, fname);
+  fprintf(stderr, "INFO: Read %" PRIu64 " messages from %s\n", cnt, fname);
 
   if (fp != NULL) {
     fclose(fp);
@@ -112,7 +112,7 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
 
   return 0;
 
- err:
+err:
   if (fp != NULL) {
     fclose(fp);
   }
@@ -121,14 +121,13 @@ static int parse(enum libparsebgp_parse_msg_types type, char *fname)
 
 static void usage()
 {
-  fprintf(
-    stderr,
-    "usage: %s [options] [type:]file [[type:]file...]\n"
-    "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
-    "         (only required if using non-standard file extensions)\n"
-    "       -h                 Show this help message\n"
-    "       -v                 Show version of the libparsebgp library\n",
-    NAME);
+  fprintf(stderr,
+          "usage: %s [options] [type:]file [[type:]file...]\n"
+          "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
+          "         (only required if using non-standard file extensions)\n"
+          "       -h                 Show this help message\n"
+          "       -v                 Show version of the libparsebgp library\n",
+          NAME);
 }
 
 int main(int argc, char **argv)
@@ -170,7 +169,7 @@ int main(int argc, char **argv)
   }
 
   int i, j;
-  for (i=optind; i<argc; i++) {
+  for (i = optind; i < argc; i++) {
     int type = 0; // undefined type
     char *fname, *tname, *freeme;
     fname = tname = freeme = strdup(argv[i]);
@@ -182,7 +181,7 @@ int main(int argc, char **argv)
       for (j = MRT_MESSAGE_TYPE; j <= BGP_MESSAGE_TYPE; j++) {
         tname = fname;
         tname += (len - strlen(type_strs[j]));
-        if(strcmp(tname, type_strs[j]) == 0) {
+        if (strcmp(tname, type_strs[j]) == 0) {
           type = j;
           break;
         }
@@ -190,7 +189,7 @@ int main(int argc, char **argv)
     } else {
       *(fname++) = '\0';
       for (j = MRT_MESSAGE_TYPE; j <= BGP_MESSAGE_TYPE; j++) {
-        if(strcmp(tname, type_strs[j]) == 0) {
+        if (strcmp(tname, type_strs[j]) == 0) {
           type = j;
           break;
         }
@@ -198,7 +197,8 @@ int main(int argc, char **argv)
     }
 
     if (type == 0) {
-      fprintf(stderr, "ERROR: Could not identify type of %s, "
+      fprintf(stderr,
+              "ERROR: Could not identify type of %s, "
               "consider explicitly specifying type using type:file syntax\n",
               argv[i]);
       usage();
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
 
     if (parse(type, fname) != 0) {
       fprintf(stderr, "WARNING: Failed to parse %s%s\n", fname,
-              (i==argc-1) ? "" : ", moving on");
+              (i == argc - 1) ? "" : ", moving on");
     }
     free(freeme);
   }

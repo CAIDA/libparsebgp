@@ -12,7 +12,6 @@
 
 #include "mp_un_reach_attr.h"
 #include <stdint.h>
-#include <sys/types.h>
 
 /**
  * Defines the BGP link state NLRI types
@@ -125,8 +124,8 @@ void libparsebgp_mp_link_state_parse_unreach_link_state(
                                                                                       *
                                                                                       * \returns number of bytes read
                                                                                       */
-int libparsebgp_mp_link_state_parse_descr_prefix(u_char **data, int data_len,
+int libparsebgp_mp_link_state_parse_descr_prefix(uint8_t **data, int data_len,
                                                  prefix_descriptor *info,
-                                                 bool is_ipv4);
+                                                 int is_ipv4);
 
 #endif //_OPENBMP_MPLINKSTATE_H_

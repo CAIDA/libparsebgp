@@ -26,7 +26,7 @@
  */
 ssize_t
 libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs,
-                                                int attr_len, u_char **data);
+                                                int attr_len, uint8_t **data);
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -43,7 +43,7 @@ libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs,
  * list<prefix_tuple> to be updated with entries
  */
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(
-  bool isIPv4, u_char **data, uint16_t len, update_prefix_tuple *prefixes,
+  int isIPv4, uint8_t **data, uint16_t len, update_prefix_tuple *prefixes,
   uint16_t *prefix_count);
 
 /**
@@ -61,7 +61,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(
  * prefix_tuple> to be updated with entries
  */
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(
-  bool isIPv4, u_char **data, uint16_t len, update_prefix_label_tuple *prefixes,
+  int isIPv4, uint8_t **data, uint16_t len, update_prefix_label_tuple *prefixes,
   uint16_t *prefix_count);
 
 /**
@@ -79,7 +79,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(
  * labels
  *
  */
-static inline uint16_t decode_label(u_char **data, uint16_t len,
+static inline uint16_t decode_label(uint8_t **data, uint16_t len,
                                     mpls_label *labels);
 
 #endif /* MPREACHATTR_H_ */

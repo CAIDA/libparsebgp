@@ -8,13 +8,16 @@
  */
 
 #include "update_msg.h"
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
 #include "ext_community.h"
 #include "mp_link_state.h"
 #include "mp_link_state_attr.h"
 #include "mp_reach_attr.h"
 #include "mp_un_reach_attr.h"
-#include "parse_utils.h"
 #include <arpa/inet.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Parses NLRI info (IPv4) from the BGP message
@@ -29,7 +32,7 @@
  * entries
  */
 static ssize_t
-libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
+libparsebgp_update_msg_parse_nlri_data_v4(uint8_t *data, uint16_t len,
                                           update_prefix_tuple ***prefixes,
                                           uint16_t *count_prefix)
 {
@@ -45,7 +48,7 @@ libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
   // TODO: Can extend this to support multicast, but right now we set it to
   // unicast v4 Set the type for all to be unicast V4
   // tuple.type = PREFIX_UNICAST_V4;
-  // tuple.is_ipv4 = true;
+  // tuple.is_ipv4 = 1;
 
   // Loop through all prefixes
   for (size_t read_size = 0; read_size < len; read_size++) {
@@ -118,11 +121,11 @@ libparsebgp_update_msg_parse_nlri_data_v4(u_char *data, uint16_t len,
  */
 ssize_t
 libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg,
-                                        u_char *data, ssize_t size,
-                                        bool *has_end_of_rib_marker)
+                                        uint8_t *data, ssize_t size,
+                                        int *has_end_of_rib_marker)
 {
   ssize_t read_size = 0, bytes_read = 0, bytes_check = 0;
-  u_char *buf_ptr = data;
+  uint8_t *buf_ptr = data;
 
   if (size < 2) {
     // LOG_WARN("%s: rtr=%s: Update message is too short to parse header",
@@ -146,7 +149,7 @@ libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg,
     return INCOMPLETE_MSG;
   }
 
-  u_char *withdrawn_ptr, *attr_ptr, *nlri_ptr;
+  uint8_t *withdrawn_ptr, *attr_ptr, *nlri_ptr;
   withdrawn_ptr = buf_ptr;
   buf_ptr += update_msg->wdrawn_route_len;
   bytes_check += update_msg->wdrawn_route_len;
@@ -181,7 +184,7 @@ libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg,
    */
   if (!update_msg->wdrawn_route_len && (size - bytes_check) <= 0 &&
       !update_msg->total_path_attr_len) {
-    *has_end_of_rib_marker = true;
+    *has_end_of_rib_marker = 1;
     // LOG_INFO("%s: rtr=%s: End-Of-RIB marker", peer_addr.c_str(),
     // router_addr.c_str());
 
@@ -238,7 +241,7 @@ libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg,
  */
 static void
 libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs,
-                                          u_char **data)
+                                          uint8_t **data)
 {
   int path_len = path_attrs->attr_len;
   as_path_segment *as_segment =
@@ -270,7 +273,7 @@ libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs,
   //        /*
   //         * Loop through each path segment
   //         */
-  //        u_char *d_ptr = data;
+  //        uint8_t *d_ptr = data;
   //        while (path_len > 0) {
   //            d_ptr++; // seg_type
   //            as_segment.seg_len = *d_ptr++;
@@ -284,10 +287,10 @@ libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs,
   //        if (path_len != 0) {
   //            //LOG_INFO("%s: rtr=%s: Using 2-octet ASN path parsing",
   //            peer_addr.c_str(), router_addr.c_str());
-  //            update_msg->peer_inf->using_2_octet_asn = true;
+  //            update_msg->peer_inf->using_2_octet_asn = 1;
   //        }
   //
-  //        update_msg->peer_inf->checked_asn_octet_length = true;         // No
+  //        update_msg->peer_inf->checked_asn_octet_length = 1;         // No
   //        more checking needed path_len = attr_len;
   //        // Put the path length back to starting value
   //    }
@@ -332,7 +335,7 @@ libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs,
     //            due to parsing failure",
     //            //           peer_addr.c_str(), router_addr.c_str());
     //
-    //            update_msg->peer_inf->using_2_octet_asn = true;
+    //            update_msg->peer_inf->using_2_octet_asn = 1;
     //        }
 
     // The rest of the data is the as path sequence, in blocks of 2 or 4 bytes
@@ -397,7 +400,7 @@ libparsebgp_update_msg_parse_attr_as_path(update_path_attrs *path_attrs,
  */
 static void
 libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_attrs,
-                                            u_char **data)
+                                            uint8_t **data)
 {
 
   // If using RFC6793, the len will be 8 instead of 6
@@ -431,7 +434,7 @@ libparsebgp_update_msg_parse_attr_aggegator(update_path_attrs *path_attrs,
  * with all parsed data
  */
 void static libparsebgp_update_msg_parse_attr_data(
-  update_path_attrs *path_attrs, u_char *data, bool *has_end_of_rib_marker)
+  update_path_attrs *path_attrs, uint8_t *data, int *has_end_of_rib_marker)
 {
   uint16_t value16bit;
 
@@ -480,11 +483,11 @@ void static libparsebgp_update_msg_parse_attr_data(
   case ATTR_TYPE_CLUSTER_LIST: // Cluster List (RFC 4456)
   { // According to RFC 4456, the value is a sequence of cluster id's
     path_attrs->attr_value.cluster_list =
-      (u_char **)malloc(path_attrs->attr_len / 4 * sizeof(u_char *));
+      (uint8_t **)malloc(path_attrs->attr_len / 4 * sizeof(uint8_t *));
     path_attrs->count_cluster_list = 0;
     for (int i = 0; i < path_attrs->attr_len; i += 4) {
       path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list] =
-        (u_char *)malloc(4 * sizeof(u_char));
+        (uint8_t *)malloc(4 * sizeof(uint8_t));
       memcpy(
         path_attrs->attr_value.cluster_list[path_attrs->count_cluster_list++],
         data, 4);
@@ -567,8 +570,8 @@ void static libparsebgp_update_msg_parse_attr_data(
  * with all parsed data
  */
 ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
-                                                u_char *data, uint16_t len,
-                                                bool *has_end_of_rib_marker,
+                                                uint8_t *data, uint16_t len,
+                                                int *has_end_of_rib_marker,
                                                 uint16_t *count_path_attrs)
 {
 

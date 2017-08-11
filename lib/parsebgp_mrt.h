@@ -6,20 +6,11 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-
-/**
- * @file    parse_mrt.h
- *
- * \brief   Parser for MRT messages
- * \details The functions in this file can be used as needed to parse MRT
- * messages from buffer
- */
-
 #ifndef PARSEMRT_H_
 #define PARSEMRT_H_
 
-#include "parse_bgp.h"
-#include "parse_utils.h"
+#include "parsebgp_bgp.h"
+#include <inttypes.h>
 
 #define MRT_PACKET_BUF_SIZE 4096 ///< Size of the MRT packet buffer (memory)
 /**
@@ -96,7 +87,7 @@ typedef struct libparsebgp_mrt_common_hdr {
 typedef struct libparsebgp_table_dump_message {
   uint16_t view_number; ///< 2-octet view number
   uint16_t sequence;    ///< 2-octet sequence
-  u_char prefix[16];  ///< 4-octet or 16-octet (depending on type), contains IP
+  uint8_t prefix[16]; ///< 4-octet or 16-octet (depending on type), contains IP
                       ///< address of a particular RIB entry
   uint8_t prefix_len; ///< 1-octet, indicates the length in bits of the prefix
                       ///< mask for the Prefix field
@@ -104,7 +95,7 @@ typedef struct libparsebgp_table_dump_message {
                       ///< Type and SHOULD be set to 1
   uint32_t
     originated_time; ///< 4-octet, contains time at which this prefix was heard
-  u_char
+  uint8_t
     peer_ip[16];    ///< 4-octe ot 16-octet (depending on type) peer IP address
   uint16_t peer_as; ///< 2-octet peer AS number
   uint16_t
@@ -122,10 +113,10 @@ typedef struct libparsebgp_table_dump_message {
 // view name is optional if not present viewname length is set to 0
 
 typedef struct peer_entry {
-  uint8_t peer_type;     ///< 1-octet Peer type
-  u_char peer_bgp_id[4]; ///< 4-octet Peer BGP Id
-  u_char peer_ip[16];    ///< Peer IP address
-  uint32_t peer_as;      ///< Peer AS number
+  uint8_t peer_type;      ///< 1-octet Peer type
+  uint8_t peer_bgp_id[4]; ///< 4-octet Peer BGP Id
+  uint8_t peer_ip[16];    ///< Peer IP address
+  uint32_t peer_as;       ///< Peer AS number
 } peer_entry;
 
 /**
@@ -134,7 +125,7 @@ typedef struct peer_entry {
 typedef struct libparsebgp_peer_index_table {
   unsigned char collector_bgp_id[4]; ///< 4-octet, Collector BGP ID
   uint16_t view_name_length;         ///< 2-octet, length of view_name
-  u_char view_name[1024];            ///< View name, in utf8 format
+  char view_name[1024];              ///< View name, in utf8 format
   uint16_t peer_count;      ///< 2-octet peer count, number of peer entries
   peer_entry *peer_entries; ///< List of peer entries
 } libparsebgp_peer_index_table;
@@ -156,7 +147,7 @@ typedef struct rib_entry {
 typedef struct libparsebgp_rib_entry_header {
   uint32_t sequence_number; ///< 4-octet sequence number
   uint8_t prefix_length;    ///< 1-octet, length of the prefix
-  u_char prefix[46];        ///< Prefix
+  char prefix[46];          ///< Prefix
   uint16_t entry_count;     ///< 2-octet entry count, number of RIB entries
   rib_entry *rib_entries;   ///< List of RIB Entries
 } libparsebgp_rib_entry_header;
@@ -170,7 +161,7 @@ typedef struct libparsebgp_rib_generic_entry_header {
   uint8_t subsequent_afi;             ///< 1-octet Subsequent AFI (SAFI)
   struct nlri_entry {
     uint8_t len;          ///< 1-octet Length of prefix in bits
-    u_char *prefix;       ///< Address prefix
+    char *prefix;         ///< Address prefix
   } nlri_entry;           ///< single NLRI entry
   uint16_t entry_count;   ///< 2-octet entry count, number of RIB Entries
   rib_entry *rib_entries; ///< List of RIB Entries
@@ -186,9 +177,8 @@ typedef struct libparsebgp_bgp4mp_state_change {
                             ///< Autonomous System (AS) number
   uint16_t interface_index; ///< 2-octet interface index
   uint16_t address_family;  ///< 2-octet address family
-  u_char
-    peer_ip[40]; ///< 4-octet of 16-octet (depending on type) Peer IP address
-  u_char
+  char peer_ip[40]; ///< 4-octet of 16-octet (depending on type) Peer IP address
+  char
     local_ip[40]; ///< 4-octet of 16-octet (depending on type) local IP address
   uint16_t old_state; ///< 2-octet old FSM state
   uint16_t new_state; ///< 2-octet new FSM state
@@ -204,9 +194,8 @@ typedef struct libparsebgp_bgp4mp_msg {
                             ///< Autonomous System (AS) number
   uint16_t interface_index; ///< 2-octet interface index
   uint16_t address_family;  ///< 2-octet address family
-  u_char
-    peer_ip[16]; ///< 4-octet of 16-octet (depending on type) Peer IP address
-  u_char
+  char peer_ip[16]; ///< 4-octet of 16-octet (depending on type) Peer IP address
+  char
     local_ip[16]; ///< 4-octet of 16-octet (depending on type) local IP address
   libparsebgp_parse_bgp_parsed_data bgp_msg; ///< Contains the BGP message
 } libparsebgp_bgp4mp_msg;
@@ -242,7 +231,7 @@ typedef struct libparsebgp_parse_mrt_parsed_data {
         bgp4mp_state_change_msg; ///< Contains BGP4MP state change messages
     } bgp4mp;
   } parsed_data;
-  bool has_end_of_rib_marker; ///< Indicates if end of RIB marker is present
+  int has_end_of_rib_marker; ///< Indicates if end of RIB marker is present
 } libparsebgp_parse_mrt_parsed_data;
 
 /**
@@ -267,27 +256,3 @@ void libparsebgp_parse_mrt_destructor(
   libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
 
 #endif /* PARSEBMP_H_ */
-
-/*
-0x58, 0xb6, 0x0f, 0x00, 0x00, 0x0d, 0x00, 0x02, 0x00, 0x00, 0x00, 0xcd, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x05,|| 0x00, 0x14, 0x58, 0xb5, 0xe3, 0x61, 0x00,
-0x27,
-
-0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02, 0x00, 0x00, 0x85,
-0xb0, 0x00, 0x00, 0x0d, 0xdd, 0x40, 0x03, 0x04, 0x5e, 0x9c, 0xfc, 0x12, 0x80,
-0x04, 0x04, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x08, 0x04, 0x85, 0xb0, 0x01, 0x4d,
-
-0x00, 0x2a, 0x58, 0xaf, 0x4f, 0x3b,
-0x00, 0x30, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02, 0x00,
-0x00, 0xbb, 0x00, 0x00, 0x00, 0x0d, 0x1c, 0x40, 0x03, 0x04, 0xb9, 0x2c, 0x74,
-0x01, 0xc0, 0x08, 0x14, 0x0d, 0x1c, 0x00, 0x02, 0x0d, 0x1c, 0x02, 0x02, 0x0d,
-0x1c, 0x08, 0x43, 0xbb, 0x00, 0x00, 0x06, 0xbb, 0x00, 0x0d, 0x1c, 0x00, 0x13,
-0x58, 0x91, 0x2d, 0x7f, 0x00, 0x19, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00,
-0x0a, 0x02, 0x02, 0x00, 0x00, 0x79, 0x2b, 0x00, 0x00, 0x99, 0x9e, 0x40, 0x03,
-0x04, 0x5b, 0xe4, 0x97, 0x01, 0x00, 0x34, 0x58, 0x90, 0x94, 0x4e, 0x00, 0x15,
-0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x06, 0x02, 0x01, 0x00, 0x00, 0x46,
-0xba, 0x40, 0x03, 0x04, 0xca, 0x49, 0x28, 0x2d, 0x00, 0x0e, 0x58, 0xb5, 0x9c,
-0xbd, 0x00, 0x19, 0x40, 0x01, 0x01, 0x00, 0x50, 0x02, 0x00, 0x0a, 0x02, 0x02,
-0x00, 0x00, 0x51, 0x23, 0x00, 0x00, 0x0d, 0x1c, 0x40, 0x03, 0x04, 0x50, 0xf1,
-0xb0, 0x1f
- */

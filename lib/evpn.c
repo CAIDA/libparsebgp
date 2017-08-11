@@ -1,4 +1,7 @@
 #include "evpn.h"
+#include "parsebgp_utils.h"
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Parse Ethernet Segment Identifier
@@ -14,7 +17,7 @@
  * Administrator subfield
  */
 static void libparsebgp_evpn_parse_ethernet_segment_identifier(
-  update_path_attrs *path_attrs, u_char **data_pointer,
+  update_path_attrs *path_attrs, uint8_t **data_pointer,
   ethernet_segment_identifier *parsed_data)
 {
   parsed_data->type = **data_pointer;
@@ -87,7 +90,7 @@ static void libparsebgp_evpn_parse_ethernet_segment_identifier(
  * Number subfield \param [out]     rd_administrator_subfield  Reference to
  * Administrator subfield
  */
-static void libparsebgp_evpn_parse_route_distinguisher(u_char **data_pointer,
+static void libparsebgp_evpn_parse_route_distinguisher(uint8_t **data_pointer,
                                                        route_distinguisher *rd)
 {
 
@@ -151,13 +154,13 @@ static void libparsebgp_evpn_parse_route_distinguisher(u_char **data_pointer,
  *
  */
 ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
-                                         u_char **data, uint16_t data_len,
-                                         bool is_unreach)
+                                         uint8_t **data, uint16_t data_len,
+                                         int is_unreach)
 {
-  u_char **data_pointer = data;
-  u_char ip_binary[16];
+  uint8_t **data_pointer = data;
+  uint8_t ip_binary[16];
   int addr_bytes;
-  //char ip_char[40];
+  // char ip_char[40];
   int data_read = 0;
 
   evpn_tuple *tuple = (evpn_tuple *)malloc(sizeof(evpn_tuple));
@@ -237,7 +240,7 @@ ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
 
         // Ethernet Tag ID (4 bytes)
 
-        u_char ethernet_id[4];
+        uint8_t ethernet_id[4];
         bzero(&ethernet_id, 4);
         memcpy(&ethernet_id, *data_pointer, 4);
         *data_pointer += 4;

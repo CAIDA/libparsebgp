@@ -1,8 +1,12 @@
 //
 // Created by ojas on 4/22/17.
 //
-#include "parse_bmp.h"
-#include "parse_bgp.h"
+
+#include "parsebgp_bmp.h"
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Buffer remaining BMP message
@@ -20,7 +24,7 @@
 static ssize_t libparsebgp_parse_bmp_buffer_bmp_message(unsigned char **buffer,
                                                         int *buf_len,
                                                         uint32_t *bmp_len,
-                                                        u_char **bmp_data)
+                                                        uint8_t **bmp_data)
 {
 
   ssize_t bmp_data_len = 0;
@@ -574,7 +578,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(
       read_size += bytes_read;
 
       bytes_read = libparsebgp_open_msg_parse_open_msg(
-        &up_event->sent_open_msg.parsed_data.open_msg, data, size, true);
+        &up_event->sent_open_msg.parsed_data.open_msg, data, size, 1);
 
       if (!bytes_read)
         return ERR_READING_MSG; // ERROR: Failed to read sent open message
@@ -599,7 +603,7 @@ static ssize_t libparsebgp_parse_bgp_handle_up_event(
       read_size += BGP_MSG_HDR_LEN;
 
       bytes_read = libparsebgp_open_msg_parse_open_msg(
-        &up_event->received_open_msg.parsed_data.open_msg, data, size, false);
+        &up_event->received_open_msg.parsed_data.open_msg, data, size, 0);
 
       if (!bytes_read) {
         return ERR_READING_MSG; // throw "Failed to read received open message";
@@ -637,19 +641,19 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(
   libparsebgp_parsed_bmp_peer_up_event *up_event, unsigned char **buffer,
   int *buf_len, uint32_t *bmp_len)
 {
-  bool is_parse_good = true;
+  int is_parse_good = 1;
   ssize_t read_size = 0;
 
   // Get the local address
   if (extract_from_buffer(buffer, buf_len, &up_event->local_ip, 16) != 16)
-    is_parse_good = false;
+    is_parse_good = 0;
   else
     read_size += 16;
 
   // Get the local port
   if (is_parse_good &&
       extract_from_buffer(buffer, buf_len, &up_event->local_port, 2) != 2)
-    is_parse_good = false;
+    is_parse_good = 0;
   else if (is_parse_good) {
     read_size += 2;
     SWAP_BYTES(&up_event->local_port, 2);
@@ -658,7 +662,7 @@ static ssize_t libparsebgp_parse_bmp_parse_peer_up_event_hdr(
   // Get the remote port
   if (is_parse_good &&
       extract_from_buffer(buffer, buf_len, &up_event->remote_port, 2) != 2)
-    is_parse_good = false;
+    is_parse_good = 0;
   else if (is_parse_good) {
     read_size += 2;
     SWAP_BYTES(&up_event->remote_port, 2);
@@ -696,8 +700,8 @@ libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg,
 {
   ssize_t read_size = 0, bytes_read = 0;
 
-  u_char *bmp_data =
-    (u_char *)malloc((BMP_PACKET_BUF_SIZE + 1) * sizeof(u_char));
+  uint8_t *bmp_data =
+    (uint8_t *)malloc((BMP_PACKET_BUF_SIZE + 1) * sizeof(uint8_t));
   uint32_t bmp_data_len;
   uint32_t bmp_len;
 
@@ -829,7 +833,7 @@ libparsebgp_parse_bmp_parse_msg(libparsebgp_parse_bmp_parsed_data *parsed_msg,
      */
     if ((bytes_read = libparsebgp_parse_bgp_parse_msg(
            &parsed_msg->libparsebgp_parsed_bmp_msg.parsed_rm_msg, bmp_data,
-           bmp_data_len, false)) < 0)
+           bmp_data_len, 0)) < 0)
       read_size = bytes_read;
     else
       read_size += bytes_read;

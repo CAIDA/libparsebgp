@@ -10,8 +10,10 @@
 #ifndef UPDATEMSG_H_
 #define UPDATEMSG_H_
 
+#include "parsebgp_bgp_common.h"
 #include "add_path_data_container.h"
-#include "bgp_common.h"
+#include <inttypes.h>
+#include <unistd.h>
 
 enum update_attr_types {
   ATTR_TYPE_ORIGIN = 1,
@@ -68,6 +70,30 @@ typedef struct as_path_segment {
 } as_path_segment;
 
 /**
+ * Struct for ethernet Auto-discovery route
+ */
+typedef struct ethernet_ad_route {
+  route_distinguisher rd;
+  ethernet_segment_identifier eth_seg_iden;
+  char ethernet_tag_id_hex[4];
+  int mpls_label;
+} ethernet_ad_route;
+
+/**
+ * Struct is used for evpn
+ */
+typedef struct evpn_tuple {
+  uint8_t route_type;
+  uint8_t length;
+  struct route_specific {
+    ethernet_ad_route eth_ad_route;
+    mac_ip_advertisement_route mac_ip_adv_route;
+    inclusive_multicast_ethernet_tag_route incl_multicast_eth_tag_route;
+    ethernet_segment_route eth_segment_route;
+  } route_type_specific;
+} evpn_tuple;
+
+/**
  * struct defines the MP_UNREACH_NLRI (RFC4760 Section 4)
  */
 typedef struct mp_unreach_nlri {
@@ -77,8 +103,8 @@ typedef struct mp_unreach_nlri {
   uint16_t count_wdrawn_routes_label; ///< Number of withdrawn routes with label
   uint16_t count_evpn_withdrawn;      ///< Number of EVPN NLRIs withdrawn
   union withdrawn_routes_nlri {       ///< Union for withdrawn routes nlri
-    update_prefix_tuple *wdrawn_routes; ///< Withdrawn routes
-    update_prefix_label_tuple
+    struct update_prefix_tuple *wdrawn_routes; ///< Withdrawn routes
+    struct update_prefix_label_tuple
       *wdrawn_routes_label;     ///< Withdrawn routes with label
     evpn_tuple *evpn_withdrawn; ///< List of evpn nlris withdrawn
   } withdrawn_routes_nlri;
@@ -110,7 +136,7 @@ typedef struct link_descriptor {
   uint8_t intf_addr[16]; ///< Interface binary address
   uint8_t nei_addr[16];  ///< Neighbor binary address
   uint32_t mt_id;        ///< Multi-Topology ID
-  bool is_ipv4;          ///< True if IPv4, false if IPv6
+  int is_ipv4;           ///< True if IPv4, false if IPv6
 } link_descriptor;
 
 /**
@@ -162,11 +188,11 @@ typedef struct mp_reach_ls {
 } mp_reach_ls;
 
 typedef struct link_peer_epe_node_sid {
-  bool L_flag;
-  bool V_flag;
+  int L_flag;
+  int V_flag;
   uint32_t sid_3;
   uint32_t sid_4;
-  u_char ip_raw[16];
+  char ip_raw[16];
 } link_peer_epe_node_sid;
 
 typedef struct mp_reach_nlri {
@@ -196,28 +222,28 @@ typedef struct mp_reach_nlri {
 typedef struct extcomm_hdr {
   uint8_t high_type; ///< Type high byte
   uint8_t low_type;  ///< Type low byte - subtype
-  char val[20];       ///< Value
+  char val[20];      ///< Value
 } extcomm_hdr;
 
 typedef struct bgp_link_state_attrs {
   uint16_t type;
   uint16_t len;
   union node_attr {
-    u_char node_flag_bits;
-    u_char node_ipv4_router_id_local[4];
-    u_char node_ipv6_router_id_local[16];
-    u_char node_isis_area_id[8];
-    u_char node_name[256];
-    u_char mt_id[256];
+    uint8_t node_flag_bits;
+    uint8_t node_ipv4_router_id_local[4];
+    uint8_t node_ipv6_router_id_local[16];
+    uint8_t node_isis_area_id[8];
+    uint8_t node_name[256];
+    uint8_t mt_id[256];
   } node;
   union link_attr {
-    u_char link_admin_group[4];
+    uint8_t link_admin_group[4];
     uint32_t link_igp_metric;
-    u_char link_ipv4_router_id_remote[4];
-    u_char link_ipv6_router_id_remote[4];
+    uint8_t link_ipv4_router_id_remote[4];
+    uint8_t link_ipv6_router_id_remote[4];
     int32_t link_max_link_bw;
     int32_t link_max_resv_bw;
-    u_char link_name[256];
+    char link_name[256];
     uint32_t link_te_def_metric;
     int32_t link_unresv_bw[8];
     link_peer_epe_node_sid link_peer_epe_sid;
@@ -234,15 +260,15 @@ typedef struct bgp_link_state_attrs {
 typedef union attr_value {
   uint8_t origin;           ///< Origin of path information
   as_path_segment *as_path; ///< sequence of AS path segments
-  u_char next_hop[4]; ///< IP address of the router to be used as next hop to
-                      ///< the destinations listed in the NLRI field of the
-                      ///< UPDATE message
-  u_char originator_id[4];  ///< Originator ID
+  uint8_t next_hop[4]; ///< IP address of the router to be used as next hop to
+                       ///< the destinations listed in the NLRI field of the
+                       ///< UPDATE message
+  uint8_t originator_id[4]; ///< Originator ID
   uint32_t med;             ///< contains the MED value
   uint32_t local_pref;      ///< contains the local pref value
-  u_char aggregator[4];     ///< The attribute contains the last AS number that
+  uint8_t aggregator[4];    ///< The attribute contains the last AS number that
                             ///< formed the aggregate route
-  u_char **cluster_list;    ///< Cluster List (RFC 4456)
+  uint8_t **cluster_list;   ///< Cluster List (RFC 4456)
   uint16_t *attr_type_comm; ///< Community list
   extcomm_hdr *ext_comm;    ///< extended community list (RFC 4360)
   mp_unreach_nlri mp_unreach_nlri_data; ///< MP_REACH_NLRI RFC4760
@@ -298,8 +324,8 @@ typedef struct libparsebgp_update_msg_data {
  */
 ssize_t
 libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg,
-                                        u_char *data, ssize_t size,
-                                        bool *has_end_of_rib_marker);
+                                        uint8_t *data, ssize_t size,
+                                        int *has_end_of_rib_marker);
 
 /**
  * Parses the BGP attributes in the update
@@ -313,8 +339,8 @@ libparsebgp_update_msg_parse_update_msg(libparsebgp_update_msg_data *update_msg,
  * with all parsed data
  */
 ssize_t libparsebgp_update_msg_parse_attributes(update_path_attrs ***update_msg,
-                                                u_char *data, uint16_t len,
-                                                bool *has_end_of_rib_marker,
+                                                uint8_t *data, uint16_t len,
+                                                int *has_end_of_rib_marker,
                                                 uint16_t *count);
 
 /**

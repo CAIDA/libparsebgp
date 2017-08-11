@@ -6,11 +6,12 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-
 #ifndef OPENMSG_H_
 #define OPENMSG_H_
 
-#include "bgp_common.h"
+#include "parsebgp_bgp_common.h"
+#include <inttypes.h>
+#include <unistd.h>
 
 /**
  * Defines the BGP capabilities
@@ -103,8 +104,8 @@ typedef struct libparsebgp_open_msg_data {
  */
 ssize_t
 libparsebgp_open_msg_parse_open_msg(libparsebgp_open_msg_data *open_msg_data,
-                                    u_char *data, size_t size,
-                                    bool openMessageIsSent);
+                                    uint8_t *data, size_t size,
+                                    int openMessageIsSent);
 
 /**
  * Destructor for open message

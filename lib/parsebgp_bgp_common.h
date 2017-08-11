@@ -1,23 +1,7 @@
-/*
- * Copyright (c) 2013-2015 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- */
+#ifndef __PARSEBGP_BGP_COMMON_H
+#define __PARSEBGP_BGP_COMMON_H
 
-#ifndef BGPCOMMON_H_
-#define BGPCOMMON_H_
-
-#include "parse_utils.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include <inttypes.h>
 
 #define BGP_MAX_MSG_SIZE 65535 // Max payload size - Larger than RFC4271 of 4096
 #define BGP_MSG_HDR_LEN 19     // BGP message header size
@@ -109,6 +93,16 @@ enum prefix_type {
   // Add BGP-LS types
 };
 
+typedef union {
+  struct {
+    uint8_t ttl : 8;     ///< TTL - not present since only 3 octets are used
+    uint8_t bos : 1;     ///< Bottom of stack
+    uint8_t exp : 3;     ///< EXP - not really used
+    uint32_t value : 20; ///< Label value
+  } decode;
+  uint32_t data; ///< Raw label - 3 octets only per RFC3107
+} mpls_label;
+
 /**
  * Defines the Add Path capability
  */
@@ -121,23 +115,13 @@ typedef struct add_path_capability {
                         ///< 2), or (c) both (value 3) for the <AFI, SAFI>.
 } add_path_capability;
 
-typedef union {
-  struct {
-    uint8_t ttl : 8;     ///< TTL - not present since only 3 octets are used
-    uint8_t bos : 1;     ///< Bottom of stack
-    uint8_t exp : 3;     ///< EXP - not really used
-    uint32_t value : 20; ///< Label value
-  } decode;
-  uint32_t data; ///< Raw label - 3 octets only per RFC3107
-} mpls_label;
-
 /**
  * Defines the prefix tuple in update message
  */
 typedef struct update_prefix_tuple {
   add_path_capability path_id; ///< 4-octet Path identifier
   uint8_t len;                 ///< 1-octet Length of prefix in bits
-  u_char prefix[16];           ///< Address prefix
+  char prefix[16];             ///< Address prefix
 } update_prefix_tuple;
 
 /**
@@ -147,21 +131,8 @@ typedef struct update_prefix_label_tuple {
   add_path_capability path_id; ///< 4-octet path identifier
   uint8_t len;                 ///< 1-octet Length of prefix in bits
   mpls_label *label;           ///< Labels
-  u_char prefix[16];           ///< Address prefix
+  char prefix[16];             ///< Address prefix
 } update_prefix_label_tuple;
-
-/**
- * Struct for route distinguisher
- */
-typedef struct route_distinguisher {
-  uint8_t rd_type;      ///< Route distinguisher type field - 2 bytes
-  struct rd_value_msg { ///< Route distinguisher value field - 6 bytes
-    uint32_t rd_administrator_subfield; ///< Administrator subfield - 2 or 4
-                                        ///< bytes depending on type
-    uint32_t rd_assigned_number; ///< Assigned Number subfield - 4 or 2 bytes
-                                 ///< depending on type
-  } rd_value;
-} route_distinguisher;
 
 /**
  * Struct for Ethernet Segment Identifier
@@ -170,21 +141,21 @@ typedef struct ethernet_segment_identifier {
   uint8_t type;
 
   struct type_0 {
-    u_char eth_segment_iden[9];
+    uint8_t eth_segment_iden[9];
   } type_0;
 
   struct type_1 {
-    u_char eth_segment_iden[6];
+    uint8_t eth_segment_iden[6];
     uint16_t CE_LACP_port_key;
   } type_1;
 
   struct type_2 {
-    u_char eth_segment_iden[6];
+    uint8_t eth_segment_iden[6];
     uint16_t root_bridge_priority;
   } type_2;
 
   struct type_3 {
-    u_char eth_segment_iden[6];
+    uint8_t eth_segment_iden[6];
     uint32_t local_discriminator_value;
   } type_3;
 
@@ -200,14 +171,17 @@ typedef struct ethernet_segment_identifier {
 } ethernet_segment_identifier;
 
 /**
- * Struct for ethernet Auto-discovery route
+ * Struct for route distinguisher
  */
-typedef struct ethernet_ad_route {
-  route_distinguisher rd;
-  ethernet_segment_identifier eth_seg_iden;
-  u_char ethernet_tag_id_hex[4];
-  int mpls_label;
-} ethernet_ad_route;
+typedef struct route_distinguisher {
+  uint8_t rd_type;      ///< Route distinguisher type field - 2 bytes
+  struct rd_value_msg { ///< Route distinguisher value field - 6 bytes
+    uint32_t rd_administrator_subfield; ///< Administrator subfield - 2 or 4
+                                        ///< bytes depending on type
+    uint32_t rd_assigned_number; ///< Assigned Number subfield - 4 or 2 bytes
+                                 ///< depending on type
+  } rd_value;
+} route_distinguisher;
 
 /**
  * Struct for MAC/IP Advertisement Route
@@ -215,11 +189,11 @@ typedef struct ethernet_ad_route {
 typedef struct mac_ip_advertisement_route {
   route_distinguisher rd;
   ethernet_segment_identifier eth_seg_iden;
-  u_char ethernet_tag_id_hex[4];
+  char ethernet_tag_id_hex[4];
   uint8_t mac_addr_len;
-  u_char mac_addr[6];
+  char mac_addr[6];
   uint8_t ip_addr_len;
-  u_char ip_addr[16];
+  char ip_addr[16];
   int mpls_label_1;
   int mpls_label_2;
 } mac_ip_advertisement_route;
@@ -230,9 +204,9 @@ typedef struct mac_ip_advertisement_route {
 typedef struct inclusive_multicast_ethernet_tag_route {
   route_distinguisher rd;
   ethernet_segment_identifier eth_seg_iden;
-  u_char ethernet_tag_id_hex[4];
+  char ethernet_tag_id_hex[4];
   uint8_t ip_addr_len;
-  u_char originating_router_ip[16];
+  char originating_router_ip[16];
 } inclusive_multicast_ethernet_tag_route;
 
 /**
@@ -242,21 +216,7 @@ typedef struct ethernet_segment_route {
   route_distinguisher rd;
   ethernet_segment_identifier eth_seg_iden;
   uint8_t ip_addr_len;
-  u_char originating_router_ip[16];
+  char originating_router_ip[16];
 } ethernet_segment_route;
 
-/**
- * Struct is used for evpn
- */
-typedef struct evpn_tuple {
-  uint8_t route_type;
-  uint8_t length;
-  struct route_specific {
-    ethernet_ad_route eth_ad_route;
-    mac_ip_advertisement_route mac_ip_adv_route;
-    inclusive_multicast_ethernet_tag_route incl_multicast_eth_tag_route;
-    ethernet_segment_route eth_segment_route;
-  } route_type_specific;
-} evpn_tuple;
-
-#endif /* BGPCOMMON_H */
+#endif /* __PARSEBGP_BGP_COMMON_H */

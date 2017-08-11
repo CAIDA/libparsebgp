@@ -10,7 +10,9 @@
 #ifndef NOTIFICATIONMSG_H_
 #define NOTIFICATIONMSG_H_
 
-#include "bgp_common.h"
+#include "parsebgp_bgp_common.h"
+#include <inttypes.h>
+#include <unistd.h>
 
 /**
  * defines the NOTIFICATION BGP header per RFC4271
@@ -81,9 +83,9 @@ enum cease_subcodes {
  * Decoded/parsed BGP notification message
  */
 typedef struct libparsebgp_notify_msg {
-  u_char error_code; ///< Indicates the type of error
-                     ///<   NOTIFY_ERROR_CODES enum for errors
-  u_char
+  uint8_t error_code; ///< Indicates the type of error
+                      ///<   NOTIFY_ERROR_CODES enum for errors
+  uint8_t
     error_subcode; ///< specific info about the nature of the reported error
                    ///<   values depend on the error code
   char error_text[255]; ///< Decoded notification message
@@ -108,6 +110,6 @@ typedef struct libparsebgp_notify_msg {
  */
 ssize_t
 libparsebgp_notification_parse_notify(libparsebgp_notify_msg *parsed_msg,
-                                      u_char **data, size_t size);
+                                      uint8_t **data, size_t size);
 
 #endif /* NOTIFICATIONMSG_H_ */

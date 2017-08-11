@@ -10,9 +10,6 @@
 #ifndef OPENBMP_ADDPATHDATACONTAINER_H
 #define OPENBMP_ADDPATHDATACONTAINER_H
 
-#include "bgp_common.h"
-//#include <map>
-
 struct send_receive_codes_for_sent_and_received_open_message_structure {
   int send_receive_code_for_sent_open_message;
   int send_receive_code_for_received_open_message;

@@ -8,8 +8,10 @@
  */
 
 #include "mp_link_state_attr.h"
-#include "parse_utils.h"
-#include <arpa/inet.h>
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
+#include <stdlib.h>
+#include <string.h>
 
 /* BGP-LS Node flags : https://tools.ietf.org/html/rfc7752#section-3.3.1.1
  *
@@ -223,7 +225,7 @@ int libparsebgp_mp_link_state_attr_parse_attr_link_state_tlv(
   update_path_attrs *path_attrs, int attr_len, u_char **data, int count)
 {
 
-  //char ip_char[46];
+  // char ip_char[46];
   uint32_t value_32bit;
   //  uint16_t value_16bit;
   int32_t float_val;
@@ -550,10 +552,10 @@ val_ss.str().data(), val_ss.str().length());*/
      */
 
     if (**data & 0x80)
-      bgp_ls_attr->link.link_peer_epe_sid.V_flag = true;
+      bgp_ls_attr->link.link_peer_epe_sid.V_flag = 1;
 
     if (**data & 0x40)
-      bgp_ls_attr->link.link_peer_epe_sid.L_flag = true;
+      bgp_ls_attr->link.link_peer_epe_sid.L_flag = 1;
 
     parse_sid_value(&bgp_ls_attr->link.link_peer_epe_sid, (data + 4),
                     bgp_ls_attr->len - 4);

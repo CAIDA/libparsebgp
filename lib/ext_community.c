@@ -11,9 +11,12 @@
  */
 
 #include "ext_community.h"
-#include "update_msg.h"
+#include "parsebgp_utils.h"
 #include <arpa/inet.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 
 /**
@@ -31,7 +34,7 @@
  * \return  Decoded string value
  */
 static void decode_type_common(extcomm_hdr *ec_hdr, u_char **value,
-                               bool is_global_4bytes, bool is_global_ipv4)
+                               int is_global_4bytes, int is_global_ipv4)
 {
   //    std::stringstream   val_ss;
   uint16_t val_16b;
@@ -316,7 +319,7 @@ static void decode_type_opaque(extcomm_hdr *ec_hdr, u_char **value)
 
   case EXT_OPAQUE_CP_ORF:
     assert(0 && "TODO: fixme when tim replies");
-    //sprintf(ec_hdr->val, "cp-orf=%d:%d", val_16b, val_32b);
+    // sprintf(ec_hdr->val, "cp-orf=%d:%d", val_16b, val_32b);
     break;
 
   case EXT_OPAQUE_OSPF_ROUTE_TYPE: {
@@ -382,7 +385,7 @@ static void decode_type_opaque(extcomm_hdr *ec_hdr, u_char **value)
  * \return  Decoded string value
  */
 static void decode_type_generic(extcomm_hdr *ec_hdr, u_char **value,
-                                bool is_global_4bytes, bool is_global_ipv4)
+                                int is_global_4bytes, int is_global_ipv4)
 {
   uint16_t val_16b;
   uint32_t val_32b;
@@ -517,7 +520,7 @@ void libparsebgp_ext_communities_parse_ext_communities(
 
   //    std::string decode_str = "";
   extcomm_hdr *ec_hdr = (extcomm_hdr *)malloc(sizeof(extcomm_hdr));
-  ec_hdr->val[0] = '\0';// = (char *)malloc(20 * sizeof(char));
+  ec_hdr->val[0] = '\0'; // = (char *)malloc(20 * sizeof(char));
   u_char **value;
 
   if ((path_attrs->attr_len % 8)) {
@@ -546,30 +549,30 @@ void libparsebgp_ext_communities_parse_ext_communities(
     case EXT_TYPE_IPV4:
       //                decode_str.append(decode_type_common(ec_hdr, value,
       //                true, true));
-      decode_type_common(ec_hdr, value, true, true);
+      decode_type_common(ec_hdr, value, 1, 1);
       break;
 
     case EXT_TYPE_2OCTET_AS:
-      decode_type_common(ec_hdr, value, false, false);
+      decode_type_common(ec_hdr, value, 0, 0);
       //                decode_str.append(decode_type_common(ec_hdr, value));
       break;
 
     case EXT_TYPE_4OCTET_AS:
-      decode_type_common(ec_hdr, value, true, false);
+      decode_type_common(ec_hdr, value, 1, 0);
       //                decode_str.append(decode_type_common(ec_hdr, value,
-      //                true));
+      //                1));
       break;
 
     case EXT_TYPE_GENERIC:
-      decode_type_generic(ec_hdr, value, false, false);
+      decode_type_generic(ec_hdr, value, 0, 0);
       break;
 
     case EXT_TYPE_GENERIC_4OCTET_AS:
-      decode_type_generic(ec_hdr, value, true, false);
+      decode_type_generic(ec_hdr, value, 1, 0);
       break;
 
     case EXT_TYPE_GENERIC_IPV4:
-      decode_type_generic(ec_hdr, value, true, true);
+      decode_type_generic(ec_hdr, value, 1, 1);
       break;
 
     case EXT_TYPE_OPAQUE:

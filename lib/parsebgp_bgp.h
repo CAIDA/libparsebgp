@@ -7,18 +7,9 @@
  *
  */
 
-/**
- * @file   parse_bgp.cpp
- *
- * @brief   Parser for BGP messages
- * @details This file has functions that can be used as needed to parse a
- * complete BGP message. BGP message can be read from a buffer
- */
-
 #ifndef PARSEBGP_H_
 #define PARSEBGP_H_
 
-#include "bgp_common.h"
 #include "notification_msg.h"
 #include "open_msg.h"
 #include "update_msg.h"
@@ -57,8 +48,8 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
     libparsebgp_notify_msg notification_msg; ///< Stores notification message
   } parsed_data;
 
-  bool has_end_of_rib_marker; ///< Indicates whether this message has the end of
-                              ///< rib marker
+  int has_end_of_rib_marker; ///< Indicates whether this message has the end of
+                             ///< rib marker
 } libparsebgp_parse_bgp_parsed_data;
 
 /**
@@ -72,8 +63,8 @@ typedef struct libparsebgp_parse_bgp_parsed_data {
  * @return the number of bytes read
  */
 ssize_t libparsebgp_parse_bgp_parse_msg(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data, size_t size,
-  bool is_local_msg);
+  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
+  size_t size, int is_local_msg);
 
 /**
  * Handle BGP update message
@@ -87,7 +78,7 @@ ssize_t libparsebgp_parse_bgp_parse_msg(
  * \returns number of bytes read
  */
 ssize_t libparsebgp_parse_bgp_handle_update(
-  libparsebgp_parse_bgp_parsed_data *bgp_update_msg, u_char **data,
+  libparsebgp_parse_bgp_parsed_data *bgp_update_msg, uint8_t **data,
   size_t size);
 
 /**
@@ -104,7 +95,7 @@ ssize_t libparsebgp_parse_bgp_handle_update(
  * @returns number of bytes read
  */
 ssize_t libparsebgp_parse_bgp_handle_down_event(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, u_char *data,
+  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
   size_t size);
 
 /**
@@ -123,7 +114,7 @@ ssize_t libparsebgp_parse_bgp_handle_down_event(
  * @returns Bytes read in parsing the header
  */
 ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr,
-                                           u_char *data, size_t size);
+                                           uint8_t *data, size_t size);
 
 /**
  * Destructor function to free the memory allocated in parse_bgp

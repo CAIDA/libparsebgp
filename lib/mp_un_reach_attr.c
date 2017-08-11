@@ -8,21 +8,23 @@
  */
 
 #include "mp_un_reach_attr.h"
+#include "parsebgp_utils.h"
 #include "evpn.h"
 #include "mp_link_state.h"
+#include <string.h>
 
 /**
  * MP Reach NLRI parse for BGP_AFI_IPV4 & BGP_AFI_IPV6
  *
  * \details Will handle the SAFI and parsing of AFI IPv4 & IPv6
  *
- * \param [in]   is_ipv4         True false to indicate if IPv4 or IPv6
+ * \param [in]   is_ipv4         1 0 to indicate if IPv4 or IPv6
  * \param [in]   nlri           Reference to parsed Unreach NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated
  * with all parsed data
  */
 static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(
-  bool is_ipv4, mp_unreach_nlri *nlri, u_char **data, int len)
+  int is_ipv4, mp_unreach_nlri *nlri, uint8_t **data, int len)
 {
 
   /*
@@ -70,18 +72,18 @@ static void libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(
  */
 static void
 libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs,
-                                       u_char **data, int len)
+                                       uint8_t **data, int len)
 {
 
   switch (path_attrs->attr_value.mp_unreach_nlri_data.afi) {
   case BGP_AFI_IPV6: // IPv6
     libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(
-      false, &path_attrs->attr_value.mp_unreach_nlri_data, data, len);
+      0, &path_attrs->attr_value.mp_unreach_nlri_data, data, len);
     break;
 
   case BGP_AFI_IPV4: // IPv4
     libparsebgp_mp_un_reach_attr_parse_afi_ipv4_ipv6(
-      true, &path_attrs->attr_value.mp_unreach_nlri_data, data, len);
+      1, &path_attrs->attr_value.mp_unreach_nlri_data, data, len);
     break;
 
   case BGP_AFI_BGPLS: // BGP-LS (draft-ietf-idr-ls-distribution-10)
@@ -99,8 +101,8 @@ libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs,
     {
       //                    libparsebgp_evpn_data *evpn_data;
       //                    libparsebgp_evpn_init(evpn_data,parse_data->peer_addr,
-      //                    true, &parsed_data);
-      libparsebgp_evpn_parse_nlri_data(path_attrs, data, len, true);
+      //                    1, &parsed_data);
+      libparsebgp_evpn_parse_nlri_data(path_attrs, data, len, 1);
       break;
     }
 
@@ -135,8 +137,8 @@ libparsebgp_mp_un_reach_attr_parse_afi(update_path_attrs *path_attrs,
  * with all parsed data
  */
 void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(
-  update_path_attrs *path_attrs, int attr_len, u_char **data,
-  bool *has_end_of_rib_marker)
+  update_path_attrs *path_attrs, int attr_len, uint8_t **data,
+  int *has_end_of_rib_marker)
 {
   // mp_unreach_nlri nlri;
   /*
@@ -161,7 +163,7 @@ void libparsebgp_mp_un_reach_attr_parse_un_reach_nlri_attr(
   if (attr_len < 0)
     return;
   if (attr_len == 0)
-    *has_end_of_rib_marker = true;
+    *has_end_of_rib_marker = 1;
   else {
     /*
      * NLRI data depends on the AFI & SAFI

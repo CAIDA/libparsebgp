@@ -8,9 +8,12 @@
  */
 
 #include "mp_reach_attr.h"
+#include "parsebgp.h"
+#include "parsebgp_utils.h"
 #include "evpn.h"
 #include "mp_link_state.h"
-#include "parse_utils.h"
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Parses mp_reach_nlri and mp_unreach_nlri (IPv4/IPv6)
@@ -19,7 +22,7 @@
  *      Will parse the NLRI encoding as defined in RFC3107 Section 3 (Carrying
  * Label Mapping information).
  *
- * \param [in]   is_ipv4                 True false to indicate if IPv4 or IPv6
+ * \param [in]   is_ipv4                 True 0 to indicate if IPv4 or IPv6
  * \param [in]   data                   Pointer to the start of the label +
  * prefixes to be parsed \param [in]   len                    Length of the data
  * in bytes to be read \param [in]   peer_info              Persistent Peer info
@@ -27,7 +30,7 @@
  * prefix_tuple> to be updated with entries
  */
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(
-  bool is_ipv4, u_char **data, uint16_t len,
+  int is_ipv4, uint8_t **data, uint16_t len,
   update_prefix_label_tuple *prefixes, uint16_t *prefix_count)
 {
   int addr_bytes, count = 0;
@@ -42,10 +45,10 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(
   // tuple.type = is_ipv4 ? PREFIX_LABEL_UNICAST_V4 : PREFIX_LABEL_UNICAST_V6;
   // tuple.is_ipv4 = is_ipv4;
 
-  //    bool add_path_enabled = libparsebgp_addpath_is_enabled(add_path_map,
+  //    int add_path_enabled = libparsebgp_addpath_is_enabled(add_path_map,
   //    is_ipv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6, BGP_SAFI_NLRI_LABEL);
 
-  // bool isVPN = typeid(vpn_tuple) == typeid(tuple);
+  // int isVPN = typeid(vpn_tuple) == typeid(tuple);
   uint16_t label_bytes;
 
   // Loop through all prefixes
@@ -117,13 +120,13 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_label_ipv4_ipv6(
  *
  * \details Will handle parsing the SAFI's for address family ipv6 and IPv4
  *
- * \param [in]   is_ipv4         True false to indicate if IPv4 or IPv6
+ * \param [in]   is_ipv4         True 0 to indicate if IPv4 or IPv6
  * \param [in]   nlri           Reference to parsed NLRI struct
  * \param [out]  parsed_data    Reference to parsed_update_data; will be updated
  * with all parsed data
  */
 static ssize_t libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(
-  bool is_ipv4, update_path_attrs *path_attrs, int nlri_len,
+  int is_ipv4, update_path_attrs *path_attrs, int nlri_len,
   unsigned char **next_hop, unsigned char **nlri_data)
 {
   ssize_t read_size = 0;
@@ -234,12 +237,12 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs,
   switch (path_attrs->attr_value.mp_reach_nlri_data.afi) {
   case BGP_AFI_IPV6: // IPv6
     read_size = libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(
-      false, path_attrs, nlri_len, next_hop, nlri_data);
+      0, path_attrs, nlri_len, next_hop, nlri_data);
     break;
 
   case BGP_AFI_IPV4: // IPv4
     read_size = libparsebgp_mp_reach_attr_parse_afi_ipv4_ipv6(
-      true, path_attrs, nlri_len, next_hop, nlri_data);
+      1, path_attrs, nlri_len, next_hop, nlri_data);
     break;
 
   case BGP_AFI_BGPLS: // BGP-LS (draft-ietf-idr-ls-distribution-10)
@@ -262,8 +265,8 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs,
     switch (path_attrs->attr_value.mp_reach_nlri_data.safi) {
     case BGP_SAFI_EVPN: // https://tools.ietf.org/html/rfc7432
     {
-      read_size = libparsebgp_evpn_parse_nlri_data(path_attrs, nlri_data,
-                                                   nlri_len, false);
+      read_size =
+        libparsebgp_evpn_parse_nlri_data(path_attrs, nlri_data, nlri_len, 0);
       break;
     }
 
@@ -302,7 +305,7 @@ static ssize_t libparsebgp_parse_afi(update_path_attrs *path_attrs,
  */
 ssize_t
 libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs,
-                                                int attr_len, u_char **data)
+                                                int attr_len, uint8_t **data)
 {
   ssize_t read_size = 0;
   /*
@@ -366,7 +369,7 @@ libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs,
  *      Will parse the NLRI encoding as defined in RFC4760 Section 5 (NLRI
  * Encoding).
  *
- * \param [in]   is_ipv4                 True false to indicate if IPv4 or IPv6
+ * \param [in]   is_ipv4                 True if IPv4, false if IPv6
  * \param [in]   data                   Pointer to the start of the prefixes to
  * be parsed \param [in]   len                    Length of the data in bytes to
  * be read \param [in]   peer_info              Persistent Peer info pointer
@@ -374,10 +377,10 @@ libparsebgp_mp_reach_attr_parse_reach_nlri_attr(update_path_attrs *path_attrs,
  * updated with entries
  */
 ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(
-  bool is_ipv4, u_char **data, uint16_t len, update_prefix_tuple *prefixes,
+  int is_ipv4, uint8_t **data, uint16_t len, update_prefix_tuple *prefixes,
   uint16_t *prefix_count)
 {
-  u_char ip_raw[16];
+  uint8_t ip_raw[16];
   int addr_bytes;
 
   if (len <= 0 || data == NULL)
@@ -388,7 +391,7 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(
   // tuple.type = is_ipv4 ? PREFIX_UNICAST_V4 : PREFIX_UNICAST_V6;
   // tuple.is_ipv4 = is_ipv4;
 
-  //    bool add_path_enabled = libparsebgp_addpath_is_enabled(add_path_map,
+  //    int add_path_enabled = libparsebgp_addpath_is_enabled(add_path_map,
   //    is_ipv4 ? BGP_AFI_IPV4 : BGP_AFI_IPV6, BGP_SAFI_NLRI_LABEL);
 
   int count = 0;
@@ -455,12 +458,12 @@ ssize_t libparsebgp_mp_reach_attr_parse_nlri_data_ipv4_ipv6(
  * labels
  *
  */
-inline uint16_t decode_label(u_char **data, uint16_t len, mpls_label *labels)
+inline uint16_t decode_label(uint8_t **data, uint16_t len, mpls_label *labels)
 {
   int read_size = 0, count = 0;
   mpls_label *label = (mpls_label *)malloc(sizeof(mpls_label));
   labels = (mpls_label *)malloc(sizeof(mpls_label));
-  u_char **data_ptr = data;
+  uint8_t **data_ptr = data;
 
   // the label is 3 octets long
   while (read_size <= len) {

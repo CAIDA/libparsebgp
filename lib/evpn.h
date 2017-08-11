@@ -2,9 +2,8 @@
 #define _OPENBMP_EVPN_H_
 
 #include "update_msg.h"
-#include <arpa/inet.h>
 #include <stdint.h>
-#include <sys/types.h>
+#include <unistd.h>
 
 enum evpn_routes_types {
   EVPN_ROUTE_TYPE_ETHERNET_AUTO_DISCOVERY = 1,
@@ -29,7 +28,7 @@ enum evpn_routes_types {
  * @return number of bytes read
  */
 ssize_t libparsebgp_evpn_parse_nlri_data(update_path_attrs *path_attrs,
-                                         u_char **data, uint16_t data_len,
-                                         bool is_unreach);
+                                         uint8_t **data, uint16_t data_len,
+                                         int is_unreach);
 
 #endif //_OPENBMP_EVPN_H_

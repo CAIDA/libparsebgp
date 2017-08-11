@@ -51,14 +51,16 @@ ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
 IncludeCategories:
   - Regex:           '^".+_int'
     Priority:        1
-  - Regex:           '^"(parsebgp)'
+  - Regex:           '^"parsebgp\.'
     Priority:        2
-  - Regex:           '^"config'
+  - Regex:           '^"parsebgp\_'
     Priority:        3
-  - Regex:           '^"'
+  - Regex:           '^"config'
     Priority:        4
-  - Regex:           '^<'
+  - Regex:           '^"'
     Priority:        5
+  - Regex:           '^<'
+    Priority:        6
 IndentCaseLabels: false
 IndentWidth:     2
 IndentWrappedFunctionNames: false

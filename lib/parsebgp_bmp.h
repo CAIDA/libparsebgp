@@ -5,8 +5,8 @@
 #ifndef PARSE_LIB_PARSE_BMPV1_H
 #define PARSE_LIB_PARSE_BMPV1_H
 
-#include "parse_bgp.h"
-#include "parse_utils.h"
+#include "parsebgp_bgp.h"
+#include <inttypes.h>
 
 /*
  * BMP Header lengths, not counting the version in the common hdr
@@ -157,7 +157,7 @@ typedef struct libparsebgp_parsed_bmp_term_msg {
  * Peer Up Events schema
  */
 typedef struct libparsebgp_parsed_bmp_peer_up_event {
-  u_char local_ip[16];  ///< IPv4 or IPv6 printed IP address
+  char local_ip[16];    ///< IPv4 or IPv6 printed IP address
   uint16_t local_port;  ///< Local port number
   uint16_t remote_port; ///< Remote port number
   libparsebgp_parse_bgp_parsed_data sent_open_msg; ///< sent open message
@@ -179,9 +179,9 @@ typedef struct libparsebgp_parsed_bmp_peer_down_event {
  * BMP stat counter
  */
 typedef struct stat_counter {
-  uint16_t stat_type;  ///< 2 bytes - Information type
-  uint16_t stat_len;   ///< 2 bytes - Length of the information that follows
-  u_char stat_data[8]; ///< Information - variable
+  uint16_t stat_type;   ///< 2 bytes - Information type
+  uint16_t stat_len;    ///< 2 bytes - Length of the information that follows
+  uint8_t stat_data[8]; ///< Information - variable
 } stat_counter;
 
 /**
