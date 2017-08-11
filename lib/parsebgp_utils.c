@@ -4,6 +4,7 @@
 
 #include "parsebgp_utils.h"
 #include "parsebgp.h"
+#include <assert.h>
 #include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
@@ -36,25 +37,19 @@ ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
  *
  * @param [in/out] var   Variable containing data to update
  * @param [in]     size  Size of var - Default is size of var
- *
- * TODO: optimize to use ntohs ntohl and ntohll if the size is appropriate
  */
 void SWAP_BYTES(void *var, int size)
 {
-  if (size <= 1)
-    return;
-
   uint8_t *v = (uint8_t *)var;
+  int i, i2;
+  uint8_t buf[128];
+  assert(size < 128);
 
-  // Allocate a working buffer
-  uint8_t buf[size];
-
-  // Make a copy
   memcpy(buf, var, size);
-
-  int i2 = 0;
-  for (int i = size - 1; i >= 0; i--)
+  i2 = 0;
+  for (i = size - 1; i >= 0; i--) {
     v[i2++] = buf[i];
+  }
 }
 
 void *malloc_zero(const size_t size)

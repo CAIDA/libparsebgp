@@ -26,7 +26,7 @@ static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
 
   if (remain > 0) {
     // need to move remaining data to start of buffer
-    memmove(buf, buf + buflen - remain, buflen - remain);
+    memmove(buf, buf + buflen - remain, remain);
     len += remain;
   }
 

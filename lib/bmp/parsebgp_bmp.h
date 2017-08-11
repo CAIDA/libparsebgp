@@ -5,206 +5,437 @@
 #include "bgp/parsebgp_bgp.h" //< BMP encapsulates BGP messages
 #include <inttypes.h>
 
+/* -------------------- Info TLV -------------------- */
+
 /**
- * BMP common header types
+ * BMP Info TLV Types
  */
-enum bmp_type {
-  TYPE_ROUTE_MON = 0,
-  TYPE_STATS_REPORT,
-  TYPE_PEER_DOWN,
-  TYPE_PEER_UP,
-  TYPE_INIT_MSG,
-  TYPE_TERM_MSG
-};
+typedef enum parsebmp_bmp_info_tlv_type {
+
+  /** The information is a free form UTF-8 string (not nul-terminated). */
+  PARSEBGP_BMP_INFO_TLV_TYPE_STRING = 0,
+
+  /** The information is an ASCII string equal to the sysDescr MIB-II [RFC1213]
+      object (not nul-terminated) */
+  PARSEBGP_BMP_INFO_TLV_TYPE_SYSDESCR = 1,
+
+  /** The information is an ASCII string equal to the sysName MIB-II [RFC1213]
+      object (not nul-terminated) */
+  PARSEBGP_BMP_INFO_TLV_TYPE_SYSNAME = 2,
+
+} parsebmp_bmp_info_tlv_type_t;
+
+/**
+ * BMP Information TLV
+ */
+typedef struct parsebgp_bmp_info_tlv {
+
+  /** Type of the information in the TLV (parsebmp_bmp_info_tlv_type_t) */
+  uint16_t type;
+
+  /** Length of the information in the following field */
+  uint16_t len;
+
+  /** Variable length information
+   *
+   * Note that while this is currently an ASCII or UTF-8 string, it is **not**
+   * null terminated, so care should be taken with it (hence why it is a uint8_t
+   * array and not a char array).
+   */
+  uint8_t *info;
+
+} parsebgp_bmp_info_tlv_t;
+
+/*  -------------------- Stats Report (Type 1) -------------------- */
 
 /**
  * BMP stats types
  */
-enum bmp_stats {
-  STATS_PREFIX_REJ = 0,
-  STATS_DUP_PREFIX,
-  STATS_DUP_WITHDRAW,
-  STATS_INVALID_CLUSTER_LIST,
-  STATS_INVALID_AS_PATH_LOOP,
-  STATS_INVALID_ORIGINATOR_ID,
-  STATS_INVALID_AS_CONFED_LOOP,
-  STATS_NUM_ROUTES_ADJ_RIB_IN,
-  STATS_NUM_ROUTES_LOC_RIB
-};
+typedef enum parsebgp_bmp_stat_counter_type {
+
+  /** Stat Type = 0: (32-bit Counter) Number of prefixes rejected by
+      inbound policy. */
+  PARSEBGP_BMP_STATS_PREFIX_REJECTS = 0,
+
+  /** Stat Type = 1: (32-bit Counter) Number of (known) duplicate prefix
+      advertisements. */
+  PARSEBGP_BMP_STATS_PREFIX_DUPS = 1,
+
+  /** Stat Type = 2: (32-bit Counter) Number of (known) duplicate
+      withdraws. */
+  PARSEBGP_BMP_STATS_WITHDRAW_DUP = 2,
+
+  /** Stat Type = 3: (32-bit Counter) Number of updates invalidated due
+      to CLUSTER_LIST loop. */
+  PARSEBGP_BMP_STATS_INVALID_CLUSTER_LIST = 3,
+
+  /** Stat Type = 4: (32-bit Counter) Number of updates invalidated due
+      to AS_PATH loop. */
+  PARSEBGP_BMP_STATS_INVALID_AS_PATH_LOOP = 4,
+
+  /** Stat Type = 5: (32-bit Counter) Number of updates invalidated due
+      to ORIGINATOR_ID. */
+  PARSEBGP_BMP_STATS_INVALID_ORIGINATOR_ID = 5,
+
+  /** Stat Type = 6: (32-bit Counter) Number of updates invalidated due
+      to AS_CONFED loop. */
+  PARSEBGP_BMP_STATS_INVALID_AS_CONFED_LOOP = 6,
+
+  /** Stat Type = 7: (64-bit Gauge) Number of routes in Adj-RIBs-In. */
+  PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN = 7,
+
+  /** Stat Type = 8: (64-bit Gauge) Number of routes in Loc-RIB. */
+  PARSEBGP_BMP_STATS_ROUTES_LOC_RIB = 8,
+
+  /** Stat Type = 9: Number of routes in per-AFI/SAFI Adj-RIB-In.  The value is
+      structured as: 2-byte Address Family Identifier (AFI), 1-byte Subsequent
+      Address Family Identifier (SAFI), followed by a 64-bit Gauge. */
+  PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_ADJ_RIB_IN = 9,
+
+  /** Stat Type = 10: Number of routes in per-AFI/SAFI Loc-RIB.  The value is
+      structured as: 2-byte AFI, 1-byte SAFI, followed by a 64-bit Gauge. */
+  PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_LOC_RIB = 10,
+
+  /** Stat Type = 11: (32-bit Counter) Number of updates subjected to
+      treat-as-withdraw treatment [RFC7606]. */
+  PARSEBGP_BMP_STATS_UPD_TREAT_AS_WITHDRAW = 11,
+
+  /** Stat Type = 12: (32-bit Counter) Number of prefixes subjected to
+      treat-as-withdraw treatment [RFC7606]. */
+  PARSEBGP_BMP_STATS_PREFIX_TREAT_AS_WITHDRAW = 12,
+
+  /** Stat Type = 13: (32-bit Counter) Number of duplicate update
+      messages received. */
+  PARSEBGP_BMP_STATS_DUP_UPD = 13,
+
+} parsebgp_bmp_stat_counter_type_t;
+
+typedef struct parsebgp_bmp_stats_counter_afi_safi_gauge {
+
+  /** AFI */
+  uint16_t afi;
+
+  /** SAFI */
+  uint8_t safi;
+
+  /** Unsigned 64-bit gauge */
+  uint64_t gauge_u64;
+
+} parsebgp_bmp_stats_counter_afi_safi_gauge_t;
 
 /**
- * BMP Initiation Message Types
+ * BMP Stats Counter
  */
-enum bmp_init_types {
-  INIT_TYPE_FREE_FORM_STRING = 0,
-  INIT_TYPE_SYSDESCR,
-  INIT_TYPE_SYSNAME,
-  INIT_TYPE_ROUTER_BGP_ID = 65531
-};
+typedef struct stat_counter {
+
+  /** Stat Counter Type (parsebgp_bmp_stat_counter_type_t) */
+  uint16_t type;
+
+  /** Length of the Stat Counter data field (either 4 or 8 in v3) */
+  uint16_t len;
+
+  union {
+
+    /** Unsigned 32-bit counter */
+    uint32_t counter_u32;
+
+    /** Unsigned 64-bit gauge */
+    uint64_t gauge_u64;
+
+    /** Special AFI/SAFI Gauge used for Types 9 and 10 */
+    parsebgp_bmp_stats_counter_afi_safi_gauge_t afi_safi_gauge;
+
+  } data;
+
+} parsebgp_bmp_stats_counter_t;
 
 /**
- * BMP Termination Message Types
+ * BMP Stats Report
  */
-enum bmp_term_types { TERM_TYPE_FREE_FORM_STRING = 0, TERM_TYPE_REASON };
+typedef struct parsebgp_bmp_stats_report {
+
+  /** Number of stats "counters" in this report */
+  uint32_t stats_count;
+
+  /** Array of stats counters (with stats_count elements) */
+  parsebgp_bmp_stats_counter_t *counters;
+
+} parsebgp_bmp_stats_report_t;
+
+
+/*  -------------------- Peer Down (Type 2) -------------------- */
+
+/** BMP Peer Down Notification Reason */
+typedef enum {
+
+  /** Reason 1: The local system closed the session. Following the Reason is a
+      BGP PDU containing a BGP NOTIFICATION message that would have been sent to
+      the peer. */
+  PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF = 1,
+
+  /** Reason 2: The local system closed the session.  No notification message
+      was sent.  Following the reason code is a 2-byte field containing the code
+      corresponding to the Finite State Machine (FSM) Event that caused the
+      system to close the session (see Section 8.1 of [RFC4271]). */
+  PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE = 2,
+
+  /** Reason 3: The remote system closed the session with a notification
+      message.  Following the Reason is a BGP PDU containing the BGP
+      NOTIFICATION message as received from the peer. */
+  PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF = 3,
+
+  /** Reason 4: The remote system closed the session without a notification
+      message.  This includes any unexpected termination of the transport
+      session, so in some cases both the local and remote systems might consider
+      this to apply. */
+  PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE = 4,
+
+  /** Reason 5: Information for this peer will no longer be sent to the
+      monitoring station for configuration reasons.  This does not, strictly
+      speaking, indicate that the peer has gone down, but it does indicate that
+      the monitoring station will not receive updates for the peer. */
+  PARSEBGP_BMP_PEER_DOWN_CONFIG = 5,
+
+} parsebgp_bmp_peer_down_reason_t;
 
 /**
- * BMP Termination Message reasons for type=1
+ * BMP Peer Down Notification
  */
-enum bmp_term_type1_reason {
-  TERM_REASON_ADMIN_CLOSE = 0,
-  TERM_REASON_UNSPECIFIED,
-  TERM_REASON_OUT_OF_RESOURCES,
-  TERM_REASON_REDUNDANT_CONN,
-  TERM_REASON_OPENBMP_CONN_CLOSED = 65533,
-  TERM_REASON_OPENBMP_CONN_ERR = 65534
-};
+typedef struct parsebgp_bmp_peer_down {
+
+  /** Reason why the session was closed (parsebgp_bmp_peer_down_reason_t) */
+  uint8_t reason;
+
+  union {
+
+    /** FSM Event that caused the system to close the connection */
+    uint16_t fsm_code;
+
+    // TODO: add BGP NOTIFICATION message
+
+  } data;
+
+} parsebgp_bmp_peer_down_t;
+
+
+/*  -------------------- Peer Up (Type 3) -------------------- */
+
+/**
+ * BMP Peer Up Notification
+ */
+typedef struct parsebgp_bmp_peer_up {
+
+  /** Local IP address associated with the peering connection */
+  uint8_t local_ip[16];
+
+  /** Local port associated with the connection */
+  uint16_t local_port;
+
+  /** Remote port number associated with the connection */
+  uint16_t remote_port;
+
+  // TODO: OPEN Message sent to the peer (sent_open)
+
+  // TODO: OPEN Message received from the peer (recv_open)
+
+  /** Array of TLVs present (may be empty) */
+  parsebgp_bmp_info_tlv_t *tlvs;
+
+  /** Number of TLVs present (may be zero) */
+  int tlvs_cnt;
+
+} parsebgp_bmp_peer_up_t;
+
+
+/*  -------------------- Init Msg (Type 4) -------------------- */
+
+/**
+ * BMP initiation message: This can contain multiple information TLVs
+ */
+typedef struct parsebgp_bmp_init_msg {
+
+  /** Array of TLVs present in the init message */
+  parsebgp_bmp_info_tlv_t *tlvs;
+
+  /** Number of TLVs present */
+  int tlvs_cnt;
+
+} parsebgp_bmp_init_msg_t;
+
+
+/*  -------------------- Term Msg (Type 5) -------------------- */
+
+typedef enum {
+
+  /** Reason = 0: Session administratively closed.  The session might be
+      re-initiated. */
+  PARSEBGP_BMP_TERM_REASON_ADMIN_CLOSE = 0,
+
+  /** Reason = 1: Unspecified reason. */
+  PARSEBGP_BMP_TERM_REASON_UNSPEC = 1,
+
+  /** Reason = 2: Out of resources.  The router has exhausted resources
+      available for the BMP session. */
+  PARSEBGP_BMP_TERM_REASON_RESOURCES = 2,
+
+  /** Reason = 3: Redundant connection.  The router has determined that this
+      connection is redundant with another one. */
+  PARSEBGP_BMP_TERM_REASON_REDUNDANT_CONN = 3,
+
+  /** Reason = 4: Session permanently administratively closed, will not be
+      re-initiated. */
+  PARSEBGP_BMP_TERM_REASON_ADMIN_CLOSE_PERM = 4,
+
+} parsebgp_bmp_term_reason_t;
+
+typedef enum {
+
+  /** String: Free-form UTF-8 string (Type 0) */
+  PARSEBGP_BMP_TERM_INFO_TYPE_STRING = 0,
+
+  /** Reason: 2-byte reason code (Type 1) (parsebgp_bmp_term_reason_t) */
+  PARSEBGP_BMP_TERM_INFO_TYPE_REASON = 1,
+
+} parsebgp_bmp_term_info_type_t;
+
+/** BMP Termination Information TLV */
+typedef struct parsebgp_bmp_term_tlv {
+
+  /** Information Type (parsebgp_bmp_term_info_type_t) */
+  uint16_t type;
+
+  /** Information Length */
+  uint16_t len;
+
+  union {
+
+    /** PARSEBGP_BMP_TERM_INFO_TYPE_STRING (nul-terminated) */
+    char *string;
+
+    /** PARSEBGP_BMP_TERM_INFO_TYPE_REASON */
+    uint16_t reason;
+
+  } info;
+
+} parsebgp_bmp_term_tlv_t;
+
+/**
+ * BMP termination message: This can contain multiple information TLVs
+ */
+typedef struct parsebgp_bmp_term_msg {
+
+  /** Array of TLVs present in the term message */
+  parsebgp_bmp_term_tlv_t *tlvs;
+
+  /** Number of TLVs present */
+  int tlvs_cnt;
+
+} parsebgp_bmp_term_msg_t;
+
+
+/*  -------------------- Common Headers -------------------- */
 
 /**
  * BMP peer header
  */
-typedef struct libparsebgp_parsed_peer_hdr_v3 {
-  uint8_t peer_type;             ///< 1 byte peer type
-  uint8_t peer_flags;            ///< 1 byte peer flags
-  unsigned char peer_dist_id[8]; ///< 8 byte peer route distinguisher
-  unsigned char peer_addr[16];   ///< 16 bytes IP address of peer
-  uint32_t peer_as;              ///< 4 byte peer AS number
-  unsigned char peer_bgp_id[4];  ///< 4 byte peer bgp id
-  uint32_t ts_secs;              ///< 4 byte timestamp in seconds
-  uint32_t ts_usecs;             ///< 4 byte timestamp microseconds
-} __attribute__((__packed__)) libparsebgp_parsed_peer_hdr_v3;
+typedef struct parsebgp_bmp_peer_hdr {
+
+  /** Peer Type */
+  uint8_t type;
+
+  /** Peer Flags */
+  uint8_t flags;
+
+  /** Peer Route Distinguisher */
+  uint64_t dist_id;
+
+  /** Peer IP Address */
+  uint8_t addr[16];
+
+  /** Peer ASN */
+  uint32_t asn;
+
+  /** Peer BGP ID */
+  uint8_t bgp_id[4];
+
+  /** Time (seconds portion) when the routes were received */
+  uint32_t ts_sec;
+
+  /** Time (microseconds portion) when the routes were received */
+  uint32_t ts_usec;
+
+} parsebgp_bmp_peer_hdr_t;
 
 /**
- *  BMP headers for older versions (BMPv1)
- */
-typedef struct __attribute__((__packed__)) common_hdr_bmp_old {
-  uint8_t type;                  ///< 1 byte message type
-  uint8_t peer_type;             ///< 1 byte peer type
-  uint8_t peer_flags;            ///< 1 byte peer flag
-  unsigned char peer_dist_id[8]; ///< 8 byte peer distinguisher
-  unsigned char peer_addr[16];   ///< 16 bytes peer IP address
-  uint32_t peer_as;              ///< 4 byte peer AS number
-  unsigned char peer_bgp_id[4];  ///< 4 byte peer bgp id
-  uint32_t ts_secs;              ///< 4 byte timestamp in seconds
-  uint32_t ts_usecs;             ///< 4 byte timestamp microseconds
-  uint8_t ver;                   ///< 1 byte -- At last since it's read before
-} common_hdr_bmp_old;
-
-/**
- * BMP common header
- */
-typedef struct common_hdr_bmp_v3 { ///< 6 bytes total length for the common
-                                   ///< header
-  uint8_t ver;                     ///< 1 byte; version of BMP header
-  uint32_t len; ///< 4 bytes; BMP msg length in bytes including all headers
-  uint8_t type; ///< 1 byte; BMP Msg type
-} common_hdr_bmp_v3;
-
-/**
- * BMP initiation message TLV
- */
-typedef struct init_msg_v3_tlv {
-  uint16_t type;   ///< 2 bytes - Information type
-  uint16_t len;    ///< 2 bytes - Length of the information that follows
-  char info[4096]; ///< Information - variable
-} init_msg_v3_tlv;
-
-/**
- * BMP initiation message: This can contain multiple init - tlvs
- */
-typedef struct libparsebgp_parsed_bmp_init_msg {
-  uint32_t num_tlvs;
-  init_msg_v3_tlv *init_msg_tlvs; ///< list of init message tlvs
-} libparsebgp_parsed_bmp_init_msg;
-
-/**
- * BMP termination message
- */
-typedef struct term_msg_v3_tlv {
-  uint16_t type;   ///< 2 bytes - Information type
-  uint16_t len;    ///< 2 bytes - Length of the information that follows
-  char info[4096]; ///< Information - variable
-} term_msg_v3_tlv;
-
-/**
- * BMP termination message: This can contain multiple term - tlvs
- */
-typedef struct libparsebgp_parsed_bmp_term_msg {
-  uint32_t num_tlvs;
-  term_msg_v3_tlv *term_msg_tlvs; ///< list of term message tlvs
-} libparsebgp_parsed_bmp_term_msg;
-
-/**
- * OBJECT: peer_up_events
+ * BMP common header types
  *
- * Peer Up Events schema
- */
-typedef struct libparsebgp_parsed_bmp_peer_up_event {
-  char local_ip[16];    ///< IPv4 or IPv6 printed IP address
-  uint16_t local_port;  ///< Local port number
-  uint16_t remote_port; ///< Remote port number
-  libparsebgp_parse_bgp_parsed_data sent_open_msg; ///< sent open message
-  libparsebgp_parse_bgp_parsed_data
-    received_open_msg; ///< received open message
-} libparsebgp_parsed_bmp_peer_up_event;
-
-/**
- * OBJECT: peer_down_events
+ * Message Type (1 byte): This identifies the type of the BMP message.  A BMP
+ * implementation MUST ignore unrecognized message types upon receipt.
  *
- * Peer Down Events schema
+ *  Type = 0: Route Monitoring
+ *  Type = 1: Statistics Report
+ *  Type = 2: Peer Down Notification
+ *  Type = 3: Peer Up Notification
+ *  Type = 4: Initiation Message
+ *  Type = 5: Termination Message
+ *  Type = 6: Route Mirroring Message
  */
-typedef struct libparsebgp_parsed_bmp_peer_down_event {
-  uint8_t bmp_reason;                           ///< BMP notify reason
-  libparsebgp_parse_bgp_parsed_data notify_msg; ///< BGP notification message
-} libparsebgp_parsed_bmp_peer_down_event;
+typedef enum parsebgp_bmp_msg_type {
+  PARSEBGP_BMP_TYPE_ROUTE_MON = 0,
+  PARSEBGP_BMP_TYPE_STATS_REPORT = 1,
+  PARSEBGP_BMP_TYPE_PEER_DOWN = 2,
+  PARSEBGP_BMP_TYPE_PEER_UP = 3,
+  PARSEBGP_BMP_TYPE_INIT_MSG = 4,
+  PARSEBGP_BMP_TYPE_TERM_MSG = 5,
+  PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG = 6,
+} parsebgp_bmp_msg_type_t;
 
-/**
- * BMP stat counter
- */
-typedef struct stat_counter {
-  uint16_t stat_type;   ///< 2 bytes - Information type
-  uint16_t stat_len;    ///< 2 bytes - Length of the information that follows
-  uint8_t stat_data[8]; ///< Information - variable
-} stat_counter;
 
-/**
- * OBJECT: stats_reports
- *
- * Stats Report schema
- */
-typedef struct libparsebgp_parsed_bmp_stat_rep {
-  uint32_t stats_count;              ///< 4 bytes - Stats Count
-  stat_counter *total_stats_counter; ///< 2 bytes - Information type
-} libparsebgp_parsed_bmp_stat_rep;
+/*  -------------------- Main BMP Message -------------------- */
 
 /**
  * BMP Message Structure
+ *
+ * This structure is based on BMP message format version 3, but the parser also
+ * supports versions 1 and 2. In the case of a v1/v2 message, the length field
+ * is filled with an inferred value once the entire message has been parsed.
+ * parsed.
  */
-typedef struct libparsebgp_parsed_bmp_parsed_data {
-  uint8_t version; ///< Version of BMP header
-  uint8_t bmp_type;
-  union libparsebgp_parsed_bmp_hdr {
-    common_hdr_bmp_v3 c_hdr_v3;   ///< structure for bmp header version 3
-    common_hdr_bmp_old c_hdr_old; ///< structure for bmp header version 1 or 2
-  } libparsebgp_parsed_bmp_hdr;   ///< union of BMP common header
+typedef struct parsebgp_bmp_msg {
 
-  libparsebgp_parsed_peer_hdr_v3
-    libparsebgp_parsed_peer_hdr; ///< structure for BMP peer header
+  /** BMP Version */
+  uint8_t version;
 
-  union libparsebgp_parsed_bmp_msg {
-    libparsebgp_parsed_bmp_init_msg
-      parsed_init_msg; ///< structure for bmp init msg
-    libparsebgp_parsed_bmp_term_msg
-      parsed_term_msg; ///< structure for bmp term msg
-    libparsebgp_parsed_bmp_peer_up_event
-      parsed_peer_up_event_msg; ///< structure for bmp peer up event msg
-    libparsebgp_parsed_bmp_peer_down_event
-      parsed_peer_down_event_msg; ///< structure for bmp peer down event msg
-    libparsebgp_parse_bgp_parsed_data
-      parsed_rm_msg; ///< structure for bmp route monitoring msg
-    libparsebgp_parsed_bmp_stat_rep
-      parsed_stat_rep;          ///< structure for bmp stats report msg
-  } libparsebgp_parsed_bmp_msg; ///< Union of BMP messages
-} libparsebgp_parse_bmp_parsed_data;
+  /** Message length including all headers */
+  uint32_t len;
+
+  /** Message Type (parsebgp_bmp_msg_type_t) */
+  uint8_t type;
+
+  /** Peer header (Not filled for TYPE_INIT_MSG and TYPE_TERM_MSG) */
+  parsebgp_bmp_peer_hdr_t peer_hdr;
+
+  /** Union of structures for all supported BMP message types */
+  union {
+
+    /** 1: PARSEBGP_BMP_TYPE_STATS_REPORT: Stats Report */
+    parsebgp_bmp_stats_report_t stats_report;
+
+    /** 2: PARSEBGP_BMP_TYPE_PEER_DOWN: Peer Down Message */
+    parsebgp_bmp_peer_down_t peer_down;
+
+    /** 3: PARSEBGP_BMP_TYPE_PEER_UP: Peer Up Message */
+    parsebgp_bmp_peer_up_t peer_up;
+
+    /** 4: PARSEBGP_BMP_TYPE_INIT_MSG: Initiation Message */
+    parsebgp_bmp_init_msg_t init_msg;
+
+    /** 5: PARSEBGP_BMP_TYPE_TERM_MSG: Termination Message */
+    parsebgp_bmp_term_msg_t term_msg;
+
+  } types;
+
+} parsebgp_bmp_msg_t;
 
 /** Destroy the given BMP message structure
  *
@@ -213,7 +444,7 @@ typedef struct libparsebgp_parsed_bmp_parsed_data {
  * This function *does not* free the passed structure itself as it is assumed to
  * be a member of a parsebgp_msg_t structure.
  */
-void parsebgp_bmp_destroy_msg(libparsebgp_parse_bmp_parsed_data *msg);
+void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg);
 
 /**
  * Decode (parse) a single BMP message from the given buffer into the given BMP
@@ -226,7 +457,7 @@ void parsebgp_bmp_destroy_msg(libparsebgp_parse_bmp_parsed_data *msg);
  * @return OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
-parsebgp_error_t parsebgp_bmp_decode(libparsebgp_parse_bmp_parsed_data *msg,
+parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
                                      uint8_t *buffer, size_t *len);
 
 #endif /* __PARSEBGP_BMP_H */

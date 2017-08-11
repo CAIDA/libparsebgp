@@ -10,7 +10,7 @@ typedef enum parsebgp_error {
   INCOMPLETE_MSG = -1,
 
   /** Message length is larger than the maximum possible message length */
-  LARGER_MSG_LEN = -2,
+  MSG_TOO_LONG = -2,
 
   /** Message is corrupted */
   CORRUPT_MSG = -3,
@@ -23,6 +23,9 @@ typedef enum parsebgp_error {
 
   /** Feature to be parsed is not currently implemented */
   NOT_IMPLEMENTED = -6,
+
+  /** Memory allocation failure */
+  MALLOC_FAILURE = -7,
 
 } parsebgp_error_t;
 

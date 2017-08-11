@@ -16,6 +16,11 @@ libparsebgp_la_SOURCES = 		\
 	parsebgp_utils.c		\
 	parsebgp_utils.h
 
+libparsebgp_la_LIBADD = 			\
+	$(top_builddir)/lib/bgp/libparsebgp_bgp.la	\
+	$(top_builddir)/lib/bmp/libparsebgp_bmp.la	\
+	$(top_builddir)/lib/mrt/libparsebgp_mrt.la
+
 libparsebgp_la_LDFLAGS = -version-info @LIBPARSEBGP_MAJOR_VERSION@:@LIBPARSEBGP_MID_VERSION@:@LIBPARSEBGP_MINOR_VERSION@
 
 CLEANFILES = *~

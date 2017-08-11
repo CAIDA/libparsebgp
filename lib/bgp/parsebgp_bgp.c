@@ -168,7 +168,7 @@ ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr,
    * the complete BGP message to be parsed
    */
   if (c_hdr->len > size)
-    return LARGER_MSG_LEN;
+    return MSG_TOO_LONG;
 
   return BGP_MSG_HDR_LEN;
 }
