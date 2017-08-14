@@ -650,8 +650,6 @@ ssize_t libparsebgp_parse_mrt_parse_msg(libparsebgp_parse_mrt_parsed_data *mrt_p
     if (read_size < 0)
         libparsebgp_parse_mrt_destructor(mrt_parsed_data);
 
-    free(mrt_data);
-
     return read_size;
 }
 

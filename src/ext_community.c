@@ -510,7 +510,7 @@ void libparsebgp_ext_communities_parse_ext_communities(update_path_attrs *path_a
         // Setup extended community header
         ec_hdr->high_type = *data[0];
         ec_hdr->low_type  = *data[1];
-        value     = data + 2;
+        *value     = *data + 2;
 
         /*
          * Docode the community by type
