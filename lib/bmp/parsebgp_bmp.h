@@ -368,26 +368,30 @@ typedef struct parsebgp_bmp_peer_hdr {
 
 /**
  * BMP common header types
- *
- * Message Type (1 byte): This identifies the type of the BMP message.  A BMP
- * implementation MUST ignore unrecognized message types upon receipt.
- *
- *  Type = 0: Route Monitoring
- *  Type = 1: Statistics Report
- *  Type = 2: Peer Down Notification
- *  Type = 3: Peer Up Notification
- *  Type = 4: Initiation Message
- *  Type = 5: Termination Message
- *  Type = 6: Route Mirroring Message
  */
 typedef enum parsebgp_bmp_msg_type {
+
+  /** Type = 0: Route Monitoring */
   PARSEBGP_BMP_TYPE_ROUTE_MON = 0,
+
+  /** Type = 1: Statistics Report */
   PARSEBGP_BMP_TYPE_STATS_REPORT = 1,
+
+  /** Type = 2: Peer Down Notification */
   PARSEBGP_BMP_TYPE_PEER_DOWN = 2,
+
+  /** Type = 3: Peer Up Notification */
   PARSEBGP_BMP_TYPE_PEER_UP = 3,
+
+  /** Type = 4: Initiation Message */
   PARSEBGP_BMP_TYPE_INIT_MSG = 4,
+
+  /** Type = 5: Termination Message */
   PARSEBGP_BMP_TYPE_TERM_MSG = 5,
+
+  /** Type = 6: Route Mirroring Message */
   PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG = 6,
+
 } parsebgp_bmp_msg_type_t;
 
 

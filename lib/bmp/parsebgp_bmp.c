@@ -454,6 +454,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
 {
   parsebgp_error_t err;
   size_t len = *lenp, nread = 0, slen = 0;
+  uint16_t bgp_len;
 
   assert(msg->version == 2 || msg->version == 1);
 
@@ -466,6 +467,47 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
     return err;
   }
   nread += slen;
+
+  // Infer the overall message length by perhaps poking our nose into the next
+  // message
+  msg->len = nread;
+
+  switch (msg->type) {
+  case PARSEBGP_BMP_TYPE_ROUTE_MON:
+    if (len - nread < 18) {
+      return INCOMPLETE_MSG;
+    }
+    memcpy(&bgp_len, buf + 16, sizeof(uint16_t));
+    bgp_len = htons(bgp_len);
+    msg->len += bgp_len;
+    break;
+
+  case PARSEBGP_BMP_TYPE_STATS_REPORT:
+    // I'm not sure how to infer the length of this.
+    // I'm not even sure how one would parse this data...
+    return NOT_IMPLEMENTED;
+    break;
+
+  case PARSEBGP_BMP_TYPE_PEER_DOWN:
+    if (len - nread < 1) {
+      return INCOMPLETE_MSG;
+    }
+    if (*buf == PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF ||
+        *buf == PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF) {
+      if (len - nread < 19) {
+        return INCOMPLETE_MSG;
+      }
+      memcpy(&bgp_len, buf + 17, sizeof(uint16_t));
+      bgp_len = htons(bgp_len);
+      msg->len += bgp_len;
+    }
+    break;
+
+  case PARSEBGP_BMP_TYPE_PEER_UP:
+    // TODO: If this is actually found in the wild, then we can implement it
+    return NOT_IMPLEMENTED;
+    break;
+  }
 
   assert(nread == BMP_HDR_V1V2_LEN);
   *lenp = nread;
@@ -589,7 +631,12 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
 
   fprintf(stderr, "DEBUG: nread: %d, remain: %d\n", (int)nread, (int)remain);
 
-  assert(remain <= slen);
+  if (remain > slen) {
+    // we already know that the message will be longer than what we have in the
+    // buffer, give up now
+    return INCOMPLETE_MSG;
+  }
+
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
@@ -629,11 +676,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
   }
   nread += slen;
 
-  if (msg->version == 3) {
-    assert(msg->len == nread);
-  } else {
-    msg->len = nread;
-  }
+  assert(msg->len == nread);
 
   *len = nread;
   return OK;
