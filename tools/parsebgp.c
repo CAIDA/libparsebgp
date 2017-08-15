@@ -80,7 +80,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
     ptr = buf;
 
     while (remain > 0) {
-      if ((msg = parsebgp_create_msg()) == NULL) {
+      if (msg == NULL && (msg = parsebgp_create_msg()) == NULL) {
         fprintf(stderr, "ERROR: Failed to create message structure\n");
         goto err;
       }
