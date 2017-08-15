@@ -441,15 +441,6 @@ typedef struct parsebgp_bmp_msg {
 
 } parsebgp_bmp_msg_t;
 
-/** Destroy the given BMP message structure
- *
- * @param msg           Pointer to message structure to destroy
- *
- * This function *does not* free the passed structure itself as it is assumed to
- * be a member of a parsebgp_msg_t structure.
- */
-void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg);
-
 /**
  * Decode (parse) a single BMP message from the given buffer into the given BMP
  * message structure.
@@ -463,5 +454,14 @@ void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg);
  */
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
                                      uint8_t *buffer, size_t *len);
+
+/** Destroy the given BMP message structure
+ *
+ * @param msg           Pointer to message structure to destroy
+ *
+ * This function *does not* free the passed structure itself as it is assumed to
+ * be a member of a parsebgp_msg_t structure.
+ */
+void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg);
 
 #endif /* __PARSEBGP_BMP_H */
