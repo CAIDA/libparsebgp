@@ -70,12 +70,11 @@ static int parse(parsebgp_msg_type_t type, char *fname)
     if (fill_len == remain) {
       // failed to read anything new from the file, so give up
       fprintf(stderr,
-              "ERROR: Failed to read anything new from file, but %ld bytes "
-              "remain. Giving up.\n",
+              "ERROR: Possibly corrupt file encountered. Trailing garbage of "
+              "%ld bytes found\n",
               remain);
       break;
     }
-    fprintf(stderr, "DEBUG: Refilled buffer with %ld bytes\n", fill_len);
     remain = fill_len;
     ptr = buf;
 
@@ -101,7 +100,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
         goto err;
       }
       // else: successful read
-      fprintf(stderr, "DEBUG: Read message\n");
+      fprintf(stderr, "DEBUG: --------------------\n");
       assert(dec_len > 0);
       ptr += dec_len;
       remain -= dec_len;

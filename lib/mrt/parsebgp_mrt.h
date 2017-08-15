@@ -1,258 +1,387 @@
-/*
- * Copyright (c) 2013-2015 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- */
-#ifndef PARSEMRT_H_
-#define PARSEMRT_H_
+#ifndef __PARSEBGP_MRT_H
+#define __PARSEBGP_MRT_H
 
-#include "bgp/parsebgp_bgp.h"
+#include "parsebgp_error.h"
 #include <inttypes.h>
-
-#define MRT_PACKET_BUF_SIZE 4096 ///< Size of the MRT packet buffer (memory)
-/**
- * MRT Message Types
- */
-enum mrt_type {
-  OSPFv2 = 11,
-  TABLE_DUMP = 12,
-  TABLE_DUMP_V2 = 13,
-  BGP4MP = 16,
-  BGP4MP_ET = 17,
-  ISIS = 32,
-  ISIS_ET = 33,
-  OSPFv3 = 48,
-  OSPFv3_ET = 49
-};
+#include <stdlib.h>
 
 /**
- * Table Dump Types
+ * MRT Address Families
  */
-enum address_family_types { AFI_IPv4 = 1, AFI_IPv6 };
+typedef enum {
+
+  /** IPv4 Address */
+  PARSEBGP_MRT_AFI_IPV4 = 1,
+
+  /** IPv6 Address */
+  PARSEBGP_MRT_AFI_IPV6 = 2,
+
+} parsebgp_mrt_afi_t;
 
 /**
- * Table Dump V2 Types
+ * MRT ASN Types (2 or 4 byte)
  */
-enum table_dump_v2_types {
+typedef enum {
+
+  /** 2-byte ASN */
+  PARSEBGP_MRT_ASN_2_BYTE = 0,
+
+  /** 4-byte ASN */
+  PARSEBGP_MRT_ASN_4_BYTE = 1,
+
+} parsebgp_mrt_asn_type_t;
+
+/**
+ * Table Dump Message
+ */
+typedef struct parsebgp_mrt_table_dump {
+
+  /** View Number (normally zero) */
+  uint16_t view_number;
+
+  /** Sequence Number */
+  uint16_t sequence;
+
+  /** IP Address of the prefix */
+  uint8_t prefix[16];
+
+  /** Length of the prefix mask */
+  uint8_t prefix_len;
+
+  /** Status (unused) */
+  uint8_t status;
+
+  /** Time prefix was heard (in seconds since the unix epoch) */
+  uint32_t originated_time;
+
+  /** Peer IP Address */
+  uint8_t peer_ip[16];
+
+  /** Peer ASN (2-byte) */
+  uint16_t peer_asn;
+
+  /** Length of the attributes field */
+  uint16_t attr_len;
+
+  // TODO: Add (array?) of parsed BGP attributes
+
+} parsebgp_mrt_table_dump_t;
+
+/**
+ * Table Dump V2 Peer Entry
+ *
+ * Note that the first two fields (peer_asn_type and peer_ip_afi) are decoded
+ * from the "Peer Type" field.
+ */
+typedef struct parsebgp_mrt_table_dump_v2_peer_entry {
+
+  /** Peer ASN Type (2 or 4 byte) */
+  parsebgp_mrt_asn_type_t asn_type;
+
+  /** Peer IP AFI */
+  parsebgp_mrt_afi_t ip_afi;
+
+  /** Peer BGP ID */
+  uint8_t bgp_id[4];
+
+  /** Peer IP Address */
+  uint8_t ip[16];
+
+  /** Peer ASN */
+  uint32_t asn;
+
+} parsebgp_mrt_table_dump_v2_peer_entry_t;
+
+/**
+ * Table Dump V2 Peer Index Table
+ */
+typedef struct parsebgp_mrt_table_dump_v2_peer_index {
+
+  /** Collector BGP ID */
+  uint8_t collector_bgp_id[4];
+
+  /** View Name Length */
+  uint16_t view_name_len;
+
+  /** View Name */
+  char *view_name;
+
+  /** Number of Peer Entries */
+  uint16_t peer_count;
+
+  /** Array of (peer_count) Peer Entries */
+  parsebgp_mrt_table_dump_v2_peer_entry_t *peer_entries;
+
+} parsebgp_mrt_table_dump_v2_peer_index_t;
+
+/**
+ * Table Dump V2 RIB Entry
+ */
+typedef struct  parsebgp_mrt_table_dump_v2_rib_entry {
+
+  /** Peer Index (refers to index of peer in the peer_entries field of the most
+      recently parsed peer index table) */
+  uint16_t peer_index;
+
+  /** Time prefix was heard (in seconds since the unix epoch) */
+  uint32_t originated_time;
+
+  /** Length of the attributes field */
+  uint16_t attr_len;
+
+  // TODO: add array of parsed BGP attributes
+
+} parsebgp_mrt_table_dump_v2_rib_entry_t;
+
+/**
+ * Table Dump V2 AFI/SAFI-specific RIB
+ */
+typedef struct parsebgp_mrt_table_dump_v2_afi_safi_rib {
+
+  /** Sequence Number */
+  uint32_t sequence;
+
+  /** Length of the prefix mask */
+  uint8_t prefix_len;
+
+  /** IP Address of the prefix */
+  uint8_t prefix[16];
+
+  /** Number of RIB entries */
+  uint16_t entry_count;
+
+  /** Array of (entry_count) RIB entries */
+  parsebgp_mrt_table_dump_v2_rib_entry_t *entries;
+
+} parsebgp_mrt_table_dump_v2_afi_safi_rib_t;
+
+/**
+ * Table Dump V2 Subtypes
+ */
+typedef enum parsebgp_mrt_table_dump_v2_subtype {
+
+  /** Peer Index Table */
   PEER_INDEX_TABLE = 1,
-  RIB_IPV4_UNICAST,
-  RIB_IPV4_MULTICAST,
-  RIB_IPV6_UNICAST,
-  RIB_IPV6_MULTICAST,
-  RIB_GENERIC
-};
 
-/**
- * BGP4MP Types
- */
-enum bgp4mp_types {
-  BGP4MP_STATE_CHANGE = 0,
-  BGP4MP_MESSAGE,
-  BGP4MP_MESSAGE_AS4 = 4,
-  BGP4MP_STATE_CHANGE_AS4,
-  BGP4MP_MESSAGE_LOCAL,
-  BGP4MP_MESSAGE_AS4_LOCAL
-};
+  /** IPv4 Unicast RIB */
+  RIB_IPV4_UNICAST = 2,
 
-/**
- * FSM states
- */
-enum state_values {
-  Idle = 1,
-  Connect,
-  Active,
-  OpenSent,
-  OpenConfirm,
-  Esablished
-};
+  /** IPv4 Multicast RIB */
+  RIB_IPV4_MULTICAST = 3,
 
-/**
- * MRT common header
- */
-typedef struct libparsebgp_mrt_common_hdr {
-  uint32_t time_stamp; ///< 4 byte; timestamp value in seconds
-  uint16_t type;     ///< 2 byte; type of information contained in message field
-  uint16_t sub_type; ///< 2 byte; further distinguishing message information
-  uint32_t
-    len; ///< 4 byte; length of the message EXCLUDING common header length
-  uint32_t microsecond_timestamp; ///< 4 byte: timestamp in microseconds
-} libparsebgp_mrt_common_hdr;
+  /** IPv6 Unicast RIB */
+  RIB_IPV6_UNICAST = 4,
 
-/**
- * Table Dump Message format
- */
-typedef struct libparsebgp_table_dump_message {
-  uint16_t view_number; ///< 2-octet view number
-  uint16_t sequence;    ///< 2-octet sequence
-  uint8_t prefix[16]; ///< 4-octet or 16-octet (depending on type), contains IP
-                      ///< address of a particular RIB entry
-  uint8_t prefix_len; ///< 1-octet, indicates the length in bits of the prefix
-                      ///< mask for the Prefix field
-  uint8_t status;     ///< 1-octet, The Status octet is unused in the TABLE_DUMP
-                      ///< Type and SHOULD be set to 1
-  uint32_t
-    originated_time; ///< 4-octet, contains time at which this prefix was heard
-  uint8_t
-    peer_ip[16];    ///< 4-octe ot 16-octet (depending on type) peer IP address
-  uint16_t peer_as; ///< 2-octet peer AS number
-  uint16_t
-    attribute_len; ///< 2-octet, contains the length of the Attribute field
-  uint16_t
-    bgp_attrs_count; ///< indicates the number of bgp attributes, not in RFC
-  update_path_attrs *
-    *bgp_attrs; ///< contains the BGP attribute information for the RIB entry
-} libparsebgp_table_dump_message;
+  /** IPv6 Multicast RIB */
+  RIB_IPV6_MULTICAST = 5,
 
-/**
- * Peer Entry Message format
- */
-// 4.3.1
-// view name is optional if not present viewname length is set to 0
+  /** Generic RIB */
+  RIB_GENERIC = 6,
 
-typedef struct peer_entry {
-  uint8_t peer_type;      ///< 1-octet Peer type
-  uint8_t peer_bgp_id[4]; ///< 4-octet Peer BGP Id
-  uint8_t peer_ip[16];    ///< Peer IP address
-  uint32_t peer_as;       ///< Peer AS number
-} peer_entry;
-
-/**
- * Peer Index Table Message format
- */
-typedef struct libparsebgp_peer_index_table {
-  unsigned char collector_bgp_id[4]; ///< 4-octet, Collector BGP ID
-  uint16_t view_name_length;         ///< 2-octet, length of view_name
-  char view_name[1024];              ///< View name, in utf8 format
-  uint16_t peer_count;      ///< 2-octet peer count, number of peer entries
-  peer_entry *peer_entries; ///< List of peer entries
-} libparsebgp_peer_index_table;
-
-/**
- * RIB Entry Message format
- */
-typedef struct rib_entry {
-  uint16_t peer_index;      ///< 2-octet Peer index
-  uint32_t originated_time; ///< 4-octet, originated time for the RIB Entry
-  uint16_t attribute_len;   ///< 2-octet, length of the BGP attributes field
-  uint16_t bgp_attrs_count; ///< Number of BGP attributes
-  update_path_attrs **bgp_attrs; ///< List of BGP attributes
-} rib_entry;
-
-/**
- * RIB Entry Header Message format
- */
-typedef struct libparsebgp_rib_entry_header {
-  uint32_t sequence_number; ///< 4-octet sequence number
-  uint8_t prefix_length;    ///< 1-octet, length of the prefix
-  char prefix[46];          ///< Prefix
-  uint16_t entry_count;     ///< 2-octet entry count, number of RIB entries
-  rib_entry *rib_entries;   ///< List of RIB Entries
-} libparsebgp_rib_entry_header;
-
-/**
- * RIB generic entry header
- */
-typedef struct libparsebgp_rib_generic_entry_header {
-  uint32_t sequence_number;           ///< 4-octet sequence number
-  uint16_t address_family_identifier; ///< 2-octet address family identifier
-  uint8_t subsequent_afi;             ///< 1-octet Subsequent AFI (SAFI)
-  struct nlri_entry {
-    uint8_t len;          ///< 1-octet Length of prefix in bits
-    char *prefix;         ///< Address prefix
-  } nlri_entry;           ///< single NLRI entry
-  uint16_t entry_count;   ///< 2-octet entry count, number of RIB Entries
-  rib_entry *rib_entries; ///< List of RIB Entries
-} libparsebgp_rib_generic_entry_header;
-
-/**
- * BGP4MP State Change Format
- */
-typedef struct libparsebgp_bgp4mp_state_change {
-  uint32_t peer_asn; ///< 2-octet or 4-octet (depending on type) peer Autonomous
-                     ///< System (AS) number
-  uint32_t local_asn;       ///< 2-octet or 4-octet (depending on type) local
-                            ///< Autonomous System (AS) number
-  uint16_t interface_index; ///< 2-octet interface index
-  uint16_t address_family;  ///< 2-octet address family
-  char peer_ip[40]; ///< 4-octet of 16-octet (depending on type) Peer IP address
-  char
-    local_ip[40]; ///< 4-octet of 16-octet (depending on type) local IP address
-  uint16_t old_state; ///< 2-octet old FSM state
-  uint16_t new_state; ///< 2-octet new FSM state
-} libparsebgp_bgp4mp_state_change;
-
-/**
- * Structure holding BGP4MP Messages
- */
-typedef struct libparsebgp_bgp4mp_msg {
-  uint32_t peer_asn; ///< 2-octet or 4-octet (depending on type) peer Autonomous
-                     ///< System (AS) number
-  uint32_t local_asn;       ///< 2-octet or 4-octet (depending on type) local
-                            ///< Autonomous System (AS) number
-  uint16_t interface_index; ///< 2-octet interface index
-  uint16_t address_family;  ///< 2-octet address family
-  char peer_ip[16]; ///< 4-octet of 16-octet (depending on type) Peer IP address
-  char
-    local_ip[16]; ///< 4-octet of 16-octet (depending on type) local IP address
-  libparsebgp_parse_bgp_parsed_data bgp_msg; ///< Contains the BGP message
-} libparsebgp_bgp4mp_msg;
+} parsebgp_mrt_table_dump_v2_subtype_t;
 
 /*
- * Structure for table_dump_v2 type as per RFC 6396
+ * Table Dump V2 (a union of the possible subtype messages)
  */
-typedef union libparsebgp_parsed_table_dump_v2 {
-  libparsebgp_peer_index_table
-    peer_index_tbl; ///< Contains parsed message of type PEER_INDEX_TABLE
-  libparsebgp_rib_entry_header rib_entry_hdr; ///< Contains parsed messages of
-                                              ///< type RIB_IPV4_UNICAST and
-                                              ///< RIB_IPV6_UNICAST
-  libparsebgp_rib_generic_entry_header
-    rib_generic_entry_hdr; ///< Contains parsed messages of type RIB_GENERIC
-} libparsebgp_parsed_table_dump_v2;
+typedef union parsebgp_mrt_table_dump_v2 {
+
+  /** Peer Index Table */
+  parsebgp_mrt_table_dump_v2_peer_index_t peer_index;
+
+  /** AFI/SAFI-specific RIB Table */
+  parsebgp_mrt_table_dump_v2_afi_safi_rib_t afi_safi_rib;
+
+  /** Generic RIB Table */
+  //parsebgp_mrt_table_dump_v2_generic_rib_t generic_rib;
+
+} parsebgp_mrt_table_dump_v2_t;
+
+
+typedef enum {
+
+  /** 1    Idle */
+  PARSEBGP_MRT_FSM_CODE_IDLE = 1,
+
+  /** 2    Connect */
+  PARSEBGP_MRT_FSM_CODE_CONNECT = 2,
+
+  /** 3    Active */
+  PARSEBGP_MRT_FSM_CODE_ACTIVE = 3,
+
+  /** 4    OpenSent */
+  PARSEBGP_MRT_FSM_CODE_OPENSENT = 4,
+
+  /** 5    OpenConfirm */
+  PARSEBGP_MRT_FSM_CODE_OPENCONFIRM = 5,
+
+  /** 6    Established */
+  PARSEBGP_MRT_FSM_CODE_ESTABLISHED = 6,
+
+} parsebgp_mrt_fsm_code_t;
+
+
+/**
+ * BGP4MP State Change information
+ */
+typedef struct parsebgp_mrt_bgp4mp_state_change {
+
+  /** FSM code of the old state (parsebgp_mrt_fsm_code_t) */
+  uint16_t old_state;
+
+  /** FSM code of the new state (parsebgp_mrt_fsm_code_t) */
+  uint16_t new_state;
+
+} parsebgp_mrt_bgp4mp_state_change_t;
+
+/**
+ * BGP4MP Message Subtypes
+ */
+typedef enum {
+
+  /** 0    BGP4MP_STATE_CHANGE */
+  PARSEBGP_MRT_BGP4MP_STATE_CHANGE = 0,
+
+  /** 1    BGP4MP_MESSAGE */
+  PARSEBGP_MRT_BGP4MP_MESSAGE = 1,
+
+  /** 4    BGP4MP_MESSAGE_AS4 */
+  PARSEBGP_MRT_BGP4MP_MESSAGE_AS4 = 4,
+
+  /** 5    BGP4MP_STATE_CHANGE_AS4 */
+  PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4 = 5,
+
+  /** 6    BGP4MP_MESSAGE_LOCAL */
+  PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL = 6,
+
+  /** 7    BGP4MP_MESSAGE_AS4_LOCAL */
+  PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL = 7,
+
+} parsebgp_mrt_bgp4mp_subtype_t;
+
+/**
+ * BGP4MP Message
+ */
+typedef struct parsebgp_mrt_bgp4mp {
+
+  /** Peer ASN */
+  uint32_t peer_asn;
+
+  /** Local ASN */
+  uint32_t local_asn;
+
+  /** Interface Index */
+  uint16_t interface_index;
+
+  /** Address Family (parsebgp_mrt_afi_t) */
+  uint16_t afi;
+
+  /** Peer IP Address */
+  uint8_t peer_ip[16];
+
+  /** Local IP Address */
+  uint8_t local_ip[16];
+
+  union {
+
+    /** State Change info (PARSEBGP_MRT_BGP4MP_STATE_CHANGE and
+        PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4) */
+    parsebgp_mrt_bgp4mp_state_change_t state_change;
+
+    /** BGP Message */
+    // TODO: add once BGP parsing is complete
+
+  } data;
+
+} parsebgp_mrt_bgp4mp_t;
+
+typedef enum {
+
+  /** 11   OSPFv2 */
+  PARSEBGP_MRT_TYPE_OSPF_V2 = 11,
+
+  /** 12   TABLE_DUMP */
+  PARSEBGP_MRT_TYPE_TABLE_DUMP = 12,
+
+  /** 13   TABLE_DUMP_V2 */
+  PARSEBGP_MRT_TYPE_TABLE_DUMP_V2 = 13,
+
+  /** 16   BGP4MP */
+  PARSEBGP_MRT_TYPE_BGP4MP = 16,
+
+  /** 17   BGP4MP_ET */
+  PARSEBGP_MRT_TYPE_BGP4MP_ET = 17,
+
+  /** 32   ISIS */
+  PARSEBGP_MRT_TYPE_ISIS = 32,
+
+  /** 33   ISIS_ET */
+  PARSEBGP_MRT_TYPE_ISIS_ET = 33,
+
+  /** 48   OSPFv3 */
+  PARSEBGP_MRT_TYPE_OSPF_V3 = 48,
+
+  /** 49   OSPFv3_ET */
+  PARSEBGP_MRT_TYPE_OSPF_V3_ET = 49
+
+} parsebgp_mrt_msg_type_t;
 
 /*
- * Structure for parsed MRT message as per RFC 6396
+ * MRT Message Structure
  */
-typedef struct libparsebgp_parse_mrt_parsed_data {
-  libparsebgp_mrt_common_hdr c_hdr; ///< MRT Common header
+typedef struct parsebgp_mrt_msg {
 
-  union libparsebgp_parsed_mrt_data { ///< Union for the different types of MRT
-                                      ///< messages
-    libparsebgp_table_dump_message table_dump; ///< Message of type TABLE_DUMP
-    libparsebgp_parsed_table_dump_v2
-      table_dump_v2; ///< Message of type TABLE_DUMP_V2
+  /** Timestamp of the message in seconds since the unix epoch */
+  uint32_t timestamp_sec;
 
-    union libparsebgp_parsed_bgp4mp_msg { ///< Union for message of type BGP4MP
-      libparsebgp_bgp4mp_msg bgp4mp_msg;  ///< Contains BGP4MP messages
-      libparsebgp_bgp4mp_state_change
-        bgp4mp_state_change_msg; ///< Contains BGP4MP state change messages
-    } bgp4mp;
-  } parsed_data;
-  int has_end_of_rib_marker; ///< Indicates if end of RIB marker is present
-} libparsebgp_parse_mrt_parsed_data;
+  /** Message type (parsebgp_mrt_msg_type_t) */
+  uint16_t type;
+
+  /** Message sub-type */
+  uint16_t subtype;
+
+  /** Message length EXCLUDING common header */
+  uint32_t len;
+
+  /** Microseconds portion of the message timestamp. This field is unused unless
+      parsing one of the *_ET message types. */
+  uint32_t timestamp_usec;
+
+  union {
+
+    /** Type 12: TABLE_DUMP */
+    parsebgp_mrt_table_dump_t table_dump;
+
+    /** Type 13: TABLE_DUMP_V2 */
+    parsebgp_mrt_table_dump_v2_t table_dump_v2;
+
+    /** Types 16 and 17: BGP4MP */
+    parsebgp_mrt_bgp4mp_t bgp4mp;
+
+  } types;
+
+} parsebgp_mrt_msg_t;
 
 /**
- * Function to parse MRT message
+ * Decode (parse) a single MRT message from the given buffer into the given MRT
+ * message structure.
  *
- * @param [in] mrt_parsed_data  Structure that contains parsed MRT message
- * @param [in] buffer           Contains the MRT message
- * @param [in] buf_len          Length of buffer
+ * @param [in] msg      Pointer to the MRT Message structure to fill
+ * @param [in] buf      Pointer to the start of a raw MRT message
+ * @param [in,out] len  Length of the data buffer (used to prevent overrun).
+ *                      Updated to the number of bytes read from the buffer.
+ * @return OK (0) if a message was parsed successfully, or an error code
+ * otherwise
+ */
+parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
+                                     uint8_t *buf, size_t *len);
+
+/** Destroy the given MRT message structure
  *
- * @return number of bytes read
+ * @param msg           Pointer to message structure to destroy
+ *
+ * This function *does not* free the passed structure itself as it is assumed to
+ * be a member of a parsebgp_msg_t structure.
  */
-ssize_t libparsebgp_parse_mrt_parse_msg(
-  libparsebgp_parse_mrt_parsed_data *mrt_parsed_data, unsigned char *buffer,
-  int buf_len);
+void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg);
 
-/**
- * Destructor function to free memory allocated to
- * libparsebgp_parse_mrt_parsed_data
- * @param mrt_parsed_data   Structure that contains parsed MRT message
- */
-void libparsebgp_parse_mrt_destructor(
-  libparsebgp_parse_mrt_parsed_data *mrt_parsed_data);
-
-#endif /* PARSEBMP_H_ */
+#endif /* __PARSEBGP_MRT_H */

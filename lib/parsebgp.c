@@ -4,6 +4,7 @@
 #include "parsebgp_mrt.h"
 #include "parsebgp_utils.h"
 #include <assert.h>
+#include <stdio.h>
 
 parsebgp_error_t parsebgp_decode(parsebgp_msg_type_t type, parsebgp_msg_t *msg,
                             uint8_t *buffer, size_t *len)
@@ -19,7 +20,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_msg_type_t type, parsebgp_msg_t *msg,
     break;
 
   case PARSEBGP_MSG_TYPE_MRT:
-    nbytes = libparsebgp_parse_mrt_parse_msg(&msg->types.mrt, buffer, *len);
+    return parsebgp_mrt_decode(&msg->types.mrt, buffer, len);
     break;
 
   case PARSEBGP_MSG_TYPE_BGP:
@@ -50,6 +51,10 @@ parsebgp_msg_t *parsebgp_create_msg()
     return NULL;
   }
 
+  fprintf(stderr,
+          "DEBUG: size of parsebgp_msg_t (excluding dynamic memory): %d\n",
+          (int)sizeof(parsebgp_msg_t));
+
   // TODO: other init for the msg here
 
   return msg;
@@ -63,7 +68,7 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg)
 
   switch (msg->type) {
   case PARSEBGP_MSG_TYPE_MRT:
-    libparsebgp_parse_mrt_destructor(&msg->types.mrt);
+    parsebgp_mrt_destroy_msg(&msg->types.mrt);
     break;
 
   case PARSEBGP_MSG_TYPE_BMP:

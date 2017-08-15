@@ -188,7 +188,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
   return OK;
 }
 
-void destroy_stats_report(parsebgp_bmp_stats_report_t *msg) {
+static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg) {
   free(msg->counters);
   msg->stats_count = 0;
 }
@@ -233,7 +233,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
   return OK;
 }
 
-void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
+static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
 {
   switch (msg->reason) {
     // Reasons with a BGP NOTIFICATION message
@@ -532,13 +532,10 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
   // Get the message type
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
 
-  // do some quick sanity checks on the message length
+  // do quick sanity check on the message length
   bmplen = msg->len - BMP_HDR_V3_LEN;
   if (bmplen > len) {
     return INCOMPLETE_MSG;
-  }
-  if (bmplen > BGP_MAX_MSG_SIZE) {
-    return MSG_TOO_LONG;
   }
 
   // parse the per-peer header for those message that contain it

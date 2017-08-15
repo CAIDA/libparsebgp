@@ -22,8 +22,6 @@
 #define PARSEBGP_DESERIALIZE_VAL(buf, len, read, to)                           \
   do {                                                                         \
     if (((len) - (read)) < sizeof(to)) {                                       \
-      fprintf(stderr, "DEBUG: Failed to extract %s (%s:%s)\n", STR(to),        \
-              __FILE__, __func__);                                             \
       return INCOMPLETE_MSG;                                                   \
     }                                                                          \
     memcpy(&(to), (buf), sizeof(to));                                          \

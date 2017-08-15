@@ -37,7 +37,7 @@ typedef struct parsebgp_msg {
     parsebgp_bmp_msg_t bmp;
 
     /** Parsed MRT message */
-    libparsebgp_parse_mrt_parsed_data mrt;
+    parsebgp_mrt_msg_t mrt;
 
   } types;
 
