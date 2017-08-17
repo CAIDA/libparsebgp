@@ -2,6 +2,7 @@
 #define __PARSEBGP_MRT_H
 
 #include "parsebgp_error.h"
+#include "parsebgp_bgp.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -60,10 +61,8 @@ typedef struct parsebgp_mrt_table_dump {
   /** Peer ASN (2-byte) */
   uint16_t peer_asn;
 
-  /** Length of the attributes field */
-  uint16_t attr_len;
-
-  // TODO: Add (array?) of parsed BGP attributes
+  /** Path Attributes */
+  parsebgp_bgp_update_path_attrs_t path_attrs;
 
 } parsebgp_mrt_table_dump_t;
 
@@ -287,8 +286,8 @@ typedef struct parsebgp_mrt_bgp4mp {
         PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4) */
     parsebgp_mrt_bgp4mp_state_change_t state_change;
 
-    /** BGP Message */
-    // TODO: add once BGP parsing is complete
+    /** BGP Message (used by PARSEBGP_MRT_BGP4MP_MESSAGE_* types) */
+    parsebgp_bgp_msg_t bgp_msg;
 
   } data;
 

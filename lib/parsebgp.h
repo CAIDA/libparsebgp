@@ -3,6 +3,7 @@
 
 #include "parsebgp_bmp.h"
 #include "parsebgp_bgp.h"
+#include "parsebgp_bgp_opts.h"
 #include "parsebgp_mrt.h"
 #include <inttypes.h>
 #include <unistd.h>
@@ -31,7 +32,7 @@ typedef struct parsebgp_msg {
 
     /** Parsed BGP message (only used if type is BGP, otherwise encapsulated BGP
         message is contained in MRT or BMP structures) */
-    libparsebgp_parse_bgp_parsed_data bgp;
+    parsebgp_bgp_msg_t bgp;
 
     /** Parsed BMP message */
     parsebgp_bmp_msg_t bmp;
@@ -44,9 +45,20 @@ typedef struct parsebgp_msg {
 } parsebgp_msg_t;
 
 /**
+ * Parsing Options
+ */
+typedef struct parsebgp_opts {
+
+  /** BGP-specific parsing options */
+  parsebgp_bgp_opts_t bgp;
+
+} parsebgp_opts_t;
+
+/**
  * Decode (parse) a single message of the given type from the given buffer into
  * the given message structure
  *
+ * @param [in] opts     Options for the parser
  * @param [in] type     Type of message to parse
  * @param [in] msg      Pointer to a message structure to fill (created using
  *                      parsebgp_msg_create)
@@ -58,8 +70,9 @@ typedef struct parsebgp_msg {
  * @return OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
-parsebgp_error_t parsebgp_decode(parsebgp_msg_type_t type, parsebgp_msg_t *msg,
-                                 uint8_t *buffer, size_t *len);
+parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
+                                 parsebgp_msg_t *msg, uint8_t *buffer,
+                                 size_t *len);
 
 /** Create an empty message structure
  *

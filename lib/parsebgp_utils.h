@@ -1,6 +1,7 @@
 #ifndef __PARSEBGP_UTILS_H
 #define __PARSEBGP_UTILS_H
 
+#include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,6 +33,24 @@
 // deprecated
 ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
                             ssize_t output_len);
+
+/**
+ * Convenience function to extract a prefix address from a buffer that uses
+ * variable length encoding
+ *
+ * @param pfx_len       Number of bits in the prefix mask
+ * @param dst           Buffer to write decoded prefix into (MUST be at least 4
+ *                      bytes for IPv4 prefixes, and at least 16 bytes for IPv6
+ *                      prefixes)
+ * @param buf           Buffer to read the prefix from
+ * @param buf_len       Total length of the buffer (to prevent overrun). Updated
+ *                      to the number of bytes read from the buffer if
+ *                      successful.
+ * @return OK if successful, or an error code otherwise. buf_len is only updated
+ * if OK is returned.
+ */
+parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
+                                        uint8_t *buf, size_t *buf_len);
 
 /**
  *  Simple function to swap bytes around from network to host or

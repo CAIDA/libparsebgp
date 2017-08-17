@@ -6,6 +6,7 @@
 #include <string.h>
 
 // for inet_ntop
+// TODO remove
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -43,7 +44,9 @@ static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
                                          uint8_t *buf, size_t *lenp,
                                          size_t remain)
 {
-  size_t len = *lenp, nread = 0;
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_error_t err;
+  parsebgp_bgp_opts_t opts = {0};
 
   // View Number
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->view_number);
@@ -73,14 +76,6 @@ static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->peer_asn);
   msg->peer_asn = ntohs(msg->peer_asn);
 
-  // Attribute length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->attr_len);
-  msg->attr_len = ntohs(msg->attr_len);
-
-  // TODO: parse the attribute(s)
-  // DEBUG:
-  nread += msg->attr_len;
-
   fprintf(stderr, "DEBUG: View: %d, Sequence: %d\n", msg->view_number,
           msg->sequence);
   int mapping[] = {-1, AF_INET, AF_INET6};
@@ -91,8 +86,16 @@ static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
           msg->originated_time);
   inet_ntop(mapping[afi], msg->peer_ip, ip_buf, INET6_ADDRSTRLEN);
   fprintf(stderr, "DEBUG: Peer IP: %s, Peer ASN: %d\n", ip_buf, msg->peer_asn);
-  fprintf(stderr, "DEBUG: Attr len: %d, Remain: %d, nread: %d\n", msg->attr_len,
-          (int)remain, (int)nread);
+  fprintf(stderr, "DEBUG: Remain: %d, nread: %d\n", (int)remain, (int)nread);
+
+  // Path Attributes
+  slen = len - nread;
+  if ((err = parsebgp_bgp_update_path_attrs_decode(
+         opts, &msg->path_attrs, buf, &slen, remain - nread)) != OK) {
+    return err;
+  }
+  nread += slen;
+  buf += slen;
 
   *lenp = nread;
   return OK;
@@ -281,7 +284,6 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                  uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
-  uint8_t bytes, junk;
   parsebgp_error_t err;
 
   // Sequence Number
@@ -292,28 +294,13 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->prefix_len);
 
   // Prefix
-  // prefixes are encoded in a compact format the min number of bytes is used,
-  // so we first need to figure out how many bytes it takes to represent a
-  // prefix of this length.
-  // TODO: figure out how to get rid of the modulo
-  bytes = msg->prefix_len / 8;
-  if ((junk = msg->prefix_len % 8) != 0) {
-    bytes++;
+  slen = len - nread;
+  if ((err = parsebgp_decode_prefix(msg->prefix_len, msg->prefix, buf,
+                                    &slen)) != OK) {
+    return err;
   }
-  // now read the prefix
-  if ((len - nread) < bytes) {
-    return INCOMPLETE_MSG;
-  }
-  memcpy(msg->prefix, buf, bytes);
-  nread += bytes;
-  buf += bytes;
-  // technically the trailing bits can be anything, so zero them out just to be
-  // helpful.
-  // TODO: quadruple check this code!
-  if (junk != 0) {
-    junk = 8 - junk;
-    msg->prefix[bytes-1] = msg->prefix[bytes-1] & (0xFF << junk);
-  }
+  nread += slen;
+  buf += slen;
 
   // Entry Count
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->entry_count);
@@ -326,8 +313,8 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
               ? PARSEBGP_MRT_AFI_IPV4
               : PARSEBGP_MRT_AFI_IPV6;
   inet_ntop(mapping[afi], msg->prefix, ip_buf, INET6_ADDRSTRLEN);
-  fprintf(stderr, "DEBUG: Prefix: %s/%d (%d bytes, %d junk), Entry Count: %d\n",
-          ip_buf, msg->prefix_len, bytes, junk, msg->entry_count);
+  fprintf(stderr, "DEBUG: Prefix: %s/%d, Entry Count: %d\n",
+          ip_buf, msg->prefix_len, msg->entry_count);
 
   // RIB Entries
   // allocate some memory for the entries
@@ -418,8 +405,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
                                      uint8_t *buf, size_t *lenp,
                                      size_t remain)
 {
-  size_t len = *lenp, nread = 0;
+  size_t len = *lenp, nread = 0, slen = 0;
   uint16_t u16;
+  parsebgp_error_t err;
+  parsebgp_bgp_opts_t opts = {0};
 
   // ASN fields
   switch (subtype) {
@@ -498,17 +487,20 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
             msg->data.state_change.old_state, msg->data.state_change.new_state);
     break;
 
-  case PARSEBGP_MRT_BGP4MP_MESSAGE:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
-  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
-    // TODO: parse the BGP message
-    // DEBUG: poke our nose into the BGP message to find out how long it is
-    memcpy(&u16, buf+16, 2);
-    u16 = htons(u16);
-    nread += u16;
-    buf += u16;
-    fprintf(stderr, "DEBUG: BGP Message len: %d\n", u16);
+    opts.asn_4_byte = 1;
+    // FALL THROUGH
+
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE:
+    slen = len - nread;
+    if ((err = parsebgp_bgp_decode(opts, &msg->data.bgp_msg, buf, &slen)) !=
+        OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
     break;
 
   default:

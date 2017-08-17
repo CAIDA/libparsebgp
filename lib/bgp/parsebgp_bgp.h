@@ -1,127 +1,82 @@
-/*
- * Copyright (c) 2013-2015 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- */
+#ifndef __PARSEBGP_BGP_H
+#define __PARSEBGP_BGP_H
 
-#ifndef PARSEBGP_H_
-#define PARSEBGP_H_
-
-#include "notification_msg.h"
-#include "open_msg.h"
-#include "update_msg.h"
+#include "parsebgp_bgp_update.h"
+#include "parsebgp_bgp_opts.h"
+#include "parsebgp_error.h"
+#include <inttypes.h>
+#include <stdlib.h>
 
 /**
- * Below defines the common BGP header per RFC4271
+ * BGP Message Types
  */
-enum bgp_msg_types {
-  BGP_MSG_OPEN = 1,
-  BGP_MSG_UPDATE,
-  BGP_MSG_NOTIFICATION,
-  BGP_MSG_KEEPALIVE,
-  BGP_MSG_ROUTE_REFRESH
-};
+typedef enum {
+
+  /** OPEN Message */
+  PARSEBGP_BGP_TYPE_OPEN = 1,
+
+  /** UPDATE Message */
+  PARSEBGP_BGP_TYPE_UPDATE = 2,
+
+  /** NOTIFICATION Message */
+  PARSEBGP_BGP_TYPE_NOTIFICATION = 3,
+
+  /** KEEPALIVE Message */
+  PARSEBGP_BGP_TYPE_KEEPALIVE = 4,
+
+  /* ROUTE-REFRESH Message */
+  PARSEBGP_BGP_TYPE_ROUTE_REFRESH = 5,
+
+} parsebgp_bgp_msg_type_t;
 
 /**
- * Struct for BGP common header
+ * BGP Message
  */
-typedef struct libparsebgp_common_bgp_hdr {
-  uint8_t marker[16]; ///< 16-octet field is included for compatibility. All
-                      ///< ones (required).
-  uint16_t len;       ///< Total length of the message, including the header in
-                      ///< octets. min length is 19, max is 4096
-  uint8_t type;       ///< type code of the message
-} libparsebgp_common_bgp_hdr;
+typedef struct parsebgp_bgp_msg {
+
+  /** Marker (always set to all ones) */
+  uint8_t marker[16];
+
+  /* Message length (total length of the message, including the header) */
+  uint16_t len;
+
+  /** Message type (parsebgp_bgp_msg_type_t) */
+  uint8_t type;
+
+  /** Union of structures for all supported BGP message types */
+  union {
+
+    /** UPDATE Message */
+    parsebgp_bgp_update_t update;
+
+  } types;
+
+} parsebgp_bgp_msg_t;
+
 
 /**
- * This struct holds the parsed BGP data according to RFC 4271
+ * Decode (parse) a single BGP message from the given buffer into the given BGP
+ * message structure.
+ *
+ * @param [in] opts     Options for the parser
+ * @param [in] msg      Pointer to the BGP Message structure to fill
+ * @param [in] buffer   Pointer to the start of a raw BGP message
+ * @param [in,out] len  Length of the data buffer (used to prevent overrun).
+ *                      Updated to the number of bytes read from the buffer.
+ * @return OK (0) if a message was parsed successfully, or an error code
+ * otherwise
  */
-typedef struct libparsebgp_parse_bgp_parsed_data {
-  libparsebgp_common_bgp_hdr c_hdr; ///< Has the bgp common header
+parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
+                                     parsebgp_bgp_msg_t *msg,
+                                     uint8_t *buffer, size_t *len);
 
-  union parsed_bgp_data { ///< Union of the different types of BGP messages
-    libparsebgp_open_msg_data open_msg;      ///< Stores the open message
-    libparsebgp_update_msg_data update_msg;  ///< Stores update message
-    libparsebgp_notify_msg notification_msg; ///< Stores notification message
-  } parsed_data;
-
-  int has_end_of_rib_marker; ///< Indicates whether this message has the end of
-                             ///< rib marker
-} libparsebgp_parse_bgp_parsed_data;
-
-/**
- * Function to parse raw BGP message from data
+/** Destroy the given BGP message structure
  *
- * @param bgp_parsed_data   Struct holding BGP data
- * @param data              Buffer containing raw data
- * @param size              Size of buffer (data)
- * @param is_local_msg      Indicates if the message is local or remote
+ * @param msg           Pointer to message structure to destroy
  *
- * @return the number of bytes read
+ * This function *does not* free the passed structure itself as it is assumed to
+ * be a member of a parsebgp_msg_t structure.
  */
-ssize_t libparsebgp_parse_bgp_parse_msg(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
-  size_t size, int is_local_msg);
+void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg);
 
-/**
- * Handle BGP update message
- *
- * @details Parses the bgp update message.
- * @param [in]     bgp_update_msg   Struct to hold parsed BGP message
- * @param [in]     data             Pointer to the raw BGP message header
- * @param [in]     size             length of the data buffer (used to prevent
- * overrun)
- *
- * \returns number of bytes read
- */
-ssize_t libparsebgp_parse_bgp_handle_update(
-  libparsebgp_parse_bgp_parsed_data *bgp_update_msg, uint8_t **data,
-  size_t size);
-
-/**
- * handle BGP notify event
- *
- * @details
- *  Function to parse notification message
- *
- * @param [in]     data                 Pointer to the raw BGP message header
- * @param [in]     size                 length of the data buffer (used to
- * prevent overrun)
- * @param [out]    bgp_parsed_data      Structure holding parsed BGP data
- *
- * @returns number of bytes read
- */
-ssize_t libparsebgp_parse_bgp_handle_down_event(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
-  size_t size);
-
-/**
- * Parses the BGP common header
- *
- * @details
- *      This method will parse the bgp common header and will upload the global
- *      c_hdr structure, instance data pointer.
- *      The return value of this method will be the BGP message type.
- *
- * @param [in]      data                Pointer to the raw BGP message header
- * @param [in]      size                length of the data buffer (used to
- * prevent overrun)
- * @param [in]      c_hdr               Struct to store common bgp header
- *
- * @returns Bytes read in parsing the header
- */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr,
-                                           uint8_t *data, size_t size);
-
-/**
- * Destructor function to free the memory allocated in parse_bgp
- * @param bgp_parsed_data  Struct containing bgp data
- *
- */
-void libparsebgp_parse_bgp_destructor(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data);
-
-#endif /* PARSEBGP_H_ */
+#endif /* __PARSEBGP_BGP_H */

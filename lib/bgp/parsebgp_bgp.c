@@ -1,196 +1,131 @@
-/*
- * Copyright (c) 2013-2016 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- */
-
 #include "parsebgp_bgp.h"
+#include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
+#include <arpa/inet.h>
+#include <assert.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
-/**
- * function to parse BGP messages
- */
-ssize_t libparsebgp_parse_bgp_parse_msg(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
-  size_t size, int is_local_msg)
+#define BGP_HDR_LEN 19
+
+static parsebgp_error_t parse_common_hdr(parsebgp_bgp_msg_t *msg,
+                                         uint8_t *buf, size_t *lenp)
 {
-  ssize_t read_size = 0;
+  size_t len = *lenp, nread = 0;
 
-  /*
-   * Parsing the bgp message header
-   */
-  ssize_t ret_val =
-    libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, data, size);
-  if (ret_val < 0) {
-    return ret_val;
-  }
-  int data_bytes_remaining = bgp_parsed_data->c_hdr.len - BGP_MSG_HDR_LEN;
-  data += BGP_MSG_HDR_LEN;
+  // Marker
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->marker);
 
-  /*
-   * Parsing the bgp msg according to the type of the message
-   */
-  switch (bgp_parsed_data->c_hdr.type) {
-  case BGP_MSG_UPDATE: {
-    read_size = libparsebgp_update_msg_parse_update_msg(
-      &bgp_parsed_data->parsed_data.update_msg, data, data_bytes_remaining,
-      &bgp_parsed_data->has_end_of_rib_marker);
+  // Length
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->len);
+  msg->len = ntohs(msg->len);
 
-    if (read_size >= 0 && read_size != (size - BGP_MSG_HDR_LEN))
-      read_size = ERR_READING_MSG;
-    break;
-  }
-  case BGP_MSG_NOTIFICATION: {
-    read_size = libparsebgp_notification_parse_notify(
-      &bgp_parsed_data->parsed_data.notification_msg, &data,
-      data_bytes_remaining);
-    break;
-  }
-  case BGP_MSG_KEEPALIVE: {
-    break;
-  }
-  case BGP_MSG_OPEN: {
-    read_size = libparsebgp_open_msg_parse_open_msg(
-      &bgp_parsed_data->parsed_data.open_msg, data, data_bytes_remaining,
-      is_local_msg);
-    if (!read_size)
-      read_size = ERR_READING_MSG;
-    break;
-  }
-  default: {
-    read_size = INVALID_MSG; // Invalid bgp message type
-  }
-  }
-  if (read_size < 0)
-    libparsebgp_parse_bgp_destructor(bgp_parsed_data);
-  else {
-    *data += read_size;
-    data_bytes_remaining -= read_size;
-    read_size += BGP_MSG_HDR_LEN;
-  }
-  return read_size;
+  // Type
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
+
+  *lenp = nread;
+  return OK;
 }
 
-/**
- * handle BGP update message and store in DB
- */
-ssize_t libparsebgp_parse_bgp_handle_update(
-  libparsebgp_parse_bgp_parsed_data *bgp_update_msg, uint8_t **data,
-  size_t size)
+parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
+                                     parsebgp_bgp_msg_t *msg,
+                                     uint8_t *buf, size_t *len)
 {
-  ssize_t read_size = 0, bytes_read = 0;
-  // Process the BGP message header
-  if ((bytes_read = libparsebgp_parse_bgp_parse_header(&bgp_update_msg->c_hdr,
-                                                       *data, size)) < 0)
-    return bytes_read;
-  read_size += bytes_read;
-  *data += bytes_read;
+  parsebgp_error_t err;
+  size_t slen = 0, nread = 0, remain = 0;
 
-  if (bgp_update_msg->c_hdr.type ==
-      BGP_MSG_UPDATE) { // checking for proper message type
-    ssize_t data_bytes_remaining = bgp_update_msg->c_hdr.len - BGP_MSG_HDR_LEN;
-    if ((bytes_read = libparsebgp_update_msg_parse_update_msg(
-           &bgp_update_msg->parsed_data.update_msg, *data, data_bytes_remaining,
-           &bgp_update_msg->has_end_of_rib_marker)) < 0)
-      return bytes_read;
-
-    if (bytes_read != (size - BGP_MSG_HDR_LEN))
-      return INVALID_MSG;
-
-    read_size += bytes_read;
-  } else
-    return INVALID_MSG;
-
-  return read_size;
-}
-
-/**
- * handle  BGP notify event - updates the down event with parsed data
- */
-ssize_t libparsebgp_parse_bgp_handle_down_event(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data, uint8_t *data,
-  size_t size)
-{
-  ssize_t read_size = 0, ret_val = 0;
-  // Process the BGP message normally
-  ret_val =
-    libparsebgp_parse_bgp_parse_header(&bgp_parsed_data->c_hdr, data, size);
-  if (ret_val < 0)
-    return ret_val;
-  if (bgp_parsed_data->c_hdr.type ==
-      BGP_MSG_NOTIFICATION) { // checking for valid bgp message type
-    int data_bytes_remaining = bgp_parsed_data->c_hdr.len - BGP_MSG_HDR_LEN;
-    *data += BGP_MSG_HDR_LEN;
-    read_size += BGP_MSG_HDR_LEN;
-
-    ret_val = libparsebgp_notification_parse_notify(
-      &bgp_parsed_data->parsed_data.notification_msg, &data,
-      data_bytes_remaining);
-    if (ret_val < 0)
-      return ret_val; // Error:Failed to parse the BGP notification message
-    else {
-      data += 2; // Move pointer past notification message
-      data_bytes_remaining -= 2;
-      read_size += 2;
-    }
-  } else {
-    return INVALID_MSG; // ERROR: Invalid BGP MSG for BMP down event, expected
-                        // NOTIFICATION message.
+  /* First, parse the message header */
+  slen = *len;
+  if ((err = parse_common_hdr(msg, buf, &slen)) != OK) {
+    return err;
   }
-  return read_size;
-}
+  nread += slen;
+  buf += slen;
+  assert(nread == BGP_HDR_LEN);
+  remain = msg->len - nread; // number of bytes left in the message
+  slen = *len - nread; // number of bytes left in the buffer
 
-/**
- * Parses the BGP common header
- */
-ssize_t libparsebgp_parse_bgp_parse_header(libparsebgp_common_bgp_hdr *c_hdr,
-                                           uint8_t *data, size_t size)
-{
-  /*
-   * Error out if data size is not large enough for common header
-   */
-  if (size < BGP_MSG_HDR_LEN)
+  if (remain > slen) {
+    // we already know that the message will be longer than what we have in the
+    // buffer, give up now
     return INCOMPLETE_MSG;
+  }
 
-  memcpy(c_hdr, data, BGP_MSG_HDR_LEN);
+  fprintf(stderr, "DEBUG: BGP Message Type: %d, Len: %d\n", msg->type,
+          msg->len);
 
-  // Change length to host byte order
-  SWAP_BYTES(&(c_hdr->len), 2);
-  /*
-   * Error out if the remaining size of the BGP message is grater than passed
-   * bgp message buffer It is expected that the passed bgp message buffer holds
-   * the complete BGP message to be parsed
-   */
-  if (c_hdr->len > size)
-    return MSG_TOO_LONG;
+  switch(msg->type) {
+  case PARSEBGP_BGP_TYPE_OPEN:
+    // TODO
+    return NOT_IMPLEMENTED;
+    break;
 
-  return BGP_MSG_HDR_LEN;
+  case PARSEBGP_BGP_TYPE_UPDATE:
+    err =
+      parsebgp_bgp_update_decode(opts, &msg->types.update, buf, &slen, remain);
+    break;
+
+  case PARSEBGP_BGP_TYPE_NOTIFICATION:
+    // TODO
+    return NOT_IMPLEMENTED;
+    break;
+
+  case PARSEBGP_BGP_TYPE_KEEPALIVE:
+    // TODO
+    return NOT_IMPLEMENTED;
+    break;
+
+  case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
+    // TODO
+    return NOT_IMPLEMENTED;
+    break;
+
+  default:
+    break;
+  }
+  if (err != OK) {
+    // parser failed
+    return err;
+  }
+  nread += slen;
+
+  assert(msg->len == nread);
+  *len = nread;
+  return OK;
 }
 
-/**
- * Destructor function to free the memory allocated in parse_bgp
- */
-void libparsebgp_parse_bgp_destructor(
-  libparsebgp_parse_bgp_parsed_data *bgp_parsed_data)
+void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
 
-  switch (bgp_parsed_data->c_hdr.type) {
-  case BGP_MSG_OPEN: {
-    libparsebgp_parse_open_msg_destructor(
-      &bgp_parsed_data->parsed_data.open_msg);
+  // no dynamic memory in common header
+
+  // destroy based on message type
+  switch(msg->type) {
+  case PARSEBGP_BGP_TYPE_OPEN:
+    // TODO
     break;
-  }
-  case BGP_MSG_UPDATE: {
-    libparsebgp_parse_update_msg_destructor(
-      &bgp_parsed_data->parsed_data.update_msg);
+
+  case PARSEBGP_BGP_TYPE_UPDATE:
+    // TODO
     break;
-  }
+
+  case PARSEBGP_BGP_TYPE_NOTIFICATION:
+    // TODO
+    break;
+
+  case PARSEBGP_BGP_TYPE_KEEPALIVE:
+    // TODO
+    break;
+
+  case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
+    // TODO
+    break;
+
   default:
     break;
   }

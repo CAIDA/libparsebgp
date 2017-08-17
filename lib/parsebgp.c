@@ -6,13 +6,11 @@
 #include <assert.h>
 #include <stdio.h>
 
-parsebgp_error_t parsebgp_decode(parsebgp_msg_type_t type, parsebgp_msg_t *msg,
-                            uint8_t *buffer, size_t *len)
+parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
+                                 parsebgp_msg_t *msg, uint8_t *buffer,
+                                 size_t *len)
 {
   msg->type = type;
-
-  // TODO: fixme when other APIs are fixed
-  ssize_t nbytes = 0;
 
   switch (type) {
   case PARSEBGP_MSG_TYPE_BMP:
@@ -24,23 +22,13 @@ parsebgp_error_t parsebgp_decode(parsebgp_msg_type_t type, parsebgp_msg_t *msg,
     break;
 
   case PARSEBGP_MSG_TYPE_BGP:
-    nbytes = libparsebgp_parse_bgp_parse_msg(&msg->types.bgp, buffer, *len, 1);
+    return parsebgp_bgp_decode(opts.bgp, &msg->types.bgp, buffer, len);
     break;
 
   default:
     return INVALID_MSG;
   }
-
-  if (nbytes < 0) {
-    // no need to update remaining
-    return nbytes; // contains error code
-  }
-
-  // update remaining (len could be 0)
-  assert(nbytes < *len);
-  *len = nbytes;
-
-  return OK;
+  assert(0);
 }
 
 parsebgp_msg_t *parsebgp_create_msg()
@@ -76,7 +64,7 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg)
     break;
 
   case PARSEBGP_MSG_TYPE_BGP:
-    libparsebgp_parse_bgp_destructor(&msg->types.bgp);
+    parsebgp_bgp_destroy_msg(&msg->types.bgp);
     break;
 
   default:
