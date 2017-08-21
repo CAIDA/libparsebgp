@@ -199,7 +199,8 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
                                         uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
-  size_t len = *lenp, nread = 0;
+  size_t len = *lenp, nread = 0;//, slen;
+  //parsebgp_error_t err;
 
   // Reason
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reason);
@@ -209,8 +210,14 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
     // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
-    // TODO: read bgp notficiation message
-    return NOT_IMPLEMENTED;
+    /*
+    slen = len - nread;
+    if ((err = parsebgp_bgp_decode()) != OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    */
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:

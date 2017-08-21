@@ -1,6 +1,8 @@
 SUBDIRS =
 
-AM_CPPFLAGS =	-I$(top_srcdir)/lib
+AM_CPPFLAGS = \
+	-I$(top_srcdir)/lib \
+	-I$(top_srcdir)/lib/bgp
 
 include_HEADERS = parsebgp_bmp.h
 

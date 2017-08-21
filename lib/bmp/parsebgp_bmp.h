@@ -2,7 +2,7 @@
 #define __PARSEBGP_BMP_H
 
 #include "parsebgp_error.h" //< for parsebgp_error_t
-//#include "bgp/parsebgp_bgp.h" //< BMP encapsulates BGP messages
+#include "parsebgp_bgp.h" //< BMP encapsulates BGP messages
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -212,7 +212,8 @@ typedef struct parsebgp_bmp_peer_down {
     /** FSM Event that caused the system to close the connection */
     uint16_t fsm_code;
 
-    // TODO: add BGP NOTIFICATION message
+    /** BGP NOTIFICATION message (as sent-to, or recv-from the peer) */
+    parsebgp_bgp_msg_t bgp_msg;
 
   } data;
 
