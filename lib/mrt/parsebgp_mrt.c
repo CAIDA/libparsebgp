@@ -223,13 +223,45 @@ destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 }
 
 static parsebgp_error_t
-parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_rib_entry_t *entries,
+parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+                                parsebgp_mrt_table_dump_v2_rib_entry_t *entries,
                                 uint16_t entry_count, uint8_t *buf,
-                                size_t *lenp)
+                                size_t *lenp, size_t remain)
 {
-  size_t len = *lenp, nread = 0;
+  size_t len = *lenp, nread = 0, slen;
   int i;
   parsebgp_mrt_table_dump_v2_rib_entry_t *entry;
+  parsebgp_bgp_opts_t opts = {0};
+  parsebgp_error_t err;
+
+  opts.asn_4_byte = 1;
+  opts.mp_reach_no_afi_safi_reserved = 1;
+  switch (subtype) {
+  case RIB_IPV4_UNICAST:
+    opts.afi = PARSEBGP_BGP_AFI_IPV4;
+    opts.safi = PARSEBGP_BGP_SAFI_UNICAST;
+    break;
+
+  case RIB_IPV4_MULTICAST:
+    opts.afi = PARSEBGP_BGP_AFI_IPV4;
+    opts.safi = PARSEBGP_BGP_SAFI_MULTICAST;
+    break;
+
+  case RIB_IPV6_UNICAST:
+    opts.afi = PARSEBGP_BGP_AFI_IPV6;
+    opts.safi = PARSEBGP_BGP_SAFI_UNICAST;
+    break;
+
+  case RIB_IPV6_MULTICAST:
+    opts.afi = PARSEBGP_BGP_AFI_IPV6;
+    opts.safi = PARSEBGP_BGP_SAFI_MULTICAST;
+    break;
+
+  default:
+    // programming error
+    assert(0);
+    return INVALID_MSG;
+  }
 
   for (i = 0; i < entry_count; i++) {
     entry = &entries[i];
@@ -242,22 +274,18 @@ parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_rib_entry_t *entries,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, entry->originated_time);
     entry->originated_time = ntohl(entry->originated_time);
 
-    // Attributes Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, entry->attr_len);
-    entry->attr_len = ntohs(entry->attr_len);
-
-    // TODO: parse the BGP attributes
-    // DEBUG: skip the attributes
-    if ((len - nread) < entry->attr_len) {
-      return INCOMPLETE_MSG;
-    }
-    nread += entry->attr_len;
-    buf += entry->attr_len;
-
     fprintf(stderr, "DEBUG: RIB ENTRY -------------------- %d\n", i);
     fprintf(stderr, "DEBUG: Peer Index: %d, Time: %" PRIu32 "\n",
             entry->peer_index, entry->originated_time);
-    fprintf(stderr, "DEBUG: Attr Len: %d\n", entry->attr_len);
+
+    // Path Attributes
+    slen = len - nread;
+    if ((err = parsebgp_bgp_update_path_attrs_decode(
+           opts, &entry->path_attrs, buf, &slen, remain - nread)) != OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
   }
 
   *lenp = nread;
@@ -324,8 +352,9 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
   // and then parse the entries
   slen = len - nread;
-  if ((err = parse_table_dump_v2_rib_entries(msg->entries, msg->entry_count,
-                                             buf, &slen)) != OK) {
+  if ((err = parse_table_dump_v2_rib_entries(subtype, msg->entries,
+                                             msg->entry_count, buf, &slen,
+                                             (remain - nread))) != OK) {
     return err;
   }
   nread += slen;

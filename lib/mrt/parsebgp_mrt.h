@@ -125,10 +125,8 @@ typedef struct  parsebgp_mrt_table_dump_v2_rib_entry {
   /** Time prefix was heard (in seconds since the unix epoch) */
   uint32_t originated_time;
 
-  /** Length of the attributes field */
-  uint16_t attr_len;
-
-  // TODO: add array of parsed BGP attributes
+  /** Path Attributes */
+  parsebgp_bgp_update_path_attrs_t path_attrs;
 
 } parsebgp_mrt_table_dump_v2_rib_entry_t;
 

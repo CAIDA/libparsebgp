@@ -482,8 +482,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
       // Type 14
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
-      if ((err = parsebgp_bgp_update_mp_reach_decode(&attr->data.mp_reach, buf,
-                                                     &slen, attr->len)) != OK) {
+      if ((err = parsebgp_bgp_update_mp_reach_decode(
+             opts, &attr->data.mp_reach, buf, &slen, attr->len)) != OK) {
         return err;
       }
       nread += slen;

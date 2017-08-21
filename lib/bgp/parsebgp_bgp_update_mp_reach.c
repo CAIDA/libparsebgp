@@ -135,9 +135,10 @@ parse_next_hop_afi_ipv4_ipv6_unicast(parsebgp_bgp_update_mp_reach_t *msg,
   return OK;
 }
 
-static parsebgp_error_t
-parse_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
-                    size_t *lenp, size_t remain)
+static parsebgp_error_t parse_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
+                                            parsebgp_bgp_update_mp_reach_t *msg,
+                                            uint8_t *buf, size_t *lenp,
+                                            size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -159,8 +160,12 @@ parse_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
     nread += slen;
     buf += slen;
 
-    // Reserved (always zero, apparently)
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reserved);
+    if (opts.mp_reach_no_afi_safi_reserved) {
+      msg->reserved = 0;
+    } else {
+      // Reserved (always zero, apparently)
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reserved);
+    }
 
     // Parse the NLRIs
     slen = len - nread;
@@ -183,18 +188,25 @@ parse_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
 }
 
 parsebgp_error_t
-parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_update_mp_reach_t *msg,
+parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
+                                    parsebgp_bgp_update_mp_reach_t *msg,
                                     uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
-  // AFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
-  msg->afi = ntohs(msg->afi);
+  // MRT TABLE_DUMP_V2 is annoying
+  if (opts.mp_reach_no_afi_safi_reserved) {
+    msg->afi = opts.afi;
+    msg->safi = opts.safi;
+  } else {
+    // AFI
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
+    msg->afi = ntohs(msg->afi);
 
-  // SAFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
+    // SAFI
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
+  }
 
   fprintf(stderr, "DEBUG: MP_REACH: AFI: %d, SAFI: %d\n", msg->afi, msg->safi);
 
@@ -208,7 +220,8 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_update_mp_reach_t *msg,
   case PARSEBGP_BGP_AFI_IPV4:
   case PARSEBGP_BGP_AFI_IPV6:
     slen = len - nread;
-    if ((err = parse_afi_ipv4_ipv6(msg, buf, &slen, remain - nread)) != OK) {
+    if ((err = parse_afi_ipv4_ipv6(opts, msg, buf, &slen, remain - nread)) !=
+        OK) {
       return err;
     }
     nread += slen;
