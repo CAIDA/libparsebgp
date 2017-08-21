@@ -262,7 +262,10 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
                                       uint8_t *buf, size_t *lenp,
                                       size_t remain)
 {
-  size_t len = *lenp, nread = 0;
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_error_t err;
+  // TODO: check opts
+  parsebgp_bgp_opts_t opts = {0};
 
   // Local IP address
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_ip);
@@ -278,21 +281,19 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
   fprintf(stderr, "DEBUG: Local Port: %"PRIu16", Remote Port: %"PRIu16"\n",
           msg->local_port, msg->remote_port);
 
-  // TODO: parse the Sent OPEN
-  // DEBUG: poke our nose into the BGP message to find out how long it is
-  uint16_t fixme;
-  memcpy(&fixme, buf+16, 2);
-  fixme = htons(fixme);
-  nread += fixme;
-  buf += fixme;
-  fprintf(stderr, "DEBUG: Sent OPEN len: %d\n", fixme);
+  slen = len - nread;
+  if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) != OK) {
+    return err;
+  }
+  nread += slen;
+  buf += slen;
 
-  // TODO: parse the Recv OPEN
-  memcpy(&fixme, buf+16, 2);
-  fixme = htons(fixme);
-  nread += fixme;
-  buf += fixme;
-  fprintf(stderr, "DEBUG: Recv OPEN len: %d\n", fixme);
+  slen = len - nread;
+  if ((err = parsebgp_bgp_decode(opts, &msg->recv_open, buf, &slen)) != OK) {
+    return err;
+  }
+  nread += slen;
+  buf += slen;
 
   // Information TLVs (optional)
   parse_info_tlvs(&msg->tlvs, &msg->tlvs_cnt, buf, lenp, remain - nread);
@@ -303,9 +304,8 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
 
 static void destroy_peer_up(parsebgp_bmp_peer_up_t *msg)
 {
-  // TODO: destroy the sent OPEN
-  // TODO: destroy the recv OPEN
-
+  parsebgp_bgp_destroy_msg(&msg->sent_open);
+  parsebgp_bgp_destroy_msg(&msg->recv_open);
   destroy_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
 }
 

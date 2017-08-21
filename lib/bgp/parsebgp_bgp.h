@@ -1,6 +1,7 @@
 #ifndef __PARSEBGP_BGP_H
 #define __PARSEBGP_BGP_H
 
+#include "parsebgp_bgp_open.h"
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_bgp_opts.h"
 #include "parsebgp_error.h"
@@ -45,6 +46,9 @@ typedef struct parsebgp_bgp_msg {
 
   /** Union of structures for all supported BGP message types */
   union {
+
+    /** OPEN Message */
+    parsebgp_bgp_open_t open;
 
     /** UPDATE Message */
     parsebgp_bgp_update_t update;

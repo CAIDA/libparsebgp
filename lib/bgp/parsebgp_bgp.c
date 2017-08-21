@@ -1,4 +1,5 @@
 #include "parsebgp_bgp.h"
+#include "parsebgp_bgp_open.h"
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
@@ -58,8 +59,8 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
 
   switch(msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
-    // TODO
-    return NOT_IMPLEMENTED;
+    err =
+      parsebgp_bgp_open_decode(opts, &msg->types.open, buf, &slen, remain);
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:
@@ -108,7 +109,7 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
   // destroy based on message type
   switch(msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
-    // TODO
+    parsebgp_bgp_open_destroy(&msg->types.open);
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:

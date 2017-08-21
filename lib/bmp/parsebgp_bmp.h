@@ -236,9 +236,11 @@ typedef struct parsebgp_bmp_peer_up {
   /** Remote port number associated with the connection */
   uint16_t remote_port;
 
-  // TODO: OPEN Message sent to the peer (sent_open)
+  /** OPEN Message sent to the peer (sent_open) */
+  parsebgp_bgp_msg_t sent_open;
 
-  // TODO: OPEN Message received from the peer (recv_open)
+  /** OPEN Message received from the peer (recv_open) */
+  parsebgp_bgp_msg_t recv_open;
 
   /** Array of TLVs present (may be empty) */
   parsebgp_bmp_info_tlv_t *tlvs;

@@ -1,6 +1,8 @@
 #ifndef __PARSEBGP_BGP_OPTS_H
 #define __PARSEBGP_BGP_OPTS_H
 
+#include <inttypes.h>
+
 /**
  * BGP Parsing Options
  */
