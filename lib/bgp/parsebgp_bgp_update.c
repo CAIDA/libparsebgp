@@ -33,7 +33,8 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   // read and realloc until we run out of message
   while (nread < nlris->len) {
     // optimistically allocate a new prefix tuple
-    if ((nlris->prefixes = realloc(nlris->prefixes, sizeof(parsebgp_bgp_prefix_t) *
+    if ((nlris->prefixes =
+           realloc(nlris->prefixes, sizeof(parsebgp_bgp_prefix_t) *
                                       ((nlris->prefixes_cnt) + 1))) == NULL) {
       return MALLOC_FAILURE;
     }
@@ -95,6 +96,7 @@ parse_path_attr_as_path(int asn_4_byte,
       return MALLOC_FAILURE;
     }
     seg = &(msg->segs)[msg->segs_cnt];
+    seg->asns = NULL; // in case we error out
     msg->segs_cnt++;
 
     // Segment Type
@@ -392,6 +394,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       return MALLOC_FAILURE;
     }
     attr = &path_attrs->attrs[path_attrs->attrs_cnt];
+    memset(attr, 0, sizeof(*attr));
     path_attrs->attrs_cnt++;
 
     // Attribute Flags
