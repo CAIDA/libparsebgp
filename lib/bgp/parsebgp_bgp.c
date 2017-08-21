@@ -111,7 +111,7 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:
-    // TODO
+    parsebgp_bgp_update_destroy(&msg->types.update);
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:

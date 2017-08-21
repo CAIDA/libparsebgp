@@ -237,6 +237,11 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
   return OK;
 }
 
+void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
+{
+  free(msg->nlris);
+}
+
 parsebgp_error_t
 parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_update_mp_unreach_t *msg,
                                       uint8_t *buf, size_t *lenp, size_t remain)
@@ -280,4 +285,10 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_update_mp_unreach_t *msg,
 
   *lenp = nread;
   return OK;
+}
+
+void parsebgp_bgp_update_mp_unreach_destroy(
+  parsebgp_bgp_update_mp_unreach_t *msg)
+{
+  free(msg->withdrawn_nlris);
 }

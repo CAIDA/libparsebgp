@@ -65,11 +65,18 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
                                     parsebgp_bgp_update_mp_reach_t *msg,
                                     uint8_t *buf, size_t *lenp, size_t remain);
 
+/** Destroy an MP_REACH message */
+void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg);
+
 
 /** Decode an MP_UNREACH message */
 parsebgp_error_t
 parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_update_mp_unreach_t *msg,
                                       uint8_t *buf, size_t *lenp,
                                       size_t remain);
+
+/** Destroy an MP_UNREACH message */
+void parsebgp_bgp_update_mp_unreach_destroy(
+  parsebgp_bgp_update_mp_unreach_t *msg);
 
 #endif /* __PARSEBGP_BGP_UPDATE_MP_REACH_H */

@@ -104,7 +104,7 @@ static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
 static void destroy_table_dump(parsebgp_mrt_afi_t afi,
                                parsebgp_mrt_table_dump_t *msg)
 {
-  // TODO: destroy the attribute(s)
+  parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
 }
 
 static parsebgp_error_t
@@ -300,7 +300,8 @@ static void destroy_table_dump_v2_rib_entries(
 
   for (i = 0; i < entry_count; i++) {
     entry = &entries[i];
-    // TODO: destroy the BGP attributes
+
+    parsebgp_bgp_update_path_attrs_destroy(&entry->path_attrs);
   }
 
   free(entries);
@@ -554,7 +555,7 @@ static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
-    // TODO: destroy the BGP message
+    parsebgp_bgp_destroy_msg(&msg->data.bgp_msg);
     break;
 
   default:

@@ -65,6 +65,15 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   return OK;
 }
 
+static void destroy_nlris(parsebgp_bgp_update_nlris_t *nlris)
+{
+  if (nlris == NULL) {
+    return;
+  }
+  free(nlris->prefixes);
+  nlris->prefixes_cnt = 0;
+}
+
 static parsebgp_error_t
 parse_path_attr_as_path(int asn_4_byte,
                         parsebgp_bgp_update_as_path_t *msg, uint8_t *buf,
@@ -122,6 +131,16 @@ parse_path_attr_as_path(int asn_4_byte,
 
   *lenp = nread;
   return OK;
+}
+
+static void destroy_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
+{
+  int i;
+
+  for (i = 0; i < msg->segs_cnt; i++) {
+    free(msg->segs[i].asns);
+  }
+  free(msg->segs);
 }
 
 static parsebgp_error_t
@@ -218,6 +237,11 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
   return OK;
 }
 
+static void destroy_attr_communities(parsebgp_bgp_update_communities_t *msg)
+{
+  free(msg->communities);
+}
+
 static parsebgp_error_t
 parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
                              uint8_t *buf, size_t *lenp, size_t remain)
@@ -248,6 +272,11 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
   *lenp = nread;
   return OK;
+}
+
+static void destroy_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
+{
+  free(msg->cluster_ids);
 }
 
 
@@ -294,6 +323,12 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 
   *lenp = nread;
   return OK;
+}
+
+static void
+destroy_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
+{
+  free(msg->communities);
 }
 
 #define CHECK_REMAIN(remain, val)                                              \
@@ -582,6 +617,76 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   return OK;
 }
 
+void parsebgp_bgp_update_path_attrs_destroy(
+  parsebgp_bgp_update_path_attrs_t *msg)
+{
+  int i;
+  parsebgp_bgp_update_path_attr_t *attr;
+
+  if (msg == NULL) {
+    return;
+  }
+
+  for (i = 0; i < msg->attrs_cnt; i++) {
+    attr = &msg->attrs[i];
+
+    switch (attr->type) {
+
+      // Types with no dynamic memory:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ATOMIC_AGGREGATE:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
+      break;
+
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
+      destroy_attr_as_path(&attr->data.as_path);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
+      destroy_attr_communities(&attr->data.communities);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
+      destroy_attr_cluster_list(&attr->data.cluster_list);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
+      parsebgp_bgp_update_mp_reach_destroy(&attr->data.mp_reach);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
+      parsebgp_bgp_update_mp_unreach_destroy(&attr->data.mp_unreach);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
+      parsebgp_bgp_update_ext_communities_destroy(&attr->data.ext_communities);
+      break;
+
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
+      // TODO
+      break;
+
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
+      destroy_attr_large_communities(&attr->data.large_communities);
+      break;
+    }
+  }
+
+  free(msg->attrs);
+  msg->attrs = NULL;
+  msg->attrs_cnt = 0;
+}
+
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
                                             parsebgp_bgp_update_t *msg,
                                             uint8_t *buf, size_t *lenp,
@@ -631,4 +736,15 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
 
   *lenp = nread;
   return OK;
+}
+
+void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg)
+{
+  if (msg == NULL) {
+    return;
+  }
+
+  destroy_nlris(&msg->withdrawn_nlris);
+  destroy_nlris(&msg->announced_nlris);
+  parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
 }

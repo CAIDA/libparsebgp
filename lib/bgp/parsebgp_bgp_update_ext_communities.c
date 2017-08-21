@@ -210,3 +210,11 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   *lenp = nread;
   return OK;
 }
+
+void parsebgp_bgp_update_ext_communities_destroy(
+  parsebgp_bgp_update_ext_communities_t *msg)
+{
+  // currently no types have dynamic memory
+
+  free(msg->communities);
+}
