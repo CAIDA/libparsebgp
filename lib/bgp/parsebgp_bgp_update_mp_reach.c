@@ -83,7 +83,7 @@ parse_next_hop_afi_ipv4_ipv6_unicast(parsebgp_bgp_update_mp_reach_t *msg,
   uint8_t first_len, second_len = 0;
 
   // WARN: this assumes that the caller has checked that the buffer is long
-  // enough to hold msg->next_hop_len bytes
+  // enough to read msg->next_hop_len bytes
 
   // sanity-check
   if ((msg->afi == PARSEBGP_BGP_AFI_IPV4 && msg->next_hop_len != 4) ||
@@ -195,11 +195,22 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
-  // MRT TABLE_DUMP_V2 is annoying
-  if (opts.mp_reach_no_afi_safi_reserved) {
+  // MRT TABLE_DUMP_V2 is annoying and can "compress" the MP_REACH header to
+  // remove AFI, SAFI, and (allegedly) reserved fields
+  //
+  // however, it seems that in practice this doesn't happen. we try to deal with
+  // this special case by peeking at the first byte in the case that we're
+  // processing MRT data, and if it is zero (i.e. would indicate a next-hop
+  // length of zero if the header was compressed), then we assume that the
+  // header is in fact not compressed and we toggle the flag off in the options.
+  if (opts.mp_reach_no_afi_safi_reserved && *buf != 0) {
+    fprintf(stderr, "DEBUG: Using MRT-provided AFI/SAFI\n");
     msg->afi = opts.afi;
     msg->safi = opts.safi;
   } else {
+    // force off to force reading of "reserved" byte
+    opts.mp_reach_no_afi_safi_reserved = 0;
+
     // AFI
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
     msg->afi = ntohs(msg->afi);

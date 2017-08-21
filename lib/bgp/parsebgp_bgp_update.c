@@ -130,6 +130,7 @@ parse_path_attr_as_path(int asn_4_byte,
 
     fprintf(stderr, "\n");
   }
+  assert((remain - nread) == 0);
 
   *lenp = nread;
   return OK;
