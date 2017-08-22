@@ -29,6 +29,9 @@ typedef enum {
   /** Cease */
   PARSEBGP_BGP_NOTIFY_CEASE = 6,
 
+  /** ROUTE-REFRESH Message Error */
+  PARSEBGP_BGP_NOTIFY_ROUTE_REFRESH = 7,
+
 } parsebgp_bgp_notification_code_t;
 
 /**
@@ -140,6 +143,16 @@ typedef enum {
   CEASE_OUT_OF_RESOURCES = 8,
 
 } parsebgp_bgp_notification_cease_subcode_t;
+
+/**
+ * BGP NOTIFICATION ROUTE-REFRESH Message Error Subcodes
+ */
+typedef enum {
+
+  /** Invalid Message Length */
+  PARSEBGP_BGP_NOTIFY_ROUTE_REFRESH_INVALID_MSG_LEN = 1,
+
+} parsebgp_bgp_notification_route_refresh_msg_subcode_t;
 
 /**
  * BGP NOTIFICATION Message

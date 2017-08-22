@@ -1,6 +1,4 @@
 #include "parsebgp_bgp.h"
-#include "parsebgp_bgp_open.h"
-#include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <arpa/inet.h>
@@ -80,8 +78,8 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
     break;
 
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
-    // TODO
-    return NOT_IMPLEMENTED;
+    err = parsebgp_bgp_route_refresh_decode(opts, &msg->types.route_refresh,
+                                            buf, &slen, remain);
     break;
 
   default:
@@ -125,7 +123,7 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
     break;
 
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
-    // TODO
+    parsebgp_bgp_route_refresh_destroy(&msg->types.route_refresh);
     break;
 
   default:

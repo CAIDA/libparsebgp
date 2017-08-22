@@ -4,6 +4,7 @@
 #include "parsebgp_bgp_notification.h"
 #include "parsebgp_bgp_open.h"
 #include "parsebgp_bgp_opts.h"
+#include "parsebgp_bgp_route_refresh.h"
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
@@ -60,7 +61,7 @@ typedef struct parsebgp_bgp_msg {
     /* KEEPALIVE has no extra data (Type 4) */
 
     /** ROUTE-REFRESH Message (Type 5) */
-    // TODO
+    parsebgp_bgp_route_refresh_t route_refresh;
 
   } types;
 
