@@ -29,7 +29,10 @@ typedef enum {
   /** Multicast (NOT_IMPLEMENTED) */
   PARSEBGP_BGP_SAFI_MULTICAST = 2,
 
-  // TODO: add support for MULTICAST, EVPN, NLRI_LABEL, MPLS
+  // TODO: add support for MULTICAST, EVPN, NLRI_LABEL
+
+  /** MPLS */
+  PARSEBGP_BGP_SAFI_MPLS = 128,
 
 } parsebgp_bgp_safi_t;
 

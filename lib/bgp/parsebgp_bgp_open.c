@@ -102,7 +102,7 @@ parsebgp_error_t parse_capabilities(parsebgp_bgp_opts_t opts,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 parsebgp_error_t parse_params(parsebgp_bgp_opts_t opts,
@@ -135,7 +135,7 @@ parsebgp_error_t parse_params(parsebgp_bgp_opts_t opts,
 
     // parse this capabilities parameter
     slen = len - nread;
-    if ((err = parse_capabilities(opts, msg, buf, &slen, u8)) != OK) {
+    if ((err = parse_capabilities(opts, msg, buf, &slen, u8)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -143,7 +143,7 @@ parsebgp_error_t parse_params(parsebgp_bgp_opts_t opts,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_bgp_opts_t opts,
@@ -180,13 +180,13 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_bgp_opts_t opts,
   // no params
   if (msg->param_len == 0) {
     *lenp = nread;
-    return OK;
+    return PARSEBGP_OK;
   }
 
   // Parse the capabilities
   slen = len - nread;
   if ((err = parse_params(opts, msg, buf, &slen, (remain - nread))) !=
-      OK) {
+      PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -198,7 +198,7 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_bgp_opts_t opts,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg)

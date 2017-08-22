@@ -142,7 +142,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
@@ -208,7 +208,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_update_ext_communities_destroy(

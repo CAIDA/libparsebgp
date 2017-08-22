@@ -67,7 +67,7 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
@@ -185,7 +185,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg) {
@@ -213,7 +213,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
     slen = len - nread;
     if ((err = parsebgp_bgp_decode(opts, &msg->data.notification, buf,
-                                   &slen)) != OK) {
+                                   &slen)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -237,7 +237,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
@@ -281,14 +281,14 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
           msg->local_port, msg->remote_port);
 
   slen = len - nread;
-  if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) != OK) {
+  if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
   buf += slen;
 
   slen = len - nread;
-  if ((err = parsebgp_bgp_decode(opts, &msg->recv_open, buf, &slen)) != OK) {
+  if ((err = parsebgp_bgp_decode(opts, &msg->recv_open, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -298,7 +298,7 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
   parse_info_tlvs(&msg->tlvs, &msg->tlvs_cnt, buf, lenp, remain - nread);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_peer_up(parsebgp_bmp_peer_up_t *msg)
@@ -390,7 +390,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_term_msg(parsebgp_bmp_term_msg_t *msg)
@@ -472,7 +472,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
       // parse the BGP message
       slen = len - nread;
       if ((err = parsebgp_bgp_decode(opts, &tlv->values.bgp_msg, buf, &slen)) !=
-          OK) {
+          PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -490,7 +490,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
@@ -554,7 +554,7 @@ static parsebgp_error_t parse_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr,
 
   assert(nread == BMP_PEER_HDR_LEN);
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
@@ -571,7 +571,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
 
   // All v1/2 messages include the peer header
   slen = len;
-  if ((err = parse_peer_hdr(&msg->peer_hdr, buf, &slen)) != OK) {
+  if ((err = parse_peer_hdr(&msg->peer_hdr, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -619,7 +619,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
 
   assert(nread == BMP_HDR_V1V2_LEN);
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
@@ -653,7 +653,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
   case PARSEBGP_BMP_TYPE_PEER_UP:      // Peer Up notification
   case PARSEBGP_BMP_TYPE_PEER_DOWN:    // Peer down notification
     slen = len;
-    if ((err = parse_peer_hdr(&msg->peer_hdr, buf, &slen)) != OK) {
+    if ((err = parse_peer_hdr(&msg->peer_hdr, buf, &slen)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -669,7 +669,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
@@ -687,7 +687,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
     // Versions 1 and 2 use the same format, but v2 adds the Peer Up message
   case 2:
     slen = len - nread;
-    if ((err = parse_common_hdr_v2(msg, buf, &slen)) != OK) {
+    if ((err = parse_common_hdr_v2(msg, buf, &slen)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -695,7 +695,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
 
   case 3:
     slen = len - nread;
-    if ((err = parse_common_hdr_v3(msg, buf, &slen)) != OK) {
+    if ((err = parse_common_hdr_v3(msg, buf, &slen)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -706,7 +706,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 /* -------------------- Main BMP Parser ----------------------------- */
@@ -720,7 +720,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
 
   /* First, parse the message header */
   slen = *len;
-  if ((err = parse_common_hdr(msg, buf, &slen)) != OK) {
+  if ((err = parse_common_hdr(msg, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -777,7 +777,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
                                  remain);
     break;
   }
-  if (err != OK) {
+  if (err != PARSEBGP_OK) {
     // parser failed
     return err;
   }
@@ -786,7 +786,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
   assert(msg->len == nread);
 
   *len = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg)

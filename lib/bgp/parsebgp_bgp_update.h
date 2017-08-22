@@ -211,7 +211,7 @@ typedef enum {
 
   /** AS_PATHLIMIT (deprecated) (Type Code 21) [draft-ietf-idr-as-pathlimit-03]
    */
-  PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT = 21,
+  PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT = 21, // DONE, TESTED
 
   // ...
 
@@ -227,6 +227,11 @@ typedef enum {
 
   /** LARGE_COMMUNITY (Type Code 32) [RFC8092] */
   PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES = 32, // DONE, TESTED
+
+  // ...
+
+  /** ATTR_SET (NOT_IMPLEMENTED) (Type Code 128) [RFC6368] */
+  PARSEBGP_BGP_PATH_ATTR_TYPE_ATTR_SET = 128,
 
 } parsebgp_bgp_update_path_attr_type_t;
 

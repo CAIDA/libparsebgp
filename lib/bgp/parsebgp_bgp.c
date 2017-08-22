@@ -25,7 +25,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bgp_msg_t *msg,
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
@@ -37,7 +37,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
 
   /* First, parse the message header */
   slen = *len;
-  if ((err = parse_common_hdr(msg, buf, &slen)) != OK) {
+  if ((err = parse_common_hdr(msg, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -73,7 +73,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
 
   case PARSEBGP_BGP_TYPE_KEEPALIVE:
     // no data
-    err = OK;
+    err = PARSEBGP_OK;
     slen = 0;
     break;
 
@@ -85,7 +85,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
   default:
     break;
   }
-  if (err != OK) {
+  if (err != PARSEBGP_OK) {
     // parser failed
     return err;
   }
@@ -93,7 +93,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
 
   assert(msg->len == nread);
   *len = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)

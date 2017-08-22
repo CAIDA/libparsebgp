@@ -41,7 +41,7 @@ parsebgp_bgp_notification_decode(parsebgp_bgp_opts_t opts,
           msg->code, msg->subcode, msg->data_len);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg)

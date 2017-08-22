@@ -367,7 +367,7 @@ typedef struct parsebgp_mrt_msg {
  * @param [in] buf      Pointer to the start of a raw MRT message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
  *                      Updated to the number of bytes read from the buffer.
- * @return OK (0) if a message was parsed successfully, or an error code
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
 parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,

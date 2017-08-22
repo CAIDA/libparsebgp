@@ -50,7 +50,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     // Prefix
     slen = len - nread;
     if ((err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen)) !=
-        OK) {
+        PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -63,7 +63,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_nlris(parsebgp_bgp_update_nlris_t *nlris)
@@ -133,7 +133,7 @@ parse_path_attr_as_path(int asn_4_byte,
   assert((remain - nread) == 0);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
@@ -167,7 +167,7 @@ parse_path_attr_next_hop(uint8_t *next_hop, uint8_t *buf,
   fprintf(stderr, "DEBUG: NEXT_HOP: %s\n", ip_buf);
 
   *lenp = sizeof(uint32_t);
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t
@@ -203,7 +203,7 @@ parse_path_attr_aggregator(int asn_4_byte,
           aggregator->asn, ip_buf, asn_4_byte);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t
@@ -237,7 +237,7 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
   fprintf(stderr, "\n");
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_attr_communities(parsebgp_bgp_update_communities_t *msg)
@@ -274,7 +274,7 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
   fprintf(stderr, "\n");
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
@@ -300,7 +300,7 @@ parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
           msg->max_asns, msg->asn);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 
@@ -346,7 +346,7 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
   fprintf(stderr, "\n");
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void
@@ -393,7 +393,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   size_t len = *lenp, nread = 0, slen = 0;
   parsebgp_bgp_update_path_attr_t *attr;
   uint8_t u8;
-  parsebgp_error_t err = OK;
+  parsebgp_error_t err = PARSEBGP_OK;
 
   path_attrs->attrs = NULL;
   path_attrs->attrs_cnt = 0;
@@ -462,7 +462,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 2:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
       if ((err = parse_path_attr_as_path(opts.asn_4_byte, &attr->data.as_path,
-                                         buf, &slen, attr->len)) != OK) {
+                                         buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -473,7 +473,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 3:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
       if ((err = parse_path_attr_next_hop(attr->data.next_hop, buf, &slen,
-                                          attr->len)) != OK) {
+                                          attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -504,7 +504,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
       if ((err =
              parse_path_attr_aggregator(opts.asn_4_byte, &attr->data.aggregator,
-                                        buf, &slen, attr->len)) != OK) {
+                                        buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -515,7 +515,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 8
     case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
       if ((err = parse_path_attr_communities(&attr->data.communities, buf,
-                                             &slen, attr->len)) != OK) {
+                                             &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -533,7 +533,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 10
     case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
       if ((err = parse_path_attr_cluster_list(&attr->data.cluster_list, buf,
-                                              &slen, attr->len)) != OK) {
+                                              &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -547,7 +547,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 14
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
       if ((err = parsebgp_bgp_update_mp_reach_decode(
-             opts, &attr->data.mp_reach, buf, &slen, attr->len)) != OK) {
+             opts, &attr->data.mp_reach, buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -558,7 +558,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 15
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
       if ((err = parsebgp_bgp_update_mp_unreach_decode(
-             &attr->data.mp_unreach, buf, &slen, attr->len)) != OK) {
+             opts, &attr->data.mp_unreach, buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -569,7 +569,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 16
     case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
       if ((err = parsebgp_bgp_update_ext_communities_decode(
-             &attr->data.ext_communities, buf, &slen, attr->len)) != OK) {
+             &attr->data.ext_communities, buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -581,7 +581,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
       // same as AS_PATH, but force 4-byte AS parsing
       if ((err = parse_path_attr_as_path(1, &attr->data.as_path, buf, &slen,
-                                         attr->len)) != OK) {
+                                         attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -592,7 +592,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
       // same as AGGREGATOR, but force 4-byte AS parsing
       if ((err = parse_path_attr_aggregator(1, &attr->data.aggregator, buf,
-                                            &slen, attr->len)) != OK) {
+                                            &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -606,7 +606,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 21
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT:
       if ((err = parse_path_attr_as_pathlimit(&attr->data.as_pathlimit, buf,
-                                              &slen, attr->len)) != OK) {
+                                              &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -620,7 +620,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 25
     case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
       if ((err = parsebgp_bgp_update_ext_communities_ipv6_decode(
-             &attr->data.ext_communities, buf, &slen, attr->len)) != OK) {
+             &attr->data.ext_communities, buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -645,7 +645,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
       if ((err = parse_path_attr_large_communities(
              &attr->data.large_communities, buf, &slen, attr->len)) !=
-          OK) {
+          PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -661,7 +661,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_update_path_attrs_destroy(
@@ -752,7 +752,7 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
   // Withdrawn Routes
   slen = len - nread;
   if ((err = parse_nlris(&msg->withdrawn_nlris, buf, &slen, remain - nread)) !=
-      OK) {
+      PARSEBGP_OK) {
     return err;
   }
   assert(slen == msg->withdrawn_nlris.len);
@@ -762,7 +762,7 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
   // Path Attributes
   slen = len - nread;
   if ((err = parsebgp_bgp_update_path_attrs_decode(
-         opts, &msg->path_attrs, buf, &slen, remain - nread)) != OK) {
+         opts, &msg->path_attrs, buf, &slen, remain - nread)) != PARSEBGP_OK) {
     return err;
   }
   assert(slen == sizeof(msg->path_attrs.len) + msg->path_attrs.len);
@@ -775,7 +775,7 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
   fprintf(stderr, "DEBUG: BGP UPDATE: NLRI Len: %d (%d remain)\n",
           msg->announced_nlris.len, (int)(remain - nread));
   if ((err = parse_nlris(&msg->announced_nlris, buf, &slen,
-                         msg->announced_nlris.len)) != OK) {
+                         msg->announced_nlris.len)) != PARSEBGP_OK) {
     return err;
   }
   assert(slen == msg->announced_nlris.len);
@@ -783,7 +783,7 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
   buf += slen;
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg)

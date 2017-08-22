@@ -57,7 +57,7 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_bgp_afi_t afi,
     // Prefix
     slen = len - nread;
     if ((err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen)) !=
-        OK) {
+        PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -71,7 +71,7 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_bgp_afi_t afi,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t
@@ -132,13 +132,13 @@ parse_next_hop_afi_ipv4_ipv6_unicast(parsebgp_bgp_update_mp_reach_t *msg,
   fprintf(stderr, "DEBUG: remain: %d\n", (int)(remain - nread));
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
-static parsebgp_error_t parse_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
-                                            parsebgp_bgp_update_mp_reach_t *msg,
-                                            uint8_t *buf, size_t *lenp,
-                                            size_t remain)
+static parsebgp_error_t
+parse_reach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
+                          parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
+                          size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -154,7 +154,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
   case PARSEBGP_BGP_SAFI_UNICAST:
     slen = len - nread;
     if ((err = parse_next_hop_afi_ipv4_ipv6_unicast(msg, buf, &slen,
-                                                    remain - nread)) != OK) {
+                                                    remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -171,20 +171,55 @@ static parsebgp_error_t parse_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
     slen = len - nread;
     if ((err = parse_afi_ipv4_ipv6_unicast_nlri(msg->afi, &msg->nlris,
                                                 &msg->nlris_cnt, buf, &slen,
-                                                remain - nread)) != OK) {
+                                                remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
     buf += slen;
     break;
 
+  case PARSEBGP_BGP_SAFI_MPLS:
+    // TODO
   default:
     fprintf(stderr, "ERROR: Unsupported SAFI: %"PRIu8"\n", msg->safi);
     return NOT_IMPLEMENTED;
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
+}
+
+static parsebgp_error_t
+parse_unreach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
+                            parsebgp_bgp_update_mp_unreach_t *msg, uint8_t *buf,
+                            size_t *lenp, size_t remain)
+{
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_error_t err;
+
+  slen = len - nread;
+
+  switch (msg->safi) {
+  case PARSEBGP_BGP_SAFI_UNICAST:
+    // Parse the NLRIs
+    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(msg->afi, &msg->withdrawn_nlris,
+                                                &msg->withdrawn_nlris_cnt, buf,
+                                                &slen, remain - nread)) != PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  case PARSEBGP_BGP_SAFI_MPLS:
+    // TODO
+  default:
+    fprintf(stderr, "ERROR: Unsupported SAFI: %"PRIu8"\n", msg->safi);
+    return NOT_IMPLEMENTED;
+  }
+
+  *lenp = nread;
+  return PARSEBGP_OK;
 }
 
 parsebgp_error_t
@@ -231,8 +266,8 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
   case PARSEBGP_BGP_AFI_IPV4:
   case PARSEBGP_BGP_AFI_IPV6:
     slen = len - nread;
-    if ((err = parse_afi_ipv4_ipv6(opts, msg, buf, &slen, remain - nread)) !=
-        OK) {
+    if ((err = parse_reach_afi_ipv4_ipv6(opts, msg, buf, &slen,
+                                         remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -245,7 +280,7 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
@@ -254,7 +289,8 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
 }
 
 parsebgp_error_t
-parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_update_mp_unreach_t *msg,
+parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_opts_t opts,
+                                      parsebgp_bgp_update_mp_unreach_t *msg,
                                       uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -274,15 +310,9 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_update_mp_unreach_t *msg,
   switch (msg->afi) {
   case PARSEBGP_BGP_AFI_IPV4:
   case PARSEBGP_BGP_AFI_IPV6:
-    if (msg->safi != PARSEBGP_BGP_SAFI_UNICAST) {
-      fprintf(stderr, "ERROR: Unsupported AFI/SAFI: %" PRIu16 "/%" PRIu8 "\n",
-              msg->afi, msg->safi);
-      return NOT_IMPLEMENTED;
-    }
     slen = len - nread;
-    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(msg->afi, &msg->withdrawn_nlris,
-                                                &msg->withdrawn_nlris_cnt, buf,
-                                                &slen, remain - nread)) != OK) {
+    if ((err = parse_unreach_afi_ipv4_ipv6(opts, msg, buf, &slen,
+                                           remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -295,7 +325,7 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_update_mp_unreach_t *msg,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_update_mp_unreach_destroy(

@@ -55,8 +55,8 @@
  * @param buf_len       Total length of the buffer (to prevent overrun). Updated
  *                      to the number of bytes read from the buffer if
  *                      successful.
- * @return OK if successful, or an error code otherwise. buf_len is only updated
- * if OK is returned.
+ * @return PARSEBGP_OK if successful, or an error code otherwise. buf_len is only updated
+ * if PARSEBGP_OK is returned.
  */
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
                                         uint8_t *buf, size_t *buf_len);

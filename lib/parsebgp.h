@@ -67,7 +67,7 @@ typedef struct parsebgp_opts {
  * @param [in,out] len   Number of bytes in buffer. Updated with number of bytes
  *                       read from the buffer
  *
- * @return OK (0) if a message was parsed successfully, or an error code
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
 parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,

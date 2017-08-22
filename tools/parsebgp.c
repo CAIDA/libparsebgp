@@ -56,7 +56,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
 
   parsebgp_opts_t opts = {{0}};
   parsebgp_msg_t *msg = NULL;
-  parsebgp_error_t err = OK;
+  parsebgp_error_t err = PARSEBGP_OK;
 
   uint64_t cnt = 0;
 
@@ -89,7 +89,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
               remain);
 
       dec_len = remain;
-      if ((err = parsebgp_decode(opts, type, msg, ptr, &dec_len)) != OK) {
+      if ((err = parsebgp_decode(opts, type, msg, ptr, &dec_len)) != PARSEBGP_OK) {
         if (err == INCOMPLETE_MSG) {
           // refill the buffer and try again
           break;

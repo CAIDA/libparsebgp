@@ -91,14 +91,14 @@ static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
   // Path Attributes
   slen = len - nread;
   if ((err = parsebgp_bgp_update_path_attrs_decode(
-         opts, &msg->path_attrs, buf, &slen, remain - nread)) != OK) {
+         opts, &msg->path_attrs, buf, &slen, remain - nread)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
   buf += slen;
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_table_dump(parsebgp_mrt_afi_t afi,
@@ -203,7 +203,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
           (int)remain, (int)nread);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void
@@ -281,7 +281,7 @@ parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     // Path Attributes
     slen = len - nread;
     if ((err = parsebgp_bgp_update_path_attrs_decode(
-           opts, &entry->path_attrs, buf, &slen, remain - nread)) != OK) {
+           opts, &entry->path_attrs, buf, &slen, remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -289,7 +289,7 @@ parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_table_dump_v2_rib_entries(
@@ -325,7 +325,7 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   // Prefix
   slen = len - nread;
   if ((err = parsebgp_decode_prefix(msg->prefix_len, msg->prefix, buf,
-                                    &slen)) != OK) {
+                                    &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -355,14 +355,14 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   slen = len - nread;
   if ((err = parse_table_dump_v2_rib_entries(subtype, msg->entries,
                                              msg->entry_count, buf, &slen,
-                                             (remain - nread))) != OK) {
+                                             (remain - nread))) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
   buf += slen;
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_table_dump_v2_afi_safi_rib(
@@ -526,7 +526,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
     slen = len - nread;
     if ((err = parsebgp_bgp_decode(opts, &msg->data.bgp_msg, buf, &slen)) !=
-        OK) {
+        PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -539,7 +539,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
@@ -612,7 +612,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
   }
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
@@ -623,7 +623,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
 
   // First, parse the common header
   slen = *len;
-  if ((err = parse_common_hdr(msg, buf, &slen)) != OK) {
+  if ((err = parse_common_hdr(msg, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -690,7 +690,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
     // unknown message type
     return INVALID_MSG;
   }
-  if (err != OK) {
+  if (err != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -700,7 +700,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
   assert(MRT_HDR_LEN + msg->len == nread);
 
   *len = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg)

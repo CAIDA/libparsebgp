@@ -47,7 +47,7 @@ parsebgp_bgp_route_refresh_decode(parsebgp_bgp_opts_t opts,
     msg->afi, msg->subtype, msg->safi, msg->data_len);
 
   *lenp = nread;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg)

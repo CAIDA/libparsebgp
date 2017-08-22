@@ -533,7 +533,7 @@ typedef struct parsebgp_bmp_msg {
  * @param [in] buffer   Pointer to the start of a raw BMP message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
  *                      Updated to the number of bytes read from the buffer.
- * @return OK (0) if a message was parsed successfully, or an error code
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,

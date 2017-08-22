@@ -37,7 +37,7 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
   memset(dst + bytes, 0, 16 - bytes);
 
   *buf_len = bytes;
-  return OK;
+  return PARSEBGP_OK;
 }
 
 void *malloc_zero(const size_t size)

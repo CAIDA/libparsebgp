@@ -4,7 +4,7 @@
 // TODO: namespace these codes
 typedef enum parsebgp_error {
   /** No error */
-  OK = 0,
+  PARSEBGP_OK = 0,
 
   /**  Buffer does not contain an entire message */
   INCOMPLETE_MSG = -1,
