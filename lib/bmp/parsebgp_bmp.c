@@ -155,7 +155,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
         return INVALID_MSG;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
-      SWAP_BYTES(&sc->data.gauge_u64, 8);
+      sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
       break;
 
       // AFI/SAFI 64-bit gauge types:
@@ -174,7 +174,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
 
       // u64 gauge
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.afi_safi_gauge.gauge_u64);
-      SWAP_BYTES(&sc->data.gauge_u64, 8);
+      sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
       break;
     }
 
@@ -586,7 +586,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
       return INCOMPLETE_MSG;
     }
     memcpy(&bgp_len, buf + 16, sizeof(uint16_t));
-    bgp_len = htons(bgp_len);
+    bgp_len = ntohs(bgp_len);
     msg->len += bgp_len;
     break;
 
@@ -606,7 +606,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
         return INCOMPLETE_MSG;
       }
       memcpy(&bgp_len, buf + 17, sizeof(uint16_t));
-      bgp_len = htons(bgp_len);
+      bgp_len = ntohs(bgp_len);
       msg->len += bgp_len;
     }
     break;

@@ -375,8 +375,12 @@ destroy_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
     case 4:                                                                    \
       val = ntohl(val);                                                        \
       break;                                                                   \
+    case 8:                                                                    \
+      val = ntohll(val);                                                       \
+      break;                                                                   \
     default:                                                                   \
-      SWAP_BYTES(&(val), sizeof(val));                                         \
+      /* unsupported value size */                                             \
+      assert(0);                                                               \
       break;                                                                   \
     }                                                                          \
     fprintf(stderr, "DEBUG: " name ": %" PRIu64 "\n", (uint64_t)val);          \

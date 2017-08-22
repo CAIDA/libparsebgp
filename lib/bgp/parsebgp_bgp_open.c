@@ -159,15 +159,15 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_bgp_opts_t opts,
 
   // ASN
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->asn);
-  msg->asn = htons(msg->asn);
+  msg->asn = ntohs(msg->asn);
 
   // Hold Time
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->hold_time);
-  msg->hold_time = htons(msg->hold_time);
+  msg->hold_time = ntohs(msg->hold_time);
 
   // BGP ID
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->bgp_id);
-  msg->bgp_id = htonl(msg->bgp_id);
+  msg->bgp_id = ntohl(msg->bgp_id);
 
   // Parameters Length
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->param_len);

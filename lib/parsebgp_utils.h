@@ -12,6 +12,19 @@
 /** Stringify a macro value */
 #define STR(a) XSTR(a)
 
+/* ntholl and htonll macros from
+   http://www.codeproject.com/KB/cpp/endianness.aspx */
+/** Byte-swap a 64-bit integer */
+#ifndef ntohll
+#define ntohll(x) (((uint64_t)(ntohl((int)((x << 32) >> 32))) << 32) |	\
+		   (uint32_t)ntohl(((int)(x >> 32))))
+#endif
+
+/** Byte-swap a 64-bit integer */
+#ifndef htonll
+#define htonll(x) ntohll(x)
+#endif
+
 /** Convenience macro to deserialize a simple variable from a byte array.
  *
  * @param buf           pointer to the buffer (will be updated)
@@ -30,10 +43,6 @@
     buf += sizeof(to);                                                         \
   } while (0)
 
-// deprecated
-ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
-                            ssize_t output_len);
-
 /**
  * Convenience function to extract a prefix address from a buffer that uses
  * variable length encoding
@@ -51,16 +60,6 @@ ssize_t extract_from_buffer(uint8_t **buffer, int *buf_len, void *output_buf,
  */
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
                                         uint8_t *buf, size_t *buf_len);
-
-/**
- *  Simple function to swap bytes around from network to host or
- *  host to networking.  This method will convert any size byte variable,
- *  unlike ntohs and ntohl.
- *
- * @param [in/out] var   Variable containing data to update
- * @param [in]     size  Size of var - Default is size of var
- */
-void SWAP_BYTES(void *var, int size);
 
 /** Convenience function to allocate and zero memory */
 void *malloc_zero(const size_t size);
