@@ -14,7 +14,8 @@
 #include <arpa/inet.h>
 
 static parsebgp_error_t
-parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_bgp_afi_t afi,
+parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_opts_t *opts,
+                                 parsebgp_bgp_afi_t afi,
                                  parsebgp_bgp_prefix_t **nlris,
                                  int *nlris_cnt,
                                  uint8_t *buf, size_t *lenp, size_t remain)
@@ -34,7 +35,8 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_bgp_afi_t afi,
     break;
 
   default:
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported AFI (%d)", afi);
   }
 
   *nlris = NULL;
@@ -169,7 +171,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
 
     // Parse the NLRIs
     slen = len - nread;
-    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(msg->afi, &msg->nlris,
+    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(opts, msg->afi, &msg->nlris,
                                                 &msg->nlris_cnt, buf, &slen,
                                                 remain - nread)) != PARSEBGP_OK) {
       return err;
@@ -181,8 +183,8 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
   case PARSEBGP_BGP_SAFI_MPLS:
     // TODO
   default:
-    fprintf(stderr, "ERROR: Unsupported SAFI: %"PRIu8"\n", msg->safi);
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported SAFI (%d)", msg->safi);
   }
 
   *lenp = nread;
@@ -202,9 +204,9 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
   switch (msg->safi) {
   case PARSEBGP_BGP_SAFI_UNICAST:
     // Parse the NLRIs
-    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(msg->afi, &msg->withdrawn_nlris,
-                                                &msg->withdrawn_nlris_cnt, buf,
-                                                &slen, remain - nread)) != PARSEBGP_OK) {
+    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(
+           opts, msg->afi, &msg->withdrawn_nlris, &msg->withdrawn_nlris_cnt,
+           buf, &slen, remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -214,8 +216,8 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
   case PARSEBGP_BGP_SAFI_MPLS:
     // TODO
   default:
-    fprintf(stderr, "ERROR: Unsupported SAFI: %"PRIu8"\n", msg->safi);
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported SAFI (%d)", msg->safi);
   }
 
   *lenp = nread;
@@ -275,8 +277,8 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
     break;
 
   default:
-    fprintf(stderr, "ERROR: Unsupported AFI: %"PRIu16"\n", msg->afi);
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported AFI (%d)", msg->afi);
   }
 
   *lenp = nread;
@@ -320,8 +322,8 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
     break;
 
   default:
-    fprintf(stderr, "ERROR: Unsupported AFI: %"PRIu16"\n", msg->afi);
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported AFI (%d)", msg->afi);
   }
 
   *lenp = nread;

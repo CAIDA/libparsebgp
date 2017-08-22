@@ -570,7 +570,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 16
     case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
       if ((err = parsebgp_bgp_update_ext_communities_decode(
-             &attr->data.ext_communities, buf, &slen, attr->len)) != PARSEBGP_OK) {
+             opts, &attr->data.ext_communities, buf, &slen, attr->len)) !=
+          PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -621,7 +622,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 25
     case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
       if ((err = parsebgp_bgp_update_ext_communities_ipv6_decode(
-             &attr->data.ext_communities, buf, &slen, attr->len)) != PARSEBGP_OK) {
+             opts, &attr->data.ext_communities, buf, &slen, attr->len)) !=
+          PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -635,7 +637,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 29
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
       // TODO
-      return PARSEBGP_NOT_IMPLEMENTED;
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(
+        opts, buf, nread, attr->len,
+        "BGP UPDATE Path Attribute %d (BGP-LS) is not yet implemented",
+        attr->type);
       break;
 
 
@@ -655,9 +660,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
 
     default:
-      // TODO: log message about unimplemented attribute and skip rather than
-      // aborting.
-      return PARSEBGP_NOT_IMPLEMENTED;
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(
+        opts, buf, nread, attr->len,
+        "BGP UPDATE Path Attribute %d is not yet implemented", attr->type);
+      break;
     }
   }
 

@@ -45,14 +45,16 @@
 
 /** Convenience macro to either abort parsing or skip an unimplemented feature
     depending on run-time configuration */
-#define PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, nread, remain, msg)                \
+#define PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain, msg_fmt, ...)  \
   do {                                                                         \
-    if (opts.ignore_not_implemented) {                                         \
-      nread += remain;                                                         \
-      fprintf(stderr, "WARN: Skipping unimplemented feature: %s (%s:%d)\n",    \
-              msg, __FILE__, __line__);                                        \
+    if ((opts)->ignore_not_implemented) {                                      \
+      nread += (remain);                                                       \
+      buf += (remain);                                                         \
+      fprintf(stderr, "WARN: NOT_IMPLEMENTED: " msg_fmt " (%s:%d)\n",          \
+              __VA_ARGS__, __FILE__, __LINE__);                                \
     } else {                                                                   \
-      fprintf(stderr, "ERROR: Unimplemented feature: %s\n", msg);              \
+      fprintf(stderr, "ERROR: NOT_IMPLEMENTED: " msg_fmt " (%s:%d)\n",         \
+              __VA_ARGS__, __FILE__, __LINE__);                                \
       return PARSEBGP_NOT_IMPLEMENTED;                                         \
     }                                                                          \
   } while (0)

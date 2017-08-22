@@ -169,13 +169,13 @@ typedef struct parsebgp_bgp_update_ext_communities {
 
 /** Decode an EXTENDED COMMUNITIES message */
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
-  parsebgp_bgp_update_ext_communities_t *msg, uint8_t *buf, size_t *lenp,
-  size_t remain);
+  parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
+  uint8_t *buf, size_t *lenp, size_t remain);
 
 /** Decode an IPv6 EXTENDED COMMUNITIES message */
 parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
-  parsebgp_bgp_update_ext_communities_t *msg, uint8_t *buf, size_t *lenp,
-  size_t remain);
+  parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
+  uint8_t *buf, size_t *lenp, size_t remain);
 
 /** Destroy an EXTENDED COMMUNITIES message */
 void parsebgp_bgp_update_ext_communities_destroy(

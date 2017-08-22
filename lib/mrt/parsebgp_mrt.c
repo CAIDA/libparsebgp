@@ -381,6 +381,7 @@ parse_table_dump_v2(parsebgp_opts_t *opts,
                     parsebgp_mrt_table_dump_v2_t *msg, uint8_t *buf,
                     size_t *lenp, size_t remain)
 {
+  size_t nread = 0;
   // table dump v2 has no common header, so just call the appropriate subtype
   // parser
   switch (subtype) {
@@ -400,7 +401,12 @@ parse_table_dump_v2(parsebgp_opts_t *opts,
     // these probably aren't too hard to support (esp. multicast), but bgpdump
     // doesn't support them, so it likely means we don't have any actual use for
     // it.
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain,
+                                  "Unsupported MRT TABLE_DUMP_V2 subtype (%d)",
+                                  subtype);
+    // only used if we try and skip the unknown data:
+    *lenp = nread;
+    return PARSEBGP_OK;
     break;
 
   default:
@@ -659,9 +665,6 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
   fprintf(stderr, "DEBUG: Remain: %d\n", (int)remain);
 
   switch (msg->type) {
-  case PARSEBGP_MRT_TYPE_OSPF_V2:
-    return PARSEBGP_NOT_IMPLEMENTED;
-    break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
     err = parse_table_dump(opts, msg->subtype, &msg->types.table_dump, buf + nread,
@@ -681,12 +684,11 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_TYPE_ISIS:
   case PARSEBGP_MRT_TYPE_ISIS_ET:
-    return PARSEBGP_NOT_IMPLEMENTED;
-    break;
-
+  case PARSEBGP_MRT_TYPE_OSPF_V2:
   case PARSEBGP_MRT_TYPE_OSPF_V3:
   case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "MRT Type %d not supported", msg->type);
     break;
 
   default:

@@ -227,7 +227,9 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
     break;
 
   default:
-    return PARSEBGP_NOT_IMPLEMENTED;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported BMP Peer-Down Reason (%d)",
+                                  msg->reason);
     break;
   }
 
@@ -596,6 +598,8 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
     // I'm not sure how to infer the length of this.
     // I'm not even sure how one would parse this data...
+    fprintf(stderr,
+            "ERROR: BMP v1/v2 Stats Report not supported. Cannot continue\n");
     return PARSEBGP_NOT_IMPLEMENTED;
     break;
 
@@ -616,6 +620,8 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
     // TODO: If this is actually found in the wild, then we can implement it
+    fprintf(stderr,
+            "ERROR: BMP v1/v2 Peer-Up not supported. Cannot continue\n");
     return PARSEBGP_NOT_IMPLEMENTED;
     break;
   }

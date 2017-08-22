@@ -92,11 +92,10 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
       break;
 
     default:
-      fprintf(stderr,
-              "DEBUG: OPEN Capability %d is either unknown or currently "
-              "unsupported\n",
-              cap->code);
-      return PARSEBGP_NOT_IMPLEMENTED;
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(
+        opts, buf, nread, remain - nread,
+        "OPEN Capability %d is either unknown or currently unsupported",
+        cap->code);
       break;
     }
   }
@@ -121,11 +120,11 @@ parsebgp_error_t parse_params(parsebgp_opts_t *opts,
     // Ensure this is a capabilities parameter
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
     if (u8 != 2) {
-      fprintf(stderr,
-              "ERROR: Unsupported BGP OPEN parameter type (%d). Only the "
-              "Capabilities parameter (Type 2) is supported\n",
-              u8);
-      return PARSEBGP_NOT_IMPLEMENTED;
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                    "Unsupported BGP OPEN parameter type (%d). "
+                                    "Only the Capabilities parameter (Type 2) "
+                                    "is supported",
+                                    u8);
     }
 
     // Capabilities Length
@@ -194,7 +193,7 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
 
   if (nread != remain) {
     fprintf(stderr, "ERROR: Trailing data after OPEN Capabilities.\n");
-    return PARSEBGP_NOT_IMPLEMENTED;
+    return PARSEBGP_INVALID_MSG;
   }
 
   *lenp = nread;
