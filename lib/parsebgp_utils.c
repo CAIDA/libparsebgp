@@ -24,7 +24,7 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
   }
   // now read the prefix
   if (*buf_len < bytes) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
   memcpy(dst, buf, bytes);
   // technically the trailing bits can be anything, so zero them out just to be

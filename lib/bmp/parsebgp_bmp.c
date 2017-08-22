@@ -29,7 +29,7 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
     // it will be partially/unfilled)
     if ((*tlvs = realloc(*tlvs, sizeof(parsebgp_bmp_info_tlv_t) *
                                   ((*tlvs_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     tlv = &(*tlvs)[*tlvs_cnt];
     (*tlvs_cnt)++;
@@ -47,16 +47,16 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
 
     if (tlv->len > remain) {
       // the length field doesn't match what we saw in the common header
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
 
     // allocate a buffer for the data
     if ((tlv->info = malloc(sizeof(uint8_t) * tlv->len)) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     // and then copy it in
     if (tlv->len > (len - nread)) {
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
     memcpy(tlv->info, buf, tlv->len);
     nread += tlv->len;
@@ -106,7 +106,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
   // Allocate enough counter structures
   if ((msg->counters = malloc_zero(sizeof(parsebgp_bmp_stats_counter_t) *
                                    msg->stats_count)) == NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   fprintf(stderr, "DEBUG: Stats with %"PRIu32" counters\n", msg->stats_count);
@@ -125,7 +125,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
 
     if (sc->len > remain - nread) {
       // invalid length specification
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
 
     // Read the data
@@ -142,7 +142,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
     case PARSEBGP_BMP_STATS_PREFIX_TREAT_AS_WITHDRAW:
     case PARSEBGP_BMP_STATS_DUP_UPD:
       if (sc->len != sizeof(sc->data.counter_u32)) {
-        return INVALID_MSG;
+        return PARSEBGP_INVALID_MSG;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.counter_u32);
       sc->data.counter_u32 = ntohl(sc->data.counter_u32);
@@ -152,7 +152,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
     case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
       if (sc->len != sizeof(sc->data.gauge_u64)) {
-        return INVALID_MSG;
+        return PARSEBGP_INVALID_MSG;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
       sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
@@ -162,7 +162,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_LOC_RIB:
       if (sc->len != 11) {
-        return INVALID_MSG;
+        return PARSEBGP_INVALID_MSG;
       }
 
       // AFI
@@ -227,13 +227,13 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
     break;
 
   default:
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
   }
 
   // we read too much, or too little data according to the common header length
   if (remain != nread) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   *lenp = nread;
@@ -340,7 +340,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
     // it will be partially/unfilled)
     if ((msg->tlvs = realloc(msg->tlvs, sizeof(parsebgp_bmp_term_tlv_t) *
                              ((msg->tlvs_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     tlv = &msg->tlvs[msg->tlvs_cnt];
     msg->tlvs_cnt++;
@@ -358,10 +358,10 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
 
     if (tlv->len > remain) {
       // the length field doesn't match what we saw in the common header
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     if (tlv->len > (len - nread)) {
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
 
     // parse the info based on the type
@@ -369,7 +369,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
     case PARSEBGP_BMP_TERM_INFO_TYPE_STRING:
       // allocate a string buffer for the data
       if ((tlv->info.string = malloc(sizeof(char) * (tlv->len + 1))) == NULL) {
-        return MALLOC_FAILURE;
+        return PARSEBGP_MALLOC_FAILURE;
       }
       // and then copy it in
       memcpy(tlv->info.string, buf, tlv->len);
@@ -384,7 +384,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
       break;
 
     default:
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     remain -= tlv->len;
   }
@@ -442,7 +442,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
     if ((msg->tlvs =
            realloc(msg->tlvs, sizeof(parsebgp_bmp_route_mirror_tlv_t) *
                                 ((msg->tlvs_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     tlv = &msg->tlvs[msg->tlvs_cnt];
     memset(tlv, 0, sizeof(*tlv));
@@ -460,10 +460,10 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
 
     if (tlv->len > (remain - nread)) {
       // the length field doesn't match what we saw in the common header
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     if (tlv->len > (len - nread)) {
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
 
     // parse the info based on the type
@@ -485,7 +485,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
       break;
 
     default:
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
   }
 
@@ -583,7 +583,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
     if (len - nread < 18) {
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
     memcpy(&bgp_len, buf + 16, sizeof(uint16_t));
     bgp_len = ntohs(bgp_len);
@@ -593,17 +593,17 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
     // I'm not sure how to infer the length of this.
     // I'm not even sure how one would parse this data...
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
     if (len - nread < 1) {
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
     if (*buf == PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF ||
         *buf == PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF) {
       if (len - nread < 19) {
-        return INCOMPLETE_MSG;
+        return PARSEBGP_PARTIAL_MSG;
       }
       memcpy(&bgp_len, buf + 17, sizeof(uint16_t));
       bgp_len = ntohs(bgp_len);
@@ -613,7 +613,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
     // TODO: If this is actually found in the wild, then we can implement it
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
   }
 
@@ -643,7 +643,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
   // do quick sanity check on the message length
   bmplen = msg->len - BMP_HDR_V3_LEN;
   if (bmplen > len) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   // parse the per-peer header for those message that contain it
@@ -665,7 +665,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
     break;
 
   default:
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   *lenp = nread;
@@ -702,7 +702,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
     break;
 
   default:
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   *lenp = nread;
@@ -740,7 +740,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
     // buffer, give up now
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   switch (msg->type) {

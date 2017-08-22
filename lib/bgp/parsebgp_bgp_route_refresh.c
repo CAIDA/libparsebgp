@@ -33,10 +33,10 @@ parsebgp_bgp_route_refresh_decode(parsebgp_bgp_opts_t opts,
   // Data
   msg->data_len = remain - nread;
   if ((len - nread) < msg->data_len) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
   if ((msg->data = malloc(msg->data_len)) == NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
   memcpy(msg->data, buf, msg->data_len);
   nread += msg->data_len;

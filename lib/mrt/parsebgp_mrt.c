@@ -23,7 +23,7 @@
     switch ((afi)) {                                                           \
     case PARSEBGP_MRT_AFI_IPV4:                                                \
       if (len - nread < sizeof(uint32_t)) {                                    \
-        return INCOMPLETE_MSG;                                                 \
+        return PARSEBGP_PARTIAL_MSG;                                                 \
       }                                                                        \
       memcpy(&(to), buf, sizeof(uint32_t));                                    \
       nread += sizeof(uint32_t);                                               \
@@ -35,7 +35,7 @@
       break;                                                                   \
                                                                                \
     default:                                                                   \
-      return INVALID_MSG;                                                      \
+      return PARSEBGP_INVALID_MSG;                                                      \
     }                                                                          \
   } while (0)
 
@@ -124,14 +124,14 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->view_name_len);
   msg->view_name_len = ntohs(msg->view_name_len);
   if (msg->view_name_len > (len - nread)) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   // View Name
   if (msg->view_name_len > 0) {
     if ((msg->view_name = malloc(sizeof(char) * (msg->view_name_len + 1))) ==
         NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     memcpy(msg->view_name, buf, msg->view_name_len);
     msg->view_name[msg->view_name_len] = '\0';
@@ -153,7 +153,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   if ((msg->peer_entries = malloc_zero(
          sizeof(parsebgp_mrt_table_dump_v2_peer_entry_t) * msg->peer_count)) ==
       NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   // Peer Entries
@@ -186,7 +186,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
       break;
 
     default:
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
 
     fprintf(stderr, "DEBUG: -------------------- %d\n", i);
@@ -260,7 +260,7 @@ parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   default:
     // programming error
     assert(0);
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   for (i = 0; i < entry_count; i++) {
@@ -349,7 +349,7 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   // allocate some memory for the entries
   if ((msg->entries = malloc(sizeof(parsebgp_mrt_table_dump_v2_rib_entry_t) *
                              msg->entry_count)) == NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
   // and then parse the entries
   slen = len - nread;
@@ -398,11 +398,11 @@ parse_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     // these probably aren't too hard to support (esp. multicast), but bgpdump
     // doesn't support them, so it likely means we don't have any actual use for
     // it.
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
 
   default:
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
     break;
   }
 }
@@ -469,7 +469,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
     break;
 
   default:
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
     break;
   }
 
@@ -534,7 +534,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
     break;
 
   default:
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
     break;
   }
 
@@ -584,7 +584,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->len);
   msg->len = ntohl(msg->len);
   if (msg->len > len - nread) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   // maybe parse the microsecond timestamp (also validates supported message
@@ -608,7 +608,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
 
   default:
     // unknown message type
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   *lenp = nread;
@@ -645,19 +645,19 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
     remain = msg->len - sizeof(msg->timestamp_usec);
   } else {
     // uh oh
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
     // buffer, give up now
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   fprintf(stderr, "DEBUG: Remain: %d\n", (int)remain);
 
   switch (msg->type) {
   case PARSEBGP_MRT_TYPE_OSPF_V2:
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
@@ -678,17 +678,17 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
 
   case PARSEBGP_MRT_TYPE_ISIS:
   case PARSEBGP_MRT_TYPE_ISIS_ET:
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
 
   case PARSEBGP_MRT_TYPE_OSPF_V3:
   case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
     break;
 
   default:
     // unknown message type
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
   if (err != PARSEBGP_OK) {
     return err;

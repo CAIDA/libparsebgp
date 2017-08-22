@@ -34,7 +34,7 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_bgp_afi_t afi,
     break;
 
   default:
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 
   *nlris = NULL;
@@ -44,7 +44,7 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_bgp_afi_t afi,
     // optimistically allocate a new prefix tuple
     if ((*nlris = realloc(*nlris, sizeof(parsebgp_bgp_prefix_t) *
                                     ((*nlris_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     tuple = &(*nlris)[*nlris_cnt];
     (*nlris_cnt)++;
@@ -92,7 +92,7 @@ parse_next_hop_afi_ipv4_ipv6_unicast(parsebgp_bgp_update_mp_reach_t *msg,
     fprintf(stderr,
             "ERROR: Unexpected Next-Hop length of %d for AFI %" PRIu16 "\n",
             msg->next_hop_len, msg->afi);
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   // handle optional v6 link-local address
@@ -144,10 +144,10 @@ parse_reach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
   parsebgp_error_t err;
 
   if ((remain - nread) < msg->next_hop_len) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
   if ((len - nread) < msg->next_hop_len) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   switch (msg->safi) {
@@ -182,7 +182,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
     // TODO
   default:
     fprintf(stderr, "ERROR: Unsupported SAFI: %"PRIu8"\n", msg->safi);
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 
   *lenp = nread;
@@ -215,7 +215,7 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
     // TODO
   default:
     fprintf(stderr, "ERROR: Unsupported SAFI: %"PRIu8"\n", msg->safi);
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 
   *lenp = nread;
@@ -276,7 +276,7 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
 
   default:
     fprintf(stderr, "ERROR: Unsupported AFI: %"PRIu16"\n", msg->afi);
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 
   *lenp = nread;
@@ -321,7 +321,7 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_opts_t opts,
 
   default:
     fprintf(stderr, "ERROR: Unsupported AFI: %"PRIu16"\n", msg->afi);
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 
   *lenp = nread;

@@ -49,7 +49,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
     // buffer, give up now
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   fprintf(stderr, "DEBUG: BGP Message Type: %d, Len: %d\n", msg->type,

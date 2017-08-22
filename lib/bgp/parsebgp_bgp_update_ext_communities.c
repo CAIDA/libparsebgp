@@ -23,7 +23,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
 
   // sanity check on the length
   if (remain % 8 != 0) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   msg->communities_cnt = remain / 8;
@@ -31,7 +31,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   if ((msg->communities = malloc_zero(
          sizeof(parsebgp_bgp_update_ext_community_t) * msg->communities_cnt)) ==
       NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   fprintf(stderr, "DEBUG: EXTENDED COMMUNITIES: Cnt: %d\n",
@@ -78,7 +78,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
       // Global Admin (IP Address)
       // manual copy since the destination can also hold v6 addr
       if ((len - nread) < 4) {
-        return INCOMPLETE_MSG;
+        return PARSEBGP_PARTIAL_MSG;
       }
       memcpy(comm->types.ip_addr.global_admin_ip, buf, 4);
       nread += 4;
@@ -155,7 +155,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
 
   // sanity check on the length
   if (remain % 20 != 0) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   msg->communities_cnt = remain / 20;
@@ -163,7 +163,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   if ((msg->communities = malloc_zero(
          sizeof(parsebgp_bgp_update_ext_community_t) * msg->communities_cnt)) ==
       NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   fprintf(stderr, "DEBUG: EXTENDED COMMUNITIES: Cnt: %d\n",
@@ -203,7 +203,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
         comm->subtype, ip_buf, comm->types.ip_addr.local_admin);
 
     default:
-      return NOT_IMPLEMENTED;
+      return PARSEBGP_NOT_IMPLEMENTED;
     }
   }
 

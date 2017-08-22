@@ -90,7 +90,7 @@ static int parse(parsebgp_msg_type_t type, char *fname)
 
       dec_len = remain;
       if ((err = parsebgp_decode(opts, type, msg, ptr, &dec_len)) != PARSEBGP_OK) {
-        if (err == INCOMPLETE_MSG) {
+        if (err == PARSEBGP_PARTIAL_MSG) {
           // refill the buffer and try again
           break;
         }

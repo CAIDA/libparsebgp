@@ -26,7 +26,7 @@ typedef enum {
   /** Unicast */
   PARSEBGP_BGP_SAFI_UNICAST = 1,
 
-  /** Multicast (NOT_IMPLEMENTED) */
+  /** Multicast (PARSEBGP_NOT_IMPLEMENTED) */
   PARSEBGP_BGP_SAFI_MULTICAST = 2,
 
   // TODO: add support for MULTICAST, EVPN, NLRI_LABEL

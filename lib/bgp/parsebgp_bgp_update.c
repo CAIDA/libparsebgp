@@ -24,10 +24,10 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   nlris->prefixes_cnt = 0;
 
   if (nlris->len > len) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
   if (nlris->len > remain) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   // read and realloc until we run out of message
@@ -36,7 +36,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     if ((nlris->prefixes =
            realloc(nlris->prefixes, sizeof(parsebgp_bgp_prefix_t) *
                                       ((nlris->prefixes_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     tuple = &nlris->prefixes[nlris->prefixes_cnt];
     nlris->prefixes_cnt++;
@@ -93,7 +93,7 @@ parse_path_attr_as_path(int asn_4_byte,
     if ((msg->segs =
            realloc(msg->segs, sizeof(parsebgp_bgp_update_as_path_seg_t) *
                                 ((msg->segs_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     seg = &(msg->segs)[msg->segs_cnt];
     seg->asns = NULL; // in case we error out
@@ -108,7 +108,7 @@ parse_path_attr_as_path(int asn_4_byte,
     // allocate enough space to store the ASNs (we store as 4-byte regardless of
     // what the path encoding is)
     if ((seg->asns = malloc(sizeof(uint32_t) * seg->asns_cnt)) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
 
     fprintf(stderr, "DEBUG: AS_PATH Segment Type: %d, # ASes: %d (AS4?: %d)\n",
@@ -154,10 +154,10 @@ parse_path_attr_next_hop(uint8_t *next_hop, uint8_t *buf,
 
   // Next Hop IP (IPv4-only)
   if (len < sizeof(uint32_t)) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
   if (remain < sizeof(uint32_t)) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
   memcpy(next_hop, buf, sizeof(uint32_t));
 
@@ -189,10 +189,10 @@ parse_path_attr_aggregator(int asn_4_byte,
 
   // Aggregator IP Address
   if (len < sizeof(uint32_t)) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
   if (remain < sizeof(uint32_t)) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
   memcpy(aggregator->addr, buf, sizeof(uint32_t));
   nread += sizeof(uint32_t);
@@ -217,14 +217,14 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
 
   if ((msg->communities = malloc(sizeof(uint32_t) * msg->communities_cnt)) ==
       NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   fprintf(stderr, "DEBUG: COMMUNITIES: Len: %d ", msg->communities_cnt);
 
   for (i = 0; i < msg->communities_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->communities[i]);
     msg->communities[i] = ntohl(msg->communities[i]);
@@ -256,14 +256,14 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
   if ((msg->cluster_ids =
          malloc(sizeof(uint32_t) * msg->cluster_ids_cnt)) == NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   fprintf(stderr, "DEBUG: CLUSTER_LIST: Len: %d ", msg->cluster_ids_cnt);
 
   for (i = 0; i < msg->cluster_ids_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->cluster_ids[i]);
     msg->cluster_ids[i] = ntohl(msg->cluster_ids[i]);
@@ -313,13 +313,13 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
   parsebgp_bgp_update_large_community_t *comm;
 
   if ((remain % 12) != 0) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   msg->communities_cnt = remain / 12;
 
   if ((msg->communities = malloc(12 * msg->communities_cnt)) == NULL) {
-    return MALLOC_FAILURE;
+    return PARSEBGP_MALLOC_FAILURE;
   }
 
   fprintf(stderr, "DEBUG: LARGE_COMMUNITIES: Len: %d ", msg->communities_cnt);
@@ -358,7 +358,7 @@ destroy_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
 #define CHECK_REMAIN(remain, val)                                              \
   do {                                                                         \
     if (remain < sizeof(val)) {                                                \
-      return INVALID_MSG;                                                      \
+      return PARSEBGP_INVALID_MSG;                                                      \
     };                                                                         \
   } while (0)
 
@@ -405,10 +405,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
           path_attrs->len, (int)(remain - nread));
 
   if (path_attrs->len > len) {
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
   if (path_attrs->len > remain) {
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   // read and realloc until we run out of attributes
@@ -417,7 +417,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     if ((path_attrs->attrs =
            realloc(path_attrs->attrs, sizeof(parsebgp_bgp_update_path_attr_t) *
                    ((path_attrs->attrs_cnt) + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     attr = &path_attrs->attrs[path_attrs->attrs_cnt];
     memset(attr, 0, sizeof(*attr));
@@ -439,10 +439,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     }
 
     if (attr->len > (remain - nread)) {
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     if (attr->len > (len - nread)) {
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
 
     fprintf(
@@ -634,7 +634,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 29
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
       // TODO
-      return NOT_IMPLEMENTED;
+      return PARSEBGP_NOT_IMPLEMENTED;
       break;
 
 
@@ -656,7 +656,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     default:
       // TODO: log message about unimplemented attribute and skip rather than
       // aborting.
-      return NOT_IMPLEMENTED;
+      return PARSEBGP_NOT_IMPLEMENTED;
     }
   }
 

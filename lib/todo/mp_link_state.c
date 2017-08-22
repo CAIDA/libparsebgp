@@ -227,7 +227,7 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls,
   if (data_len < 4) {
     // LOG_WARN("%s: bgp-ls: Unable to parse node NLRI since it's too short
     // (invalid)", peer_addr.c_str());
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   memcpy(&mp_reach_ls->nlri_ls.node_nlri.type, *data, 2);
@@ -240,13 +240,13 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls,
   if (mp_reach_ls->nlri_ls.node_nlri.len > data_len) {
     // LOG_WARN("%s: bgp-ls: failed to parse node descriptor; type length is
     // larger than available data %d>=%d",peer_addr.c_str(), len, data_len);
-    return INCOMPLETE_MSG;
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   if (mp_reach_ls->nlri_ls.node_nlri.type != NODE_DESCR_LOCAL_DESCR) {
     // LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not
     // local descriptor",peer_addr.c_str(), type);
-    return INVALID_MSG;
+    return PARSEBGP_INVALID_MSG;
   }
 
   // Parse the local descriptor sub-tlv's
@@ -912,7 +912,7 @@ libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs,
       //                LOG_NOTICE("%s: bgp-ls: failed to parse link state NLRI;
       //                length is larger than available
       //                data",peer_addr.c_str());
-      return INCOMPLETE_MSG;
+      return PARSEBGP_PARTIAL_MSG;
     }
 
     /*
@@ -949,7 +949,7 @@ libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs,
       break;
 
     default:
-      return INVALID_MSG;
+      return PARSEBGP_INVALID_MSG;
     }
     path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info
       .mp_rch_ls[path_attrs->attr_value.mp_reach_nlri_data.count_mp_rch_ls++] =
@@ -989,7 +989,7 @@ ssize_t libparsebgp_mp_link_state_parse_reach_link_state(
     // LOG_INFO("%s: MP_UNREACH AFI=bgp-ls SAFI=%d is not implemented yet,
     // skipping for now",
     //        peer_addr.c_str(), nlri.afi, nlri.safi);
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 }
 

@@ -150,7 +150,7 @@ typedef enum {
 typedef enum {
 
   /** Invalid Message Length */
-  PARSEBGP_BGP_NOTIFY_ROUTE_REFRESH_INVALID_MSG_LEN = 1,
+  PARSEBGP_BGP_NOTIFY_ROUTE_REFRESH_PARSEBGP_INVALID_MSG_LEN = 1,
 
 } parsebgp_bgp_notification_route_refresh_msg_subcode_t;
 

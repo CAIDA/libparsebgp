@@ -230,7 +230,7 @@ typedef enum {
 
   // ...
 
-  /** ATTR_SET (NOT_IMPLEMENTED) (Type Code 128) [RFC6368] */
+  /** ATTR_SET (PARSEBGP_NOT_IMPLEMENTED) (Type Code 128) [RFC6368] */
   PARSEBGP_BGP_PATH_ATTR_TYPE_ATTR_SET = 128,
 
 } parsebgp_bgp_update_path_attr_type_t;

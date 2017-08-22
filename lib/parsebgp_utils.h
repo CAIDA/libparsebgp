@@ -36,7 +36,7 @@
 #define PARSEBGP_DESERIALIZE_VAL(buf, len, read, to)                           \
   do {                                                                         \
     if (((len) - (read)) < sizeof(to)) {                                       \
-      return INCOMPLETE_MSG;                                                   \
+      return PARSEBGP_PARTIAL_MSG;                                                   \
     }                                                                          \
     memcpy(&(to), (buf), sizeof(to));                                          \
     read += sizeof(to);                                                        \

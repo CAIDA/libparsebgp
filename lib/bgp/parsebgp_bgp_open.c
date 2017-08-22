@@ -25,7 +25,7 @@ parsebgp_error_t parse_capabilities(parsebgp_bgp_opts_t opts,
     if ((msg->capabilities =
            realloc(msg->capabilities, sizeof(parsebgp_bgp_open_capability_t) *
                                         (msg->capabilities_cnt + 1))) == NULL) {
-      return MALLOC_FAILURE;
+      return PARSEBGP_MALLOC_FAILURE;
     }
     cap = &msg->capabilities[msg->capabilities_cnt++];
 
@@ -40,7 +40,7 @@ parsebgp_error_t parse_capabilities(parsebgp_bgp_opts_t opts,
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_MPBGP:
       if (cap->len != 4) {
-        return INVALID_MSG;
+        return PARSEBGP_INVALID_MSG;
       }
       // AFI
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.mpbgp.afi);
@@ -59,7 +59,7 @@ parsebgp_error_t parse_capabilities(parsebgp_bgp_opts_t opts,
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
       if (cap->len != 4) {
-        return INVALID_MSG;
+        return PARSEBGP_INVALID_MSG;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.asn);
       cap->values.asn = ntohl(cap->values.asn);
@@ -86,7 +86,7 @@ parsebgp_error_t parse_capabilities(parsebgp_bgp_opts_t opts,
                 "ERROR: Expecting no extra data for BGP OPEN capability %d, "
                 "but found %d bytes\n",
                 cap->code, cap->len);
-        return INVALID_MSG;
+        return PARSEBGP_INVALID_MSG;
       }
       fprintf(stderr, "DEBUG: Capability %d found\n", cap->code);
       break;
@@ -96,7 +96,7 @@ parsebgp_error_t parse_capabilities(parsebgp_bgp_opts_t opts,
               "DEBUG: OPEN Capability %d is either unknown or currently "
               "unsupported\n",
               cap->code);
-      return NOT_IMPLEMENTED;
+      return PARSEBGP_NOT_IMPLEMENTED;
       break;
     }
   }
@@ -125,7 +125,7 @@ parsebgp_error_t parse_params(parsebgp_bgp_opts_t opts,
               "ERROR: Unsupported BGP OPEN parameter type (%d). Only the "
               "Capabilities parameter (Type 2) is supported\n",
               u8);
-      return NOT_IMPLEMENTED;
+      return PARSEBGP_NOT_IMPLEMENTED;
     }
 
     // Capabilities Length
@@ -194,7 +194,7 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_bgp_opts_t opts,
 
   if (nread != remain) {
     fprintf(stderr, "ERROR: Trailing data after OPEN Capabilities.\n");
-    return NOT_IMPLEMENTED;
+    return PARSEBGP_NOT_IMPLEMENTED;
   }
 
   *lenp = nread;
