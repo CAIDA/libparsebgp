@@ -284,6 +284,27 @@ static void destroy_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
 
 
 static parsebgp_error_t
+parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
+                             uint8_t *buf, size_t *lenp, size_t remain)
+{
+  size_t len = *lenp, nread = 0;
+
+  // Max # ASNs
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->max_asns);
+
+  // ASN
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->asn);
+  msg->asn = ntohs(msg->asn);
+
+  fprintf(stderr, "DEBUG: AS_PATHLIMIT: Max ASNs: %d, ASN: %"PRIu32"\n",
+          msg->max_asns, msg->asn);
+
+  *lenp = nread;
+  return OK;
+}
+
+
+static parsebgp_error_t
 parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
                                   uint8_t *buf, size_t *lenp, size_t remain)
 {
@@ -575,9 +596,24 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       break;
 
 
+      // ...
+
+
+      // Type 21
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT:
+      if ((err = parse_path_attr_as_pathlimit(&attr->data.as_pathlimit, buf,
+                                              &slen, attr->len)) != OK) {
+        return err;
+      }
+      nread += slen;
+      buf += slen;
+      break;
+
+
       //...
 
 
+      // Type 25
     case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
       if ((err = parsebgp_bgp_update_ext_communities_ipv6_decode(
              &attr->data.ext_communities, buf, &slen, attr->len)) != OK) {
@@ -591,6 +627,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // ...
 
 
+      // Type 29
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
       // TODO
       return NOT_IMPLEMENTED;
@@ -599,6 +636,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
       // ...
 
+
+      // Type 32
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
       if ((err = parse_path_attr_large_communities(
              &attr->data.large_communities, buf, &slen, attr->len)) !=
@@ -645,6 +684,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT:
       break;
 
 

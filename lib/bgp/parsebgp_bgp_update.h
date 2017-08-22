@@ -117,6 +117,19 @@ typedef struct parsebgp_bgp_update_cluster_list {
 } parsebgp_bgp_update_cluster_list_t;
 
 /**
+ * AS_PATHLIMIT
+ */
+typedef struct parsebgp_bgp_update_as_pathlimit {
+
+  /** Upper bound on the number of ASes in the AS_PATH attribute */
+  uint8_t max_asns;
+
+  /** AS Number */
+  uint32_t asn;
+
+} parsebgp_bgp_update_as_pathlimit_t;
+
+/**
  * LARGE COMMUNITY
  */
 typedef struct parsebgp_bgp_update_large_community {
@@ -196,8 +209,14 @@ typedef enum {
 
   // ...
 
+  /** AS_PATHLIMIT (deprecated) (Type Code 21) [draft-ietf-idr-as-pathlimit-03]
+   */
+  PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT = 21,
+
+  // ...
+
   /** IPv6 Address Specific Extended Community (Type Code 25) [RFC5701] */
-  PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES = 25,
+  PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES = 25, // DONE, TESTED
 
   // ...
 
@@ -207,7 +226,7 @@ typedef enum {
   // ...
 
   /** LARGE_COMMUNITY (Type Code 32) [RFC8092] */
-  PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES = 32,
+  PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES = 32, // DONE, TESTED
 
 } parsebgp_bgp_update_path_attr_type_t;
 
@@ -283,6 +302,9 @@ typedef struct parsebgp_bgp_update_path_attr {
 
     /** EXT_COMMUNITIES */
     parsebgp_bgp_update_ext_communities_t ext_communities;
+
+    /** AS_PATHLIMIT */
+    parsebgp_bgp_update_as_pathlimit_t as_pathlimit;
 
     /** LARGE COMMUNITIES */
     parsebgp_bgp_update_large_communities_t large_communities;
