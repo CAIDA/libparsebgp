@@ -5,6 +5,7 @@ AM_CPPFLAGS =	-I$(top_srcdir)/lib
 include_HEADERS =				\
 	parsebgp_bgp.h 				\
 	parsebgp_bgp_common.h			\
+	parsebgp_bgp_notification.h		\
 	parsebgp_bgp_open.h			\
 	parsebgp_bgp_opts.h			\
 	parsebgp_bgp_update.h			\
@@ -17,6 +18,8 @@ libparsebgp_bgp_la_SOURCES = 			\
 	parsebgp_bgp.c				\
 	parsebgp_bgp.h				\
 	parsebgp_bgp_common.h			\
+	parsebgp_bgp_notification.c		\
+	parsebgp_bgp_notification.h		\
 	parsebgp_bgp_open.c			\
 	parsebgp_bgp_open.h			\
 	parsebgp_bgp_opts.h			\

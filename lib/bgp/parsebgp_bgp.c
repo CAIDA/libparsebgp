@@ -69,8 +69,8 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
-    // TODO
-    return NOT_IMPLEMENTED;
+    err = parsebgp_bgp_notification_decode(opts, &msg->types.notification, buf,
+                                           &slen, remain);
     break;
 
   case PARSEBGP_BGP_TYPE_KEEPALIVE:
@@ -117,11 +117,11 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
-    // TODO
+    parsebgp_bgp_notification_destroy(&msg->types.notification);
     break;
 
   case PARSEBGP_BGP_TYPE_KEEPALIVE:
-    // TODO
+    // nothing to destroy
     break;
 
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:

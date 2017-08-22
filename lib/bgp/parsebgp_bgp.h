@@ -1,9 +1,10 @@
 #ifndef __PARSEBGP_BGP_H
 #define __PARSEBGP_BGP_H
 
+#include "parsebgp_bgp_notification.h"
 #include "parsebgp_bgp_open.h"
-#include "parsebgp_bgp_update.h"
 #include "parsebgp_bgp_opts.h"
+#include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
@@ -47,11 +48,19 @@ typedef struct parsebgp_bgp_msg {
   /** Union of structures for all supported BGP message types */
   union {
 
-    /** OPEN Message */
+    /** OPEN Message (Type 1) */
     parsebgp_bgp_open_t open;
 
-    /** UPDATE Message */
+    /** UPDATE Message (Type 2) */
     parsebgp_bgp_update_t update;
+
+    /** NOTIFICATION message (Type 3) */
+    parsebgp_bgp_notification_t notification;
+
+    /* KEEPALIVE has no extra data (Type 4) */
+
+    /** ROUTE-REFRESH Message (Type 5) */
+    // TODO
 
   } types;
 
