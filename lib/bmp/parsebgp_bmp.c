@@ -199,8 +199,9 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
                                         uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
-  size_t len = *lenp, nread = 0;//, slen;
-  //parsebgp_error_t err;
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_error_t err;
+  parsebgp_bgp_opts_t opts = {0}; // opts are unused in notification parser
 
   // Reason
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reason);
@@ -210,14 +211,13 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
     // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
-    /*
     slen = len - nread;
-    if ((err = parsebgp_bgp_decode()) != OK) {
+    if ((err = parsebgp_bgp_decode(opts, &msg->data.notification, buf,
+                                   &slen)) != OK) {
       return err;
     }
     nread += slen;
     buf += slen;
-    */
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
@@ -246,7 +246,7 @@ static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
     // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
-    // TODO: destroy bgp notficiation message
+    parsebgp_bgp_destroy_msg(&msg->data.notification);
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
@@ -264,8 +264,7 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  // TODO: check opts
-  parsebgp_bgp_opts_t opts = {0};
+  parsebgp_bgp_opts_t opts = {0}; // opts are unused in OPEN parser
 
   // Local IP address
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_ip);
@@ -331,6 +330,9 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bmp_term_tlv_t *tlv = NULL;
+
+  msg->tlvs = NULL;
+  msg->tlvs_cnt = 0;
 
   // read and realloc tlvs until we run out of message
   while (remain > 0) {
@@ -406,6 +408,105 @@ static void destroy_term_msg(parsebgp_bmp_term_msg_t *msg)
       break;
 
     case PARSEBGP_BMP_TERM_INFO_TYPE_REASON:
+    default:
+      // nothing to do
+      break;
+    }
+  }
+  free(msg->tlvs);
+  msg->tlvs = NULL;
+  msg->tlvs_cnt = 0;
+}
+
+
+// Type 6:
+static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
+                                               uint8_t *buf, size_t *lenp,
+                                               size_t remain)
+{
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_bmp_route_mirror_tlv_t *tlv = NULL;
+  parsebgp_error_t err;
+  parsebgp_bgp_opts_t opts = {0};
+  // TODO: correctly configure the BGP parser for 4-byte ASes etc.  for now,
+  // assume that the peer is 4-byte capable. maybe consider adding code to the
+  // BGP parser to fall back to 2-byte parsing if the 4-byte parser fails.
+  opts.asn_4_byte = 1;
+
+  msg->tlvs = NULL;
+  msg->tlvs_cnt = 0;
+
+  // read and realloc tlvs until we run out of message
+  while ((remain - nread) > 0) {
+
+    if ((msg->tlvs =
+           realloc(msg->tlvs, sizeof(parsebgp_bmp_route_mirror_tlv_t) *
+                                ((msg->tlvs_cnt) + 1))) == NULL) {
+      return MALLOC_FAILURE;
+    }
+    tlv = &msg->tlvs[msg->tlvs_cnt];
+    memset(tlv, 0, sizeof(*tlv));
+    msg->tlvs_cnt++;
+
+    // read the TLV header
+
+    // Type
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->type);
+    tlv->type = ntohs(tlv->type);
+
+    // Length
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->len);
+    tlv->len = ntohs(tlv->len);
+
+    if (tlv->len > (remain - nread)) {
+      // the length field doesn't match what we saw in the common header
+      return INVALID_MSG;
+    }
+    if (tlv->len > (len - nread)) {
+      return INCOMPLETE_MSG;
+    }
+
+    // parse the info based on the type
+    switch (tlv->type) {
+    case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG:
+      // parse the BGP message
+      slen = len - nread;
+      if ((err = parsebgp_bgp_decode(opts, &tlv->values.bgp_msg, buf, &slen)) !=
+          OK) {
+        return err;
+      }
+      nread += slen;
+      buf += slen;
+      break;
+
+    case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO:
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->values.code);
+      tlv->values.code = ntohs(tlv->values.code);
+      break;
+
+    default:
+      return INVALID_MSG;
+    }
+  }
+
+  *lenp = nread;
+  return OK;
+}
+
+static void destroy_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
+{
+  int i;
+  if (msg->tlvs_cnt == 0) {
+    return;
+  }
+
+  for (i = 0; i < msg->tlvs_cnt; i++) {
+    switch (msg->tlvs[i].type) {
+    case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG:
+      parsebgp_bgp_destroy_msg(&msg->tlvs[i].values.bgp_msg);
+      break;
+
+    case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO:
     default:
       // nothing to do
       break;
@@ -615,6 +716,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
 {
   parsebgp_error_t err;
   size_t slen = 0, nread = 0, remain = 0;
+  parsebgp_bgp_opts_t opts = {0};
 
   /* First, parse the message header */
   slen = *len;
@@ -643,14 +745,10 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
 
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
-  case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    // DEBUG FIXME:
-    fprintf(stderr, "WARN: Skipping route monitoring message. FIXME!\n");
-    slen = msg->len - nread;
-    /*
-    err = parsebgp_bgp_decode_update(&msg->types.update_msg, buf + nread,
-                                     &slen);
-    */
+    // TODO: understand if it is sufficient to believe this flag
+    opts.asn_4_byte =
+      !(msg->peer_hdr.flags & PARSEBGP_BMP_PEER_FLAG_2_BYTE_AS_PATH);
+    err = parsebgp_bgp_decode(opts, &msg->types.route_mon, buf + nread, &slen);
     break;
 
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
@@ -672,6 +770,11 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
 
   case PARSEBGP_BMP_TYPE_TERM_MSG:
     err = parse_term_msg(&msg->types.term_msg, buf + nread, &slen, remain);
+    break;
+
+  case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
+    err = parse_route_mirror_msg(&msg->types.route_mirror, buf + nread, &slen,
+                                 remain);
     break;
   }
   if (err != OK) {
@@ -696,8 +799,7 @@ void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg)
 
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
-  case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    // TODO: ask BGP parser to destroy update message
+    parsebgp_bgp_destroy_msg(&msg->types.route_mon);
     break;
 
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
@@ -718,6 +820,10 @@ void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg)
 
   case PARSEBGP_BMP_TYPE_TERM_MSG:
     destroy_term_msg(&msg->types.term_msg);
+    break;
+
+  case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
+    destroy_route_mirror_msg(&msg->types.route_mirror);
     break;
   }
 }

@@ -213,7 +213,7 @@ typedef struct parsebgp_bmp_peer_down {
     uint16_t fsm_code;
 
     /** BGP NOTIFICATION message (as sent-to, or recv-from the peer) */
-    parsebgp_bgp_msg_t bgp_msg;
+    parsebgp_bgp_msg_t notification;
 
   } data;
 
@@ -337,7 +337,81 @@ typedef struct parsebgp_bmp_term_msg {
 } parsebgp_bmp_term_msg_t;
 
 
+/*  -------------------- Route Mirror (Type 6) -------------------- */
+
+/** Route Mirror TLV Types */
+typedef enum {
+
+  /** BGP Message */
+  PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG = 0,
+
+  /** Information */
+  PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO = 1,
+
+} parsebgp_bmp_route_mirror_type_t;
+
+/** Route Mirror Information Codes */
+typedef enum {
+
+  /** Errored PDU */
+  PARSEBGP_BMP_ROUTE_MIRROR_INFO_ERROR_PDU = 0,
+
+  /** Messages Lost */
+  PARSEBGP_BMP_ROUTE_MIRROR_INFO_MSG_LOST = 1,
+
+} parsebgp_bmp_route_mirror_info_code_t;
+
+/** Route Mirror TLV */
+typedef struct parsebgp_bmp_route_mirror_tlv {
+
+  /** Type */
+  uint16_t type;
+
+  /** Length */
+  uint16_t len;
+
+  /** Values */
+  union {
+
+    /** BGP PDU */
+    parsebgp_bgp_msg_t bgp_msg;
+
+    /** Information Code (parsebgp_bmp_route_mirror_info_code_t) */
+    uint16_t code;
+
+  } values;
+
+} parsebgp_bmp_route_mirror_tlv_t;
+
+/** Route Mirror Message */
+typedef struct parsebgp_bmp_route_mirror {
+
+  /** Array of (tlvs_cnt) Route Mirroring TLVs */
+  parsebgp_bmp_route_mirror_tlv_t *tlvs;
+
+  /** (Inferred) number of TLVs */
+  int tlvs_cnt;
+
+} parsebgp_bmp_route_mirror_t;
+
+
 /*  -------------------- Common Headers -------------------- */
+
+/**
+ * BMP Peer Flags
+ */
+typedef enum parsebgp_bmp_peer_flag {
+
+  /** IPv6 Peer Address */
+  PARSEBGP_BMP_PEER_FLAG_IPV6 = 0x80,
+
+  /** Post-Policy Adj-RIB-In (i.e., not pre-policy) */
+  PARSEBGP_BMP_PEER_FLAG_POST_POLICY = 0x40,
+
+  /** Legacy 2-byte AS_PATH format */
+  PARSEBGP_BMP_PEER_FLAG_2_BYTE_AS_PATH = 0x20,
+
+} parsebgp_bmp_peer_flag_t;
 
 /**
  * BMP peer header
@@ -426,6 +500,9 @@ typedef struct parsebgp_bmp_msg {
   /** Union of structures for all supported BMP message types */
   union {
 
+    /** 0: PARSEBGP_BMP_TYPE_ROUTE_MON: Route Monitoring */
+    parsebgp_bgp_msg_t route_mon;
+
     /** 1: PARSEBGP_BMP_TYPE_STATS_REPORT: Stats Report */
     parsebgp_bmp_stats_report_t stats_report;
 
@@ -440,6 +517,9 @@ typedef struct parsebgp_bmp_msg {
 
     /** 5: PARSEBGP_BMP_TYPE_TERM_MSG: Termination Message */
     parsebgp_bmp_term_msg_t term_msg;
+
+    /** 6: PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG: Route Mirroring */
+    parsebgp_bmp_route_mirror_t route_mirror;
 
   } types;
 
