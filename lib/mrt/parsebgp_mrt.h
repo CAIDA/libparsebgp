@@ -363,6 +363,7 @@ typedef struct parsebgp_mrt_msg {
  * Decode (parse) a single MRT message from the given buffer into the given MRT
  * message structure.
  *
+ * @param [in] opts     Options for the parser
  * @param [in] msg      Pointer to the MRT Message structure to fill
  * @param [in] buf      Pointer to the start of a raw MRT message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
@@ -370,7 +371,8 @@ typedef struct parsebgp_mrt_msg {
  * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
-parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
+parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
+                                     parsebgp_mrt_msg_t *msg,
                                      uint8_t *buf, size_t *len);
 
 /** Destroy the given MRT message structure

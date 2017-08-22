@@ -529,6 +529,7 @@ typedef struct parsebgp_bmp_msg {
  * Decode (parse) a single BMP message from the given buffer into the given BMP
  * message structure.
  *
+ * @param [in] opts     Options for the parser
  * @param [in] msg      Pointer to the BMP Message structure to fill
  * @param [in] buffer   Pointer to the start of a raw BMP message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
@@ -536,7 +537,8 @@ typedef struct parsebgp_bmp_msg {
  * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
-parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
+parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
+                                     parsebgp_bmp_msg_t *msg,
                                      uint8_t *buffer, size_t *len);
 
 /** Destroy the given BMP message structure

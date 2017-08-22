@@ -13,7 +13,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-parsebgp_error_t parse_capabilities(parsebgp_opts_t opts,
+parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
                                     parsebgp_bgp_open_t *msg,
                                     uint8_t *buf, size_t *lenp,
                                     size_t remain)
@@ -105,7 +105,7 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t parse_params(parsebgp_opts_t opts,
+parsebgp_error_t parse_params(parsebgp_opts_t *opts,
                               parsebgp_bgp_open_t *msg,
                               uint8_t *buf, size_t *lenp,
                               size_t remain)
@@ -146,7 +146,7 @@ parsebgp_error_t parse_params(parsebgp_opts_t opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
                                           parsebgp_bgp_open_t *msg,
                                           uint8_t *buf, size_t *lenp,
                                           size_t remain)

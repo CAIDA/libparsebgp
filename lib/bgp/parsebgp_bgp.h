@@ -80,7 +80,7 @@ typedef struct parsebgp_bgp_msg {
  * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
-parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
                                      parsebgp_bgp_msg_t *msg,
                                      uint8_t *buffer, size_t *len);
 

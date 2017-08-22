@@ -39,15 +39,14 @@
     }                                                                          \
   } while (0)
 
-static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
+static parsebgp_error_t parse_table_dump(parsebgp_opts_t *opts,
+                                         parsebgp_mrt_afi_t afi,
                                          parsebgp_mrt_table_dump_t *msg,
                                          uint8_t *buf, size_t *lenp,
                                          size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  parsebgp_opts_t opts;
-  parsebgp_opts_init(&opts);
 
   // View Number
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->view_number);
@@ -224,7 +223,8 @@ destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 }
 
 static parsebgp_error_t
-parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+parse_table_dump_v2_rib_entries(parsebgp_opts_t *opts,
+                                parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                 parsebgp_mrt_table_dump_v2_rib_entry_t *entries,
                                 uint16_t entry_count, uint8_t *buf,
                                 size_t *lenp, size_t remain)
@@ -233,30 +233,28 @@ parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   int i;
   parsebgp_mrt_table_dump_v2_rib_entry_t *entry;
   parsebgp_error_t err;
-  parsebgp_opts_t opts;
-  parsebgp_opts_init(&opts);
 
-  opts.bgp.asn_4_byte = 1;
-  opts.bgp.mp_reach_no_afi_safi_reserved = 1;
+  opts->bgp.asn_4_byte = 1;
+  opts->bgp.mp_reach_no_afi_safi_reserved = 1;
   switch (subtype) {
   case RIB_IPV4_UNICAST:
-    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV4;
-    opts.bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
+    opts->bgp.afi = PARSEBGP_BGP_AFI_IPV4;
+    opts->bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
   case RIB_IPV4_MULTICAST:
-    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV4;
-    opts.bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
+    opts->bgp.afi = PARSEBGP_BGP_AFI_IPV4;
+    opts->bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
 
   case RIB_IPV6_UNICAST:
-    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV6;
-    opts.bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
+    opts->bgp.afi = PARSEBGP_BGP_AFI_IPV6;
+    opts->bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
   case RIB_IPV6_MULTICAST:
-    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV6;
-    opts.bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
+    opts->bgp.afi = PARSEBGP_BGP_AFI_IPV6;
+    opts->bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
 
   default:
@@ -310,7 +308,8 @@ static void destroy_table_dump_v2_rib_entries(
 }
 
 static parsebgp_error_t
-parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
+                                 parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                  parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg,
                                  uint8_t *buf, size_t *lenp, size_t remain)
 {
@@ -355,7 +354,7 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
   // and then parse the entries
   slen = len - nread;
-  if ((err = parse_table_dump_v2_rib_entries(subtype, msg->entries,
+  if ((err = parse_table_dump_v2_rib_entries(opts, subtype, msg->entries,
                                              msg->entry_count, buf, &slen,
                                              (remain - nread))) != PARSEBGP_OK) {
     return err;
@@ -377,7 +376,8 @@ static void destroy_table_dump_v2_afi_safi_rib(
 }
 
 static parsebgp_error_t
-parse_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+parse_table_dump_v2(parsebgp_opts_t *opts,
+                    parsebgp_mrt_table_dump_v2_subtype_t subtype,
                     parsebgp_mrt_table_dump_v2_t *msg, uint8_t *buf,
                     size_t *lenp, size_t remain)
 {
@@ -390,7 +390,7 @@ parse_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 
   case RIB_IPV4_UNICAST:
   case RIB_IPV6_UNICAST:
-    return parse_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib, buf,
+    return parse_table_dump_v2_afi_safi_rib(opts, subtype, &msg->afi_safi_rib, buf,
                                             lenp, remain);
     break;
 
@@ -432,7 +432,8 @@ static void destroy_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
 }
 
-static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
+static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
+                                     parsebgp_mrt_bgp4mp_subtype_t subtype,
                                      parsebgp_mrt_bgp4mp_t *msg,
                                      uint8_t *buf, size_t *lenp,
                                      size_t remain)
@@ -440,8 +441,6 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   size_t len = *lenp, nread = 0, slen = 0;
   uint16_t u16;
   parsebgp_error_t err;
-  parsebgp_opts_t opts;
-  parsebgp_opts_init(&opts);
 
   // ASN fields
   switch (subtype) {
@@ -522,7 +521,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
-    opts.bgp.asn_4_byte = 1;
+    opts->bgp.asn_4_byte = 1;
     // FALL THROUGH
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
@@ -618,7 +617,8 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
+parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
+                                     parsebgp_mrt_msg_t *msg,
                                      uint8_t *buf, size_t *len)
 {
   parsebgp_error_t err;
@@ -664,18 +664,18 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_mrt_msg_t *msg,
     break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
-    err = parse_table_dump(msg->subtype, &msg->types.table_dump, buf + nread,
+    err = parse_table_dump(opts, msg->subtype, &msg->types.table_dump, buf + nread,
                            &slen, remain);
     break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP_V2:
-    err = parse_table_dump_v2(msg->subtype, &msg->types.table_dump_v2,
+    err = parse_table_dump_v2(opts, msg->subtype, &msg->types.table_dump_v2,
                               buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_MRT_TYPE_BGP4MP:
   case PARSEBGP_MRT_TYPE_BGP4MP_ET:
-    err = parse_bgp4mp(msg->subtype, &msg->types.bgp4mp, buf + nread, &slen,
+    err = parse_bgp4mp(opts, msg->subtype, &msg->types.bgp4mp, buf + nread, &slen,
                        remain);
     break;
 

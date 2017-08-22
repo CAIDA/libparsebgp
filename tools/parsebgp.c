@@ -45,7 +45,7 @@ static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
   return len;
 }
 
-static int parse(parsebgp_msg_type_t type, char *fname)
+static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
 {
   uint8_t buf[BUFLEN];
   FILE *fp = NULL;
@@ -54,8 +54,6 @@ static int parse(parsebgp_msg_type_t type, char *fname)
   size_t dec_len = 0;
   uint8_t *ptr;
 
-  parsebgp_opts_t opts;
-  parsebgp_opts_init(&opts);
   parsebgp_msg_t *msg = NULL;
   parsebgp_error_t err = PARSEBGP_OK;
 
@@ -90,7 +88,8 @@ static int parse(parsebgp_msg_type_t type, char *fname)
               remain);
 
       dec_len = remain;
-      if ((err = parsebgp_decode(opts, type, msg, ptr, &dec_len)) != PARSEBGP_OK) {
+      if ((err = parsebgp_decode(*opts, type, msg, ptr, &dec_len)) !=
+          PARSEBGP_OK) {
         if (err == PARSEBGP_PARTIAL_MSG) {
           // refill the buffer and try again
           break;
@@ -143,6 +142,7 @@ static void usage()
           "usage: %s [options] [type:]file [[type:]file...]\n"
           "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
           "         (only required if using non-standard file extensions)\n"
+          "       -q                 Ignore unknown messages and attributes\n"
           "       -h                 Show this help message\n"
           "       -v                 Show version of the libparsebgp library\n",
           NAME);
@@ -154,13 +154,18 @@ int main(int argc, char **argv)
   int prevoptind;
   opterr = 0;
 
-  while (prevoptind = optind, (opt = getopt(argc, argv, ":t:vh?")) >= 0) {
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
+
+  while (prevoptind = optind, (opt = getopt(argc, argv, ":t:qvh?")) >= 0) {
     if (optind == prevoptind + 2 && (optarg == NULL || *optarg == '-')) {
       opt = ':';
       --optind;
     }
     switch (opt) {
-    // TODO add output format options (e.g., elem, bgpdump)
+    case 'q':
+      opts.ignore_not_implemented = 1;
+      break;
 
     case 'h':
     case '?':
@@ -226,7 +231,7 @@ int main(int argc, char **argv)
 
     fprintf(stderr, "INFO: Parsing %s (Type: %s)\n", fname, type_strs[type]);
 
-    if (parse(type, fname) != 0) {
+    if (parse(&opts, type, fname) != 0) {
       fprintf(stderr, "WARNING: Failed to parse %s%s\n", fname,
               (i == argc - 1) ? "" : ", moving on");
     }

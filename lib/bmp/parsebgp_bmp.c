@@ -195,14 +195,13 @@ static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg) {
 
 
 // Type 2:
-static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
+static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
+                                        parsebgp_bmp_peer_down_t *msg,
                                         uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  parsebgp_opts_t opts; // opts are unused in notification parser
-  parsebgp_opts_init(&opts);
 
   // Reason
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reason);
@@ -259,14 +258,13 @@ static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
 
 
 // Type 3:
-static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
+static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
+                                      parsebgp_bmp_peer_up_t *msg,
                                       uint8_t *buf, size_t *lenp,
                                       size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  parsebgp_opts_t opts; // opts are unused in OPEN parser
-  parsebgp_opts_init(&opts);
 
   // Local IP address
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_ip);
@@ -283,14 +281,16 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
           msg->local_port, msg->remote_port);
 
   slen = len - nread;
-  if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) != PARSEBGP_OK) {
+  if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) !=
+      PARSEBGP_OK) {
     return err;
   }
   nread += slen;
   buf += slen;
 
   slen = len - nread;
-  if ((err = parsebgp_bgp_decode(opts, &msg->recv_open, buf, &slen)) != PARSEBGP_OK) {
+  if ((err = parsebgp_bgp_decode(opts, &msg->recv_open, buf, &slen)) !=
+      PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -422,19 +422,19 @@ static void destroy_term_msg(parsebgp_bmp_term_msg_t *msg)
 
 
 // Type 6:
-static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
+static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
+                                               parsebgp_bmp_route_mirror_t *msg,
                                                uint8_t *buf, size_t *lenp,
                                                size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_bmp_route_mirror_tlv_t *tlv = NULL;
   parsebgp_error_t err;
-  parsebgp_opts_t opts;
-  parsebgp_opts_init(&opts);
+
   // TODO: correctly configure the BGP parser for 4-byte ASes etc.  for now,
   // assume that the peer is 4-byte capable. maybe consider adding code to the
   // BGP parser to fall back to 2-byte parsing if the 4-byte parser fails.
-  opts.bgp.asn_4_byte = 1;
+  opts->bgp.asn_4_byte = 1;
 
   msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
@@ -714,13 +714,12 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
 
 /* -------------------- Main BMP Parser ----------------------------- */
 
-parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
+parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
+                                     parsebgp_bmp_msg_t *msg,
                                      uint8_t *buf, size_t *len)
 {
   parsebgp_error_t err;
   size_t slen = 0, nread = 0, remain = 0;
-  parsebgp_opts_t opts;
-  parsebgp_opts_init(&opts);
 
   /* First, parse the message header */
   slen = *len;
@@ -750,7 +749,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
     // TODO: understand if it is sufficient to believe this flag
-    opts.bgp.asn_4_byte =
+    opts->bgp.asn_4_byte =
       !(msg->peer_hdr.flags & PARSEBGP_BMP_PEER_FLAG_2_BYTE_AS_PATH);
     err = parsebgp_bgp_decode(opts, &msg->types.route_mon, buf + nread, &slen);
     break;
@@ -761,11 +760,11 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
-    err = parse_peer_down(&msg->types.peer_down, buf + nread, &slen, remain);
+    err = parse_peer_down(opts, &msg->types.peer_down, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
-    err = parse_peer_up(&msg->types.peer_up, buf + nread, &slen, remain);
+    err = parse_peer_up(opts, &msg->types.peer_up, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_INIT_MSG:
@@ -777,7 +776,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
     break;
 
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    err = parse_route_mirror_msg(&msg->types.route_mirror, buf + nread, &slen,
+    err = parse_route_mirror_msg(opts, &msg->types.route_mirror, buf + nread, &slen,
                                  remain);
     break;
   }

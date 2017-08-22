@@ -387,7 +387,7 @@ destroy_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
   } while (0)
 
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
-  parsebgp_opts_t opts, parsebgp_bgp_update_path_attrs_t *path_attrs,
+  parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *path_attrs,
   uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
@@ -462,7 +462,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // Type 2:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
       if ((err =
-             parse_path_attr_as_path(opts.bgp.asn_4_byte, &attr->data.as_path,
+             parse_path_attr_as_path(opts->bgp.asn_4_byte, &attr->data.as_path,
                                      buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
@@ -503,7 +503,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
       // Type 7
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
-      if ((err = parse_path_attr_aggregator(opts.bgp.asn_4_byte,
+      if ((err = parse_path_attr_aggregator(opts->bgp.asn_4_byte,
                                             &attr->data.aggregator, buf, &slen,
                                             attr->len)) != PARSEBGP_OK) {
         return err;
@@ -736,7 +736,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
   msg->attrs_cnt = 0;
 }
 
-parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
                                             parsebgp_bgp_update_t *msg,
                                             uint8_t *buf, size_t *lenp,
                                             size_t remain)
