@@ -1,7 +1,7 @@
 #ifndef __PARSEBGP_BGP_OPEN_H
 #define __PARSEBGP_BGP_OPEN_H
 
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
@@ -114,7 +114,7 @@ typedef struct parsebgp_bgp_open {
 } parsebgp_bgp_open_t;
 
 /** Decode an OPEN message */
-parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_bgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t opts,
                                           parsebgp_bgp_open_t *msg,
                                           uint8_t *buf, size_t *lenp,
                                           size_t remain);

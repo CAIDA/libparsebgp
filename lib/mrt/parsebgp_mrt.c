@@ -46,7 +46,8 @@ static parsebgp_error_t parse_table_dump(parsebgp_mrt_afi_t afi,
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  parsebgp_bgp_opts_t opts = {0};
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
 
   // View Number
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->view_number);
@@ -231,30 +232,31 @@ parse_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   size_t len = *lenp, nread = 0, slen;
   int i;
   parsebgp_mrt_table_dump_v2_rib_entry_t *entry;
-  parsebgp_bgp_opts_t opts = {0};
   parsebgp_error_t err;
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
 
-  opts.asn_4_byte = 1;
-  opts.mp_reach_no_afi_safi_reserved = 1;
+  opts.bgp.asn_4_byte = 1;
+  opts.bgp.mp_reach_no_afi_safi_reserved = 1;
   switch (subtype) {
   case RIB_IPV4_UNICAST:
-    opts.afi = PARSEBGP_BGP_AFI_IPV4;
-    opts.safi = PARSEBGP_BGP_SAFI_UNICAST;
+    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV4;
+    opts.bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
   case RIB_IPV4_MULTICAST:
-    opts.afi = PARSEBGP_BGP_AFI_IPV4;
-    opts.safi = PARSEBGP_BGP_SAFI_MULTICAST;
+    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV4;
+    opts.bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
 
   case RIB_IPV6_UNICAST:
-    opts.afi = PARSEBGP_BGP_AFI_IPV6;
-    opts.safi = PARSEBGP_BGP_SAFI_UNICAST;
+    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV6;
+    opts.bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
   case RIB_IPV6_MULTICAST:
-    opts.afi = PARSEBGP_BGP_AFI_IPV6;
-    opts.safi = PARSEBGP_BGP_SAFI_MULTICAST;
+    opts.bgp.afi = PARSEBGP_BGP_AFI_IPV6;
+    opts.bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
 
   default:
@@ -438,7 +440,8 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   size_t len = *lenp, nread = 0, slen = 0;
   uint16_t u16;
   parsebgp_error_t err;
-  parsebgp_bgp_opts_t opts = {0};
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
 
   // ASN fields
   switch (subtype) {
@@ -519,7 +522,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
-    opts.asn_4_byte = 1;
+    opts.bgp.asn_4_byte = 1;
     // FALL THROUGH
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:

@@ -1,7 +1,7 @@
 #ifndef __PARSEBGP_BGP_NOTIFICATION_H
 #define __PARSEBGP_BGP_NOTIFICATION_H
 
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
@@ -175,7 +175,7 @@ typedef struct parsebgp_bgp_notification {
 
 /** Decode a NOTIFICATION message */
 parsebgp_error_t
-parsebgp_bgp_notification_decode(parsebgp_bgp_opts_t opts,
+parsebgp_bgp_notification_decode(parsebgp_opts_t opts,
                                  parsebgp_bgp_notification_t *msg, uint8_t *buf,
                                  size_t *lenp, size_t remain);
 

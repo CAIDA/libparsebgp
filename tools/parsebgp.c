@@ -54,7 +54,8 @@ static int parse(parsebgp_msg_type_t type, char *fname)
   size_t dec_len = 0;
   uint8_t *ptr;
 
-  parsebgp_opts_t opts = {{0}};
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
   parsebgp_msg_t *msg = NULL;
   parsebgp_error_t err = PARSEBGP_OK;
 

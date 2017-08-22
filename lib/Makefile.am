@@ -5,7 +5,10 @@ AM_CPPFLAGS =	-I$(top_srcdir)/lib	\
 		-I$(top_srcdir)/lib/bmp	\
 		-I$(top_srcdir)/lib/mrt
 
-include_HEADERS = parsebgp.h
+include_HEADERS = 		\
+	parsebgp.h		\
+	parsebgp_error.h	\
+	parsebgp_opts.h
 
 lib_LTLIBRARIES = libparsebgp.la
 
@@ -13,6 +16,8 @@ libparsebgp_la_SOURCES = 		\
 	parsebgp.c			\
 	parsebgp.h			\
 	parsebgp_error.h		\
+	parsebgp_opts.c			\
+	parsebgp_opts.h			\
 	parsebgp_utils.c		\
 	parsebgp_utils.h
 

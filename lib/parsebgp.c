@@ -22,7 +22,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
     break;
 
   case PARSEBGP_MSG_TYPE_BGP:
-    return parsebgp_bgp_decode(opts.bgp, &msg->types.bgp, buffer, len);
+    return parsebgp_bgp_decode(opts, &msg->types.bgp, buffer, len);
     break;
 
   default:

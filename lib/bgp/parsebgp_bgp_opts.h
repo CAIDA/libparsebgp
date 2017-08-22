@@ -37,4 +37,11 @@ typedef struct parsebgp_bgp_opts {
 
 } parsebgp_bgp_opts_t;
 
+/**
+ * Initialize parser options to default values
+ *
+ * @param opts          pointer to an opts structure to initialize
+ */
+void parsebgp_bgp_opts_init(parsebgp_bgp_opts_t *opts);
+
 #endif /* __PARSEBGP_BGP_OPTS_H */

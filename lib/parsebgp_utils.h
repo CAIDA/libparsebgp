@@ -43,6 +43,20 @@
     buf += sizeof(to);                                                         \
   } while (0)
 
+/** Convenience macro to either abort parsing or skip an unimplemented feature
+    depending on run-time configuration */
+#define PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, nread, remain, msg)                \
+  do {                                                                         \
+    if (opts.ignore_not_implemented) {                                         \
+      nread += remain;                                                         \
+      fprintf(stderr, "WARN: Skipping unimplemented feature: %s (%s:%d)\n",    \
+              msg, __FILE__, __line__);                                        \
+    } else {                                                                   \
+      fprintf(stderr, "ERROR: Unimplemented feature: %s\n", msg);              \
+      return PARSEBGP_NOT_IMPLEMENTED;                                         \
+    }                                                                          \
+  } while (0)
+
 /**
  * Convenience function to extract a prefix address from a buffer that uses
  * variable length encoding

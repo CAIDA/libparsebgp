@@ -136,7 +136,7 @@ parse_next_hop_afi_ipv4_ipv6_unicast(parsebgp_bgp_update_mp_reach_t *msg,
 }
 
 static parsebgp_error_t
-parse_reach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
+parse_reach_afi_ipv4_ipv6(parsebgp_opts_t opts,
                           parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
                           size_t *lenp, size_t remain)
 {
@@ -160,7 +160,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
     nread += slen;
     buf += slen;
 
-    if (opts.mp_reach_no_afi_safi_reserved) {
+    if (opts.bgp.mp_reach_no_afi_safi_reserved) {
       msg->reserved = 0;
     } else {
       // Reserved (always zero, apparently)
@@ -190,7 +190,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
 }
 
 static parsebgp_error_t
-parse_unreach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
+parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t opts,
                             parsebgp_bgp_update_mp_unreach_t *msg, uint8_t *buf,
                             size_t *lenp, size_t remain)
 {
@@ -223,7 +223,7 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_bgp_opts_t opts,
 }
 
 parsebgp_error_t
-parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
+parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t opts,
                                     parsebgp_bgp_update_mp_reach_t *msg,
                                     uint8_t *buf, size_t *lenp, size_t remain)
 {
@@ -238,13 +238,13 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_bgp_opts_t opts,
   // processing MRT data, and if it is zero (i.e. would indicate a next-hop
   // length of zero if the header was compressed), then we assume that the
   // header is in fact not compressed and we toggle the flag off in the options.
-  if (opts.mp_reach_no_afi_safi_reserved && *buf != 0) {
+  if (opts.bgp.mp_reach_no_afi_safi_reserved && *buf != 0) {
     fprintf(stderr, "DEBUG: Using MRT-provided AFI/SAFI\n");
-    msg->afi = opts.afi;
-    msg->safi = opts.safi;
+    msg->afi = opts.bgp.afi;
+    msg->safi = opts.bgp.safi;
   } else {
     // force off to force reading of "reserved" byte
-    opts.mp_reach_no_afi_safi_reserved = 0;
+    opts.bgp.mp_reach_no_afi_safi_reserved = 0;
 
     // AFI
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
@@ -289,7 +289,7 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
 }
 
 parsebgp_error_t
-parsebgp_bgp_update_mp_unreach_decode(parsebgp_bgp_opts_t opts,
+parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t opts,
                                       parsebgp_bgp_update_mp_unreach_t *msg,
                                       uint8_t *buf, size_t *lenp, size_t remain)
 {

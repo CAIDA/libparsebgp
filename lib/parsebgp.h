@@ -3,7 +3,7 @@
 
 #include "parsebgp_bmp.h"
 #include "parsebgp_bgp.h"
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_mrt.h"
 #include <inttypes.h>
 #include <unistd.h>
@@ -43,16 +43,6 @@ typedef struct parsebgp_msg {
   } types;
 
 } parsebgp_msg_t;
-
-/**
- * Parsing Options
- */
-typedef struct parsebgp_opts {
-
-  /** BGP-specific parsing options */
-  parsebgp_bgp_opts_t bgp;
-
-} parsebgp_opts_t;
 
 /**
  * Decode (parse) a single message of the given type from the given buffer into

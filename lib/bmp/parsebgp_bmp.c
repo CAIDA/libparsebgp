@@ -201,7 +201,8 @@ static parsebgp_error_t parse_peer_down(parsebgp_bmp_peer_down_t *msg,
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  parsebgp_bgp_opts_t opts = {0}; // opts are unused in notification parser
+  parsebgp_opts_t opts; // opts are unused in notification parser
+  parsebgp_opts_init(&opts);
 
   // Reason
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reason);
@@ -264,7 +265,8 @@ static parsebgp_error_t parse_peer_up(parsebgp_bmp_peer_up_t *msg,
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  parsebgp_bgp_opts_t opts = {0}; // opts are unused in OPEN parser
+  parsebgp_opts_t opts; // opts are unused in OPEN parser
+  parsebgp_opts_init(&opts);
 
   // Local IP address
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_ip);
@@ -427,11 +429,12 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg,
   size_t len = *lenp, nread = 0, slen;
   parsebgp_bmp_route_mirror_tlv_t *tlv = NULL;
   parsebgp_error_t err;
-  parsebgp_bgp_opts_t opts = {0};
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
   // TODO: correctly configure the BGP parser for 4-byte ASes etc.  for now,
   // assume that the peer is 4-byte capable. maybe consider adding code to the
   // BGP parser to fall back to 2-byte parsing if the 4-byte parser fails.
-  opts.asn_4_byte = 1;
+  opts.bgp.asn_4_byte = 1;
 
   msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
@@ -716,7 +719,8 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
 {
   parsebgp_error_t err;
   size_t slen = 0, nread = 0, remain = 0;
-  parsebgp_bgp_opts_t opts = {0};
+  parsebgp_opts_t opts;
+  parsebgp_opts_init(&opts);
 
   /* First, parse the message header */
   slen = *len;
@@ -746,7 +750,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_bmp_msg_t *msg,
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
     // TODO: understand if it is sufficient to believe this flag
-    opts.asn_4_byte =
+    opts.bgp.asn_4_byte =
       !(msg->peer_hdr.flags & PARSEBGP_BMP_PEER_FLAG_2_BYTE_AS_PATH);
     err = parsebgp_bgp_decode(opts, &msg->types.route_mon, buf + nread, &slen);
     break;

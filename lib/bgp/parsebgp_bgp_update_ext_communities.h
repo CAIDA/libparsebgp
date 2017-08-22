@@ -2,7 +2,7 @@
 #define __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H
 
 #include "parsebgp_bgp_common.h"
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>

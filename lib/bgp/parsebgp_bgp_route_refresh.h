@@ -1,7 +1,7 @@
 #ifndef __PARSEBGP_BGP_ROUTE_REFRESH_H
 #define __PARSEBGP_BGP_ROUTE_REFRESH_H
 
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
@@ -48,7 +48,7 @@ typedef struct parsebgp_bgp_route_refresh {
 
 /** Decode a ROUTE REFRESH message */
 parsebgp_error_t
-parsebgp_bgp_route_refresh_decode(parsebgp_bgp_opts_t opts,
+parsebgp_bgp_route_refresh_decode(parsebgp_opts_t opts,
                                   parsebgp_bgp_route_refresh_t *msg,
                                   uint8_t *buf, size_t *lenp, size_t remain);
 

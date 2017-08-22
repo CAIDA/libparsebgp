@@ -2,7 +2,7 @@
 #define __PARSEBGP_BGP_UPDATE_H
 
 #include "parsebgp_bgp_common.h"
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_bgp_update_ext_communities.h"
 #include "parsebgp_bgp_update_mp_reach.h"
 #include "parsebgp_error.h"
@@ -367,7 +367,7 @@ typedef struct parsebgp_bgp_update {
 } parsebgp_bgp_update_t;
 
 /** Decode an UPDATE message */
-parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_bgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t opts,
                                             parsebgp_bgp_update_t *msg,
                                             uint8_t *buf, size_t *lenp,
                                             size_t remain);
@@ -377,7 +377,7 @@ void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg);
 
 /** Decode PATH ATTRIBUTES */
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
-  parsebgp_bgp_opts_t opts, parsebgp_bgp_update_path_attrs_t *msg, uint8_t *buf,
+  parsebgp_opts_t opts, parsebgp_bgp_update_path_attrs_t *msg, uint8_t *buf,
   size_t *lenp, size_t remain);
 
 /** Destroy a Path Attributes message */

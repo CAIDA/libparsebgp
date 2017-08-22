@@ -3,7 +3,7 @@
 
 #include "parsebgp_bgp_notification.h"
 #include "parsebgp_bgp_open.h"
-#include "parsebgp_bgp_opts.h"
+#include "parsebgp_opts.h"
 #include "parsebgp_bgp_route_refresh.h"
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
@@ -80,7 +80,7 @@ typedef struct parsebgp_bgp_msg {
  * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
  * otherwise
  */
-parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t opts,
                                      parsebgp_bgp_msg_t *msg,
                                      uint8_t *buffer, size_t *len);
 

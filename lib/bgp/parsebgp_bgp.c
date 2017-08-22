@@ -28,7 +28,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bgp_msg_t *msg,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t parsebgp_bgp_decode(parsebgp_bgp_opts_t opts,
+parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t opts,
                                      parsebgp_bgp_msg_t *msg,
                                      uint8_t *buf, size_t *len)
 {
