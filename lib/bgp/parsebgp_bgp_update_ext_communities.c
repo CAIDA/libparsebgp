@@ -231,8 +231,6 @@ void parsebgp_bgp_update_ext_communities_destroy(
 static void dump_ext_community(parsebgp_bgp_update_ext_community_t *comm,
                                int depth)
 {
-  int i;
-
   PARSEBGP_DUMP_INT(depth, "Type", comm->type);
   PARSEBGP_DUMP_INT(depth, "Subtype", comm->subtype);
 
@@ -277,25 +275,14 @@ static void dump_ext_community(parsebgp_bgp_update_ext_community_t *comm,
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_OPAQUE:
     case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_OPAQUE:
-      PARSEBGP_DUMP_INFO(depth, "Opaque Data: ");
-      for (i = 0; i < 6; i++) {
-        if (i != 0) {
-          printf(" ");
-        }
-        printf("%02X", comm->types.opaque[i]);
-      }
-      printf("\n");
+      PARSEBGP_DUMP_DATA(depth, "Opaque Data", comm->types.opaque,
+                         sizeof(comm->types.opaque));
       break;
 
     default:
-      PARSEBGP_DUMP_INFO(depth, "Unknown Type Data: ");
-      for (i = 0; i < 7; i++) {
-        if (i != 0) {
-          printf(" ");
-        }
-        printf("%02X", comm->types.unknown[i]);
-      }
-      printf("\n");
+      PARSEBGP_DUMP_INFO(depth, "Unknown Type\n");
+      PARSEBGP_DUMP_DATA(depth, "Data", comm->types.unknown,
+                         sizeof(comm->types.unknown));
       break;
     }
 }

@@ -135,16 +135,7 @@ void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_msg_t, depth);
 
-  PARSEBGP_DUMP_INFO(depth, "Marker: ");
-  int i;
-  for (i = 0; i < 16; i++) {
-    if (i != 0) {
-      printf(" ");
-    }
-    printf("%02X", msg->marker[i]);
-  }
-  printf("\n");
-
+  PARSEBGP_DUMP_DATA(depth, "Marker", msg->marker, sizeof(msg->marker));
   PARSEBGP_DUMP_INT(depth, "Length", msg->len);
   PARSEBGP_DUMP_INT(depth, "Type", msg->type);
 
@@ -159,7 +150,6 @@ void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
     parsebgp_bgp_update_dump(&msg->types.update, depth);
     break;
 
-#if 0
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
     parsebgp_bgp_notification_dump(&msg->types.notification, depth);
     break;
@@ -171,7 +161,6 @@ void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
     parsebgp_bgp_route_refresh_dump(&msg->types.route_refresh, depth);
     break;
-#endif
 
   default:
     break;

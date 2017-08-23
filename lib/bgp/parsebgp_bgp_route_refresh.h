@@ -55,4 +55,18 @@ parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
 /** Destroy an ROUTE REFRESH message */
 void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg);
 
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed ROUTE-REFRESH message to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_route_refresh_dump(parsebgp_bgp_route_refresh_t *msg,
+                                    int depth);
+
 #endif /* __PARSEBGP_BGP_ROUTE_REFRESH_H */

@@ -52,3 +52,14 @@ void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg)
 
   free(msg->data);
 }
+
+void parsebgp_bgp_notification_dump(parsebgp_bgp_notification_t *msg,
+                                    int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_notification_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Error Code", msg->code);
+  PARSEBGP_DUMP_INT(depth, "Error Subcode", msg->subcode);
+  PARSEBGP_DUMP_INT(depth, "Data Length", msg->data_len);
+  PARSEBGP_DUMP_DATA(depth, "Data", msg->data, msg->data_len);
+}

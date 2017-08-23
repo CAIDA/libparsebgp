@@ -110,6 +110,23 @@
                        ip_buf, len);                                           \
   } while (0)
 
+#define PARSEBGP_DUMP_DATA(depth, name, data, len)                             \
+  do {                                                                         \
+    int _byte;                                                                 \
+    PARSEBGP_DUMP_INFO(depth, name ": ");                                      \
+    if ((len) == 0) {                                                          \
+      printf("NONE\n");                                                        \
+    } else {                                                                   \
+      for (_byte = 0; _byte < len; _byte++) {                                  \
+        if (_byte != 0) {                                                      \
+          printf(" ");                                                         \
+        }                                                                      \
+        printf("%02X", data[_byte]);                                           \
+      }                                                                        \
+      printf("\n");                                                            \
+    }                                                                          \
+  } while (0)
+
 /**
  * Convenience function to extract a prefix address from a buffer that uses
  * variable length encoding

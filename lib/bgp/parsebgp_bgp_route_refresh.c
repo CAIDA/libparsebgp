@@ -58,3 +58,15 @@ void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg)
 
   free(msg->data);
 }
+
+void parsebgp_bgp_route_refresh_dump(parsebgp_bgp_route_refresh_t *msg,
+                                     int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_route_refresh_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "AFI", msg->afi);
+  PARSEBGP_DUMP_INT(depth, "Subtype", msg->subtype);
+  PARSEBGP_DUMP_INT(depth, "SAFI", msg->safi);
+  PARSEBGP_DUMP_INT(depth, "Data Length", msg->data_len);
+  PARSEBGP_DUMP_DATA(depth, "Data", msg->data, msg->data_len);
+}
