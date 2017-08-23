@@ -6,13 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// for inet_ntop
-// TODO: remove
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-
 parsebgp_error_t
 parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
                                   parsebgp_bgp_route_refresh_t *msg,
