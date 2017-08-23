@@ -174,7 +174,8 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
 
       // u64 gauge
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.afi_safi_gauge.gauge_u64);
-      sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
+      sc->data.afi_safi_gauge.gauge_u64 =
+        ntohll(sc->data.afi_safi_gauge.gauge_u64);
       break;
     }
 
@@ -268,8 +269,24 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
-  // Local IP address
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_ip);
+  // copy the AFI into the header for convenience
+  msg->local_ip_afi = opts->bmp.peer_ip_afi;
+
+  if (msg->local_ip_afi == PARSEBGP_BGP_AFI_IPV4) {
+    if ((len - nread) < 16) {
+      return PARSEBGP_PARTIAL_MSG;
+    }
+    // skip over the empty bytes
+    nread += 12;
+    buf += 12;
+    // and read the v2 addr
+    memcpy(msg->local_ip, buf, 4);
+    nread += 4;
+    buf += 4;
+  } else {
+    // IPv6, copy the full 16-bytes as-is
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_ip);
+  }
 
   // Local port
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_port);
@@ -522,10 +539,43 @@ static void destroy_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
   msg->tlvs_cnt = 0;
 }
 
+static void dump_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_route_mirror_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "TLVs Count", msg->tlvs_cnt);
+
+  depth++;
+  int i;
+  parsebgp_bmp_route_mirror_tlv_t *tlv;
+
+  for (i = 0; i < msg->tlvs_cnt; i++) {
+    tlv = &msg->tlvs[i];
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_route_mirror_tlv_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Type", tlv->type);
+    PARSEBGP_DUMP_INT(depth, "Length", tlv->len);
+
+    switch (tlv->type) {
+    case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG:
+      parsebgp_bgp_dump_msg(&tlv->values.bgp_msg, depth + 1);
+      break;
+
+    case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO:
+      PARSEBGP_DUMP_INT(depth, "Code", tlv->values.code);
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
 
 /* -------------------- BMP Header Parsers -------------------- */
 
-static parsebgp_error_t parse_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr,
+static parsebgp_error_t parse_peer_hdr(parsebgp_opts_t *opts,
+                                       parsebgp_bmp_peer_hdr_t *hdr,
                                        uint8_t *buf, size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
@@ -536,11 +586,41 @@ static parsebgp_error_t parse_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr,
   // Flags
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->flags);
 
+  // pass some of our flags back in the options so other parts of the parser can
+  // use them
+  if ((hdr->flags & PARSEBGP_BMP_PEER_FLAG_IPV6)) {
+    hdr->afi = PARSEBGP_BGP_AFI_IPV6;
+  } else {
+    hdr->afi = PARSEBGP_BGP_AFI_IPV4;
+  }
+  opts->bmp.peer_ip_afi = hdr->afi;
+
   // Route distinguisher
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->dist_id);
 
   // IP Address
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->addr);
+  //
+  // BMP for some reason writes IPv4 addresses into the least-significant bytes,
+  // meaning that it is stuck at [12, 13, 14, 15] in the hdr->addr byte array.
+  // we need to rescue it
+  if (hdr->afi == PARSEBGP_BGP_AFI_IPV4) {
+    if ((len - nread) < 16) {
+      return PARSEBGP_PARTIAL_MSG;
+    }
+    // skip over the empty bytes
+    nread += 12;
+    buf += 12;
+    // and read the v2 addr
+    memcpy(hdr->addr, buf, 4);
+    nread += 4;
+    buf += 4;
+    // note that this will leave trailing garbage in the address, but you
+    // weren't planning on reading more bytes than the peer flags suggests
+    // anyway, right?
+  } else {
+    // IPv6, copy the full 16-bytes as-is
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->addr);
+  }
 
   // AS Number
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->asn);
@@ -562,7 +642,8 @@ static parsebgp_error_t parse_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr,
   return PARSEBGP_OK;
 }
 
-static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
+static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
+                                            parsebgp_bmp_msg_t *msg,
                                             uint8_t *buf, size_t *lenp)
 {
   parsebgp_error_t err;
@@ -576,7 +657,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
 
   // All v1/2 messages include the peer header
   slen = len;
-  if ((err = parse_peer_hdr(&msg->peer_hdr, buf, &slen)) != PARSEBGP_OK) {
+  if ((err = parse_peer_hdr(opts, &msg->peer_hdr, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -631,7 +712,8 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_bmp_msg_t *msg,
   return PARSEBGP_OK;
 }
 
-static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
+static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
+                                            parsebgp_bmp_msg_t *msg,
                                             uint8_t *buf, size_t *lenp)
 {
   parsebgp_error_t err;
@@ -662,7 +744,8 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
   case PARSEBGP_BMP_TYPE_PEER_UP:      // Peer Up notification
   case PARSEBGP_BMP_TYPE_PEER_DOWN:    // Peer down notification
     slen = len;
-    if ((err = parse_peer_hdr(&msg->peer_hdr, buf, &slen)) != PARSEBGP_OK) {
+    if ((err = parse_peer_hdr(opts, &msg->peer_hdr, buf, &slen)) !=
+        PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -681,7 +764,8 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_bmp_msg_t *msg,
   return PARSEBGP_OK;
 }
 
-static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
+static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
+                                         parsebgp_bmp_msg_t *msg, uint8_t *buf,
                                          size_t *lenp)
 {
   parsebgp_error_t err;
@@ -696,7 +780,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
     // Versions 1 and 2 use the same format, but v2 adds the Peer Up message
   case 2:
     slen = len - nread;
-    if ((err = parse_common_hdr_v2(msg, buf, &slen)) != PARSEBGP_OK) {
+    if ((err = parse_common_hdr_v2(opts, msg, buf, &slen)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -704,7 +788,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bmp_msg_t *msg, uint8_t *buf,
 
   case 3:
     slen = len - nread;
-    if ((err = parse_common_hdr_v3(msg, buf, &slen)) != PARSEBGP_OK) {
+    if ((err = parse_common_hdr_v3(opts, msg, buf, &slen)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -729,7 +813,7 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
 
   /* First, parse the message header */
   slen = *len;
-  if ((err = parse_common_hdr(msg, buf, &slen)) != PARSEBGP_OK) {
+  if ((err = parse_common_hdr(opts, msg, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -766,7 +850,8 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
-    err = parse_peer_down(opts, &msg->types.peer_down, buf + nread, &slen, remain);
+    err =
+      parse_peer_down(opts, &msg->types.peer_down, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
@@ -782,8 +867,8 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    err = parse_route_mirror_msg(opts, &msg->types.route_mirror, buf + nread, &slen,
-                                 remain);
+    err = parse_route_mirror_msg(opts, &msg->types.route_mirror, buf + nread,
+                                 &slen, remain);
     break;
   }
   if (err != PARSEBGP_OK) {

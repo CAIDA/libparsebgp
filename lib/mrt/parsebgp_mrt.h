@@ -7,19 +7,6 @@
 #include <stdlib.h>
 
 /**
- * MRT Address Families
- */
-typedef enum {
-
-  /** IPv4 Address */
-  PARSEBGP_MRT_AFI_IPV4 = 1,
-
-  /** IPv6 Address */
-  PARSEBGP_MRT_AFI_IPV6 = 2,
-
-} parsebgp_mrt_afi_t;
-
-/**
  * MRT ASN Types (2 or 4 byte)
  */
 typedef enum {
@@ -78,10 +65,10 @@ typedef struct parsebgp_mrt_table_dump_v2_peer_entry {
   parsebgp_mrt_asn_type_t asn_type;
 
   /** Peer IP AFI */
-  parsebgp_mrt_afi_t ip_afi;
+  parsebgp_bgp_afi_t ip_afi;
 
   /** Peer BGP ID */
-  uint8_t bgp_id[4];
+  uint32_t bgp_id;
 
   /** Peer IP Address */
   uint8_t ip[16];
@@ -97,7 +84,7 @@ typedef struct parsebgp_mrt_table_dump_v2_peer_entry {
 typedef struct parsebgp_mrt_table_dump_v2_peer_index {
 
   /** Collector BGP ID */
-  uint8_t collector_bgp_id[4];
+  uint32_t collector_bgp_id;
 
   /** View Name Length */
   uint16_t view_name_len;
@@ -270,7 +257,7 @@ typedef struct parsebgp_mrt_bgp4mp {
   /** Interface Index */
   uint16_t interface_index;
 
-  /** Address Family (parsebgp_mrt_afi_t) */
+  /** Address Family (parsebgp_bgp_afi_t) */
   uint16_t afi;
 
   /** Peer IP Address */

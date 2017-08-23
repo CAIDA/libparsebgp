@@ -230,6 +230,9 @@ typedef struct parsebgp_bmp_peer_up {
   /** Local IP address associated with the peering connection */
   uint8_t local_ip[16];
 
+  /** (Inferred) Local IP Address AFI (based on peer header flags) */
+  parsebgp_bgp_afi_t local_ip_afi;
+
   /** Local port associated with the connection */
   uint16_t local_port;
 
@@ -429,6 +432,9 @@ typedef struct parsebgp_bmp_peer_hdr {
 
   /** Peer IP Address */
   uint8_t addr[16];
+
+  /** (Inferred) Peer IP AFI (based on flags) */
+  parsebgp_bgp_afi_t afi;
 
   /** Peer ASN */
   uint32_t asn;

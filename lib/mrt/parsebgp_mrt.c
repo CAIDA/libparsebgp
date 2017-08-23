@@ -21,7 +21,7 @@
 #define DESERIALIZE_IP(afi, buf, len, nread, to)                               \
   do {                                                                         \
     switch ((afi)) {                                                           \
-    case PARSEBGP_MRT_AFI_IPV4:                                                \
+    case PARSEBGP_BGP_AFI_IPV4:                                                \
       if (len - nread < sizeof(uint32_t)) {                                    \
         return PARSEBGP_PARTIAL_MSG;                                                 \
       }                                                                        \
@@ -30,7 +30,7 @@
       buf += sizeof(uint32_t);                                                 \
       break;                                                                   \
                                                                                \
-    case PARSEBGP_MRT_AFI_IPV6:                                                \
+    case PARSEBGP_BGP_AFI_IPV6:                                                \
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, to);                           \
       break;                                                                   \
                                                                                \
@@ -40,7 +40,7 @@
   } while (0)
 
 static parsebgp_error_t parse_table_dump(parsebgp_opts_t *opts,
-                                         parsebgp_mrt_afi_t afi,
+                                         parsebgp_bgp_afi_t afi,
                                          parsebgp_mrt_table_dump_t *msg,
                                          uint8_t *buf, size_t *lenp,
                                          size_t remain)
@@ -101,7 +101,7 @@ static parsebgp_error_t parse_table_dump(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-static void destroy_table_dump(parsebgp_mrt_afi_t afi,
+static void destroy_table_dump(parsebgp_bgp_afi_t afi,
                                parsebgp_mrt_table_dump_t *msg)
 {
   parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
@@ -144,7 +144,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   msg->peer_count = ntohs(msg->peer_count);
 
   fprintf(stderr, "DEBUG: Peer Index Table\n");
-  fprintf(stderr, "DEBUG: Collector ID: %x\n", *(uint32_t*)msg->collector_bgp_id);
+  fprintf(stderr, "DEBUG: Collector ID: %x\n", msg->collector_bgp_id);
   fprintf(stderr, "DEBUG: View Name (len: %d): %s\n", msg->view_name_len,
           msg->view_name == NULL ? "" : msg->view_name);
   fprintf(stderr, "DEBUG: Peers (%d)\n", msg->peer_count);
@@ -192,7 +192,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
     fprintf(stderr, "DEBUG: -------------------- %d\n", i);
     fprintf(stderr, "DEBUG: Peer ASN Type: %d, Peer IP AFI: %d\n", pe->asn_type,
             pe->ip_afi);
-    fprintf(stderr, "DEBUG: Peer BGP ID: %x\n", *(uint32_t*)pe->bgp_id);
+    fprintf(stderr, "DEBUG: Peer BGP ID: %x\n", pe->bgp_id);
     int mapping[] = {-1, AF_INET, AF_INET6};
     char ip_buf[INET6_ADDRSTRLEN];
     inet_ntop(mapping[pe->ip_afi], pe->ip, ip_buf, INET6_ADDRSTRLEN);
@@ -340,8 +340,8 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
   int mapping[] = {-1, AF_INET, AF_INET6};
   char ip_buf[INET6_ADDRSTRLEN];
   int afi = (subtype == RIB_IPV4_UNICAST || subtype == RIB_IPV4_MULTICAST)
-              ? PARSEBGP_MRT_AFI_IPV4
-              : PARSEBGP_MRT_AFI_IPV6;
+              ? PARSEBGP_BGP_AFI_IPV4
+              : PARSEBGP_BGP_AFI_IPV6;
   inet_ntop(mapping[afi], msg->prefix, ip_buf, INET6_ADDRSTRLEN);
   fprintf(stderr, "DEBUG: Prefix: %s/%d, Entry Count: %d\n",
           ip_buf, msg->prefix_len, msg->entry_count);

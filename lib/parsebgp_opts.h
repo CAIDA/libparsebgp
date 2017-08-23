@@ -2,6 +2,7 @@
 #define __PARSEBGP_OPTS_H
 
 #include "parsebgp_bgp_opts.h"
+#include "parsebgp_bmp_opts.h"
 
 /**
  * Parsing Options
@@ -25,6 +26,9 @@ typedef struct parsebgp_opts {
 
   /** BGP-specific parsing options */
   parsebgp_bgp_opts_t bgp;
+
+  /** BMP-specific parsing options */
+  parsebgp_bmp_opts_t bmp;
 
 } parsebgp_opts_t;
 
