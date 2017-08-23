@@ -406,6 +406,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 {
   size_t len = *lenp, nread = 0, slen = 0;
   parsebgp_bgp_update_path_attr_t *attr;
+  uint8_t flags_tmp, type_tmp;
+  uint16_t len_tmp;
   uint8_t u8;
   parsebgp_error_t err = PARSEBGP_OK;
 
@@ -425,7 +427,34 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
   // read and realloc until we run out of attributes
   while (nread < path_attrs->len) {
-    // optimistically allocate a new path attribute object
+    // read the flags, type and length before allocating in case the user has
+    // specified a filter to skip this attribute
+
+    // Attribute Flags
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, flags_tmp);
+
+    // Attribute Type
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, type_tmp);
+
+    // Attribute Length
+    if (flags_tmp & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) {
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, len_tmp);
+      len_tmp = ntohs(len_tmp);
+    } else {
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
+      len_tmp = u8;
+    }
+
+    // has the user enabled the filter, and have they (implicitly) filtered out
+    // this type of attribute
+    if (opts->bgp.path_attr_filter_enabled &&
+        opts->bgp.path_attr_filter[type_tmp] == 0) {
+      // they don't want it. skip over the rest of the attribute
+      nread += len_tmp;
+      buf += len_tmp;
+      continue;
+    }
+
     if ((path_attrs->attrs = realloc(
            path_attrs->attrs, sizeof(parsebgp_bgp_update_path_attr_t) *
                                 ((path_attrs->attrs_cnt) + 1))) == NULL) {
@@ -436,19 +465,13 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     path_attrs->attrs_cnt++;
 
     // Attribute Flags
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->flags);
+    attr->flags = flags_tmp;
 
     // Attribute Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->type);
+    attr->type = type_tmp;
 
     // Attribute Length
-    if (attr->flags & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) {
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->len);
-      attr->len = ntohs(attr->len);
-    } else {
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
-      attr->len = u8;
-    }
+    attr->len = len_tmp;
 
     if (attr->len > (remain - nread)) {
       return PARSEBGP_INVALID_MSG;

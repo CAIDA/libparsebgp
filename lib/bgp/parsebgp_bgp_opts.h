@@ -35,6 +35,24 @@ typedef struct parsebgp_bgp_opts {
    */
   uint8_t safi;
 
+  /**
+   * Should only some UPDATE Path Attributes be parsed?
+   *
+   * If this is set, the path_attr_filter array is checked for each Path
+   * Attribute type (ATTR_TYPE) found. If path_attr_filter[ATTR_TYPE] is set,
+   * then the Path Attribute is parsed, otherwise it is skipped.
+   */
+  int path_attr_filter_enabled;
+
+  /**
+   * Path Attribute Filter array.
+   *
+   * There is one flag per Path Attribute Type, indicating whether the given
+   * Path Attribute should be parsed (see documentation for
+   * path_attr_filter_enabled for more information).
+   */
+  uint8_t path_attr_filter[UINT8_MAX];
+
 } parsebgp_bgp_opts_t;
 
 /**
