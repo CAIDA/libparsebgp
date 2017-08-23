@@ -160,7 +160,8 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   msg->peer_count = ntohs(msg->peer_count);
 
   fprintf(stderr, "DEBUG: Peer Index Table\n");
-  fprintf(stderr, "DEBUG: Collector ID: %x\n", msg->collector_bgp_id);
+  fprintf(stderr, "DEBUG: Collector ID: %x\n",
+          *(uint32_t *)msg->collector_bgp_id);
   fprintf(stderr, "DEBUG: View Name (len: %d): %s\n", msg->view_name_len,
           msg->view_name == NULL ? "" : msg->view_name);
   fprintf(stderr, "DEBUG: Peers (%d)\n", msg->peer_count);
@@ -208,7 +209,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
     fprintf(stderr, "DEBUG: -------------------- %d\n", i);
     fprintf(stderr, "DEBUG: Peer ASN Type: %d, Peer IP AFI: %d\n", pe->asn_type,
             pe->ip_afi);
-    fprintf(stderr, "DEBUG: Peer BGP ID: %x\n", pe->bgp_id);
+    fprintf(stderr, "DEBUG: Peer BGP ID: %x\n", *(uint32_t*)pe->bgp_id);
     int mapping[] = {-1, AF_INET, AF_INET6};
     char ip_buf[INET6_ADDRSTRLEN];
     inet_ntop(mapping[pe->ip_afi], pe->ip, ip_buf, INET6_ADDRSTRLEN);

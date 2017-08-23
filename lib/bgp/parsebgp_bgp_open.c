@@ -166,7 +166,6 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
 
   // BGP ID
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->bgp_id);
-  msg->bgp_id = ntohl(msg->bgp_id);
 
   // Parameters Length
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->param_len);
@@ -174,7 +173,8 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
   fprintf(stderr,
           "DEBUG: BGP OPEN: Version: %d, ASN: %d, Hold Time: %d, BGP ID: %x, "
           "Params Len: %d\n",
-          msg->version, msg->asn, msg->hold_time, msg->bgp_id, msg->param_len);
+          msg->version, msg->asn, msg->hold_time, *(uint32_t *)msg->bgp_id,
+          msg->param_len);
 
   // no params
   if (msg->param_len == 0) {

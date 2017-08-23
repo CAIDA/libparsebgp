@@ -98,8 +98,8 @@ typedef struct parsebgp_bgp_open {
   /** Hold Time */
   uint16_t hold_time;
 
-  /** BGP ID of sender */
-  uint32_t bgp_id;
+  /** BGP ID of sender (Network byte order) */
+  uint8_t bgp_id[4];
 
   /** Parameters Length (in bytes) */
   uint8_t param_len;

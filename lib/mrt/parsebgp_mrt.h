@@ -67,8 +67,8 @@ typedef struct parsebgp_mrt_table_dump_v2_peer_entry {
   /** Peer IP AFI */
   parsebgp_bgp_afi_t ip_afi;
 
-  /** Peer BGP ID */
-  uint32_t bgp_id;
+  /** Peer BGP ID (Network byte order) */
+  uint8_t bgp_id[4];
 
   /** Peer IP Address */
   uint8_t ip[16];
@@ -83,8 +83,8 @@ typedef struct parsebgp_mrt_table_dump_v2_peer_entry {
  */
 typedef struct parsebgp_mrt_table_dump_v2_peer_index {
 
-  /** Collector BGP ID */
-  uint32_t collector_bgp_id;
+  /** Collector BGP ID (Network byte order) */
+  uint8_t collector_bgp_id[4];
 
   /** View Name Length */
   uint16_t view_name_len;
