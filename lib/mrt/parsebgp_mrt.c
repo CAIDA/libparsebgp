@@ -100,8 +100,7 @@ static void dump_table_dump(parsebgp_bgp_afi_t afi,
   PARSEBGP_DUMP_IP(depth, "Peer IP", afi, msg->peer_ip);
   PARSEBGP_DUMP_INT(depth, "Peer ASN", msg->peer_asn);
 
-  // TODO
-  // parsebgp_bgp_update_path_atrs_dump(&msg->path_attrs, depth + 1);
+   parsebgp_bgp_update_path_attrs_dump(&msg->path_attrs, depth + 1);
 }
 
 static parsebgp_error_t
@@ -390,8 +389,7 @@ dump_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     PARSEBGP_DUMP_INT(depth, "Peer Index", entry->peer_index);
     PARSEBGP_DUMP_INT(depth, "Originated Time", entry->originated_time);
 
-    // TODO:
-    // parsebgp_bgp_update_path_atrs_dump(&entry->path_attrs, depth + 1);
+    parsebgp_bgp_update_path_attrs_dump(&entry->path_attrs, depth + 1);
   }
 }
 
