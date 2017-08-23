@@ -229,6 +229,9 @@ static void dump_attr_communities(parsebgp_bgp_update_communities_t *msg,
   PARSEBGP_DUMP_INFO(depth, "Communities: ");
   int i;
   for (i = 0; i < msg->communities_cnt; i++) {
+    if (i != 0) {
+      printf(" ");
+    }
     printf("%" PRIu16 ":%" PRIu16, (uint16_t)(msg->communities[i] >> 16),
            (uint16_t)msg->communities[i]);
   }
@@ -276,11 +279,13 @@ static void dump_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
   PARSEBGP_DUMP_INFO(depth, "Cluster IDs: ");
   int i;
   for (i = 0; i < msg->cluster_ids_cnt; i++) {
-    printf("%"PRIu32, msg->cluster_ids[i]);
+    if (i != 0) {
+      printf(" ");
+    }
+    printf("%" PRIu32, msg->cluster_ids[i]);
   }
   printf("\n");
 }
-
 
 static parsebgp_error_t
 parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
@@ -356,6 +361,9 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
   parsebgp_bgp_update_large_community_t *comm;
   for (i = 0; i < msg->communities_cnt; i++) {
     comm = &msg->communities[i];
+    if (i != 0) {
+      printf(" ");
+    }
     printf("%" PRIu32 ":%" PRIu32 ":%" PRIu32 " ", comm->global_admin,
            comm->local_1, comm->local_2);
   }
