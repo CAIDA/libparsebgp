@@ -4,7 +4,14 @@
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+
+// for inet_ntop
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 /** Internal to the STR macro */
 #define XSTR(a) #a
@@ -57,6 +64,50 @@
               __VA_ARGS__, __FILE__, __LINE__);                                \
       return PARSEBGP_NOT_IMPLEMENTED;                                         \
     }                                                                          \
+  } while (0)
+
+#define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
+  do {                                                                         \
+    int i;                                                                     \
+    for (i = 0; i < depth; i++) {                                              \
+      if (i == depth - 1) {                                                    \
+        printf(" ");                                                           \
+      } else {                                                                 \
+        printf("  ");                                                          \
+      }                                                                        \
+    }                                                                          \
+    printf(">> " STR(struct_name) " (%ld bytes):\n", sizeof(struct_name));     \
+  } while (0)
+
+#define PARSEBGP_DUMP_INFO(depth, ...)                                         \
+  do {                                                                         \
+    int i;                                                                     \
+    printf(" ");                                                        \
+    for (i = 0; i < depth; i++) {                                             \
+      printf("  ");                                                            \
+    }                                                                          \
+    printf(__VA_ARGS__);                                                       \
+  } while (0)
+
+#define PARSEBGP_DUMP_INT(depth, name, val)                                    \
+  PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20-(int)strlen(name ": "), (int)val);
+
+#define PARSEBGP_DUMP_IP(depth, name, afi, ipaddr)                             \
+  do {                                                                         \
+    int mapping[] = {-1, AF_INET, AF_INET6};                                   \
+    char ip_buf[INET6_ADDRSTRLEN];                                             \
+    inet_ntop(mapping[afi], ipaddr, ip_buf, INET6_ADDRSTRLEN);                 \
+    PARSEBGP_DUMP_INFO(depth, name ": %*s\n", 20 - (int)strlen(name ": "),     \
+                       ip_buf);                                                \
+  } while (0)
+
+#define PARSEBGP_DUMP_PFX(depth, name, afi, ipaddr, len)                       \
+  do {                                                                         \
+    int mapping[] = {-1, AF_INET, AF_INET6};                                   \
+    char ip_buf[INET6_ADDRSTRLEN];                                             \
+    inet_ntop(mapping[afi], ipaddr, ip_buf, INET6_ADDRSTRLEN);                 \
+    PARSEBGP_DUMP_INFO(depth, name ": %*s/%d\n", 20 - (int)strlen(name ": "),  \
+                       ip_buf, len);                                           \
   } while (0)
 
 /**

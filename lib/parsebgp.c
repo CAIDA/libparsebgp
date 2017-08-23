@@ -39,10 +39,6 @@ parsebgp_msg_t *parsebgp_create_msg()
     return NULL;
   }
 
-  fprintf(stderr,
-          "DEBUG: size of parsebgp_msg_t (excluding dynamic memory): %d\n",
-          (int)sizeof(parsebgp_msg_t));
-
   // TODO: other init for the msg here
 
   return msg;
@@ -73,4 +69,30 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg)
   }
 
   free(msg);
+}
+
+void parsebgp_dump_msg(parsebgp_msg_t *msg)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_msg_t, 0);
+  PARSEBGP_DUMP_INT(0, "Type", msg->type);
+
+  switch (msg->type) {
+  case PARSEBGP_MSG_TYPE_MRT:
+    parsebgp_mrt_dump_msg(&msg->types.mrt, 1);
+    break;
+
+  case PARSEBGP_MSG_TYPE_BMP:
+    parsebgp_bmp_dump_msg(&msg->types.bmp, 1);
+    break;
+
+  case PARSEBGP_MSG_TYPE_BGP:
+    parsebgp_bgp_dump_msg(&msg->types.bgp, 1);
+    break;
+
+  default:
+    PARSEBGP_DUMP_INFO(0, "UNKNOWN MESSAGE TYPE\n");
+    break;
+  }
+
+  printf("\n");
 }

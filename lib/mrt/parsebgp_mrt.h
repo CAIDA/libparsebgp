@@ -371,4 +371,17 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
  */
 void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg);
 
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed message to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_mrt_dump_msg(parsebgp_mrt_msg_t *msg, int depth);
+
 #endif /* __PARSEBGP_MRT_H */

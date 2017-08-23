@@ -64,7 +64,8 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
                                  parsebgp_msg_t *msg, uint8_t *buffer,
                                  size_t *len);
 
-/** Create an empty message structure
+/**
+ * Create an empty message structure
  *
  * @return pointer to a fresh message structure
  *
@@ -73,10 +74,23 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
  */
 parsebgp_msg_t *parsebgp_create_msg();
 
-/** Destroy the given message structure
+/**
+ * Destroy the given message structure
  *
  * @param msg           Pointer to message structure to destroy
  */
 void parsebgp_destroy_msg(parsebgp_msg_t *msg);
+
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed message to dump
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_dump_msg(parsebgp_msg_t *msg);
 
 #endif // __PARSEBGP_H

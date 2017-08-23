@@ -87,6 +87,22 @@ static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
   *tlvs_cnt = 0;
 }
 
+static void dump_info_tlvs(parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
+                           int depth)
+{
+  int i;
+  parsebgp_bmp_info_tlv_t *tlv;
+
+  for (i = 0; i < tlvs_cnt; i++) {
+    tlv = &tlvs[i];
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_info_tlv_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Type", tlv->type);
+    PARSEBGP_DUMP_INT(depth, "Length", tlv->len);
+    PARSEBGP_DUMP_INFO(depth, "Value: '%.*s'\n", tlv->len, tlv->info);
+  }
+}
+
 
 /* -------------------- BMP Message Type Parsers -------------------- */
 
@@ -194,6 +210,60 @@ static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg) {
   msg->stats_count = 0;
 }
 
+static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_stats_report_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Stats Count", msg->stats_count);
+
+  depth++;
+  int i;
+  parsebgp_bmp_stats_counter_t *sc;
+  for (i = 0; i < msg->stats_count; i++) {
+    sc = &msg->counters[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_stats_counter_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Type", sc->type);
+    PARSEBGP_DUMP_INT(depth, "Length", sc->len);
+
+    switch (sc->type) {
+      // 32-bit counter types:
+    case PARSEBGP_BMP_STATS_PREFIX_REJECTS:
+    case PARSEBGP_BMP_STATS_PREFIX_DUPS:
+    case PARSEBGP_BMP_STATS_WITHDRAW_DUP:
+    case PARSEBGP_BMP_STATS_INVALID_CLUSTER_LIST:
+    case PARSEBGP_BMP_STATS_INVALID_AS_PATH_LOOP:
+    case PARSEBGP_BMP_STATS_INVALID_ORIGINATOR_ID:
+    case PARSEBGP_BMP_STATS_INVALID_AS_CONFED_LOOP:
+    case PARSEBGP_BMP_STATS_UPD_TREAT_AS_WITHDRAW:
+    case PARSEBGP_BMP_STATS_PREFIX_TREAT_AS_WITHDRAW:
+    case PARSEBGP_BMP_STATS_DUP_UPD:
+      PARSEBGP_DUMP_INT(depth, "u32", sc->data.counter_u32);
+      break;
+
+      // 64-bit gauge types:
+    case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
+    case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
+      PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
+      break;
+
+      // AFI/SAFI 64-bit gauge types:
+    case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_ADJ_RIB_IN:
+    case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_LOC_RIB:
+      // AFI
+      PARSEBGP_DUMP_INT(depth, "AFI", sc->data.afi_safi_gauge.afi);
+
+      // SAFI
+      PARSEBGP_DUMP_INT(depth, "SAFI", sc->data.afi_safi_gauge.safi);
+
+      // u64 gauge
+      PARSEBGP_DUMP_INT(depth, "u64", sc->data.afi_safi_gauge.gauge_u64);
+      break;
+    }
+  }
+}
+
 
 // Type 2:
 static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
@@ -255,6 +325,30 @@ static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
   default:
     // nothing to do
+    break;
+  }
+}
+
+static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_peer_down_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Reason", msg->reason);
+
+  depth++;
+  switch (msg->reason) {
+    // Reasons with a BGP NOTIFICATION message
+  case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
+  case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
+    // TODO
+    //parsebgp_bgp_dump_msg(&msg->data.notification, depth);
+    break;
+
+  case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
+    PARSEBGP_DUMP_INT(depth, "FSM Code", msg->data.fsm_code);
+    break;
+
+  default:
     break;
   }
 }
@@ -329,6 +423,28 @@ static void destroy_peer_up(parsebgp_bmp_peer_up_t *msg)
   destroy_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
 }
 
+static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_peer_up_t, depth);
+
+  PARSEBGP_DUMP_IP(depth, "Local IP", msg->local_ip_afi, msg->local_ip);
+  PARSEBGP_DUMP_INT(depth, "Local Port", msg->local_port);
+  PARSEBGP_DUMP_INT(depth, "Remote Port", msg->remote_port);
+
+  PARSEBGP_DUMP_INFO(depth, "Sent OPEN:\n");
+  parsebgp_bgp_dump_msg(&msg->sent_open, depth + 1);
+
+  PARSEBGP_DUMP_INFO(depth, "Received OPEN:\n");
+  parsebgp_bgp_dump_msg(&msg->recv_open, depth + 1);
+
+  PARSEBGP_DUMP_INT(depth, "TLVs Count", msg->tlvs_cnt);
+
+  if (msg->tlvs_cnt > 0) {
+    dump_info_tlvs(msg->tlvs, msg->tlvs_cnt, depth + 1);
+  }
+}
+
+
 
 // Type 4:
 static parsebgp_error_t parse_init_msg(parsebgp_bmp_init_msg_t *msg,
@@ -341,6 +457,14 @@ static parsebgp_error_t parse_init_msg(parsebgp_bmp_init_msg_t *msg,
 static void destroy_init_msg(parsebgp_bmp_init_msg_t *msg)
 {
   destroy_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
+}
+
+static void dump_init_msg(parsebgp_bmp_init_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_init_msg_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "TLV Count", msg->tlvs_cnt);
+  dump_info_tlvs(msg->tlvs, msg->tlvs_cnt, depth + 1);
 }
 
 
@@ -437,6 +561,38 @@ static void destroy_term_msg(parsebgp_bmp_term_msg_t *msg)
   free(msg->tlvs);
   msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
+}
+
+static void dump_term_msg(parsebgp_bmp_term_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_term_msg_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "TLV Count", msg->tlvs_cnt);
+
+  depth++;
+  int i;
+  parsebgp_bmp_term_tlv_t *tlv;
+  for (i = 0; i < msg->tlvs_cnt; i++) {
+    tlv = &msg->tlvs[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_term_tlv_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Type", tlv->type);
+    PARSEBGP_DUMP_INT(depth, "Length", tlv->len);
+
+    switch (tlv->type) {
+    case PARSEBGP_BMP_TERM_INFO_TYPE_STRING:
+      PARSEBGP_DUMP_INFO(depth, "String: '%s'\n", tlv->info.string);
+      break;
+
+    case PARSEBGP_BMP_TERM_INFO_TYPE_REASON:
+      PARSEBGP_DUMP_INT(depth, "Reason", tlv->info.reason);
+      break;
+
+    default:
+      break;
+    }
+  }
 }
 
 
@@ -642,6 +798,23 @@ static parsebgp_error_t parse_peer_hdr(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
+static void dump_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_peer_hdr_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Type", hdr->type);
+  PARSEBGP_DUMP_INT(depth, "Flags", hdr->flags);
+  PARSEBGP_DUMP_INT(depth, "Route Distinguisher", hdr->dist_id);
+  int afi = (hdr->flags & PARSEBGP_BMP_PEER_FLAG_IPV6) ? PARSEBGP_BGP_AFI_IPV6
+                                                       : PARSEBGP_BGP_AFI_IPV4;
+  PARSEBGP_DUMP_IP(depth, "IP", afi, hdr->addr);
+  PARSEBGP_DUMP_INT(depth, "ASN", hdr->asn);
+  PARSEBGP_DUMP_IP(depth, "BGP ID", PARSEBGP_BGP_AFI_IPV4, hdr->bgp_id);
+
+  PARSEBGP_DUMP_INT(depth, "Time.sec", hdr->ts_sec);
+  PARSEBGP_DUMP_INT(depth, "Time.usec", hdr->ts_usec);
+}
+
 static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
                                             parsebgp_bmp_msg_t *msg,
                                             uint8_t *buf, size_t *lenp)
@@ -802,6 +975,20 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
+static void dump_common_hdr(parsebgp_bmp_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_INT(depth, "Version", msg->version);
+  PARSEBGP_DUMP_INT(depth, "Length", msg->len);
+  PARSEBGP_DUMP_INT(depth, "Type", msg->type);
+
+  if (msg->type == PARSEBGP_BMP_TYPE_INIT_MSG ||
+      msg->type == PARSEBGP_BMP_TYPE_TERM_MSG) {
+    return;
+  }
+
+  dump_peer_hdr(&msg->peer_hdr, depth + 1);
+}
+
 /* -------------------- Main BMP Parser ----------------------------- */
 
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
@@ -918,6 +1105,44 @@ void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg)
 
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
     destroy_route_mirror_msg(&msg->types.route_mirror);
+    break;
+  }
+}
+
+void parsebgp_bmp_dump_msg(parsebgp_bmp_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_msg_t, depth);
+
+  dump_common_hdr(msg, depth);
+
+  depth++;
+  switch (msg->type) {
+  case PARSEBGP_BMP_TYPE_ROUTE_MON:
+    parsebgp_bgp_dump_msg(&msg->types.route_mon, depth);
+    break;
+
+  case PARSEBGP_BMP_TYPE_STATS_REPORT:
+    dump_stats_report(&msg->types.stats_report, depth);
+    break;
+
+  case PARSEBGP_BMP_TYPE_PEER_DOWN:
+    dump_peer_down(&msg->types.peer_down, depth);
+    break;
+
+  case PARSEBGP_BMP_TYPE_PEER_UP:
+    dump_peer_up(&msg->types.peer_up, depth);
+    break;
+
+  case PARSEBGP_BMP_TYPE_INIT_MSG:
+    dump_init_msg(&msg->types.init_msg, depth);
+    break;
+
+  case PARSEBGP_BMP_TYPE_TERM_MSG:
+    dump_term_msg(&msg->types.term_msg, depth);
+    break;
+
+  case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
+    dump_route_mirror_msg(&msg->types.route_mirror, depth);
     break;
   }
 }

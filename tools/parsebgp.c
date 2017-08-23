@@ -84,9 +84,6 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
         goto err;
       }
 
-      fprintf(stderr, "DEBUG: About to parse message (%ld bytes remain)\n",
-              remain);
-
       dec_len = remain;
       if ((err = parsebgp_decode(*opts, type, msg, ptr, &dec_len)) !=
           PARSEBGP_OK) {
@@ -101,11 +98,12 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
         goto err;
       }
       // else: successful read
-      fprintf(stderr, "DEBUG: --------------------\n");
       assert(dec_len > 0);
       ptr += dec_len;
       remain -= dec_len;
       cnt++;
+
+      parsebgp_dump_msg(msg);
 
       parsebgp_destroy_msg(msg);
       msg = NULL;

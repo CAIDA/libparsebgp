@@ -130,3 +130,10 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
     break;
   }
 }
+
+void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_msg_t, depth);
+
+  PARSEBGP_DUMP_INFO(depth, "TODO\n");
+}

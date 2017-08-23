@@ -107,6 +107,22 @@ static void destroy_table_dump(parsebgp_bgp_afi_t afi,
   parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
 }
 
+static void dump_table_dump(parsebgp_bgp_afi_t afi,
+                            parsebgp_mrt_table_dump_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_t, depth);
+  PARSEBGP_DUMP_INT(depth, "View Number", msg->view_number);
+  PARSEBGP_DUMP_INT(depth, "Sequence", msg->sequence);
+  PARSEBGP_DUMP_PFX(depth, "Prefix", afi, msg->prefix, msg->prefix_len);
+  PARSEBGP_DUMP_INT(depth, "Status (unused)", msg->status);
+  PARSEBGP_DUMP_INT(depth, "Originated Time", msg->originated_time);
+  PARSEBGP_DUMP_IP(depth, "Peer IP", afi, msg->peer_ip);
+  PARSEBGP_DUMP_INT(depth, "Peer ASN", msg->peer_asn);
+
+  // TODO
+  // parsebgp_bgp_update_path_atrs_dump(&msg->path_attrs, depth + 1);
+}
+
 static parsebgp_error_t
 parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
                                uint8_t *buf, size_t *lenp, size_t remain)
@@ -220,6 +236,31 @@ destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
   free(msg->peer_entries);
   msg->peer_entries = NULL;
   msg->peer_count = 0;
+}
+
+static void
+dump_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
+                              int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_peer_index_t, depth);
+
+  PARSEBGP_DUMP_IP(depth, "Collector BGP ID", PARSEBGP_BGP_AFI_IPV4,
+                   &msg->collector_bgp_id);
+  PARSEBGP_DUMP_INFO(depth, "View Name: %s\n", msg->view_name);
+  PARSEBGP_DUMP_INT(depth, "Peer Count", msg->peer_count);
+
+  depth++;
+  int i;
+  parsebgp_mrt_table_dump_v2_peer_entry_t *entry;
+  for (i = 0; i < msg->peer_count; i++) {
+    entry = &msg->peer_entries[i];
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_peer_entry_t, depth);
+    PARSEBGP_DUMP_INT(depth, "ASN Type", entry->asn_type);
+    PARSEBGP_DUMP_INT(depth, "IP AFI", entry->ip_afi);
+    PARSEBGP_DUMP_IP(depth, "BGP ID", PARSEBGP_BGP_AFI_IPV4, &entry->bgp_id);
+    PARSEBGP_DUMP_IP(depth, "IP", entry->ip_afi, entry->ip);
+    PARSEBGP_DUMP_INT(depth, "ASN", entry->asn);
+  }
 }
 
 static parsebgp_error_t
@@ -375,6 +416,37 @@ static void destroy_table_dump_v2_afi_safi_rib(
   msg->entry_count = 0;
 }
 
+static void
+dump_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+                                parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg,
+                                int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_afi_safi_rib_t, depth);
+
+  int afi = (subtype == RIB_IPV4_UNICAST || subtype == RIB_IPV4_MULTICAST)
+    ? PARSEBGP_BGP_AFI_IPV4
+    : PARSEBGP_BGP_AFI_IPV6;
+
+  PARSEBGP_DUMP_INT(depth, "Sequence", msg->sequence);
+  PARSEBGP_DUMP_PFX(depth, "Prefix", afi, msg->prefix, msg->prefix_len);
+  PARSEBGP_DUMP_INT(depth, "Entry Count", msg->entry_count);
+
+  depth++;
+  int i;
+  parsebgp_mrt_table_dump_v2_rib_entry_t *entry;
+  for (i = 0; i < msg->entry_count; i++) {
+    entry = &msg->entries[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_rib_entry_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Peer Index", entry->peer_index);
+    PARSEBGP_DUMP_INT(depth, "Originated Time", entry->originated_time);
+
+    // TODO:
+    // parsebgp_bgp_update_path_atrs_dump(&entry->path_attrs, depth + 1);
+  }
+}
+
 static parsebgp_error_t
 parse_table_dump_v2(parsebgp_opts_t *opts,
                     parsebgp_mrt_table_dump_v2_subtype_t subtype,
@@ -428,6 +500,30 @@ static void destroy_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   case RIB_IPV4_UNICAST:
   case RIB_IPV6_UNICAST:
     return destroy_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
+    break;
+
+  case RIB_IPV4_MULTICAST:
+  case RIB_IPV6_MULTICAST:
+  case RIB_GENERIC:
+  default:
+    break;
+  }
+}
+
+static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+                               parsebgp_mrt_table_dump_v2_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_t, depth);
+
+  switch (subtype) {
+  case PEER_INDEX_TABLE:
+    return dump_table_dump_v2_peer_index(&msg->peer_index, depth + 1);
+    break;
+
+  case RIB_IPV4_UNICAST:
+  case RIB_IPV6_UNICAST:
+    return dump_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib,
+                                           depth + 1);
     break;
 
   case RIB_IPV4_MULTICAST:
@@ -571,6 +667,40 @@ static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   }
 }
 
+static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
+                        parsebgp_mrt_bgp4mp_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_bgp4mp_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Peer ASN", msg->peer_asn);
+  PARSEBGP_DUMP_INT(depth, "Local ASN", msg->local_asn);
+  PARSEBGP_DUMP_INT(depth, "Interface Index", msg->interface_index);
+  PARSEBGP_DUMP_INT(depth, "AFI", msg->afi);
+  PARSEBGP_DUMP_IP(depth, "Peer IP", msg->afi, msg->peer_ip);
+  PARSEBGP_DUMP_IP(depth, "Local IP", msg->afi, msg->local_ip);
+
+  depth++;
+  switch (subtype) {
+  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
+  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_bgp4mp_state_change_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Old State", msg->data.state_change.old_state);
+    PARSEBGP_DUMP_INT(depth, "New State", msg->data.state_change.new_state);
+    break;
+
+  case PARSEBGP_MRT_BGP4MP_MESSAGE:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
+    parsebgp_bgp_dump_msg(&msg->data.bgp_msg, depth);
+    break;
+
+  default:
+    break;
+  }
+}
+
 static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
                                          size_t *lenp)
 {
@@ -623,6 +753,15 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
   return PARSEBGP_OK;
 }
 
+static void dump_common_hdr(parsebgp_mrt_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_INT(depth, "Timestamp.sec", msg->timestamp_sec);
+  PARSEBGP_DUMP_INT(depth, "Type", msg->type);
+  PARSEBGP_DUMP_INT(depth, "Subtype", msg->subtype);
+  PARSEBGP_DUMP_INT(depth, "Length", msg->len);
+  PARSEBGP_DUMP_INT(depth, "Timestamp.usec", msg->timestamp_usec);
+}
+
 parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
                                      parsebgp_mrt_msg_t *msg,
                                      uint8_t *buf, size_t *len)
@@ -637,8 +776,6 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
   }
   nread += slen;
 
-  fprintf(stderr, "DEBUG: Got MRT message with timestamp %" PRIu32 "\n",
-          msg->timestamp_sec);
   fprintf(stderr, "DEBUG: Type: %d, Subtype: %d\n", msg->type, msg->subtype);
   fprintf(stderr, "DEBUG: Length: %"PRIu32"\n", msg->len);
   fprintf(stderr, "DEBUG: Timestamp.usec: %"PRIu32"\n", msg->timestamp_usec);
@@ -741,4 +878,32 @@ void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg)
   }
 
   return;
+}
+
+void parsebgp_mrt_dump_msg(parsebgp_mrt_msg_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_msg_t, depth);
+  dump_common_hdr(msg, depth);
+
+  switch(msg->type) {
+  case PARSEBGP_MRT_TYPE_TABLE_DUMP:
+    dump_table_dump(msg->subtype, &msg->types.table_dump, depth + 1);
+    break;
+
+  case PARSEBGP_MRT_TYPE_TABLE_DUMP_V2:
+    dump_table_dump_v2(msg->subtype, &msg->types.table_dump_v2, depth + 1);
+    break;
+
+  case PARSEBGP_MRT_TYPE_BGP4MP:
+  case PARSEBGP_MRT_TYPE_BGP4MP_ET:
+    dump_bgp4mp(msg->subtype, &msg->types.bgp4mp, depth + 1);
+    break;
+
+  case PARSEBGP_MRT_TYPE_ISIS:
+  case PARSEBGP_MRT_TYPE_ISIS_ET:
+  case PARSEBGP_MRT_TYPE_OSPF_V2:
+  case PARSEBGP_MRT_TYPE_OSPF_V3:
+  case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
+    break;
+  }
 }
