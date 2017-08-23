@@ -19,6 +19,14 @@ char *type_strs[] = {
   "mrt", // PARSEBGP_MSG_TYPE_MRT
 };
 
+
+// should messages NOT be dumped to stdout after parsing
+//
+// normally the debug output would be the only reason you would run this tool,
+// but it may be useful to disable output to test raw parsing speed without all
+// the printfs slowing things down.
+static int silent = 0;
+
 static ssize_t refill_buffer(FILE *fp, uint8_t *buf, size_t buflen,
                              size_t remain)
 {
@@ -103,7 +111,9 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
       remain -= dec_len;
       cnt++;
 
-      parsebgp_dump_msg(msg);
+      if (!silent) {
+        parsebgp_dump_msg(msg);
+      }
 
       parsebgp_destroy_msg(msg);
       msg = NULL;
@@ -140,8 +150,9 @@ static void usage()
           "usage: %s [options] [type:]file [[type:]file...]\n"
           "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
           "         (only required if using non-standard file extensions)\n"
-          "       -q                 Ignore unknown messages and attributes\n"
+          "       -i                 Ignore unknown messages and attributes\n"
           "       -h                 Show this help message\n"
+          "       -q                 Do not dump parsed messages (quiet mode)\n"
           "       -v                 Show version of the libparsebgp library\n",
           NAME);
 }
@@ -155,14 +166,18 @@ int main(int argc, char **argv)
   parsebgp_opts_t opts;
   parsebgp_opts_init(&opts);
 
-  while (prevoptind = optind, (opt = getopt(argc, argv, ":t:qvh?")) >= 0) {
+  while (prevoptind = optind, (opt = getopt(argc, argv, ":t:iqvh?")) >= 0) {
     if (optind == prevoptind + 2 && (optarg == NULL || *optarg == '-')) {
       opt = ':';
       --optind;
     }
     switch (opt) {
-    case 'q':
+    case 'i':
       opts.ignore_not_implemented = 1;
+      break;
+
+    case 'q':
+      silent = 1;
       break;
 
     case 'h':
