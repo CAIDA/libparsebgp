@@ -59,7 +59,7 @@ typedef enum {
   /* Transitive Types: */
 
   /** IPv6-Address-Specific (Transitive) */
-  PARSEBGP_BGP_IPV6_EXT_COMM_TYPE_TRANS_IPV6 = 0x00,
+  PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV6 = 0x00,
 
 
   // ...
@@ -68,7 +68,7 @@ typedef enum {
   /** Non-Transitive Types: */
 
   /** IPv6-Address-Specific (Non-Transitive) */
-  PARSEBGP_BGP_IPV6_EXT_COMM_TYPE_NONTRANS_IPV6 = 0x40,
+  PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV6 = 0x40,
 
 } parsebgp_bgp_update_ext_community_ipv6_type_t;
 
