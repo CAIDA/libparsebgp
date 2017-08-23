@@ -1,10 +1,10 @@
 #ifndef __PARSEBGP_H
 #define __PARSEBGP_H
 
-#include "parsebgp_bmp.h"
 #include "parsebgp_bgp.h"
-#include "parsebgp_opts.h"
+#include "parsebgp_bmp.h"
 #include "parsebgp_mrt.h"
+#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <unistd.h>
 
@@ -19,8 +19,9 @@ typedef enum parsebgp_msg_type {
 } parsebgp_msg_type_t;
 
 /** Convenience macro to allow iterating over all valid message types */
-#define PARSEBGP_FOREACH_MSG_TYPE(iter)         \
-  for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_MRT; (iter)++)
+#define PARSEBGP_FOREACH_MSG_TYPE(iter)                                        \
+  for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_MRT;        \
+       (iter)++)
 
 /** Structure into which a message is parsed */
 typedef struct parsebgp_msg {
@@ -57,7 +58,8 @@ typedef struct parsebgp_msg {
  * @param [in,out] len   Number of bytes in buffer. Updated with number of bytes
  *                       read from the buffer
  *
- * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error
+ code
  * otherwise
  */
 parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,

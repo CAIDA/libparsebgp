@@ -1,8 +1,8 @@
 #ifndef __PARSEBGP_MRT_H
 #define __PARSEBGP_MRT_H
 
-#include "parsebgp_error.h"
 #include "parsebgp_bgp.h"
+#include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -103,7 +103,7 @@ typedef struct parsebgp_mrt_table_dump_v2_peer_index {
 /**
  * Table Dump V2 RIB Entry
  */
-typedef struct  parsebgp_mrt_table_dump_v2_rib_entry {
+typedef struct parsebgp_mrt_table_dump_v2_rib_entry {
 
   /** Peer Index (refers to index of peer in the peer_entries field of the most
       recently parsed peer index table) */
@@ -177,10 +177,9 @@ typedef union parsebgp_mrt_table_dump_v2 {
 
   /** Generic RIB Table */
   // TODO
-  //parsebgp_mrt_table_dump_v2_generic_rib_t generic_rib;
+  // parsebgp_mrt_table_dump_v2_generic_rib_t generic_rib;
 
 } parsebgp_mrt_table_dump_v2_t;
-
 
 typedef enum {
 
@@ -203,7 +202,6 @@ typedef enum {
   PARSEBGP_MRT_FSM_CODE_ESTABLISHED = 6,
 
 } parsebgp_mrt_fsm_code_t;
-
 
 /**
  * BGP4MP State Change information
@@ -355,12 +353,12 @@ typedef struct parsebgp_mrt_msg {
  * @param [in] buf      Pointer to the start of a raw MRT message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
  *                      Updated to the number of bytes read from the buffer.
- * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
- * otherwise
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error
+ * code otherwise
  */
 parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
-                                     parsebgp_mrt_msg_t *msg,
-                                     uint8_t *buf, size_t *len);
+                                     parsebgp_mrt_msg_t *msg, uint8_t *buf,
+                                     size_t *len);
 
 /** Destroy the given MRT message structure
  *

@@ -19,7 +19,6 @@ char *type_strs[] = {
   "mrt", // PARSEBGP_MSG_TYPE_MRT
 };
 
-
 // should messages NOT be dumped to stdout after parsing
 //
 // normally the debug output would be the only reason you would run this tool,
@@ -214,7 +213,8 @@ int main(int argc, char **argv)
     if ((fname = strchr(fname, ':')) == NULL) {
       fname = tname;
       int len = strlen(fname);
-      PARSEBGP_FOREACH_MSG_TYPE(j) {
+      PARSEBGP_FOREACH_MSG_TYPE(j)
+      {
         tname = fname;
         tname += (len - strlen(type_strs[j]));
         if (strcmp(tname, type_strs[j]) == 0) {
@@ -224,7 +224,8 @@ int main(int argc, char **argv)
       }
     } else {
       *(fname++) = '\0';
-      PARSEBGP_FOREACH_MSG_TYPE(j) {
+      PARSEBGP_FOREACH_MSG_TYPE(j)
+      {
         if (strcmp(tname, type_strs[j]) == 0) {
           type = j;
           break;

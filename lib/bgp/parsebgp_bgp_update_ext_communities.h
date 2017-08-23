@@ -2,8 +2,8 @@
 #define __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H
 
 #include "parsebgp_bgp_common.h"
-#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -30,7 +30,6 @@ typedef enum {
   PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_OPAQUE = 0x03,
 
   // ...
-
 
   /** Non-Transitive Types: */
 
@@ -61,9 +60,7 @@ typedef enum {
   /** IPv6-Address-Specific (Transitive) */
   PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV6 = 0x00,
 
-
   // ...
-
 
   /** Non-Transitive Types: */
 
@@ -168,7 +165,6 @@ typedef struct parsebgp_bgp_update_ext_communities {
   int communities_cnt;
 
 } parsebgp_bgp_update_ext_communities_t;
-
 
 /** Decode an EXTENDED COMMUNITIES message */
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(

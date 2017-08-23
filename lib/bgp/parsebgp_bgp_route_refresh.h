@@ -1,8 +1,8 @@
 #ifndef __PARSEBGP_BGP_ROUTE_REFRESH_H
 #define __PARSEBGP_BGP_ROUTE_REFRESH_H
 
-#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -67,6 +67,6 @@ void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg);
  * to get a sense of their data.
  */
 void parsebgp_bgp_route_refresh_dump(parsebgp_bgp_route_refresh_t *msg,
-                                    int depth);
+                                     int depth);
 
 #endif /* __PARSEBGP_BGP_ROUTE_REFRESH_H */

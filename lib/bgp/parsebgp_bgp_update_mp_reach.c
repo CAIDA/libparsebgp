@@ -6,18 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
-// for inet_ntop
-// TODO: remove
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 static parsebgp_error_t
-parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_opts_t *opts,
-                                 parsebgp_bgp_afi_t afi,
-                                 parsebgp_bgp_prefix_t **nlris,
-                                 int *nlris_cnt,
+parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_opts_t *opts, parsebgp_bgp_afi_t afi,
+                                 parsebgp_bgp_prefix_t **nlris, int *nlris_cnt,
                                  uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -66,12 +57,6 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_opts_t *opts,
     }
     nread += slen;
     buf += slen;
-
-    // DEBUG
-    char ip_buf[INET6_ADDRSTRLEN];
-    inet_ntop(afi == PARSEBGP_BGP_AFI_IPV4 ? AF_INET : AF_INET6, tuple->addr,
-              ip_buf, INET6_ADDRSTRLEN);
-    fprintf(stderr, "DEBUG: Prefix: %s/%d\n", ip_buf, tuple->len);
   }
 
   *lenp = nread;
@@ -124,17 +109,6 @@ parse_next_hop_afi_ipv4_ipv6_unicast(parsebgp_bgp_update_mp_reach_t *msg,
     memset(msg->next_hop_ll, 0, sizeof(msg->next_hop_ll));
   }
 
-  // DEBUG
-  char ip_buf[INET6_ADDRSTRLEN] = "";
-  inet_ntop(msg->afi == PARSEBGP_BGP_AFI_IPV4 ? AF_INET : AF_INET6,
-            msg->next_hop, ip_buf, INET6_ADDRSTRLEN);
-  char ip2_buf[INET6_ADDRSTRLEN] = "";
-  inet_ntop(msg->afi == PARSEBGP_BGP_AFI_IPV4 ? AF_INET : AF_INET6,
-            msg->next_hop_ll, ip2_buf, INET6_ADDRSTRLEN);
-  fprintf(stderr, "DEBUG: NH-Len: %d, Next-Hop: %s, Next-Hop-LL: %s\n",
-          msg->next_hop_len, ip_buf, ip2_buf);
-  fprintf(stderr, "DEBUG: remain: %d\n", (int)(remain - nread));
-
   *lenp = nread;
   return PARSEBGP_OK;
 }
@@ -173,9 +147,9 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
 
     // Parse the NLRIs
     slen = len - nread;
-    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(opts, msg->afi, &msg->nlris,
-                                                &msg->nlris_cnt, buf, &slen,
-                                                remain - nread)) != PARSEBGP_OK) {
+    if ((err = parse_afi_ipv4_ipv6_unicast_nlri(
+           opts, msg->afi, &msg->nlris, &msg->nlris_cnt, buf, &slen,
+           remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -183,7 +157,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BGP_SAFI_MPLS:
-    // TODO
+  // TODO
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported SAFI (%d)", msg->safi);
@@ -216,7 +190,7 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BGP_SAFI_MPLS:
-    // TODO
+  // TODO
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported SAFI (%d)", msg->safi);
@@ -243,7 +217,6 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
   // length of zero if the header was compressed), then we assume that the
   // header is in fact not compressed and we toggle the flag off in the options.
   if (opts->bgp.mp_reach_no_afi_safi_reserved && *buf != 0) {
-    fprintf(stderr, "DEBUG: Using MRT-provided AFI/SAFI\n");
     msg->afi = opts->bgp.afi;
     msg->safi = opts->bgp.safi;
   } else {
@@ -257,8 +230,6 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
     // SAFI
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
   }
-
-  fprintf(stderr, "DEBUG: MP_REACH: AFI: %d, SAFI: %d\n", msg->afi, msg->safi);
 
   // Next-Hop Length
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->next_hop_len);
@@ -292,8 +263,8 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
   free(msg->nlris);
 }
 
-void parsebgp_bgp_update_mp_reach_dump(
-  parsebgp_bgp_update_mp_reach_t *msg, int depth)
+void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
+                                       int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_reach_t, depth);
 
@@ -342,8 +313,6 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
   // SAFI
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
 
-  fprintf(stderr, "DEBUG: MP_UNREACH: AFI: %d, SAFI: %d\n", msg->afi, msg->safi);
-
   // process NLRIs based on AFI
   // TODO: support other AFIs (BGPLS etc.)
   switch (msg->afi) {
@@ -373,8 +342,8 @@ void parsebgp_bgp_update_mp_unreach_destroy(
   free(msg->withdrawn_nlris);
 }
 
-void parsebgp_bgp_update_mp_unreach_dump(
-  parsebgp_bgp_update_mp_unreach_t *msg, int depth)
+void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
+                                         int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_unreach_t, depth);
 

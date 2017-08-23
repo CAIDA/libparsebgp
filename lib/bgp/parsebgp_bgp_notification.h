@@ -1,8 +1,8 @@
 #ifndef __PARSEBGP_BGP_NOTIFICATION_H
 #define __PARSEBGP_BGP_NOTIFICATION_H
 
-#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stdlib.h>
 

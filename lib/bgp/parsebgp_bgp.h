@@ -3,10 +3,10 @@
 
 #include "parsebgp_bgp_notification.h"
 #include "parsebgp_bgp_open.h"
-#include "parsebgp_opts.h"
 #include "parsebgp_bgp_route_refresh.h"
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -67,7 +67,6 @@ typedef struct parsebgp_bgp_msg {
 
 } parsebgp_bgp_msg_t;
 
-
 /**
  * Decode (parse) a single BGP message from the given buffer into the given BGP
  * message structure.
@@ -77,12 +76,12 @@ typedef struct parsebgp_bgp_msg {
  * @param [in] buffer   Pointer to the start of a raw BGP message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
  *                      Updated to the number of bytes read from the buffer.
- * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
- * otherwise
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error
+ * code otherwise
  */
 parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_msg_t *msg,
-                                     uint8_t *buffer, size_t *len);
+                                     parsebgp_bgp_msg_t *msg, uint8_t *buffer,
+                                     size_t *len);
 
 /** Destroy the given BGP message structure
  *

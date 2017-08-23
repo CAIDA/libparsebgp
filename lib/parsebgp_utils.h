@@ -3,15 +3,15 @@
 
 #include "parsebgp_error.h"
 #include <inttypes.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 // for inet_ntop:
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 /** Internal to the STR macro */
 #define XSTR(a) #a
@@ -23,8 +23,9 @@
    http://www.codeproject.com/KB/cpp/endianness.aspx */
 /** Byte-swap a 64-bit integer */
 #ifndef ntohll
-#define ntohll(x) (((uint64_t)(ntohl((int)((x << 32) >> 32))) << 32) |	\
-		   (uint32_t)ntohl(((int)(x >> 32))))
+#define ntohll(x)                                                              \
+  (((uint64_t)(ntohl((int)((x << 32) >> 32))) << 32) |                         \
+   (uint32_t)ntohl(((int)(x >> 32))))
 #endif
 
 /** Byte-swap a 64-bit integer */
@@ -43,7 +44,7 @@
 #define PARSEBGP_DESERIALIZE_VAL(buf, len, read, to)                           \
   do {                                                                         \
     if (((len) - (read)) < sizeof(to)) {                                       \
-      return PARSEBGP_PARTIAL_MSG;                                                   \
+      return PARSEBGP_PARTIAL_MSG;                                             \
     }                                                                          \
     memcpy(&(to), (buf), sizeof(to));                                          \
     read += sizeof(to);                                                        \
@@ -82,15 +83,16 @@
 #define PARSEBGP_DUMP_INFO(depth, ...)                                         \
   do {                                                                         \
     int i;                                                                     \
-    printf(" ");                                                        \
-    for (i = 0; i < depth; i++) {                                             \
+    printf(" ");                                                               \
+    for (i = 0; i < depth; i++) {                                              \
       printf("  ");                                                            \
     }                                                                          \
     printf(__VA_ARGS__);                                                       \
   } while (0)
 
 #define PARSEBGP_DUMP_INT(depth, name, val)                                    \
-  PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20-(int)strlen(name ": "), (int)val);
+  PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),       \
+                     (int)val);
 
 #define PARSEBGP_DUMP_IP(depth, name, afi, ipaddr)                             \
   do {                                                                         \
@@ -139,8 +141,8 @@
  * @param buf_len       Total length of the buffer (to prevent overrun). Updated
  *                      to the number of bytes read from the buffer if
  *                      successful.
- * @return PARSEBGP_OK if successful, or an error code otherwise. buf_len is only updated
- * if PARSEBGP_OK is returned.
+ * @return PARSEBGP_OK if successful, or an error code otherwise. buf_len is
+ * only updated if PARSEBGP_OK is returned.
  */
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
                                         uint8_t *buf, size_t *buf_len);

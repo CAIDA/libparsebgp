@@ -6,13 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// for inet_ntop
-// TODO: remove
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
   uint8_t *buf, size_t *lenp, size_t remain)
@@ -34,16 +27,11 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
     return PARSEBGP_MALLOC_FAILURE;
   }
 
-  fprintf(stderr, "DEBUG: EXTENDED COMMUNITIES: Cnt: %d\n",
-          msg->communities_cnt);
-
   for (i = 0; i < msg->communities_cnt; i++) {
     comm = &msg->communities[i];
 
     // Type (High)
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->type);
-
-    fprintf(stderr, "DEBUG: EXT_COMM: Type (High): 0x%02x\n", comm->type);
 
     switch (comm->type) {
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_TWO_OCTET_AS:
@@ -62,12 +50,6 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
                                comm->types.two_octet.local_admin);
       comm->types.two_octet.local_admin =
         ntohl(comm->types.two_octet.local_admin);
-
-      fprintf(stderr,
-              "DEBUG: TWO-OCTET: Subtype: %02x, Global Admin: %" PRIu16
-              ", Local Admin: %" PRIu32 "\n",
-              comm->subtype, comm->types.two_octet.global_admin,
-              comm->types.two_octet.local_admin);
       break;
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV4:
@@ -91,15 +73,6 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
                                comm->types.ip_addr.local_admin);
       comm->types.ip_addr.local_admin = ntohs(comm->types.ip_addr.local_admin);
-
-      char ip_buf[INET6_ADDRSTRLEN];
-      inet_ntop(AF_INET, comm->types.ip_addr.global_admin_ip, ip_buf,
-                INET6_ADDRSTRLEN);
-      fprintf(
-        stderr,
-        "DEBUG: IPv4: Subtype: %02x, Global Admin: %s, Local Admin: %" PRIu32
-        "\n",
-        comm->subtype, ip_buf, comm->types.ip_addr.local_admin);
       break;
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_FOUR_OCTET_AS:
@@ -118,12 +91,6 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
                                comm->types.four_octet.local_admin);
       comm->types.four_octet.local_admin =
         ntohs(comm->types.four_octet.local_admin);
-
-      fprintf(stderr,
-              "DEBUG: FOUR-OCTET: Subtype: %02x, Global Admin: %" PRIu32
-              ", Local Admin: %" PRIu16 "\n",
-              comm->subtype, comm->types.four_octet.global_admin,
-              comm->types.four_octet.local_admin);
       break;
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_OPAQUE:
@@ -133,13 +100,10 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
 
       // Opaque (6 bytes)
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->types.opaque);
-
-      fprintf(stderr, "DEBUG: OPAQUE: Subtype: %02x\n", comm->subtype);
       break;
 
     default:
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->types.unknown);
-      fprintf(stderr, "DEBUG: UNKNOWN COMMUNITY\n");
       break;
     }
   }
@@ -169,16 +133,11 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
     return PARSEBGP_MALLOC_FAILURE;
   }
 
-  fprintf(stderr, "DEBUG: EXTENDED COMMUNITIES: Cnt: %d\n",
-          msg->communities_cnt);
-
   for (i = 0; i < msg->communities_cnt; i++) {
     comm = &msg->communities[i];
 
     // Type (High)
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->type);
-
-    fprintf(stderr, "DEBUG: EXT_COMM: Type (High): 0x%02x\n", comm->type);
 
     switch (comm->type) {
 
@@ -198,15 +157,6 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
                                comm->types.ip_addr.local_admin);
       comm->types.ip_addr.local_admin = ntohs(comm->types.ip_addr.local_admin);
-
-      char ip_buf[INET6_ADDRSTRLEN];
-      inet_ntop(AF_INET6, comm->types.ip_addr.global_admin_ip, ip_buf,
-                INET6_ADDRSTRLEN);
-      fprintf(
-        stderr,
-        "DEBUG: IPv4: Subtype: %02x, Global Admin: %s, Local Admin: %" PRIu32
-        "\n",
-        comm->subtype, ip_buf, comm->types.ip_addr.local_admin);
 
     default:
       // this is an especially unusual error
@@ -235,56 +185,53 @@ static void dump_ext_community(parsebgp_bgp_update_ext_community_t *comm,
   PARSEBGP_DUMP_INT(depth, "Subtype", comm->subtype);
 
   depth++;
-   switch (comm->type) {
-    case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_TWO_OCTET_AS:
-    case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_TWO_OCTET_AS:
-      PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_community_two_octet_t,
-                               depth);
-      PARSEBGP_DUMP_INT(depth, "Global Admin",
-                        comm->types.two_octet.global_admin);
-      PARSEBGP_DUMP_INT(depth, "Local Admin",
-                        comm->types.two_octet.local_admin);
-      break;
+  switch (comm->type) {
+  case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_TWO_OCTET_AS:
+  case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_TWO_OCTET_AS:
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_community_two_octet_t,
+                             depth);
+    PARSEBGP_DUMP_INT(depth, "Global Admin",
+                      comm->types.two_octet.global_admin);
+    PARSEBGP_DUMP_INT(depth, "Local Admin", comm->types.two_octet.local_admin);
+    break;
 
-    case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV4:
-    case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV4:
-      // v6 communities have the same type value:
-      //case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV6:
-      //case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV6:
+  case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV4:
+  case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV4:
+    // v6 communities have the same type value:
+    // case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV6:
+    // case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV6:
 
-      PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_community_ip_addr_t,
-                               depth);
-      PARSEBGP_DUMP_INT(depth, "Global Admin IP AFI",
-                        comm->types.ip_addr.global_admin_ip_afi);
-      PARSEBGP_DUMP_IP(depth, "Global Admin IP",
-                       comm->types.ip_addr.global_admin_ip_afi,
-                       comm->types.ip_addr.global_admin_ip);
-      PARSEBGP_DUMP_INT(depth, "Local Admin",
-                        comm->types.ip_addr.local_admin);
-      break;
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_community_ip_addr_t,
+                             depth);
+    PARSEBGP_DUMP_INT(depth, "Global Admin IP AFI",
+                      comm->types.ip_addr.global_admin_ip_afi);
+    PARSEBGP_DUMP_IP(depth, "Global Admin IP",
+                     comm->types.ip_addr.global_admin_ip_afi,
+                     comm->types.ip_addr.global_admin_ip);
+    PARSEBGP_DUMP_INT(depth, "Local Admin", comm->types.ip_addr.local_admin);
+    break;
 
-    case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_FOUR_OCTET_AS:
-    case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_FOUR_OCTET_AS:
-      PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_community_four_octet_t,
-                               depth);
-      PARSEBGP_DUMP_INT(depth, "Global Admin",
-                        comm->types.four_octet.global_admin);
-      PARSEBGP_DUMP_INT(depth, "Local Admin",
-                        comm->types.four_octet.local_admin);
-      break;
+  case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_FOUR_OCTET_AS:
+  case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_FOUR_OCTET_AS:
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_community_four_octet_t,
+                             depth);
+    PARSEBGP_DUMP_INT(depth, "Global Admin",
+                      comm->types.four_octet.global_admin);
+    PARSEBGP_DUMP_INT(depth, "Local Admin", comm->types.four_octet.local_admin);
+    break;
 
-    case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_OPAQUE:
-    case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_OPAQUE:
-      PARSEBGP_DUMP_DATA(depth, "Opaque Data", comm->types.opaque,
-                         sizeof(comm->types.opaque));
-      break;
+  case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_OPAQUE:
+  case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_OPAQUE:
+    PARSEBGP_DUMP_DATA(depth, "Opaque Data", comm->types.opaque,
+                       sizeof(comm->types.opaque));
+    break;
 
-    default:
-      PARSEBGP_DUMP_INFO(depth, "Unknown Type\n");
-      PARSEBGP_DUMP_DATA(depth, "Data", comm->types.unknown,
-                         sizeof(comm->types.unknown));
-      break;
-    }
+  default:
+    PARSEBGP_DUMP_INFO(depth, "Unknown Type\n");
+    PARSEBGP_DUMP_DATA(depth, "Data", comm->types.unknown,
+                       sizeof(comm->types.unknown));
+    break;
+  }
 }
 
 void parsebgp_bgp_update_ext_communities_dump(

@@ -9,8 +9,8 @@
 
 #define BGP_HDR_LEN 19
 
-static parsebgp_error_t parse_common_hdr(parsebgp_bgp_msg_t *msg,
-                                         uint8_t *buf, size_t *lenp)
+static parsebgp_error_t parse_common_hdr(parsebgp_bgp_msg_t *msg, uint8_t *buf,
+                                         size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
 
@@ -29,8 +29,8 @@ static parsebgp_error_t parse_common_hdr(parsebgp_bgp_msg_t *msg,
 }
 
 parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_msg_t *msg,
-                                     uint8_t *buf, size_t *len)
+                                     parsebgp_bgp_msg_t *msg, uint8_t *buf,
+                                     size_t *len)
 {
   parsebgp_error_t err;
   size_t slen = 0, nread = 0, remain = 0;
@@ -44,7 +44,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
   buf += slen;
   assert(nread == BGP_HDR_LEN);
   remain = msg->len - nread; // number of bytes left in the message
-  slen = *len - nread; // number of bytes left in the buffer
+  slen = *len - nread;       // number of bytes left in the buffer
 
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
@@ -52,13 +52,9 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
     return PARSEBGP_PARTIAL_MSG;
   }
 
-  fprintf(stderr, "DEBUG: BGP Message Type: %d, Len: %d\n", msg->type,
-          msg->len);
-
-  switch(msg->type) {
+  switch (msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
-    err =
-      parsebgp_bgp_open_decode(opts, &msg->types.open, buf, &slen, remain);
+    err = parsebgp_bgp_open_decode(opts, &msg->types.open, buf, &slen, remain);
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:
@@ -105,7 +101,7 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
   // no dynamic memory in common header
 
   // destroy based on message type
-  switch(msg->type) {
+  switch (msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
     parsebgp_bgp_open_destroy(&msg->types.open);
     break;
@@ -141,7 +137,7 @@ void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
 
   depth++;
 
-  switch(msg->type) {
+  switch (msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
     parsebgp_bgp_open_dump(&msg->types.open, depth);
     break;

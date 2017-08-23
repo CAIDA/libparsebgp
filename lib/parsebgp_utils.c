@@ -31,7 +31,7 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
   // helpful.
   if (junk != 0) {
     junk = 8 - junk;
-    dst[bytes-1] = dst[bytes-1] & (0xFF << junk);
+    dst[bytes - 1] = dst[bytes - 1] & (0xFF << junk);
   }
   // and ensure the rest of the buffer is clean
   memset(dst + bytes, 0, 16 - bytes);

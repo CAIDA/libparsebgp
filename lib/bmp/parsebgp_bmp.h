@@ -1,8 +1,8 @@
 #ifndef __PARSEBGP_BMP_H
 #define __PARSEBGP_BMP_H
 
+#include "parsebgp_bgp.h"   //< BMP encapsulates BGP messages
 #include "parsebgp_error.h" //< for parsebgp_error_t
-#include "parsebgp_bgp.h" //< BMP encapsulates BGP messages
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -163,7 +163,6 @@ typedef struct parsebgp_bmp_stats_report {
 
 } parsebgp_bmp_stats_report_t;
 
-
 /*  -------------------- Peer Down (Type 2) -------------------- */
 
 /** BMP Peer Down Notification Reason */
@@ -219,7 +218,6 @@ typedef struct parsebgp_bmp_peer_down {
 
 } parsebgp_bmp_peer_down_t;
 
-
 /*  -------------------- Peer Up (Type 3) -------------------- */
 
 /**
@@ -253,7 +251,6 @@ typedef struct parsebgp_bmp_peer_up {
 
 } parsebgp_bmp_peer_up_t;
 
-
 /*  -------------------- Init Msg (Type 4) -------------------- */
 
 /**
@@ -268,7 +265,6 @@ typedef struct parsebgp_bmp_init_msg {
   int tlvs_cnt;
 
 } parsebgp_bmp_init_msg_t;
-
 
 /*  -------------------- Term Msg (Type 5) -------------------- */
 
@@ -339,7 +335,6 @@ typedef struct parsebgp_bmp_term_msg {
 
 } parsebgp_bmp_term_msg_t;
 
-
 /*  -------------------- Route Mirror (Type 6) -------------------- */
 
 /** Route Mirror TLV Types */
@@ -396,7 +391,6 @@ typedef struct parsebgp_bmp_route_mirror {
   int tlvs_cnt;
 
 } parsebgp_bmp_route_mirror_t;
-
 
 /*  -------------------- Common Headers -------------------- */
 
@@ -478,7 +472,6 @@ typedef enum parsebgp_bmp_msg_type {
 
 } parsebgp_bmp_msg_type_t;
 
-
 /*  -------------------- Main BMP Message -------------------- */
 
 /**
@@ -540,12 +533,12 @@ typedef struct parsebgp_bmp_msg {
  * @param [in] buffer   Pointer to the start of a raw BMP message
  * @param [in,out] len  Length of the data buffer (used to prevent overrun).
  *                      Updated to the number of bytes read from the buffer.
- * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error code
- * otherwise
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error
+ * code otherwise
  */
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bmp_msg_t *msg,
-                                     uint8_t *buffer, size_t *len);
+                                     parsebgp_bmp_msg_t *msg, uint8_t *buffer,
+                                     size_t *len);
 
 /** Destroy the given BMP message structure
  *

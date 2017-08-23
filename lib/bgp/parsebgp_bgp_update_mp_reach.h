@@ -2,8 +2,8 @@
 #define __PARSEBGP_BGP_UPDATE_MP_REACH_H
 
 #include "parsebgp_bgp_common.h"
-#include "parsebgp_opts.h"
 #include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -58,7 +58,6 @@ typedef struct parsebgp_bgp_update_mp_unreach {
 
 } parsebgp_bgp_update_mp_unreach_t;
 
-
 /** Decode an MP_REACH message */
 parsebgp_error_t
 parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
@@ -103,6 +102,6 @@ void parsebgp_bgp_update_mp_unreach_destroy(
  * to get a sense of their data.
  */
 void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
-                                       int depth);
+                                         int depth);
 
 #endif /* __PARSEBGP_BGP_UPDATE_MP_REACH_H */

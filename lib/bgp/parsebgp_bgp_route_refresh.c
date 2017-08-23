@@ -8,10 +8,10 @@
 
 // for inet_ntop
 // TODO: remove
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 parsebgp_error_t
 parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
@@ -40,11 +40,6 @@ parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
   }
   memcpy(msg->data, buf, msg->data_len);
   nread += msg->data_len;
-
-  fprintf(
-    stderr,
-    "DEBUG: ROUTE-REFRESH: AFI: %d, Subtype: %d, SAFI: %d, Data Len: %d\n",
-    msg->afi, msg->subtype, msg->safi, msg->data_len);
 
   *lenp = nread;
   return PARSEBGP_OK;

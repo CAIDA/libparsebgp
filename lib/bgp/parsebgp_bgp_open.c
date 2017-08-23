@@ -6,17 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
-// for inet_ntop
-// TODO: remove
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
-                                    parsebgp_bgp_open_t *msg,
-                                    uint8_t *buf, size_t *lenp,
-                                    size_t remain)
+                                    parsebgp_bgp_open_t *msg, uint8_t *buf,
+                                    size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bgp_open_capability_t *cap;
@@ -51,10 +43,6 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 
       // SAFI
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.mpbgp.safi);
-
-      fprintf(stderr, "DEBUG: MPBGP: AFI: %d, SAFI: %d, Reserved: %d\n",
-              cap->values.mpbgp.afi, cap->values.mpbgp.safi,
-              cap->values.mpbgp.reserved);
       break;
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
@@ -63,7 +51,6 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.asn);
       cap->values.asn = ntohl(cap->values.asn);
-      fprintf(stderr, "DEBUG: AS4: %"PRIu32"\n", cap->values.asn);
       break;
 
     // capabilities with data that we are ignoring (since OpenBMP is ignoring
@@ -71,13 +58,10 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
     case PARSEBGP_BGP_OPEN_CAPABILITY_OUTBOUND_FILTER:
     case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
     case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
-      fprintf(stderr,
-              "DEBUG: Capability %d found (skipping %d value bytes)\n",
-              cap->code, cap->len);
       nread += cap->len;
       break;
 
-      // capabilities with no extra data:
+    // capabilities with no extra data:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
@@ -88,7 +72,6 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
                 cap->code, cap->len);
         return PARSEBGP_INVALID_MSG;
       }
-      fprintf(stderr, "DEBUG: Capability %d found\n", cap->code);
       break;
 
     default:
@@ -104,10 +87,8 @@ parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t parse_params(parsebgp_opts_t *opts,
-                              parsebgp_bgp_open_t *msg,
-                              uint8_t *buf, size_t *lenp,
-                              size_t remain)
+parsebgp_error_t parse_params(parsebgp_opts_t *opts, parsebgp_bgp_open_t *msg,
+                              uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -129,8 +110,6 @@ parsebgp_error_t parse_params(parsebgp_opts_t *opts,
 
     // Capabilities Length
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
-
-    fprintf(stderr, "DEBUG: Parsing capabilities parameter of length %d\n", u8);
 
     // parse this capabilities parameter
     slen = len - nread;
@@ -169,12 +148,6 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
 
   // Parameters Length
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->param_len);
-
-  fprintf(stderr,
-          "DEBUG: BGP OPEN: Version: %d, ASN: %d, Hold Time: %d, BGP ID: %x, "
-          "Params Len: %d\n",
-          msg->version, msg->asn, msg->hold_time, *(uint32_t *)msg->bgp_id,
-          msg->param_len);
 
   // no params
   if (msg->param_len == 0) {
@@ -254,7 +227,7 @@ void parsebgp_bgp_open_dump(parsebgp_bgp_open_t *msg, int depth)
       PARSEBGP_DUMP_INFO(depth, "Note: Ignored Capability Data\n");
       break;
 
-      // capabilities with no extra data:
+    // capabilities with no extra data:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:

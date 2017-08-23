@@ -8,10 +8,10 @@
 
 // for inet_ntop
 // TODO: remove
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 parsebgp_error_t
 parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
@@ -37,9 +37,6 @@ parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
   memcpy(msg->data, buf, msg->data_len);
   nread += msg->data_len;
 
-  fprintf(stderr, "DEBUG: NOTIFICATION: Code: %d, Subcode: %d, Data Len: %d\n",
-          msg->code, msg->subcode, msg->data_len);
-
   *lenp = nread;
   return PARSEBGP_OK;
 }
@@ -53,8 +50,7 @@ void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg)
   free(msg->data);
 }
 
-void parsebgp_bgp_notification_dump(parsebgp_bgp_notification_t *msg,
-                                    int depth)
+void parsebgp_bgp_notification_dump(parsebgp_bgp_notification_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_notification_t, depth);
 

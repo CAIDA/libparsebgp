@@ -7,15 +7,14 @@
 #include <string.h>
 
 #define BMP_HDR_V1V2_LEN 43 ///< BMP v1/2 header length
-#define BMP_HDR_V3_LEN 6 ///< BMP v3 header length
+#define BMP_HDR_V3_LEN 6    ///< BMP v3 header length
 #define BMP_PEER_HDR_LEN 42 ///< BMP peer header length
 
 /* -------------------- Helper parser functions -------------------- */
 
 static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
-                                        int *tlvs_cnt,
-                                        uint8_t *buf, size_t *lenp,
-                                        size_t remain)
+                                        int *tlvs_cnt, uint8_t *buf,
+                                        size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bmp_info_tlv_t *tlv = NULL;
@@ -62,16 +61,13 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
     nread += tlv->len;
     buf += tlv->len;
     remain -= tlv->len;
-
-    fprintf(stderr, "DEBUG: TLV info: '%.*s'\n", tlv->len, tlv->info);
   }
 
   *lenp = nread;
   return PARSEBGP_OK;
 }
 
-static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
-                              int *tlvs_cnt)
+static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_cnt)
 {
   int i;
   if (*tlvs_cnt == 0) {
@@ -103,7 +99,6 @@ static void dump_info_tlvs(parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
   }
 }
 
-
 /* -------------------- BMP Message Type Parsers -------------------- */
 
 // Type 1:
@@ -125,8 +120,6 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
     return PARSEBGP_MALLOC_FAILURE;
   }
 
-  fprintf(stderr, "DEBUG: Stats with %"PRIu32" counters\n", msg->stats_count);
-
   // parse each stat
   for (i = 0; i < msg->stats_count; i++) {
     sc = &msg->counters[i];
@@ -146,7 +139,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
 
     // Read the data
     switch (sc->type) {
-      // 32-bit counter types:
+    // 32-bit counter types:
     case PARSEBGP_BMP_STATS_PREFIX_REJECTS:
     case PARSEBGP_BMP_STATS_PREFIX_DUPS:
     case PARSEBGP_BMP_STATS_WITHDRAW_DUP:
@@ -164,7 +157,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
       sc->data.counter_u32 = ntohl(sc->data.counter_u32);
       break;
 
-      // 64-bit gauge types:
+    // 64-bit gauge types:
     case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
       if (sc->len != sizeof(sc->data.gauge_u64)) {
@@ -174,7 +167,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
       sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
       break;
 
-      // AFI/SAFI 64-bit gauge types:
+    // AFI/SAFI 64-bit gauge types:
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_LOC_RIB:
       if (sc->len != 11) {
@@ -189,23 +182,20 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.afi_safi_gauge.safi);
 
       // u64 gauge
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.afi_safi_gauge.gauge_u64);
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+                               sc->data.afi_safi_gauge.gauge_u64);
       sc->data.afi_safi_gauge.gauge_u64 =
         ntohll(sc->data.afi_safi_gauge.gauge_u64);
       break;
     }
-
-    fprintf(stderr, "DEBUG: Stat Counter: Type: %d, Length: %d\n", sc->type,
-            sc->len);
-    fprintf(stderr, "DEBUG: Stat data: u32: %" PRIu32 ", u64: %" PRIu64 "\n",
-            sc->data.counter_u32, sc->data.gauge_u64);
   }
 
   *lenp = nread;
   return PARSEBGP_OK;
 }
 
-static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg) {
+static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg)
+{
   free(msg->counters);
   msg->stats_count = 0;
 }
@@ -228,7 +218,7 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
     PARSEBGP_DUMP_INT(depth, "Length", sc->len);
 
     switch (sc->type) {
-      // 32-bit counter types:
+    // 32-bit counter types:
     case PARSEBGP_BMP_STATS_PREFIX_REJECTS:
     case PARSEBGP_BMP_STATS_PREFIX_DUPS:
     case PARSEBGP_BMP_STATS_WITHDRAW_DUP:
@@ -242,13 +232,13 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
       PARSEBGP_DUMP_INT(depth, "u32", sc->data.counter_u32);
       break;
 
-      // 64-bit gauge types:
+    // 64-bit gauge types:
     case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
       PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
       break;
 
-      // AFI/SAFI 64-bit gauge types:
+    // AFI/SAFI 64-bit gauge types:
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_LOC_RIB:
       // AFI
@@ -264,7 +254,6 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
   }
 }
 
-
 // Type 2:
 static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
                                         parsebgp_bmp_peer_down_t *msg,
@@ -279,7 +268,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
 
   // Read the data (if present)
   switch (msg->reason) {
-    // Reasons with a BGP NOTIFICATION message
+  // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
     slen = len - nread;
@@ -316,7 +305,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
 static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
 {
   switch (msg->reason) {
-    // Reasons with a BGP NOTIFICATION message
+  // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
     parsebgp_bgp_destroy_msg(&msg->data.notification);
@@ -337,11 +326,11 @@ static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
 
   depth++;
   switch (msg->reason) {
-    // Reasons with a BGP NOTIFICATION message
+  // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
     // TODO
-    //parsebgp_bgp_dump_msg(&msg->data.notification, depth);
+    // parsebgp_bgp_dump_msg(&msg->data.notification, depth);
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
@@ -353,12 +342,10 @@ static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
   }
 }
 
-
 // Type 3:
 static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
-                                      parsebgp_bmp_peer_up_t *msg,
-                                      uint8_t *buf, size_t *lenp,
-                                      size_t remain)
+                                      parsebgp_bmp_peer_up_t *msg, uint8_t *buf,
+                                      size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -389,9 +376,6 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   // Remote port
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->remote_port);
   msg->remote_port = ntohs(msg->remote_port);
-
-  fprintf(stderr, "DEBUG: Local Port: %"PRIu16", Remote Port: %"PRIu16"\n",
-          msg->local_port, msg->remote_port);
 
   slen = len - nread;
   if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) !=
@@ -444,8 +428,6 @@ static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
   }
 }
 
-
-
 // Type 4:
 static parsebgp_error_t parse_init_msg(parsebgp_bmp_init_msg_t *msg,
                                        uint8_t *buf, size_t *lenp,
@@ -467,7 +449,6 @@ static void dump_init_msg(parsebgp_bmp_init_msg_t *msg, int depth)
   dump_info_tlvs(msg->tlvs, msg->tlvs_cnt, depth + 1);
 }
 
-
 // Type 5:
 static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
                                        uint8_t *buf, size_t *lenp,
@@ -484,7 +465,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
     // optimistically allocate a new TLV (if we fail to parse the message then
     // it will be partially/unfilled)
     if ((msg->tlvs = realloc(msg->tlvs, sizeof(parsebgp_bmp_term_tlv_t) *
-                             ((msg->tlvs_cnt) + 1))) == NULL) {
+                                          ((msg->tlvs_cnt) + 1))) == NULL) {
       return PARSEBGP_MALLOC_FAILURE;
     }
     tlv = &msg->tlvs[msg->tlvs_cnt];
@@ -594,7 +575,6 @@ static void dump_term_msg(parsebgp_bmp_term_msg_t *msg, int depth)
     }
   }
 }
-
 
 // Type 6:
 static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
@@ -726,7 +706,6 @@ static void dump_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg, int depth)
     }
   }
 }
-
 
 /* -------------------- BMP Header Parsers -------------------- */
 
@@ -911,7 +890,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
   }
 
   // parse the per-peer header for those message that contain it
-  switch(msg->type) {
+  switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:    // Route monitoring
   case PARSEBGP_BMP_TYPE_STATS_REPORT: // Statistics Report
   case PARSEBGP_BMP_TYPE_PEER_UP:      // Peer Up notification
@@ -950,7 +929,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
 
   switch (msg->version) {
   case 1:
-    // Versions 1 and 2 use the same format, but v2 adds the Peer Up message
+  // Versions 1 and 2 use the same format, but v2 adds the Peer Up message
   case 2:
     slen = len - nread;
     if ((err = parse_common_hdr_v2(opts, msg, buf, &slen)) != PARSEBGP_OK) {
@@ -992,8 +971,8 @@ static void dump_common_hdr(parsebgp_bmp_msg_t *msg, int depth)
 /* -------------------- Main BMP Parser ----------------------------- */
 
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bmp_msg_t *msg,
-                                     uint8_t *buf, size_t *len)
+                                     parsebgp_bmp_msg_t *msg, uint8_t *buf,
+                                     size_t *len)
 {
   parsebgp_error_t err;
   size_t slen = 0, nread = 0, remain = 0;
@@ -1005,17 +984,9 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
   }
   nread += slen;
 
-  fprintf(stderr, "DEBUG: Got BMP message with version %" PRIu8 "\n",
-          msg->version);
-  fprintf(stderr, "DEBUG: Length: %"PRIu32"\n", msg->len);
-  fprintf(stderr, "DEBUG: Type: %"PRIu32"\n", msg->type);
-  fprintf(stderr, "DEBUG: Peer ASN: %"PRIu32"\n", msg->peer_hdr.asn);
-
   /* Continue to parse the message based on the type */
-  slen = *len - nread; // number of bytes left in the buffer
+  slen = *len - nread;       // number of bytes left in the buffer
   remain = msg->len - nread; // number of bytes left in the message
-
-  fprintf(stderr, "DEBUG: nread: %d, remain: %d\n", (int)nread, (int)remain);
 
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
