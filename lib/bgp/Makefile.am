@@ -19,6 +19,7 @@ noinst_LTLIBRARIES = libparsebgp_bgp.la
 libparsebgp_bgp_la_SOURCES = 			\
 	parsebgp_bgp.c				\
 	parsebgp_bgp.h				\
+	parsebgp_bgp_common.c			\
 	parsebgp_bgp_common.h			\
 	parsebgp_bgp_notification.c		\
 	parsebgp_bgp_notification.h		\

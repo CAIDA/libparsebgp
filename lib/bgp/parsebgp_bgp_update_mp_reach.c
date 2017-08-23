@@ -297,7 +297,34 @@ void parsebgp_bgp_update_mp_reach_dump(
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_reach_t, depth);
 
-  PARSEBGP_DUMP_INFO(depth, "TODO\n");
+  PARSEBGP_DUMP_INT(depth, "AFI", msg->afi);
+  PARSEBGP_DUMP_INT(depth, "SAFI", msg->safi);
+  PARSEBGP_DUMP_INT(depth, "Next Hop Length", msg->next_hop_len);
+
+  if (msg->safi != PARSEBGP_BGP_SAFI_UNICAST) {
+    PARSEBGP_DUMP_INFO(depth, "MP_REACH SAFI %d Not Supported\n", msg->safi);
+    return;
+  }
+
+  switch (msg->afi) {
+  case PARSEBGP_BGP_AFI_IPV4:
+  case PARSEBGP_BGP_AFI_IPV6:
+    PARSEBGP_DUMP_IP(depth, "Next Hop", msg->afi, msg->next_hop);
+    if (msg->afi == PARSEBGP_BGP_AFI_IPV6 && msg->next_hop_len == 32) {
+      PARSEBGP_DUMP_IP(depth, "Next Hop Link-Local", msg->afi,
+                       msg->next_hop_ll);
+    }
+
+    PARSEBGP_DUMP_INT(depth, "Reserved", msg->reserved);
+    PARSEBGP_DUMP_INT(depth, "NLRIs Count", msg->nlris_cnt);
+
+    parsebgp_bgp_dump_prefixes(msg->nlris, msg->nlris_cnt, depth + 1);
+    break;
+
+  default:
+    PARSEBGP_DUMP_INFO(depth, "MP_REACH AFI %d Not Supported\n", msg->afi);
+    break;
+  }
 }
 
 parsebgp_error_t
@@ -351,5 +378,25 @@ void parsebgp_bgp_update_mp_unreach_dump(
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_unreach_t, depth);
 
-  PARSEBGP_DUMP_INFO(depth, "TODO\n");
+  PARSEBGP_DUMP_INT(depth, "AFI", msg->afi);
+  PARSEBGP_DUMP_INT(depth, "SAFI", msg->safi);
+
+  if (msg->safi != PARSEBGP_BGP_SAFI_UNICAST) {
+    PARSEBGP_DUMP_INFO(depth, "MP_UNREACH SAFI %d Not Supported\n", msg->safi);
+    return;
+  }
+
+  switch (msg->afi) {
+  case PARSEBGP_BGP_AFI_IPV4:
+  case PARSEBGP_BGP_AFI_IPV6:
+    PARSEBGP_DUMP_INT(depth, "Withdrawn NLRIs Count", msg->withdrawn_nlris_cnt);
+
+    parsebgp_bgp_dump_prefixes(msg->withdrawn_nlris, msg->withdrawn_nlris_cnt,
+                               depth + 1);
+    break;
+
+  default:
+    PARSEBGP_DUMP_INFO(depth, "MP_UNREACH AFI %d Not Supported\n", msg->afi);
+    break;
+  }
 }

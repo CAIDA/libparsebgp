@@ -4,10 +4,10 @@
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-// for inet_ntop
+// for inet_ntop:
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

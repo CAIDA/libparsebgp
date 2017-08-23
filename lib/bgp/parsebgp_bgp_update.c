@@ -83,19 +83,7 @@ static void dump_nlris(parsebgp_bgp_update_nlris_t *nlris, int depth)
 
   PARSEBGP_DUMP_INT(depth, "Prefixes Count", nlris->prefixes_cnt);
 
-  depth++;
-  int i;
-  parsebgp_bgp_prefix_t *tuple;
-  for (i = 0; i < nlris->prefixes_cnt; i++) {
-    tuple = &nlris->prefixes[i];
-
-    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_prefix_t, depth);
-
-    PARSEBGP_DUMP_INT(depth, "Type", tuple->type);
-    PARSEBGP_DUMP_INT(depth, "AFI", tuple->afi);
-    PARSEBGP_DUMP_INT(depth, "SAFI", tuple->safi);
-    PARSEBGP_DUMP_PFX(depth, "Prefix", tuple->afi, tuple->addr, tuple->len);
-  }
+  parsebgp_bgp_dump_prefixes(nlris->prefixes, nlris->prefixes_cnt, depth + 1);
 }
 
 static parsebgp_error_t
