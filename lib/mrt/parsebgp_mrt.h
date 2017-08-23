@@ -176,7 +176,7 @@ typedef union parsebgp_mrt_table_dump_v2 {
   parsebgp_mrt_table_dump_v2_afi_safi_rib_t afi_safi_rib;
 
   /** Generic RIB Table */
-  // TODO
+  // TODO: add support for Generic RIB
   // parsebgp_mrt_table_dump_v2_generic_rib_t generic_rib;
 
 } parsebgp_mrt_table_dump_v2_t;

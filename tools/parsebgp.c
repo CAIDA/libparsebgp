@@ -99,9 +99,8 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
           break;
         }
         // else: its a fatal error
-
-        // TODO: add error code to string func
-        fprintf(stderr, "ERROR: Failed to parse message (%d)\n", err);
+        fprintf(stderr, "ERROR: Failed to parse message (%d:%s)\n", err,
+                parsebgp_strerror(err));
         goto err;
       }
       // else: successful read

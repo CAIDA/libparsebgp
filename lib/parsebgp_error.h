@@ -1,6 +1,12 @@
 #ifndef __PARSEBGP_ERROR_H
 #define __PARSEBGP_ERROR_H
 
+/**
+ * Error codes returned by the parser
+ *
+ * Note: these codes must be kept in sync with the error codes in
+ * parsebgp_error.c
+ */
 typedef enum parsebgp_error {
 
   /** No error */
@@ -19,5 +25,14 @@ typedef enum parsebgp_error {
   PARSEBGP_MALLOC_FAILURE = -4,
 
 } parsebgp_error_t;
+
+/**
+ * Convert an error code to a human-readable error string
+ *
+ * @param err           Error code to convert to a string
+ * @return borrowed pointer to a string representing the error code specified,
+ * or "Unknown Error" if the code is not recognized.
+ */
+const char *parsebgp_strerror(parsebgp_error_t err);
 
 #endif /* __PARSEBGP_ERROR_H */

@@ -329,8 +329,7 @@ static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
   // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
-    // TODO
-    // parsebgp_bgp_dump_msg(&msg->data.notification, depth);
+    parsebgp_bgp_dump_msg(&msg->data.notification, depth);
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:

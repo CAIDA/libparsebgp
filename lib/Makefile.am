@@ -15,6 +15,7 @@ lib_LTLIBRARIES = libparsebgp.la
 libparsebgp_la_SOURCES = 		\
 	parsebgp.c			\
 	parsebgp.h			\
+	parsebgp_error.c		\
 	parsebgp_error.h		\
 	parsebgp_opts.c			\
 	parsebgp_opts.h			\

@@ -17,9 +17,8 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
   // prefixes are encoded in a compact format the min number of bytes is used,
   // so we first need to figure out how many bytes it takes to represent a
   // prefix of this length.
-  // TODO: figure out how to get rid of the modulo
   bytes = pfx_len / 8;
-  if ((junk = pfx_len % 8) != 0) {
+  if ((junk = (pfx_len % 8)) != 0) {
     bytes++;
   }
   // now read the prefix

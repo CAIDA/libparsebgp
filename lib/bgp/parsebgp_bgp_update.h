@@ -85,7 +85,7 @@ typedef struct parsebgp_bgp_update_aggregator {
   /** ASN */
   uint32_t asn;
 
-  /** IP Address (TODO: Does this need to support IPv6?) */
+  /** IP Address */
   uint8_t addr[4];
 
 } parsebgp_bgp_update_aggregator_t;

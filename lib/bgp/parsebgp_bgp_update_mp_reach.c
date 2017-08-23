@@ -157,7 +157,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BGP_SAFI_MPLS:
-  // TODO
+  // TODO: add support for MPLS SAFI
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported SAFI (%d)", msg->safi);
@@ -190,7 +190,7 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BGP_SAFI_MPLS:
-  // TODO
+  // TODO: add support for MPLS SAFI
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported SAFI (%d)", msg->safi);

@@ -619,7 +619,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 29
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
-      // TODO
+      // TODO: add support for BGP-LS
       PARSEBGP_SKIP_NOT_IMPLEMENTED(
         opts, buf, nread, attr->len,
         "BGP UPDATE Path Attribute %d (BGP-LS) is not yet implemented",
@@ -705,7 +705,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
-      // TODO
+      // TODO: add support for BGP-LS
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:

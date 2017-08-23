@@ -39,8 +39,6 @@ parsebgp_msg_t *parsebgp_create_msg()
     return NULL;
   }
 
-  // TODO: other init for the msg here
-
   return msg;
 }
 
