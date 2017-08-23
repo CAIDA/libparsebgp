@@ -210,3 +210,59 @@ void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg)
   // now just free the capabilities array
   free(msg->capabilities);
 }
+
+void parsebgp_bgp_open_dump(parsebgp_bgp_open_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_open_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Version", msg->version);
+  PARSEBGP_DUMP_INT(depth, "ASN", msg->asn);
+  PARSEBGP_DUMP_INT(depth, "Hold Time", msg->hold_time);
+  PARSEBGP_DUMP_IP(depth, "BGP ID", PARSEBGP_BGP_AFI_IPV4, msg->bgp_id);
+  PARSEBGP_DUMP_INT(depth, "Parameters Length", msg->param_len);
+  PARSEBGP_DUMP_INT(depth, "Capabilities Count", msg->capabilities_cnt);
+  depth++;
+  int i;
+  parsebgp_bgp_open_capability_t *cap;
+  for (i = 0; i < msg->capabilities_cnt; i++) {
+    cap = &msg->capabilities[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_open_capability_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Code", cap->code);
+    PARSEBGP_DUMP_INT(depth, "Length", cap->len);
+
+    depth++;
+    switch (cap->code) {
+    case PARSEBGP_BGP_OPEN_CAPABILITY_MPBGP:
+      PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_open_capability_mpbgp_t, depth);
+
+      PARSEBGP_DUMP_INT(depth, "AFI", cap->values.mpbgp.afi);
+      PARSEBGP_DUMP_INT(depth, "Reserved", cap->values.mpbgp.reserved);
+      PARSEBGP_DUMP_INT(depth, "SAFI", cap->values.mpbgp.safi);
+      break;
+
+    case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
+      PARSEBGP_DUMP_INT(depth, "AS4 ASN", cap->values.asn);
+      break;
+
+    // capabilities with data that we are ignoring (since OpenBMP is ignoring
+    // it)
+    case PARSEBGP_BGP_OPEN_CAPABILITY_OUTBOUND_FILTER:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
+      PARSEBGP_DUMP_INFO(depth, "Note: Ignored Capability Data\n");
+      break;
+
+      // capabilities with no extra data:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
+      break;
+
+    default:
+      break;
+    }
+    depth--;
+  }
+}

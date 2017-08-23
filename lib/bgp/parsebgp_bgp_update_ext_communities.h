@@ -90,6 +90,9 @@ typedef struct parsebgp_bgp_update_ext_community_two_octet {
  */
 typedef struct parsebgp_bgp_update_ext_community_ip_addr {
 
+  /** Global Administrator IP AFI */
+  uint16_t global_admin_ip_afi;
+
   /** Global Administrator (IP Address) */
   uint8_t global_admin_ip[16];
 
@@ -176,6 +179,20 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
 parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
   uint8_t *buf, size_t *lenp, size_t remain);
+
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed MP_REACH attribute to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_update_ext_communities_dump(
+  parsebgp_bgp_update_ext_communities_t *msg, int depth);
 
 /** Destroy an EXTENDED COMMUNITIES message */
 void parsebgp_bgp_update_ext_communities_destroy(

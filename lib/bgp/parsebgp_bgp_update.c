@@ -43,6 +43,8 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
 
     // Fix the prefix type to v4 unicast
     tuple->type = PARSEBGP_BGP_PREFIX_UNICAST_IPV4;
+    tuple->afi = PARSEBGP_BGP_AFI_IPV4;
+    tuple->safi = PARSEBGP_BGP_SAFI_UNICAST;
 
     // Read the prefix length
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tuple->len);
@@ -73,6 +75,27 @@ static void destroy_nlris(parsebgp_bgp_update_nlris_t *nlris)
   }
   free(nlris->prefixes);
   nlris->prefixes_cnt = 0;
+}
+
+static void dump_nlris(parsebgp_bgp_update_nlris_t *nlris, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_nlris_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Prefixes Count", nlris->prefixes_cnt);
+
+  depth++;
+  int i;
+  parsebgp_bgp_prefix_t *tuple;
+  for (i = 0; i < nlris->prefixes_cnt; i++) {
+    tuple = &nlris->prefixes[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_prefix_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Type", tuple->type);
+    PARSEBGP_DUMP_INT(depth, "AFI", tuple->afi);
+    PARSEBGP_DUMP_INT(depth, "SAFI", tuple->safi);
+    PARSEBGP_DUMP_PFX(depth, "Prefix", tuple->afi, tuple->addr, tuple->len);
+  }
 }
 
 static parsebgp_error_t
@@ -146,28 +169,32 @@ static void destroy_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
   free(msg->segs);
 }
 
-static parsebgp_error_t
-parse_path_attr_next_hop(uint8_t *next_hop, uint8_t *buf,
-                         size_t *lenp, size_t remain)
+static void dump_attr_as_path(parsebgp_bgp_update_as_path_t *msg, int depth)
 {
-  size_t len = *lenp;
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_as_path_t, depth);
 
-  // Next Hop IP (IPv4-only)
-  if (len < sizeof(uint32_t)) {
-    return PARSEBGP_PARTIAL_MSG;
+  PARSEBGP_DUMP_INT(depth, "Segment Count", msg->segs_cnt);
+
+  depth++;
+  int i;
+  parsebgp_bgp_update_as_path_seg_t *seg;
+  for (i = 0; i < msg->segs_cnt; i++) {
+    seg = &msg->segs[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_as_path_seg_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Type", seg->type);
+    PARSEBGP_DUMP_INT(depth, "ASNs Count", seg->asns_cnt);
+    PARSEBGP_DUMP_INFO(depth, "ASNs: ");
+    int j;
+    for (j = 0; j < seg->asns_cnt; j++) {
+      if (j != 0) {
+        printf(" ");
+      }
+      printf("%"PRIu32, seg->asns[j]);
+    }
+    printf("\n");
   }
-  if (remain < sizeof(uint32_t)) {
-    return PARSEBGP_INVALID_MSG;
-  }
-  memcpy(next_hop, buf, sizeof(uint32_t));
-
-  // DEBUG
-  char ip_buf[INET6_ADDRSTRLEN];
-  inet_ntop(AF_INET, next_hop, ip_buf, INET6_ADDRSTRLEN);
-  fprintf(stderr, "DEBUG: NEXT_HOP: %s\n", ip_buf);
-
-  *lenp = sizeof(uint32_t);
-  return PARSEBGP_OK;
 }
 
 static parsebgp_error_t
@@ -187,15 +214,8 @@ parse_path_attr_aggregator(int asn_4_byte,
     aggregator->asn = ntohs(u16);
   }
 
-  // Aggregator IP Address
-  if (len < sizeof(uint32_t)) {
-    return PARSEBGP_PARTIAL_MSG;
-  }
-  if (remain < sizeof(uint32_t)) {
-    return PARSEBGP_INVALID_MSG;
-  }
-  memcpy(aggregator->addr, buf, sizeof(uint32_t));
-  nread += sizeof(uint32_t);
+  // Aggregator IP Address (IPv4-only)
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, aggregator->addr);
 
   char ip_buf[INET6_ADDRSTRLEN];
   inet_ntop(AF_INET, aggregator->addr, ip_buf, INET6_ADDRSTRLEN);
@@ -245,6 +265,22 @@ static void destroy_attr_communities(parsebgp_bgp_update_communities_t *msg)
   free(msg->communities);
 }
 
+static void dump_attr_communities(parsebgp_bgp_update_communities_t *msg,
+                                  int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_communities_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Communities Count", msg->communities_cnt);
+
+  PARSEBGP_DUMP_INFO(depth, "Communities: ");
+  int i;
+  for (i = 0; i < msg->communities_cnt; i++) {
+    printf("%" PRIu16 ":%" PRIu16, (uint16_t)(msg->communities[i] >> 16),
+           (uint16_t)msg->communities[i]);
+  }
+  printf("\n");
+}
+
 static parsebgp_error_t
 parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
                              uint8_t *buf, size_t *lenp, size_t remain)
@@ -280,6 +316,21 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 static void destroy_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
 {
   free(msg->cluster_ids);
+}
+
+static void dump_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
+                                   int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_cluster_list_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Cluster ID Count", msg->cluster_ids_cnt);
+
+  PARSEBGP_DUMP_INFO(depth, "Cluster IDs: ");
+  int i;
+  for (i = 0; i < msg->cluster_ids_cnt; i++) {
+    printf("%"PRIu32, msg->cluster_ids[i]);
+  }
+  printf("\n");
 }
 
 
@@ -355,11 +406,30 @@ destroy_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
   free(msg->communities);
 }
 
+static void
+dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
+                            int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_large_communities_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Communities Count", msg->communities_cnt);
+
+  PARSEBGP_DUMP_INFO(depth, "Communities: ");
+  int i;
+  parsebgp_bgp_update_large_community_t *comm;
+  for (i = 0; i < msg->communities_cnt; i++) {
+    comm = &msg->communities[i];
+    printf("%" PRIu32 ":%" PRIu32 ":%" PRIu32 " ", comm->global_admin,
+           comm->local_1, comm->local_2);
+  }
+  printf("\n");
+}
+
 #define CHECK_REMAIN(remain, val)                                              \
   do {                                                                         \
     if (remain < sizeof(val)) {                                                \
-      return PARSEBGP_INVALID_MSG;                                                      \
-    };                                                                         \
+      return PARSEBGP_INVALID_MSG;                                             \
+    }                                                                          \
   } while (0)
 
 #define PARSE_SIMPLE_ATTR(name, val, buf, len, nread, remain)                  \
@@ -473,12 +543,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
       // Type 3:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
-      if ((err = parse_path_attr_next_hop(attr->data.next_hop, buf, &slen,
-                                          attr->len)) != PARSEBGP_OK) {
-        return err;
-      }
-      nread += slen;
-      buf += slen;
+      CHECK_REMAIN(remain, attr->data.next_hop);
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.next_hop);
       break;
 
 
@@ -742,6 +808,111 @@ void parsebgp_bgp_update_path_attrs_destroy(
   msg->attrs_cnt = 0;
 }
 
+void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
+                                         int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_path_attrs_t, depth);
+
+  PARSEBGP_DUMP_INT(depth, "Length", msg->len);
+  PARSEBGP_DUMP_INT(depth, "Attributes Count", msg->attrs_cnt);
+
+  depth++;
+  int i;
+  parsebgp_bgp_update_path_attr_t *attr;
+  for (i = 0; i < msg->attrs_cnt; i++) {
+    attr = &msg->attrs[i];
+
+    PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_path_attr_t, depth);
+
+    PARSEBGP_DUMP_INT(depth, "Flags", attr->flags);
+    PARSEBGP_DUMP_INT(depth, "Type", attr->type);
+    PARSEBGP_DUMP_INT(depth, "Length", attr->len);
+
+    depth++;
+    switch (attr->type) {
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
+      PARSEBGP_DUMP_INT(depth, "ORIGIN", attr->data.origin);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
+      dump_attr_as_path(&attr->data.as_path, depth);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
+      PARSEBGP_DUMP_IP(depth, "Next Hop", PARSEBGP_BGP_AFI_IPV4,
+                       attr->data.next_hop);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
+      PARSEBGP_DUMP_INT(depth, "MED", attr->data.med);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
+      PARSEBGP_DUMP_INT(depth, "LOCAL_PREF", attr->data.local_pref);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ATOMIC_AGGREGATE:
+      PARSEBGP_DUMP_INFO(depth, "ATOMIC_AGGREGATE\n");
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
+      PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_aggregator_t, depth);
+      PARSEBGP_DUMP_INT(depth, "ASN", attr->data.aggregator.asn);
+      PARSEBGP_DUMP_IP(depth, "IP", PARSEBGP_BGP_AFI_IPV4,
+                       attr->data.aggregator.addr);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
+      dump_attr_communities(&attr->data.communities, depth);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
+      PARSEBGP_DUMP_INT(depth, "ORIGINATOR_ID", attr->data.originator_id);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
+      dump_attr_cluster_list(&attr->data.cluster_list, depth);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
+      parsebgp_bgp_update_mp_reach_dump(&attr->data.mp_reach, depth);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
+      parsebgp_bgp_update_mp_unreach_dump(&attr->data.mp_unreach, depth);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
+      parsebgp_bgp_update_ext_communities_dump(&attr->data.ext_communities,
+                                               depth);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT:
+      PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_as_pathlimit_t, depth);
+      PARSEBGP_DUMP_INT(depth, "Max # ASNs", attr->data.as_pathlimit.max_asns);
+      PARSEBGP_DUMP_INT(depth, "ASN", attr->data.as_pathlimit.asn);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
+      PARSEBGP_DUMP_INFO(depth, "BGP-LS Support Not Implemented\n");
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
+      dump_attr_large_communities(&attr->data.large_communities, depth);
+      break;
+
+    default:
+      PARSEBGP_DUMP_INFO(depth, "Unsupported Attribute\n");
+      break;
+    }
+    depth--;
+  }
+}
+
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
                                             parsebgp_bgp_update_t *msg,
                                             uint8_t *buf, size_t *lenp,
@@ -802,4 +973,18 @@ void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg)
   destroy_nlris(&msg->withdrawn_nlris);
   destroy_nlris(&msg->announced_nlris);
   parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
+}
+
+void parsebgp_bgp_update_dump(parsebgp_bgp_update_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_t, depth);
+
+  PARSEBGP_DUMP_INFO(depth, "Withdrawn NLRIs:\n");
+  dump_nlris(&msg->withdrawn_nlris, depth + 1);
+
+  PARSEBGP_DUMP_INFO(depth, "Path Attributes:\n");
+  parsebgp_bgp_update_path_attrs_dump(&msg->path_attrs, depth + 1);
+
+  PARSEBGP_DUMP_INFO(depth, "Announced NLRIs:\n");
+  dump_nlris(&msg->announced_nlris, depth + 1);
 }

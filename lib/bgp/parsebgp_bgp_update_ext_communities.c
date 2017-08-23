@@ -75,6 +75,9 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
       // Sub-Type
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
 
+      // AFI
+      comm->types.ip_addr.global_admin_ip_afi = PARSEBGP_BGP_AFI_IPV4;
+
       // Global Admin (IP Address)
       // manual copy since the destination can also hold v6 addr
       if ((len - nread) < 4) {
@@ -184,6 +187,9 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
       // Sub-type
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
 
+      // AFI
+      comm->types.ip_addr.global_admin_ip_afi = PARSEBGP_BGP_AFI_IPV6;
+
       // IPv6 Address
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
                                comm->types.ip_addr.global_admin_ip);
@@ -220,4 +226,12 @@ void parsebgp_bgp_update_ext_communities_destroy(
   // currently no types have dynamic memory
 
   free(msg->communities);
+}
+
+void parsebgp_bgp_update_ext_communities_dump(
+  parsebgp_bgp_update_ext_communities_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_communities_t, depth);
+
+  PARSEBGP_DUMP_INFO(depth, "TODO\n");
 }

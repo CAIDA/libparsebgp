@@ -58,6 +58,12 @@ typedef struct parsebgp_bgp_prefix {
   /** Prefix Type (parsebgp_bgp_prefix_type_t) */
   uint8_t type;
 
+  /** Prefix AFI */
+  uint16_t afi;
+
+  /** Prefix SAFI */
+  uint8_t safi;
+
   /** Prefix Length (number of bits in the mask) */
   uint8_t len;
 

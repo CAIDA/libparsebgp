@@ -86,7 +86,7 @@ typedef struct parsebgp_bgp_update_aggregator {
   uint32_t asn;
 
   /** IP Address (TODO: Does this need to support IPv6?) */
-  uint8_t addr[16];
+  uint8_t addr[4];
 
 } parsebgp_bgp_update_aggregator_t;
 
@@ -279,7 +279,7 @@ typedef struct parsebgp_bgp_update_path_attr {
     parsebgp_bgp_update_as_path_t as_path;
 
     /** NEXT_HOP */
-    uint8_t next_hop[16];
+    uint8_t next_hop[4];
 
     /** MULIT_EXIT_DISC (MED) */
     uint32_t med;
@@ -305,7 +305,7 @@ typedef struct parsebgp_bgp_update_path_attr {
     /** MP_UNREACH */
     parsebgp_bgp_update_mp_unreach_t mp_unreach;
 
-    /** EXT_COMMUNITIES */
+    /** EXT_COMMUNITIES and IPV6_EXT_COMMUNITIES */
     parsebgp_bgp_update_ext_communities_t ext_communities;
 
     /** AS_PATHLIMIT */
@@ -375,6 +375,19 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
 /** Destroy an UPDATE message */
 void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg);
 
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed UPDATE message to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_update_dump(parsebgp_bgp_update_t *msg, int depth);
+
 /** Decode PATH ATTRIBUTES */
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *msg, uint8_t *buf,
@@ -383,5 +396,19 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 /** Destroy a Path Attributes message */
 void parsebgp_bgp_update_path_attrs_destroy(
   parsebgp_bgp_update_path_attrs_t *msg);
+
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed Path Attrs message to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
+                                         int depth);
 
 #endif /* __PARSEBGP_BGP_UPDATE_H */

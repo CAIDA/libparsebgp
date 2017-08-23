@@ -52,6 +52,8 @@ parse_afi_ipv4_ipv6_unicast_nlri(parsebgp_opts_t *opts,
     (*nlris_cnt)++;
 
     tuple->type = p_type;
+    tuple->afi = afi;
+    tuple->safi = PARSEBGP_BGP_SAFI_UNICAST;
 
     // Read the prefix length
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tuple->len);
@@ -290,6 +292,14 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
   free(msg->nlris);
 }
 
+void parsebgp_bgp_update_mp_reach_dump(
+  parsebgp_bgp_update_mp_reach_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_reach_t, depth);
+
+  PARSEBGP_DUMP_INFO(depth, "TODO\n");
+}
+
 parsebgp_error_t
 parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
                                       parsebgp_bgp_update_mp_unreach_t *msg,
@@ -334,4 +344,12 @@ void parsebgp_bgp_update_mp_unreach_destroy(
   parsebgp_bgp_update_mp_unreach_t *msg)
 {
   free(msg->withdrawn_nlris);
+}
+
+void parsebgp_bgp_update_mp_unreach_dump(
+  parsebgp_bgp_update_mp_unreach_t *msg, int depth)
+{
+  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_unreach_t, depth);
+
+  PARSEBGP_DUMP_INFO(depth, "TODO\n");
 }

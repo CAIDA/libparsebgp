@@ -68,6 +68,19 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
 /** Destroy an MP_REACH message */
 void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg);
 
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed MP_REACH attribute to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
+                                       int depth);
 
 /** Decode an MP_UNREACH message */
 parsebgp_error_t parsebgp_bgp_update_mp_unreach_decode(
@@ -77,5 +90,19 @@ parsebgp_error_t parsebgp_bgp_update_mp_unreach_decode(
 /** Destroy an MP_UNREACH message */
 void parsebgp_bgp_update_mp_unreach_destroy(
   parsebgp_bgp_update_mp_unreach_t *msg);
+
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed MP_UNREACH attribute to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
+                                       int depth);
 
 #endif /* __PARSEBGP_BGP_UPDATE_MP_REACH_H */
