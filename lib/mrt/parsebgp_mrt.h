@@ -145,22 +145,22 @@ typedef struct parsebgp_mrt_table_dump_v2_afi_safi_rib {
 typedef enum parsebgp_mrt_table_dump_v2_subtype {
 
   /** Peer Index Table */
-  PEER_INDEX_TABLE = 1,
+  PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE = 1,
 
   /** IPv4 Unicast RIB */
-  RIB_IPV4_UNICAST = 2,
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST = 2,
 
   /** IPv4 Multicast RIB */
-  RIB_IPV4_MULTICAST = 3,
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST = 3,
 
   /** IPv6 Unicast RIB */
-  RIB_IPV6_UNICAST = 4,
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST = 4,
 
   /** IPv6 Multicast RIB */
-  RIB_IPV6_MULTICAST = 5,
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST = 5,
 
   /** Generic RIB */
-  RIB_GENERIC = 6,
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC = 6,
 
 } parsebgp_mrt_table_dump_v2_subtype_t;
 

@@ -238,22 +238,22 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
   opts->bgp.asn_4_byte = 1;
   opts->bgp.mp_reach_no_afi_safi_reserved = 1;
   switch (subtype) {
-  case RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV4;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
-  case RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV4;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
 
-  case RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV6;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
-  case RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV6;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
@@ -370,7 +370,8 @@ dump_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_afi_safi_rib_t, depth);
 
-  int afi = (subtype == RIB_IPV4_UNICAST || subtype == RIB_IPV4_MULTICAST)
+  int afi = (subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST ||
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST)
               ? PARSEBGP_BGP_AFI_IPV4
               : PARSEBGP_BGP_AFI_IPV6;
 
@@ -401,19 +402,19 @@ static parsebgp_error_t parse_table_dump_v2(
   // table dump v2 has no common header, so just call the appropriate subtype
   // parser
   switch (subtype) {
-  case PEER_INDEX_TABLE:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE:
     return parse_table_dump_v2_peer_index(&msg->peer_index, buf, lenp, remain);
     break;
 
-  case RIB_IPV4_UNICAST:
-  case RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
     return parse_table_dump_v2_afi_safi_rib(opts, subtype, &msg->afi_safi_rib,
                                             buf, lenp, remain);
     break;
 
-  case RIB_IPV4_MULTICAST:
-  case RIB_IPV6_MULTICAST:
-  case RIB_GENERIC:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
     // these probably aren't too hard to support (esp. multicast), but bgpdump
     // doesn't support them, so it likely means we don't have any actual use for
     // it.
@@ -437,18 +438,18 @@ static void destroy_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   // table dump v2 has no common header, so just call the appropriate subtype
   // destructor
   switch (subtype) {
-  case PEER_INDEX_TABLE:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE:
     return destroy_table_dump_v2_peer_index(&msg->peer_index);
     break;
 
-  case RIB_IPV4_UNICAST:
-  case RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
     return destroy_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
     break;
 
-  case RIB_IPV4_MULTICAST:
-  case RIB_IPV6_MULTICAST:
-  case RIB_GENERIC:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
   default:
     break;
   }
@@ -460,19 +461,19 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_t, depth);
 
   switch (subtype) {
-  case PEER_INDEX_TABLE:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE:
     return dump_table_dump_v2_peer_index(&msg->peer_index, depth + 1);
     break;
 
-  case RIB_IPV4_UNICAST:
-  case RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
     return dump_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib,
                                            depth + 1);
     break;
 
-  case RIB_IPV4_MULTICAST:
-  case RIB_IPV6_MULTICAST:
-  case RIB_GENERIC:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
   default:
     break;
   }
