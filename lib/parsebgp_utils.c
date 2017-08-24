@@ -1,7 +1,3 @@
-//
-// Created by Induja on 4/6/2017.
-//
-
 #include "parsebgp_utils.h"
 #include "parsebgp.h"
 #include <assert.h>
