@@ -521,7 +521,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       break;
 
     // Type 7
-    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGREGATOR:
       if ((err = parse_path_attr_aggregator(opts->bgp.asn_4_byte,
                                             &attr->data.aggregator, buf, &slen,
                                             attr->len)) != PARSEBGP_OK) {
@@ -698,7 +698,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ATOMIC_AGGREGATE:
-    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGREGATOR:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT:
@@ -796,7 +796,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
       PARSEBGP_DUMP_INFO(depth, "ATOMIC_AGGREGATE\n");
       break;
 
-    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGEGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGREGATOR:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
       PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_aggregator_t, depth);
       PARSEBGP_DUMP_INT(depth, "ASN", attr->data.aggregator.asn);
