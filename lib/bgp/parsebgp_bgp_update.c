@@ -453,7 +453,15 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     }
 
     attr = &path_attrs->attrs[type_tmp];
-    assert(attr->type == 0);
+    if (attr->type != 0) {
+      assert(attr->type == type_tmp);
+
+      fprintf(stderr, "WARN: Duplicate Path Attribute (%d) found. Skipping\n",
+              type_tmp);
+      nread += len_tmp;
+      buf += len_tmp;
+      continue;
+    }
     path_attrs->attrs_cnt++;
 
     // Attribute Flags
