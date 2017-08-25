@@ -326,10 +326,16 @@ typedef struct parsebgp_bgp_update_path_attrs {
   /** Length of the (raw) Path Attributes data (in bytes) */
   uint16_t len;
 
-  /** Array of (attrs_cnt) Path Attributes */
-  parsebgp_bgp_update_path_attr_t *attrs;
+  /** Array of Path Attributes
+   *
+   * Attributes are stored at attrs[ATTR_TYPE] to allow access to specific
+   * attributes without having to do a linear search. Users should check that
+   * attrs[ATTR_TYPE].type is set (to ATTR_TYPE) before accessing any other
+   * fields of the attribute.
+   */
+  parsebgp_bgp_update_path_attr_t attrs[UINT8_MAX];
 
-  /** Number of Path Attributes in the attrs field */
+  /** Number of populated Path Attributes in the attrs field */
   int attrs_cnt;
 
 } parsebgp_bgp_update_path_attrs_t;

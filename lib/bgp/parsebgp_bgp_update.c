@@ -411,7 +411,6 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   uint8_t u8;
   parsebgp_error_t err = PARSEBGP_OK;
 
-  path_attrs->attrs = NULL;
   path_attrs->attrs_cnt = 0;
 
   // Path Attributes Length
@@ -425,10 +424,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     return PARSEBGP_INVALID_MSG;
   }
 
-  // read and realloc until we run out of attributes
+  // read until we run out of attributes
   while (nread < path_attrs->len) {
-    // read the flags, type and length before allocating in case the user has
-    // specified a filter to skip this attribute
 
     // Attribute Flags
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, flags_tmp);
@@ -455,13 +452,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       continue;
     }
 
-    if ((path_attrs->attrs = realloc(
-           path_attrs->attrs, sizeof(parsebgp_bgp_update_path_attr_t) *
-                                ((path_attrs->attrs_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
-    attr = &path_attrs->attrs[path_attrs->attrs_cnt];
-    memset(attr, 0, sizeof(*attr));
+    attr = &path_attrs->attrs[type_tmp];
+    assert(attr->type == 0);
     path_attrs->attrs_cnt++;
 
     // Attribute Flags
@@ -688,6 +680,9 @@ void parsebgp_bgp_update_path_attrs_destroy(
     attr = &msg->attrs[i];
 
     switch (attr->type) {
+    case 0:
+      // unpopulated attribute
+      break;
 
     // Types with no dynamic memory:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
@@ -737,8 +732,6 @@ void parsebgp_bgp_update_path_attrs_destroy(
     }
   }
 
-  free(msg->attrs);
-  msg->attrs = NULL;
   msg->attrs_cnt = 0;
 }
 
@@ -755,6 +748,10 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
   parsebgp_bgp_update_path_attr_t *attr;
   for (i = 0; i < msg->attrs_cnt; i++) {
     attr = &msg->attrs[i];
+
+    if (attr->type == 0) {
+      continue;
+    }
 
     PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_path_attr_t, depth);
 
