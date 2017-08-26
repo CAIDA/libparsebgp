@@ -26,10 +26,10 @@ typedef enum {
   /** Unicast */
   PARSEBGP_BGP_SAFI_UNICAST = 1,
 
-  /** Multicast (PARSEBGP_NOT_IMPLEMENTED) */
+  /** Multicast */
   PARSEBGP_BGP_SAFI_MULTICAST = 2,
 
-  // TODO: add support for MULTICAST, EVPN, NLRI_LABEL
+  // TODO: add support for EVPN, NLRI_LABEL
 
   /** MPLS */
   PARSEBGP_BGP_SAFI_MPLS = 128,
@@ -46,6 +46,12 @@ typedef enum {
 
   /** Unicast IPv6 Prefix */
   PARSEBGP_BGP_PREFIX_UNICAST_IPV6 = 2,
+
+  /** Multicast IPv4 Prefix */
+  PARSEBGP_BGP_PREFIX_MULTICAST_IPV4 = 1,
+
+  /** Multicast IPv6 Prefix */
+  PARSEBGP_BGP_PREFIX_MULTICAST_IPV6 = 2,
 
   // TODO: add support for BGPLS and L2VPN etc.
 } parsebgp_bgp_prefix_type_t;

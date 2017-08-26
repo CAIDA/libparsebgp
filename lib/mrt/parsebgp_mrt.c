@@ -408,17 +408,16 @@ static parsebgp_error_t parse_table_dump_v2(
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
     return parse_table_dump_v2_afi_safi_rib(opts, subtype, &msg->afi_safi_rib,
                                             buf, lenp, remain);
     break;
 
-  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
-  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
-    // these probably aren't too hard to support (esp. multicast), but bgpdump
-    // doesn't support them, so it likely means we don't have any actual use for
-    // it.
+    // these probably aren't too hard to support, but bgpdump doesn't support
+    // them, so it likely means we don't have any actual use for it.
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain,
                                   "Unsupported MRT TABLE_DUMP_V2 subtype (%d)",
                                   subtype);
@@ -444,12 +443,12 @@ static void destroy_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
     return destroy_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
     break;
 
-  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
-  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
   default:
     break;
@@ -467,13 +466,13 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
     return dump_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib,
                                            depth + 1);
     break;
 
-  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
-  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
   default:
     break;
