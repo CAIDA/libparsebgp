@@ -336,8 +336,9 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
 
   // RIB Entries
   // allocate some memory for the entries
-  if ((msg->entries = malloc(sizeof(parsebgp_mrt_table_dump_v2_rib_entry_t) *
-                             msg->entry_count)) == NULL) {
+  if ((msg->entries = malloc_zero(
+         sizeof(parsebgp_mrt_table_dump_v2_rib_entry_t) * msg->entry_count)) ==
+      NULL) {
     return PARSEBGP_MALLOC_FAILURE;
   }
   // and then parse the entries
