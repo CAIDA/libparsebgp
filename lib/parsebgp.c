@@ -10,7 +10,11 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
                                  parsebgp_msg_t *msg, uint8_t *buffer,
                                  size_t *len)
 {
+  // it is a programming error to reuse a message structure, so just abort
+  assert(msg->used == 0);
+
   msg->type = type;
+  msg->used = 1;
 
   switch (type) {
   case PARSEBGP_MSG_TYPE_BMP:
@@ -44,7 +48,7 @@ parsebgp_msg_t *parsebgp_create_msg()
 
 void parsebgp_destroy_msg(parsebgp_msg_t *msg)
 {
-  if (msg == NULL) {
+  if (msg == NULL || msg->used == 0) {
     return;
   }
 

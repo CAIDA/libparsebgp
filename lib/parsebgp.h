@@ -43,6 +43,9 @@ typedef struct parsebgp_msg {
 
   } types;
 
+  /** Sanity check to ensure that a message structure is not reused */
+  uint8_t used;
+
 } parsebgp_msg_t;
 
 /**
