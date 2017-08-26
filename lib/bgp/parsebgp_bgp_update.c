@@ -684,8 +684,11 @@ void parsebgp_bgp_update_path_attrs_destroy(
     return;
   }
 
-  for (i = 0; i < msg->attrs_cnt; i++) {
+  for (i = 0; i < UINT8_MAX; i++) {
     attr = &msg->attrs[i];
+
+    // sanity check
+    assert(attr->type == 0 || attr->type == i);
 
     switch (attr->type) {
     case 0:
@@ -754,7 +757,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
   depth++;
   int i;
   parsebgp_bgp_update_path_attr_t *attr;
-  for (i = 0; i < msg->attrs_cnt; i++) {
+  for (i = 0; i < UINT8_MAX; i++) {
     attr = &msg->attrs[i];
 
     if (attr->type == 0) {
