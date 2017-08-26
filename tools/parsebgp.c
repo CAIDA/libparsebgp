@@ -96,6 +96,8 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
           PARSEBGP_OK) {
         if (err == PARSEBGP_PARTIAL_MSG) {
           // refill the buffer and try again
+          parsebgp_destroy_msg(msg);
+          msg = NULL;
           break;
         }
         // else: its a fatal error
