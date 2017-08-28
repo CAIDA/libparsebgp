@@ -78,8 +78,8 @@ typedef struct parsebgp_bgp_update_as_path {
   /** Does the path contain 4-byte ASNs (instead of 2-byte)? */
   int asn_4_byte;
 
-  /** (Borrowed) Pointer to the raw AS Path data in the original input buffer */
-  uint8_t *data;
+  /** Pointer to the a copy of the raw AS Path data */
+  uint8_t *raw;
 
 } parsebgp_bgp_update_as_path_t;
 
@@ -107,9 +107,8 @@ typedef struct parsebgp_bgp_update_communities {
   /** (Inferred) Number of communities in the array */
   int communities_cnt;
 
-  /** (Borrowed) Pointer to the raw communities data in the original input
-   * buffer */
-  uint8_t *data;
+  /** Pointer to a copy of the raw communities data */
+  uint8_t *raw;
 
 } parsebgp_bgp_update_communities_t;
 

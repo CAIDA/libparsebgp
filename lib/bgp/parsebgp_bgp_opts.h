@@ -57,11 +57,10 @@ typedef struct parsebgp_bgp_opts {
    * Should some (select) UPDATE Path Attributes be parsed only in a superficial
    * manner?
    *
-   * If this is set, the path_attr_shallow array is checked for each Path
-   * Attribute type (ATTR_TYPE) found. If path_attr_shallow[ATTR_TYPE] is set,
-   * then the Path Attribute is **not** fully parsed, and instead, a
-   * **borrowed** pointer to the attribute data within the _input buffer_ is set.
-   * (Thus this pointer is only valid as long as the input buffer is valid.)
+   * If this is set, the path_attr_raw array is checked for each Path
+   * Attribute type (ATTR_TYPE) found. If path_attr_raw[ATTR_TYPE] is set,
+   * then the Path Attribute is **not** fully parsed, and instead, a pointer to
+   * a **copy** of the raw attribute data is set.
    *
    * This feature allows users to improve performance when they want to use
    * their own (optimized) parser to parse the attribute data.
@@ -72,16 +71,16 @@ typedef struct parsebgp_bgp_opts {
    * feature. All other attribute will be fully parsed (unless filtered out
    * using the above 'path_attr_filter').
    */
-  int path_attr_shallow_enabled;
+  int path_attr_raw_enabled;
 
   /**
-   * Path Attribute shallow-parsing config array
+   * Path Attribute raw-parsing config array
    *
    * There is one flag per Path Attribute Type, indicating whether the given
-   * Path Attribute should be shallow-parsed (see documentation for
-   * path_attr_shallow_enabled for more information).
+   * Path Attribute should be raw-parsed (see documentation for
+   * path_attr_raw_enabled for more information).
    */
-  uint8_t path_attr_shallow[UINT8_MAX];
+  uint8_t path_attr_raw[UINT8_MAX];
 
 } parsebgp_bgp_opts_t;
 
