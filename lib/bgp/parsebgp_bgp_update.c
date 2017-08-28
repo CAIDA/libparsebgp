@@ -210,17 +210,22 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
   int i;
 
   msg->communities_cnt = remain / sizeof(uint32_t);
-  if ((msg->communities = malloc(remain)) == NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
 
   if (raw) {
     // don't actually parse the communities
+    if ((msg->raw = malloc(remain)) == NULL) {
+      return PARSEBGP_MALLOC_FAILURE;
+    }
     memcpy(msg->raw, buf, remain);
+    msg->communities = NULL;
     *lenp = remain;
     return PARSEBGP_OK;
   }
   msg->raw = NULL;
+
+  if ((msg->communities = malloc(remain)) == NULL) {
+    return PARSEBGP_MALLOC_FAILURE;
+  }
 
   for (i = 0; i < msg->communities_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
