@@ -69,11 +69,17 @@ typedef struct parsebgp_bgp_update_as_path_seg {
  */
 typedef struct parsebgp_bgp_update_as_path {
 
-  /** Array of AS Path Segments */
+  /** Array of AS Path Segments (may be NULL if shallow parsing is enabled) */
   parsebgp_bgp_update_as_path_seg_t *segs;
 
   /** Number of Segments in the AS Path */
   int segs_cnt;
+
+  /** Does the path contain 4-byte ASNs (instead of 2-byte)? */
+  int asn_4_byte;
+
+  /** (Borrowed) Pointer to the raw AS Path data in the original input buffer */
+  uint8_t *data;
 
 } parsebgp_bgp_update_as_path_t;
 
@@ -95,11 +101,15 @@ typedef struct parsebgp_bgp_update_aggregator {
  */
 typedef struct parsebgp_bgp_update_communities {
 
-  /** Set of communities */
+  /** Set of communities (may be NULL if shallow parsing is enabled) */
   uint32_t *communities;
 
   /** (Inferred) Number of communities in the array */
   int communities_cnt;
+
+  /** (Borrowed) Pointer to the raw communities data in the original input
+   * buffer */
+  uint8_t *data;
 
 } parsebgp_bgp_update_communities_t;
 
