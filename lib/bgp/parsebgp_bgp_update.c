@@ -114,6 +114,21 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     // Segment Length (# ASNs)
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, seg->asns_cnt);
 
+    switch (seg->type) {
+    case PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SET:
+      // as per RFC 4271
+      msg->asns_cnt++;
+      break;
+
+    case PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SEQ:
+      msg->asns_cnt += seg->asns_cnt;
+      break;
+
+    default:
+      // don't count confederations as per RFC 5065
+      break;
+    }
+
     // allocate enough space to store the ASNs (we store as 4-byte regardless of
     // what the path encoding is)
     if ((seg->asns = malloc(sizeof(uint32_t) * seg->asns_cnt)) == NULL) {
@@ -154,6 +169,7 @@ static void dump_attr_as_path(parsebgp_bgp_update_as_path_t *msg, int depth)
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_as_path_t, depth);
 
   PARSEBGP_DUMP_INT(depth, "Segment Count", msg->segs_cnt);
+  PARSEBGP_DUMP_INT(depth, "ASN Count*", msg->asns_cnt);
 
   depth++;
   int i;

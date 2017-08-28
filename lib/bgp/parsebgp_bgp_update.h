@@ -75,6 +75,14 @@ typedef struct parsebgp_bgp_update_as_path {
   /** Number of Segments in the AS Path */
   int segs_cnt;
 
+  /** Number of ASNs in the AS Path
+   *
+   * Note: this uses the definition in Section 9.1.2.2 of [RFC4271] and Section
+   * 5.3 of [RFC5065] which treats AS_SETs as a single ASN, and does not count
+   * CONFED_* segments at all.
+   */
+  int asns_cnt;
+
   /** Does the path contain 4-byte ASNs (instead of 2-byte)? */
   int asn_4_byte;
 
