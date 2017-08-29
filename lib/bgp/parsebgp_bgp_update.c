@@ -510,6 +510,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     if (opts->bgp.path_attr_raw_enabled &&
         opts->bgp.path_attr_raw[type_tmp] != 0) {
       raw = 1;
+    } else {
+      raw = 0;
     }
 
     // Attribute Flags
