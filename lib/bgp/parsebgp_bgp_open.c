@@ -59,6 +59,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
     case PARSEBGP_BGP_OPEN_CAPABILITY_OUTBOUND_FILTER:
     case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
     case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_LLGR:
       nread += cap->len;
       break;
 

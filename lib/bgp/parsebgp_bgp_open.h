@@ -35,6 +35,9 @@ typedef enum {
   /** Enhanced Route Refresh Capability */
   PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED = 70,
 
+  /** Long-Lived Graceful Restart (LLGR) Capability */
+  PARSEBGP_BGP_OPEN_CAPABILITY_LLGR = 71,
+
   /** Route Refresh Capability for BGP-4 */
   PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD = 128,
 
