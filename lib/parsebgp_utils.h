@@ -58,8 +58,10 @@
     if ((opts)->ignore_not_implemented) {                                      \
       nread += (remain);                                                       \
       buf += (remain);                                                         \
-      fprintf(stderr, "WARN: NOT_IMPLEMENTED: " msg_fmt " (%s:%d)\n",          \
-              __VA_ARGS__, __FILE__, __LINE__);                                \
+      if (!(opts)->silence_not_implemented) {                                  \
+        fprintf(stderr, "WARN: NOT_IMPLEMENTED: " msg_fmt " (%s:%d)\n",        \
+                __VA_ARGS__, __FILE__, __LINE__);                              \
+      }                                                                        \
     } else {                                                                   \
       fprintf(stderr, "ERROR: NOT_IMPLEMENTED: " msg_fmt " (%s:%d)\n",         \
               __VA_ARGS__, __FILE__, __LINE__);                                \

@@ -151,7 +151,8 @@ static void usage()
           "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
           "         (only required if using non-standard file extensions)\n"
           "       -f <attr-type>     Filter to include given Path Attribute\n"
-          "       -i                 Ignore unknown messages and attributes\n"
+          "       -s                 Skip unknown messages and attributes\n"
+          "                            (use multiple times to silence warnings)\n"
           "       -h                 Show this help message\n"
           "       -q                 Do not dump parsed messages (quiet mode)\n"
           "       -v                 Show version of the libparsebgp library\n",
@@ -167,7 +168,7 @@ int main(int argc, char **argv)
   parsebgp_opts_t opts;
   parsebgp_opts_init(&opts);
 
-  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:iqvh?")) >= 0) {
+  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:sqvh?")) >= 0) {
     if (optind == prevoptind + 2 && (optarg == NULL || *optarg == '-')) {
       opt = ':';
       --optind;
@@ -180,7 +181,11 @@ int main(int argc, char **argv)
               (uint8_t)atoi(optarg));
       break;
 
-    case 'i':
+    case 's':
+      // if this is the second (or more) time, silence the warnings
+      if (opts.ignore_not_implemented) {
+        opts.silence_not_implemented = 1;
+      }
       opts.ignore_not_implemented = 1;
       break;
 
