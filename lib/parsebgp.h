@@ -29,7 +29,7 @@ typedef struct parsebgp_msg {
   /** Type of message parsed */
   parsebgp_msg_type_t type;
 
-  union {
+  struct {
 
     /** Parsed BGP message (only used if type is BGP, otherwise encapsulated BGP
         message is contained in MRT or BMP structures) */

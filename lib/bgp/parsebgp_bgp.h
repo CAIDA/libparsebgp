@@ -47,7 +47,7 @@ typedef struct parsebgp_bgp_msg {
   uint8_t type;
 
   /** Union of structures for all supported BGP message types */
-  union {
+  struct {
 
     /** OPEN Message (Type 1) */
     parsebgp_bgp_open_t open;

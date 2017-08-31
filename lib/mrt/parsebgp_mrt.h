@@ -165,9 +165,9 @@ typedef enum parsebgp_mrt_table_dump_v2_subtype {
 } parsebgp_mrt_table_dump_v2_subtype_t;
 
 /*
- * Table Dump V2 (a union of the possible subtype messages)
+ * Table Dump V2 (a "union" of the possible subtype messages)
  */
-typedef union parsebgp_mrt_table_dump_v2 {
+typedef struct parsebgp_mrt_table_dump_v2 {
 
   /** Peer Index Table */
   parsebgp_mrt_table_dump_v2_peer_index_t peer_index;
@@ -264,7 +264,7 @@ typedef struct parsebgp_mrt_bgp4mp {
   /** Local IP Address */
   uint8_t local_ip[16];
 
-  union {
+  struct {
 
     /** State Change info (PARSEBGP_MRT_BGP4MP_STATE_CHANGE and
         PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4) */
@@ -329,7 +329,7 @@ typedef struct parsebgp_mrt_msg {
       parsing one of the *_ET message types. */
   uint32_t timestamp_usec;
 
-  union {
+  struct {
 
     /** Type 12: TABLE_DUMP */
     parsebgp_mrt_table_dump_t table_dump;

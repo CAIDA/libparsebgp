@@ -206,7 +206,7 @@ typedef struct parsebgp_bmp_peer_down {
   /** Reason why the session was closed (parsebgp_bmp_peer_down_reason_t) */
   uint8_t reason;
 
-  union {
+  struct {
 
     /** FSM Event that caused the system to close the connection */
     uint16_t fsm_code;
@@ -310,7 +310,7 @@ typedef struct parsebgp_bmp_term_tlv {
   /** Information Length */
   uint16_t len;
 
-  union {
+  struct {
 
     /** PARSEBGP_BMP_TERM_INFO_TYPE_STRING (nul-terminated) */
     char *string;
@@ -369,7 +369,7 @@ typedef struct parsebgp_bmp_route_mirror_tlv {
   uint16_t len;
 
   /** Values */
-  union {
+  struct {
 
     /** BGP PDU */
     parsebgp_bgp_msg_t bgp_msg;
@@ -497,7 +497,7 @@ typedef struct parsebgp_bmp_msg {
   parsebgp_bmp_peer_hdr_t peer_hdr;
 
   /** Union of structures for all supported BMP message types */
-  union {
+  struct {
 
     /** 0: PARSEBGP_BMP_TYPE_ROUTE_MON: Route Monitoring */
     parsebgp_bgp_msg_t route_mon;

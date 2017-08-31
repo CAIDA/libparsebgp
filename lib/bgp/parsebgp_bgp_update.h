@@ -283,7 +283,7 @@ typedef struct parsebgp_bgp_update_path_attr {
   uint16_t len;
 
   /** Union of all support Path Attribute data */
-  union {
+  struct {
 
     /** ORIGIN (parsebgp_bgp_update_origin_type_t) */
     uint8_t origin;
