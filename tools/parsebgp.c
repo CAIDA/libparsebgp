@@ -66,6 +66,11 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
 
   uint64_t cnt = 0;
 
+  if ((msg = parsebgp_create_msg()) == NULL) {
+    fprintf(stderr, "ERROR: Failed to create message structure\n");
+    goto err;
+  }
+
   if ((fp = fopen(fname, "r")) == NULL) {
     fprintf(stderr, "ERROR: Could not open %s (%s)\n", fname, strerror(errno));
     goto err;
@@ -86,18 +91,12 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
     ptr = buf;
 
     while (remain > 0) {
-      if (msg == NULL && (msg = parsebgp_create_msg()) == NULL) {
-        fprintf(stderr, "ERROR: Failed to create message structure\n");
-        goto err;
-      }
-
       dec_len = remain;
       if ((err = parsebgp_decode(*opts, type, msg, ptr, &dec_len)) !=
           PARSEBGP_OK) {
         if (err == PARSEBGP_PARTIAL_MSG) {
           // refill the buffer and try again
-          parsebgp_destroy_msg(msg);
-          msg = NULL;
+          parsebgp_clear_msg(msg);
           break;
         }
         // else: its a fatal error
@@ -115,8 +114,7 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
         parsebgp_dump_msg(msg);
       }
 
-      parsebgp_destroy_msg(msg);
-      msg = NULL;
+      parsebgp_clear_msg(msg);
     }
   }
 
