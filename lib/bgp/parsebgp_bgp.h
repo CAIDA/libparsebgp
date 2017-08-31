@@ -50,18 +50,18 @@ typedef struct parsebgp_bgp_msg {
   struct {
 
     /** OPEN Message (Type 1) */
-    parsebgp_bgp_open_t open;
+    parsebgp_bgp_open_t *open;
 
     /** UPDATE Message (Type 2) */
-    parsebgp_bgp_update_t update;
+    parsebgp_bgp_update_t *update;
 
     /** NOTIFICATION message (Type 3) */
-    parsebgp_bgp_notification_t notification;
+    parsebgp_bgp_notification_t *notification;
 
     /* KEEPALIVE has no extra data (Type 4) */
 
     /** ROUTE-REFRESH Message (Type 5) */
-    parsebgp_bgp_route_refresh_t route_refresh;
+    parsebgp_bgp_route_refresh_t *route_refresh;
 
   } types;
 
@@ -86,11 +86,14 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
 /** Destroy the given BGP message structure
  *
  * @param msg           Pointer to message structure to destroy
- *
- * This function *does not* free the passed structure itself as it is assumed to
- * be a member of a parsebgp_msg_t structure.
  */
 void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg);
+
+/** Clear the given BGP message structure ready for reuse
+ *
+ * @param msg           Pointer to message structure to clear
+ */
+void parsebgp_bgp_clear_msg(parsebgp_bgp_msg_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout

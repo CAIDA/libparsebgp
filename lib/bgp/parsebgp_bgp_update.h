@@ -62,6 +62,9 @@ typedef struct parsebgp_bgp_update_as_path_seg {
   /** Array of (asn_cnt) ASNs */
   uint32_t *asns;
 
+  /** Number of allocated ASNs (INTERNAL) */
+  uint8_t _asns_alloc_cnt;
+
 } parsebgp_bgp_update_as_path_seg_t;
 
 /**
@@ -71,6 +74,9 @@ typedef struct parsebgp_bgp_update_as_path {
 
   /** Array of AS Path Segments (may be NULL if shallow parsing is enabled) */
   parsebgp_bgp_update_as_path_seg_t *segs;
+
+  /** Number of allocated segments (INTERNAL) */
+  int _segs_alloc_cnt;
 
   /** Number of Segments in the AS Path */
   int segs_cnt;
@@ -88,6 +94,9 @@ typedef struct parsebgp_bgp_update_as_path {
 
   /** Pointer to the a copy of the raw AS Path data */
   uint8_t *raw;
+
+  /** Allocated length of the raw data (INTERNAL) */
+  int _raw_alloc_len;
 
 } parsebgp_bgp_update_as_path_t;
 
@@ -112,11 +121,17 @@ typedef struct parsebgp_bgp_update_communities {
   /** Set of communities (may be NULL if shallow parsing is enabled) */
   uint32_t *communities;
 
+  /** Allocated number of communities (INTERNAL) */
+  int _communities_alloc_cnt;
+
   /** (Inferred) Number of communities in the array */
   int communities_cnt;
 
   /** Pointer to a copy of the raw communities data */
   uint8_t *raw;
+
+  /** Allocated length of the raw data (INTERNAL) */
+  int _raw_alloc_len;
 
 } parsebgp_bgp_update_communities_t;
 
@@ -127,6 +142,9 @@ typedef struct parsebgp_bgp_update_cluster_list {
 
   /** Array of CLUSTER_IDs */
   uint32_t *cluster_ids;
+
+  /** Number of allocated CLUSTER_IDs (INTERNAL) */
+  int _cluster_ids_alloc_cnt;
 
   /** (Inferred) Number of CLUSTER_IDs in the array */
   int cluster_ids_cnt;
@@ -169,6 +187,9 @@ typedef struct parsebgp_bgp_update_large_communities {
 
   /** Array of (communities_cnt) LARGE COMMUNITIES */
   parsebgp_bgp_update_large_community_t *communities;
+
+  /** Number of allocated communities (INTERNAL) */
+  int _communities_alloc_cnt;
 
   /** (Inferred) number of communities */
   int communities_cnt;
@@ -293,7 +314,7 @@ typedef struct parsebgp_bgp_update_path_attr {
      * An AS4_PATH should be merged with the AS_PATH attribute using the method
      * outlined in RFC6793 section 4.2.3.
      */
-    parsebgp_bgp_update_as_path_t as_path;
+    parsebgp_bgp_update_as_path_t *as_path;
 
     /** NEXT_HOP */
     uint8_t next_hop[4];
@@ -308,28 +329,28 @@ typedef struct parsebgp_bgp_update_path_attr {
     parsebgp_bgp_update_aggregator_t aggregator;
 
     /** COMMUNITIES */
-    parsebgp_bgp_update_communities_t communities;
+    parsebgp_bgp_update_communities_t *communities;
 
     /** ORIGINATOR_ID */
     uint32_t originator_id;
 
     /** CLUSTER_LIST */
-    parsebgp_bgp_update_cluster_list_t cluster_list;
+    parsebgp_bgp_update_cluster_list_t *cluster_list;
 
     /** MP_REACH */
-    parsebgp_bgp_update_mp_reach_t mp_reach;
+    parsebgp_bgp_update_mp_reach_t *mp_reach;
 
     /** MP_UNREACH */
-    parsebgp_bgp_update_mp_unreach_t mp_unreach;
+    parsebgp_bgp_update_mp_unreach_t *mp_unreach;
 
     /** EXT_COMMUNITIES and IPV6_EXT_COMMUNITIES */
-    parsebgp_bgp_update_ext_communities_t ext_communities;
+    parsebgp_bgp_update_ext_communities_t *ext_communities;
 
     /** AS_PATHLIMIT */
     parsebgp_bgp_update_as_pathlimit_t as_pathlimit;
 
     /** LARGE COMMUNITIES */
-    parsebgp_bgp_update_large_communities_t large_communities;
+    parsebgp_bgp_update_large_communities_t *large_communities;
 
   } data;
 
@@ -368,6 +389,9 @@ typedef struct parsebgp_bgp_update_nlris {
   /** Array of (prefixes_cnt) prefixes */
   parsebgp_bgp_prefix_t *prefixes;
 
+  /** Number of allocated prefixes (INTERNAL) */
+  int _prefixes_alloc_cnt;
+
   /** (Inferred) number of prefixes in the prefixes field */
   int prefixes_cnt;
 
@@ -398,6 +422,9 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
 /** Destroy an UPDATE message */
 void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg);
 
+/** Clear an UPDATE message */
+void parsebgp_bgp_update_clear(parsebgp_bgp_update_t *msg);
+
 /**
  * Dump a human-readable version of the message to stdout
  *
@@ -418,6 +445,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
 /** Destroy a Path Attributes message */
 void parsebgp_bgp_update_path_attrs_destroy(
+  parsebgp_bgp_update_path_attrs_t *msg);
+
+/** Clear a Path Attributes message */
+void parsebgp_bgp_update_path_attrs_clear(
   parsebgp_bgp_update_path_attrs_t *msg);
 
 /**

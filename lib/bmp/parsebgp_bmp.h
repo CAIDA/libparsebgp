@@ -45,6 +45,9 @@ typedef struct parsebgp_bmp_info_tlv {
    */
   uint8_t *info;
 
+  /** Length of the allocated info buffer (INTERNAL) */
+  int _info_alloc_len;
+
 } parsebgp_bmp_info_tlv_t;
 
 /*  -------------------- Stats Report (Type 1) -------------------- */
@@ -161,6 +164,9 @@ typedef struct parsebgp_bmp_stats_report {
   /** Array of stats counters (with stats_count elements) */
   parsebgp_bmp_stats_counter_t *counters;
 
+  /** Number of allocated counters (INTERNAL) */
+  int _counters_alloc_cnt;
+
 } parsebgp_bmp_stats_report_t;
 
 /*  -------------------- Peer Down (Type 2) -------------------- */
@@ -212,7 +218,7 @@ typedef struct parsebgp_bmp_peer_down {
     uint16_t fsm_code;
 
     /** BGP NOTIFICATION message (as sent-to, or recv-from the peer) */
-    parsebgp_bgp_msg_t notification;
+    parsebgp_bgp_msg_t *notification;
 
   } data;
 
@@ -238,13 +244,16 @@ typedef struct parsebgp_bmp_peer_up {
   uint16_t remote_port;
 
   /** OPEN Message sent to the peer (sent_open) */
-  parsebgp_bgp_msg_t sent_open;
+  parsebgp_bgp_msg_t *sent_open;
 
   /** OPEN Message received from the peer (recv_open) */
-  parsebgp_bgp_msg_t recv_open;
+  parsebgp_bgp_msg_t *recv_open;
 
   /** Array of TLVs present (may be empty) */
   parsebgp_bmp_info_tlv_t *tlvs;
+
+  /** Number of allocated TLVs (INTERNAL) */
+  int _tlvs_alloc_cnt;
 
   /** Number of TLVs present (may be zero) */
   int tlvs_cnt;
@@ -260,6 +269,9 @@ typedef struct parsebgp_bmp_init_msg {
 
   /** Array of TLVs present in the init message */
   parsebgp_bmp_info_tlv_t *tlvs;
+
+  /** Number of allocated TLVs (INTERNAL) */
+  int _tlvs_alloc_cnt;
 
   /** Number of TLVs present */
   int tlvs_cnt;
@@ -315,6 +327,9 @@ typedef struct parsebgp_bmp_term_tlv {
     /** PARSEBGP_BMP_TERM_INFO_TYPE_STRING (nul-terminated) */
     char *string;
 
+    /** Allocated length of "string" (INTERNAL) */
+    int _string_alloc_len;
+
     /** PARSEBGP_BMP_TERM_INFO_TYPE_REASON */
     uint16_t reason;
 
@@ -329,6 +344,9 @@ typedef struct parsebgp_bmp_term_msg {
 
   /** Array of TLVs present in the term message */
   parsebgp_bmp_term_tlv_t *tlvs;
+
+  /** Number of allocated TLVs (INTERNAL) */
+  int _tlvs_alloc_cnt;
 
   /** Number of TLVs present */
   int tlvs_cnt;
@@ -372,7 +390,7 @@ typedef struct parsebgp_bmp_route_mirror_tlv {
   struct {
 
     /** BGP PDU */
-    parsebgp_bgp_msg_t bgp_msg;
+    parsebgp_bgp_msg_t *bgp_msg;
 
     /** Information Code (parsebgp_bmp_route_mirror_info_code_t) */
     uint16_t code;
@@ -386,6 +404,9 @@ typedef struct parsebgp_bmp_route_mirror {
 
   /** Array of (tlvs_cnt) Route Mirroring TLVs */
   parsebgp_bmp_route_mirror_tlv_t *tlvs;
+
+  /** Number of allocated TLVs (INTERNAL) */
+  int _tlvs_alloc_cnt;
 
   /** (Inferred) number of TLVs */
   int tlvs_cnt;
@@ -500,25 +521,25 @@ typedef struct parsebgp_bmp_msg {
   struct {
 
     /** 0: PARSEBGP_BMP_TYPE_ROUTE_MON: Route Monitoring */
-    parsebgp_bgp_msg_t route_mon;
+    parsebgp_bgp_msg_t *route_mon;
 
     /** 1: PARSEBGP_BMP_TYPE_STATS_REPORT: Stats Report */
-    parsebgp_bmp_stats_report_t stats_report;
+    parsebgp_bmp_stats_report_t *stats_report;
 
     /** 2: PARSEBGP_BMP_TYPE_PEER_DOWN: Peer Down Message */
-    parsebgp_bmp_peer_down_t peer_down;
+    parsebgp_bmp_peer_down_t *peer_down;
 
     /** 3: PARSEBGP_BMP_TYPE_PEER_UP: Peer Up Message */
-    parsebgp_bmp_peer_up_t peer_up;
+    parsebgp_bmp_peer_up_t *peer_up;
 
     /** 4: PARSEBGP_BMP_TYPE_INIT_MSG: Initiation Message */
-    parsebgp_bmp_init_msg_t init_msg;
+    parsebgp_bmp_init_msg_t *init_msg;
 
     /** 5: PARSEBGP_BMP_TYPE_TERM_MSG: Termination Message */
-    parsebgp_bmp_term_msg_t term_msg;
+    parsebgp_bmp_term_msg_t *term_msg;
 
     /** 6: PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG: Route Mirroring */
-    parsebgp_bmp_route_mirror_t route_mirror;
+    parsebgp_bmp_route_mirror_t *route_mirror;
 
   } types;
 
@@ -543,11 +564,14 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
 /** Destroy the given BMP message structure
  *
  * @param msg           Pointer to message structure to destroy
- *
- * This function *does not* free the passed structure itself as it is assumed to
- * be a member of a parsebgp_msg_t structure.
  */
 void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg);
+
+/** Clear the given BMP message structure ready for reuse
+ *
+ * @param msg           Pointer to message structure to clear
+ */
+void parsebgp_bmp_clear_msg(parsebgp_bmp_msg_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout

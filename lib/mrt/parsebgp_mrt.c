@@ -85,7 +85,19 @@ static parsebgp_error_t parse_table_dump(parsebgp_opts_t *opts,
 static void destroy_table_dump(parsebgp_bgp_afi_t afi,
                                parsebgp_mrt_table_dump_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
+
+  free(msg);
+}
+
+static void clear_table_dump(parsebgp_bgp_afi_t afi,
+                             parsebgp_mrt_table_dump_t *msg)
+{
+  parsebgp_bgp_update_path_attrs_clear(&msg->path_attrs);
 }
 
 static void dump_table_dump(parsebgp_bgp_afi_t afi,
@@ -125,10 +137,8 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
 
   // View Name
   if (msg->view_name_len > 0) {
-    if ((msg->view_name = malloc(sizeof(char) * (msg->view_name_len + 1))) ==
-        NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(msg->view_name, sizeof(char),
+                           msg->_view_name_alloc_len, msg->view_name_len + 1);
     memcpy(msg->view_name, buf, msg->view_name_len);
     msg->view_name[msg->view_name_len] = '\0';
     nread += msg->view_name_len;
@@ -140,11 +150,11 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   msg->peer_count = ntohs(msg->peer_count);
 
   // allocate some space for the peer entries
-  if ((msg->peer_entries = malloc_zero(
-         sizeof(parsebgp_mrt_table_dump_v2_peer_entry_t) * msg->peer_count)) ==
-      NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->peer_entries,
+                         sizeof(parsebgp_mrt_table_dump_v2_peer_entry_t),
+                         msg->_peer_entries_alloc_cnt, msg->peer_count);
+  memset(msg->peer_entries, 0,
+         sizeof(parsebgp_mrt_table_dump_v2_peer_entry_t) * msg->peer_count);
 
   // Peer Entries
   for (i = 0; i < msg->peer_count; i++) {
@@ -197,6 +207,15 @@ destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 
   free(msg->peer_entries);
   msg->peer_entries = NULL;
+  msg->peer_count = 0;
+
+  free(msg);
+}
+
+static void
+clear_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
+{
+  msg->view_name_len = 0;
   msg->peer_count = 0;
 }
 
@@ -291,6 +310,25 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
 }
 
 static void destroy_table_dump_v2_rib_entries(
+  parsebgp_mrt_table_dump_v2_rib_entry_t *entries, uint16_t entry_alloc_cnt)
+{
+  int i;
+  parsebgp_mrt_table_dump_v2_rib_entry_t *entry;
+
+  if (entries == NULL) {
+    return;
+  }
+
+  for (i = 0; i < entry_alloc_cnt; i++) {
+    entry = &entries[i];
+
+    parsebgp_bgp_update_path_attrs_destroy(&entry->path_attrs);
+  }
+
+  free(entries);
+}
+
+static void clear_table_dump_v2_rib_entries(
   parsebgp_mrt_table_dump_v2_rib_entry_t *entries, uint16_t entry_count)
 {
   int i;
@@ -299,10 +337,8 @@ static void destroy_table_dump_v2_rib_entries(
   for (i = 0; i < entry_count; i++) {
     entry = &entries[i];
 
-    parsebgp_bgp_update_path_attrs_destroy(&entry->path_attrs);
+    parsebgp_bgp_update_path_attrs_clear(&entry->path_attrs);
   }
-
-  free(entries);
 }
 
 static parsebgp_error_t
@@ -336,11 +372,10 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
 
   // RIB Entries
   // allocate some memory for the entries
-  if ((msg->entries = malloc_zero(
-         sizeof(parsebgp_mrt_table_dump_v2_rib_entry_t) * msg->entry_count)) ==
-      NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->entries,
+                         sizeof(parsebgp_mrt_table_dump_v2_rib_entry_t),
+                         msg->_entries_alloc_cnt, msg->entry_count);
+
   // and then parse the entries
   slen = len - nread;
   if ((err = parse_table_dump_v2_rib_entries(
@@ -359,8 +394,17 @@ static void destroy_table_dump_v2_afi_safi_rib(
   parsebgp_mrt_table_dump_v2_subtype_t subtype,
   parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg)
 {
-  destroy_table_dump_v2_rib_entries(msg->entries, msg->entry_count);
+  destroy_table_dump_v2_rib_entries(msg->entries, msg->_entries_alloc_cnt);
   msg->entries = NULL;
+  msg->entry_count = 0;
+  msg->_entries_alloc_cnt = 0;
+}
+
+static void clear_table_dump_v2_afi_safi_rib(
+  parsebgp_mrt_table_dump_v2_subtype_t subtype,
+  parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg)
+{
+  clear_table_dump_v2_rib_entries(msg->entries, msg->entry_count);
   msg->entry_count = 0;
 }
 
@@ -435,18 +479,31 @@ static parsebgp_error_t parse_table_dump_v2(
 static void destroy_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                   parsebgp_mrt_table_dump_v2_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
+  destroy_table_dump_v2_peer_index(&msg->peer_index);
+  destroy_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
+
+  free(msg);
+}
+
+static void clear_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+                                parsebgp_mrt_table_dump_v2_t *msg)
+{
   // table dump v2 has no common header, so just call the appropriate subtype
-  // destructor
+  // clear
   switch (subtype) {
   case PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE:
-    return destroy_table_dump_v2_peer_index(&msg->peer_index);
+    return clear_table_dump_v2_peer_index(&msg->peer_index);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
-    return destroy_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
+    return clear_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
@@ -557,8 +614,9 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
     slen = len - nread;
-    if ((err = parsebgp_bgp_decode(opts, &msg->data.bgp_msg, buf, &slen)) !=
+    if ((err = parsebgp_bgp_decode(opts, msg->data.bgp_msg, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
     }
@@ -578,6 +636,18 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
 static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
                            parsebgp_mrt_bgp4mp_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
+  parsebgp_bgp_destroy_msg(msg->data.bgp_msg);
+
+  free(msg);
+}
+
+static void clear_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
+                           parsebgp_mrt_bgp4mp_t *msg)
+{
   switch (subtype) {
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
@@ -588,7 +658,7 @@ static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
-    parsebgp_bgp_destroy_msg(&msg->data.bgp_msg);
+    parsebgp_bgp_clear_msg(msg->data.bgp_msg);
     break;
 
   default:
@@ -622,7 +692,7 @@ static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
-    parsebgp_bgp_dump_msg(&msg->data.bgp_msg, depth);
+    parsebgp_bgp_dump_msg(msg->data.bgp_msg, depth);
     break;
 
   default:
@@ -727,18 +797,21 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
   switch (msg->type) {
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
-    err = parse_table_dump(opts, msg->subtype, &msg->types.table_dump,
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.table_dump);
+    err = parse_table_dump(opts, msg->subtype, msg->types.table_dump,
                            buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP_V2:
-    err = parse_table_dump_v2(opts, msg->subtype, &msg->types.table_dump_v2,
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.table_dump_v2);
+    err = parse_table_dump_v2(opts, msg->subtype, msg->types.table_dump_v2,
                               buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_MRT_TYPE_BGP4MP:
   case PARSEBGP_MRT_TYPE_BGP4MP_ET:
-    err = parse_bgp4mp(opts, msg->subtype, &msg->types.bgp4mp, buf + nread,
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.bgp4mp);
+    err = parse_bgp4mp(opts, msg->subtype, msg->types.bgp4mp, buf + nread,
                        &slen, remain);
     break;
 
@@ -775,18 +848,29 @@ void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg)
   // common header has no dynamically allocated memory
 
   // free per-type memory
+  destroy_table_dump(msg->subtype, msg->types.table_dump);
+  destroy_table_dump_v2(msg->subtype, msg->types.table_dump_v2);
+  destroy_bgp4mp(msg->subtype, msg->types.bgp4mp);
+
+  free(msg);
+
+  return;
+}
+
+void parsebgp_mrt_clear_msg(parsebgp_mrt_msg_t *msg)
+{
   switch (msg->type) {
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
-    destroy_table_dump(msg->subtype, &msg->types.table_dump);
+    clear_table_dump(msg->subtype, msg->types.table_dump);
     break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP_V2:
-    destroy_table_dump_v2(msg->subtype, &msg->types.table_dump_v2);
+    clear_table_dump_v2(msg->subtype, msg->types.table_dump_v2);
     break;
 
   case PARSEBGP_MRT_TYPE_BGP4MP:
   case PARSEBGP_MRT_TYPE_BGP4MP_ET:
-    destroy_bgp4mp(msg->subtype, &msg->types.bgp4mp);
+    clear_bgp4mp(msg->subtype, msg->types.bgp4mp);
     break;
 
   case PARSEBGP_MRT_TYPE_ISIS:
@@ -794,11 +878,8 @@ void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg)
   case PARSEBGP_MRT_TYPE_OSPF_V2:
   case PARSEBGP_MRT_TYPE_OSPF_V3:
   case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
-    // not implemented
     break;
   }
-
-  return;
 }
 
 void parsebgp_mrt_dump_msg(parsebgp_mrt_msg_t *msg, int depth)
@@ -808,16 +889,16 @@ void parsebgp_mrt_dump_msg(parsebgp_mrt_msg_t *msg, int depth)
 
   switch (msg->type) {
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
-    dump_table_dump(msg->subtype, &msg->types.table_dump, depth + 1);
+    dump_table_dump(msg->subtype, msg->types.table_dump, depth + 1);
     break;
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP_V2:
-    dump_table_dump_v2(msg->subtype, &msg->types.table_dump_v2, depth + 1);
+    dump_table_dump_v2(msg->subtype, msg->types.table_dump_v2, depth + 1);
     break;
 
   case PARSEBGP_MRT_TYPE_BGP4MP:
   case PARSEBGP_MRT_TYPE_BGP4MP_ET:
-    dump_bgp4mp(msg->subtype, &msg->types.bgp4mp, depth + 1);
+    dump_bgp4mp(msg->subtype, msg->types.bgp4mp, depth + 1);
     break;
 
   case PARSEBGP_MRT_TYPE_ISIS:

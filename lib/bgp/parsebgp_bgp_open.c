@@ -15,11 +15,10 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
   parsebgp_bgp_open_capability_t *cap;
 
   while ((remain - nread) > 0) {
-    if ((msg->capabilities =
-           realloc(msg->capabilities, sizeof(parsebgp_bgp_open_capability_t) *
-                                        (msg->capabilities_cnt + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+
+    PARSEBGP_MAYBE_REALLOC(
+      msg->capabilities, sizeof(parsebgp_bgp_open_capability_t),
+      msg->_capabilities_alloc_cnt, msg->capabilities_cnt + 1);
     cap = &msg->capabilities[msg->capabilities_cnt++];
 
     // Code
@@ -185,6 +184,13 @@ void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg)
   // we don't (currently) have any capabilities that use dynamic memory, so for
   // now just free the capabilities array
   free(msg->capabilities);
+
+  free(msg);
+}
+
+void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg)
+{
+  msg->capabilities_cnt = 0;
 }
 
 void parsebgp_bgp_open_dump(parsebgp_bgp_open_t *msg, int depth)

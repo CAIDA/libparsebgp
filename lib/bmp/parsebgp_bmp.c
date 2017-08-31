@@ -13,8 +13,9 @@
 /* -------------------- Helper parser functions -------------------- */
 
 static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
-                                        int *tlvs_cnt, uint8_t *buf,
-                                        size_t *lenp, size_t remain)
+                                        int *tlvs_alloc_cnt, int *tlvs_cnt,
+                                        uint8_t *buf, size_t *lenp,
+                                        size_t remain)
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bmp_info_tlv_t *tlv = NULL;
@@ -24,12 +25,8 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
 
   // read and realloc tlvs until we run out of message
   while (remain > 0) {
-    // optimistically allocate a new TLV (if we fail to parse the message then
-    // it will be partially/unfilled)
-    if ((*tlvs = realloc(*tlvs, sizeof(parsebgp_bmp_info_tlv_t) *
-                                  ((*tlvs_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(*tlvs, sizeof(parsebgp_bmp_info_tlv_t),
+                           *tlvs_alloc_cnt, *tlvs_cnt + 1);
     tlv = &(*tlvs)[*tlvs_cnt];
     (*tlvs_cnt)++;
 
@@ -44,19 +41,16 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
 
     remain -= sizeof(tlv->type) + sizeof(tlv->len);
 
+    // Info data
     if (tlv->len > remain) {
       // the length field doesn't match what we saw in the common header
       return PARSEBGP_INVALID_MSG;
     }
-
-    // allocate a buffer for the data
-    if ((tlv->info = malloc(sizeof(uint8_t) * tlv->len)) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
-    // and then copy it in
     if (tlv->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;
     }
+    PARSEBGP_MAYBE_REALLOC(tlv->info, sizeof(uint8_t), tlv->_info_alloc_len,
+                           tlv->len);
     memcpy(tlv->info, buf, tlv->len);
     nread += tlv->len;
     buf += tlv->len;
@@ -67,7 +61,23 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
   return PARSEBGP_OK;
 }
 
-static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_cnt)
+static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_alloc_cnt)
+{
+  int i;
+  if (*tlvs == NULL || *tlvs_alloc_cnt == 0) {
+    return;
+  }
+
+  for (i = 0; i < *tlvs_alloc_cnt; i++) {
+    free((*tlvs)[i].info);
+    (*tlvs)[i].info = NULL;
+  }
+  free(*tlvs);
+  *tlvs = NULL;
+  *tlvs_alloc_cnt = 0;
+}
+
+static void clear_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_cnt)
 {
   int i;
   if (*tlvs_cnt == 0) {
@@ -75,11 +85,8 @@ static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_cnt)
   }
 
   for (i = 0; i < *tlvs_cnt; i++) {
-    free((*tlvs)[i].info);
-    (*tlvs)[i].info = NULL;
+    (*tlvs)[i].len = 0;
   }
-  free(*tlvs);
-  *tlvs = NULL;
   *tlvs_cnt = 0;
 }
 
@@ -115,10 +122,10 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
   msg->stats_count = ntohl(msg->stats_count);
 
   // Allocate enough counter structures
-  if ((msg->counters = malloc_zero(sizeof(parsebgp_bmp_stats_counter_t) *
-                                   msg->stats_count)) == NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->counters, sizeof(parsebgp_bmp_stats_counter_t),
+                         msg->_counters_alloc_cnt, msg->stats_count);
+  memset(msg->counters, 0,
+         sizeof(parsebgp_bmp_stats_counter_t) * msg->stats_count);
 
   // parse each stat
   for (i = 0; i < msg->stats_count; i++) {
@@ -196,7 +203,15 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
 
 static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   free(msg->counters);
+  free(msg);
+}
+
+static void clear_stats_report(parsebgp_bmp_stats_report_t *msg)
+{
   msg->stats_count = 0;
 }
 
@@ -271,8 +286,9 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
   // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.notification);
     slen = len - nread;
-    if ((err = parsebgp_bgp_decode(opts, &msg->data.notification, buf,
+    if ((err = parsebgp_bgp_decode(opts, msg->data.notification, buf,
                                    &slen)) != PARSEBGP_OK) {
       return err;
     }
@@ -304,11 +320,20 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
 
 static void destroy_peer_down(parsebgp_bmp_peer_down_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+  parsebgp_bgp_destroy_msg(msg->data.notification);
+  free(msg);
+}
+
+static void clear_peer_down(parsebgp_bmp_peer_down_t *msg)
+{
   switch (msg->reason) {
   // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
-    parsebgp_bgp_destroy_msg(&msg->data.notification);
+    parsebgp_bgp_clear_msg(msg->data.notification);
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
@@ -329,7 +354,7 @@ static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
   // Reasons with a BGP NOTIFICATION message
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE_WITH_NOTIF:
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
-    parsebgp_bgp_dump_msg(&msg->data.notification, depth);
+    parsebgp_bgp_dump_msg(msg->data.notification, depth);
     break;
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
@@ -376,16 +401,18 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->remote_port);
   msg->remote_port = ntohs(msg->remote_port);
 
+  PARSEBGP_MAYBE_MALLOC_ZERO(msg->sent_open);
   slen = len - nread;
-  if ((err = parsebgp_bgp_decode(opts, &msg->sent_open, buf, &slen)) !=
+  if ((err = parsebgp_bgp_decode(opts, msg->sent_open, buf, &slen)) !=
       PARSEBGP_OK) {
     return err;
   }
   nread += slen;
   buf += slen;
 
+  PARSEBGP_MAYBE_MALLOC_ZERO(msg->recv_open);
   slen = len - nread;
-  if ((err = parsebgp_bgp_decode(opts, &msg->recv_open, buf, &slen)) !=
+  if ((err = parsebgp_bgp_decode(opts, msg->recv_open, buf, &slen)) !=
       PARSEBGP_OK) {
     return err;
   }
@@ -393,7 +420,8 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   buf += slen;
 
   // Information TLVs (optional)
-  parse_info_tlvs(&msg->tlvs, &msg->tlvs_cnt, buf, lenp, remain - nread);
+  parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf, lenp,
+                  remain - nread);
 
   *lenp = nread;
   return PARSEBGP_OK;
@@ -401,9 +429,20 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
 
 static void destroy_peer_up(parsebgp_bmp_peer_up_t *msg)
 {
-  parsebgp_bgp_destroy_msg(&msg->sent_open);
-  parsebgp_bgp_destroy_msg(&msg->recv_open);
-  destroy_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
+  if (msg == NULL) {
+    return;
+  }
+  parsebgp_bgp_destroy_msg(msg->sent_open);
+  parsebgp_bgp_destroy_msg(msg->recv_open);
+  destroy_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt);
+  free(msg);
+}
+
+static void clear_peer_up(parsebgp_bmp_peer_up_t *msg)
+{
+  parsebgp_bgp_clear_msg(msg->sent_open);
+  parsebgp_bgp_clear_msg(msg->recv_open);
+  clear_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
 }
 
 static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
@@ -415,10 +454,10 @@ static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
   PARSEBGP_DUMP_INT(depth, "Remote Port", msg->remote_port);
 
   PARSEBGP_DUMP_INFO(depth, "Sent OPEN:\n");
-  parsebgp_bgp_dump_msg(&msg->sent_open, depth + 1);
+  parsebgp_bgp_dump_msg(msg->sent_open, depth + 1);
 
   PARSEBGP_DUMP_INFO(depth, "Received OPEN:\n");
-  parsebgp_bgp_dump_msg(&msg->recv_open, depth + 1);
+  parsebgp_bgp_dump_msg(msg->recv_open, depth + 1);
 
   PARSEBGP_DUMP_INT(depth, "TLVs Count", msg->tlvs_cnt);
 
@@ -432,12 +471,22 @@ static parsebgp_error_t parse_init_msg(parsebgp_bmp_init_msg_t *msg,
                                        uint8_t *buf, size_t *lenp,
                                        size_t remain)
 {
-  return parse_info_tlvs(&msg->tlvs, &msg->tlvs_cnt, buf, lenp, remain);
+  return parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf,
+                         lenp, remain);
 }
 
 static void destroy_init_msg(parsebgp_bmp_init_msg_t *msg)
 {
-  destroy_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
+  if (msg == NULL) {
+    return;
+  }
+  destroy_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt);
+  free(msg);
+}
+
+static void clear_init_msg(parsebgp_bmp_init_msg_t *msg)
+{
+  clear_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
 }
 
 static void dump_init_msg(parsebgp_bmp_init_msg_t *msg, int depth)
@@ -459,14 +508,10 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
   msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
 
-  // read and realloc tlvs until we run out of message
+  // read until we run out of message
   while (remain > 0) {
-    // optimistically allocate a new TLV (if we fail to parse the message then
-    // it will be partially/unfilled)
-    if ((msg->tlvs = realloc(msg->tlvs, sizeof(parsebgp_bmp_term_tlv_t) *
-                                          ((msg->tlvs_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(msg->tlvs, sizeof(parsebgp_bmp_term_tlv_t),
+                           msg->_tlvs_alloc_cnt, msg->tlvs_cnt + 1);
     tlv = &msg->tlvs[msg->tlvs_cnt];
     msg->tlvs_cnt++;
 
@@ -493,9 +538,8 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
     switch (tlv->type) {
     case PARSEBGP_BMP_TERM_INFO_TYPE_STRING:
       // allocate a string buffer for the data
-      if ((tlv->info.string = malloc(sizeof(char) * (tlv->len + 1))) == NULL) {
-        return PARSEBGP_MALLOC_FAILURE;
-      }
+      PARSEBGP_MAYBE_REALLOC(tlv->info.string, sizeof(char),
+                             tlv->info._string_alloc_len, tlv->len + 1);
       // and then copy it in
       memcpy(tlv->info.string, buf, tlv->len);
       tlv->info.string[tlv->len] = '\0';
@@ -521,24 +565,30 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
 static void destroy_term_msg(parsebgp_bmp_term_msg_t *msg)
 {
   int i;
+  if (msg == NULL || msg->_tlvs_alloc_cnt == 0) {
+    return;
+  }
+
+  for (i = 0; i < msg->_tlvs_alloc_cnt; i++) {
+    free(msg->tlvs[i].info.string);
+    msg->tlvs[i].info.string = NULL;
+  }
+  free(msg->tlvs);
+  msg->tlvs = NULL;
+  msg->_tlvs_alloc_cnt = 0;
+  free(msg);
+}
+
+static void clear_term_msg(parsebgp_bmp_term_msg_t *msg)
+{
+  int i;
   if (msg->tlvs_cnt == 0) {
     return;
   }
 
   for (i = 0; i < msg->tlvs_cnt; i++) {
-    switch (msg->tlvs[i].type) {
-    case PARSEBGP_BMP_TERM_INFO_TYPE_STRING:
-      free(msg->tlvs[i].info.string);
-      msg->tlvs[i].info.string = NULL;
-      break;
-
-    case PARSEBGP_BMP_TERM_INFO_TYPE_REASON:
-    default:
-      // nothing to do
-      break;
-    }
+    msg->tlvs[i].len = 0;
   }
-  free(msg->tlvs);
   msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
 }
@@ -593,14 +643,10 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
   msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
 
-  // read and realloc tlvs until we run out of message
+  // read tlvs until we run out of message
   while ((remain - nread) > 0) {
-
-    if ((msg->tlvs =
-           realloc(msg->tlvs, sizeof(parsebgp_bmp_route_mirror_tlv_t) *
-                                ((msg->tlvs_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(msg->tlvs, sizeof(parsebgp_bmp_route_mirror_tlv_t),
+                           msg->_tlvs_alloc_cnt, msg->tlvs_cnt + 1);
     tlv = &msg->tlvs[msg->tlvs_cnt];
     memset(tlv, 0, sizeof(*tlv));
     msg->tlvs_cnt++;
@@ -627,8 +673,9 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
     switch (tlv->type) {
     case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG:
       // parse the BGP message
+      PARSEBGP_MAYBE_MALLOC_ZERO(tlv->values.bgp_msg);
       slen = len - nread;
-      if ((err = parsebgp_bgp_decode(opts, &tlv->values.bgp_msg, buf, &slen)) !=
+      if ((err = parsebgp_bgp_decode(opts, tlv->values.bgp_msg, buf, &slen)) !=
           PARSEBGP_OK) {
         return err;
       }
@@ -653,6 +700,23 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
 static void destroy_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
 {
   int i;
+  if (msg == NULL || msg->tlvs_cnt == 0) {
+    return;
+  }
+
+  for (i = 0; i < msg->tlvs_cnt; i++) {
+    parsebgp_bgp_destroy_msg(msg->tlvs[i].values.bgp_msg);
+  }
+
+  free(msg->tlvs);
+  msg->tlvs = NULL;
+  msg->_tlvs_alloc_cnt = 0;
+  free(msg);
+}
+
+static void clear_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
+{
+  int i;
   if (msg->tlvs_cnt == 0) {
     return;
   }
@@ -660,7 +724,7 @@ static void destroy_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
   for (i = 0; i < msg->tlvs_cnt; i++) {
     switch (msg->tlvs[i].type) {
     case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG:
-      parsebgp_bgp_destroy_msg(&msg->tlvs[i].values.bgp_msg);
+      parsebgp_bgp_clear_msg(msg->tlvs[i].values.bgp_msg);
       break;
 
     case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO:
@@ -669,8 +733,7 @@ static void destroy_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
       break;
     }
   }
-  free(msg->tlvs);
-  msg->tlvs = NULL;
+
   msg->tlvs_cnt = 0;
 }
 
@@ -693,7 +756,7 @@ static void dump_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg, int depth)
 
     switch (tlv->type) {
     case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_BGP_MSG:
-      parsebgp_bgp_dump_msg(&tlv->values.bgp_msg, depth + 1);
+      parsebgp_bgp_dump_msg(tlv->values.bgp_msg, depth + 1);
       break;
 
     case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO:
@@ -998,33 +1061,40 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
     // TODO: understand if it is sufficient to believe this flag
     opts->bgp.asn_4_byte =
       !(msg->peer_hdr.flags & PARSEBGP_BMP_PEER_FLAG_2_BYTE_AS_PATH);
-    err = parsebgp_bgp_decode(opts, &msg->types.route_mon, buf + nread, &slen);
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.route_mon);
+    err = parsebgp_bgp_decode(opts, msg->types.route_mon, buf + nread, &slen);
     break;
 
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.stats_report);
     err =
-      parse_stats_report(&msg->types.stats_report, buf + nread, &slen, remain);
+      parse_stats_report(msg->types.stats_report, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.peer_down);
     err =
-      parse_peer_down(opts, &msg->types.peer_down, buf + nread, &slen, remain);
+      parse_peer_down(opts, msg->types.peer_down, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
-    err = parse_peer_up(opts, &msg->types.peer_up, buf + nread, &slen, remain);
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.peer_up);
+    err = parse_peer_up(opts, msg->types.peer_up, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_INIT_MSG:
-    err = parse_init_msg(&msg->types.init_msg, buf + nread, &slen, remain);
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.init_msg);
+    err = parse_init_msg(msg->types.init_msg, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_TERM_MSG:
-    err = parse_term_msg(&msg->types.term_msg, buf + nread, &slen, remain);
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.term_msg);
+    err = parse_term_msg(msg->types.term_msg, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    err = parse_route_mirror_msg(opts, &msg->types.route_mirror, buf + nread,
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.route_mirror);
+    err = parse_route_mirror_msg(opts, msg->types.route_mirror, buf + nread,
                                  &slen, remain);
     break;
   }
@@ -1048,33 +1118,48 @@ void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg)
 
   // Common header has no dynamically allocated memory
 
+  parsebgp_bgp_destroy_msg(msg->types.route_mon);
+  destroy_stats_report(msg->types.stats_report);
+  destroy_peer_down(msg->types.peer_down);
+  destroy_peer_up(msg->types.peer_up);
+  destroy_init_msg(msg->types.init_msg);
+  destroy_term_msg(msg->types.term_msg);
+  destroy_route_mirror_msg(msg->types.route_mirror);
+
+  free(msg);
+}
+
+void parsebgp_bmp_clear_msg(parsebgp_bmp_msg_t *msg)
+{
+  // Common header has no dynamically allocated memory
+
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
-    parsebgp_bgp_destroy_msg(&msg->types.route_mon);
+    parsebgp_bgp_clear_msg(msg->types.route_mon);
     break;
 
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
-    destroy_stats_report(&msg->types.stats_report);
+    clear_stats_report(msg->types.stats_report);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
-    destroy_peer_down(&msg->types.peer_down);
+    clear_peer_down(msg->types.peer_down);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
-    destroy_peer_up(&msg->types.peer_up);
+    clear_peer_up(msg->types.peer_up);
     break;
 
   case PARSEBGP_BMP_TYPE_INIT_MSG:
-    destroy_init_msg(&msg->types.init_msg);
+    clear_init_msg(msg->types.init_msg);
     break;
 
   case PARSEBGP_BMP_TYPE_TERM_MSG:
-    destroy_term_msg(&msg->types.term_msg);
+    clear_term_msg(msg->types.term_msg);
     break;
 
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    destroy_route_mirror_msg(&msg->types.route_mirror);
+    clear_route_mirror_msg(msg->types.route_mirror);
     break;
   }
 }
@@ -1088,31 +1173,31 @@ void parsebgp_bmp_dump_msg(parsebgp_bmp_msg_t *msg, int depth)
   depth++;
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
-    parsebgp_bgp_dump_msg(&msg->types.route_mon, depth);
+    parsebgp_bgp_dump_msg(msg->types.route_mon, depth);
     break;
 
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
-    dump_stats_report(&msg->types.stats_report, depth);
+    dump_stats_report(msg->types.stats_report, depth);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
-    dump_peer_down(&msg->types.peer_down, depth);
+    dump_peer_down(msg->types.peer_down, depth);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_UP:
-    dump_peer_up(&msg->types.peer_up, depth);
+    dump_peer_up(msg->types.peer_up, depth);
     break;
 
   case PARSEBGP_BMP_TYPE_INIT_MSG:
-    dump_init_msg(&msg->types.init_msg, depth);
+    dump_init_msg(msg->types.init_msg, depth);
     break;
 
   case PARSEBGP_BMP_TYPE_TERM_MSG:
-    dump_term_msg(&msg->types.term_msg, depth);
+    dump_term_msg(msg->types.term_msg, depth);
     break;
 
   case PARSEBGP_BMP_TYPE_ROUTE_MIRROR_MSG:
-    dump_route_mirror_msg(&msg->types.route_mirror, depth);
+    dump_route_mirror_msg(msg->types.route_mirror, depth);
     break;
   }
 }

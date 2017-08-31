@@ -21,11 +21,12 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
 
   msg->communities_cnt = remain / 8;
 
-  if ((msg->communities = malloc_zero(
-         sizeof(parsebgp_bgp_update_ext_community_t) * msg->communities_cnt)) ==
-      NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->communities,
+                         sizeof(parsebgp_bgp_update_ext_community_t),
+                         msg->_communities_alloc_cnt, msg->communities_cnt);
+  // TODO: does this really need to be zeroed?
+  memset(msg->communities, 0,
+         sizeof(parsebgp_bgp_update_ext_community_t) * msg->communities_cnt);
 
   for (i = 0; i < msg->communities_cnt; i++) {
     comm = &msg->communities[i];
@@ -127,11 +128,12 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
 
   msg->communities_cnt = remain / 20;
 
-  if ((msg->communities = malloc_zero(
-         sizeof(parsebgp_bgp_update_ext_community_t) * msg->communities_cnt)) ==
-      NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->communities,
+                         sizeof(parsebgp_bgp_update_ext_community_t),
+                         msg->_communities_alloc_cnt, msg->communities_cnt);
+  // TODO: does this really need to be zeroed?
+  memset(msg->communities, 0,
+         sizeof(parsebgp_bgp_update_ext_community_t) * msg->communities_cnt);
 
   for (i = 0; i < msg->communities_cnt; i++) {
     comm = &msg->communities[i];
@@ -176,6 +178,13 @@ void parsebgp_bgp_update_ext_communities_destroy(
   // currently no types have dynamic memory
 
   free(msg->communities);
+  free(msg);
+}
+
+void parsebgp_bgp_update_ext_communities_clear(
+  parsebgp_bgp_update_ext_communities_t *msg)
+{
+  msg->communities_cnt = 0;
 }
 
 static void dump_ext_community(parsebgp_bgp_update_ext_community_t *comm,

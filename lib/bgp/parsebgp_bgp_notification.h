@@ -168,6 +168,9 @@ typedef struct parsebgp_bgp_notification {
   /** Error Data */
   uint8_t *data;
 
+  /** Allocated length of Error Data (INTERNAL) */
+  int _data_alloc_len;
+
   /** Length of Error Data (in bytes) */
   int data_len;
 
@@ -179,8 +182,11 @@ parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
                                  parsebgp_bgp_notification_t *msg, uint8_t *buf,
                                  size_t *lenp, size_t remain);
 
-/** Destroy an NOTIFICATION message */
+/** Destroy a NOTIFICATION message */
 void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg);
+
+/** Clear a NOTIFICATION message */
+void parsebgp_bgp_notification_clear(parsebgp_bgp_notification_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout

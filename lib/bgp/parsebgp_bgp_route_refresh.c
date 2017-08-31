@@ -28,9 +28,8 @@ parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
   if ((len - nread) < msg->data_len) {
     return PARSEBGP_PARTIAL_MSG;
   }
-  if ((msg->data = malloc(msg->data_len)) == NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->data, sizeof(uint8_t), msg->_data_alloc_len,
+                         msg->data_len);
   memcpy(msg->data, buf, msg->data_len);
   nread += msg->data_len;
 
@@ -45,6 +44,13 @@ void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg)
   }
 
   free(msg->data);
+
+  free(msg);
+}
+
+void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg)
+{
+  msg->data_len = 0;
 }
 
 void parsebgp_bgp_route_refresh_dump(parsebgp_bgp_route_refresh_t *msg,

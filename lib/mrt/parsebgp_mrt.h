@@ -92,11 +92,17 @@ typedef struct parsebgp_mrt_table_dump_v2_peer_index {
   /** View Name */
   char *view_name;
 
+  /** Allocated length of "view_name" (INTERNAL) */
+  uint16_t _view_name_alloc_len;
+
   /** Number of Peer Entries */
   uint16_t peer_count;
 
   /** Array of (peer_count) Peer Entries */
   parsebgp_mrt_table_dump_v2_peer_entry_t *peer_entries;
+
+  /** Number of allocated Peer Entries (INTERNAL) */
+  uint16_t _peer_entries_alloc_cnt;
 
 } parsebgp_mrt_table_dump_v2_peer_index_t;
 
@@ -136,6 +142,9 @@ typedef struct parsebgp_mrt_table_dump_v2_afi_safi_rib {
 
   /** Array of (entry_count) RIB entries */
   parsebgp_mrt_table_dump_v2_rib_entry_t *entries;
+
+  /** Number of allocated RIB entries (INTERNAL) */
+  uint16_t _entries_alloc_cnt;
 
 } parsebgp_mrt_table_dump_v2_afi_safi_rib_t;
 
@@ -271,7 +280,7 @@ typedef struct parsebgp_mrt_bgp4mp {
     parsebgp_mrt_bgp4mp_state_change_t state_change;
 
     /** BGP Message (used by PARSEBGP_MRT_BGP4MP_MESSAGE_* types) */
-    parsebgp_bgp_msg_t bgp_msg;
+    parsebgp_bgp_msg_t *bgp_msg;
 
   } data;
 
@@ -332,13 +341,13 @@ typedef struct parsebgp_mrt_msg {
   struct {
 
     /** Type 12: TABLE_DUMP */
-    parsebgp_mrt_table_dump_t table_dump;
+    parsebgp_mrt_table_dump_t *table_dump;
 
     /** Type 13: TABLE_DUMP_V2 */
-    parsebgp_mrt_table_dump_v2_t table_dump_v2;
+    parsebgp_mrt_table_dump_v2_t *table_dump_v2;
 
     /** Types 16 and 17: BGP4MP */
-    parsebgp_mrt_bgp4mp_t bgp4mp;
+    parsebgp_mrt_bgp4mp_t *bgp4mp;
 
   } types;
 
@@ -363,11 +372,14 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
 /** Destroy the given MRT message structure
  *
  * @param msg           Pointer to message structure to destroy
- *
- * This function *does not* free the passed structure itself as it is assumed to
- * be a member of a parsebgp_msg_t structure.
  */
 void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg);
+
+/** Clear the given MRT message structure ready for reuse
+ *
+ * @param msg           Pointer to message structure to clear
+ */
+void parsebgp_mrt_clear_msg(parsebgp_mrt_msg_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout

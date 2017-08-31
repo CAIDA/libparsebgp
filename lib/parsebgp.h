@@ -33,18 +33,15 @@ typedef struct parsebgp_msg {
 
     /** Parsed BGP message (only used if type is BGP, otherwise encapsulated BGP
         message is contained in MRT or BMP structures) */
-    parsebgp_bgp_msg_t bgp;
+    parsebgp_bgp_msg_t *bgp;
 
     /** Parsed BMP message */
-    parsebgp_bmp_msg_t bmp;
+    parsebgp_bmp_msg_t *bmp;
 
     /** Parsed MRT message */
-    parsebgp_mrt_msg_t mrt;
+    parsebgp_mrt_msg_t *mrt;
 
   } types;
-
-  /** Sanity check to ensure that a message structure is not reused */
-  uint8_t used;
 
 } parsebgp_msg_t;
 
@@ -78,6 +75,13 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
  * free allocated memory.
  */
 parsebgp_msg_t *parsebgp_create_msg();
+
+/**
+ * Clear the given message structure ready for reuse
+ *
+ * @param msg           Pointer to message structure to clear
+ */
+void parsebgp_clear_msg(parsebgp_msg_t *msg);
 
 /**
  * Destroy the given message structure

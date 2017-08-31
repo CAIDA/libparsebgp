@@ -6,12 +6,10 @@
 #include <string.h>
 #include <unistd.h>
 
-static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(parsebgp_opts_t *opts,
-                                                 parsebgp_bgp_afi_t afi,
-                                                 parsebgp_bgp_safi_t safi,
-                                                 parsebgp_bgp_prefix_t **nlris,
-                                                 int *nlris_cnt, uint8_t *buf,
-                                                 size_t *lenp, size_t remain)
+static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
+  parsebgp_opts_t *opts, parsebgp_bgp_afi_t afi, parsebgp_bgp_safi_t safi,
+  parsebgp_bgp_prefix_t **nlris, int *nlris_alloc_cnt, int *nlris_cnt,
+  uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   uint8_t p_type;
@@ -60,11 +58,8 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(parsebgp_opts_t *opts,
   *nlris_cnt = 0;
 
   while ((remain - nread) > 0) {
-    // optimistically allocate a new prefix tuple
-    if ((*nlris = realloc(*nlris, sizeof(parsebgp_bgp_prefix_t) *
-                                    ((*nlris_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(*nlris, sizeof(parsebgp_bgp_prefix_t),
+                           *nlris_alloc_cnt, *nlris_cnt + 1);
     tuple = &(*nlris)[*nlris_cnt];
     (*nlris_cnt)++;
 
@@ -174,9 +169,9 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
 
     // Parse the NLRIs
     slen = len - nread;
-    if ((err = parse_afi_ipv4_ipv6_nlri(opts, msg->afi, msg->safi, &msg->nlris,
-                                        &msg->nlris_cnt, buf, &slen,
-                                        remain - nread)) != PARSEBGP_OK) {
+    if ((err = parse_afi_ipv4_ipv6_nlri(
+           opts, msg->afi, msg->safi, &msg->nlris, &msg->_nlris_alloc_cnt,
+           &msg->nlris_cnt, buf, &slen, remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -208,10 +203,10 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
   case PARSEBGP_BGP_SAFI_UNICAST:
   case PARSEBGP_BGP_SAFI_MULTICAST:
     // Parse the NLRIs
-    if ((err = parse_afi_ipv4_ipv6_nlri(opts, msg->afi, msg->safi,
-                                        &msg->withdrawn_nlris,
-                                        &msg->withdrawn_nlris_cnt, buf, &slen,
-                                        remain - nread)) != PARSEBGP_OK) {
+    if ((err = parse_afi_ipv4_ipv6_nlri(
+           opts, msg->afi, msg->safi, &msg->withdrawn_nlris,
+           &msg->_withdrawn_nlris_alloc_cnt, &msg->withdrawn_nlris_cnt, buf,
+           &slen, remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -290,6 +285,12 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
 void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
 {
   free(msg->nlris);
+  free(msg);
+}
+
+void parsebgp_bgp_update_mp_reach_clear(parsebgp_bgp_update_mp_reach_t *msg)
+{
+  msg->nlris_cnt = 0;
 }
 
 void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
@@ -370,6 +371,13 @@ void parsebgp_bgp_update_mp_unreach_destroy(
   parsebgp_bgp_update_mp_unreach_t *msg)
 {
   free(msg->withdrawn_nlris);
+  free(msg);
+}
+
+void parsebgp_bgp_update_mp_unreach_clear(
+  parsebgp_bgp_update_mp_unreach_t *msg)
+{
+  msg->withdrawn_nlris_cnt = 0;
 }
 
 void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,

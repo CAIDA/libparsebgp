@@ -41,6 +41,9 @@ typedef struct parsebgp_bgp_route_refresh {
   /** Data (e.g., for ORF messages) */
   uint8_t *data;
 
+  /** Allocated Data Length (INTERNAL) */
+  int _data_alloc_len;
+
   /** (Inferred) Data Length */
   int data_len;
 
@@ -52,8 +55,11 @@ parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
                                   parsebgp_bgp_route_refresh_t *msg,
                                   uint8_t *buf, size_t *lenp, size_t remain);
 
-/** Destroy an ROUTE REFRESH message */
+/** Destroy a ROUTE REFRESH message */
 void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg);
+
+/** Clear a ROUTE REFRESH message */
+void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout

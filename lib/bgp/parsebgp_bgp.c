@@ -54,16 +54,19 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
 
   switch (msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
-    err = parsebgp_bgp_open_decode(opts, &msg->types.open, buf, &slen, remain);
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.open);
+    err = parsebgp_bgp_open_decode(opts, msg->types.open, buf, &slen, remain);
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.update);
     err =
-      parsebgp_bgp_update_decode(opts, &msg->types.update, buf, &slen, remain);
+      parsebgp_bgp_update_decode(opts, msg->types.update, buf, &slen, remain);
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
-    err = parsebgp_bgp_notification_decode(opts, &msg->types.notification, buf,
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.notification);
+    err = parsebgp_bgp_notification_decode(opts, msg->types.notification, buf,
                                            &slen, remain);
     break;
 
@@ -74,8 +77,9 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
     break;
 
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
-    err = parsebgp_bgp_route_refresh_decode(opts, &msg->types.route_refresh,
-                                            buf, &slen, remain);
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.route_refresh);
+    err = parsebgp_bgp_route_refresh_decode(opts, msg->types.route_refresh, buf,
+                                            &slen, remain);
     break;
 
   default:
@@ -100,26 +104,42 @@ void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)
 
   // no dynamic memory in common header
 
-  // destroy based on message type
+  parsebgp_bgp_open_destroy(msg->types.open);
+  parsebgp_bgp_update_destroy(msg->types.update);
+  parsebgp_bgp_notification_destroy(msg->types.notification);
+  parsebgp_bgp_route_refresh_destroy(msg->types.route_refresh);
+
+  free(msg);
+}
+
+void parsebgp_bgp_clear_msg(parsebgp_bgp_msg_t *msg)
+{
+  if (msg == NULL) {
+    return;
+  }
+
+  // no dynamic memory in common header
+
+  // clear based on message type
   switch (msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
-    parsebgp_bgp_open_destroy(&msg->types.open);
+    parsebgp_bgp_open_clear(msg->types.open);
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:
-    parsebgp_bgp_update_destroy(&msg->types.update);
+    parsebgp_bgp_update_clear(msg->types.update);
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
-    parsebgp_bgp_notification_destroy(&msg->types.notification);
+    parsebgp_bgp_notification_clear(msg->types.notification);
     break;
 
   case PARSEBGP_BGP_TYPE_KEEPALIVE:
-    // nothing to destroy
+    // nothing to clear
     break;
 
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
-    parsebgp_bgp_route_refresh_destroy(&msg->types.route_refresh);
+    parsebgp_bgp_route_refresh_clear(msg->types.route_refresh);
     break;
 
   default:
@@ -139,15 +159,15 @@ void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
 
   switch (msg->type) {
   case PARSEBGP_BGP_TYPE_OPEN:
-    parsebgp_bgp_open_dump(&msg->types.open, depth);
+    parsebgp_bgp_open_dump(msg->types.open, depth);
     break;
 
   case PARSEBGP_BGP_TYPE_UPDATE:
-    parsebgp_bgp_update_dump(&msg->types.update, depth);
+    parsebgp_bgp_update_dump(msg->types.update, depth);
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
-    parsebgp_bgp_notification_dump(&msg->types.notification, depth);
+    parsebgp_bgp_notification_dump(msg->types.notification, depth);
     break;
 
   case PARSEBGP_BGP_TYPE_KEEPALIVE:
@@ -155,7 +175,7 @@ void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
     break;
 
   case PARSEBGP_BGP_TYPE_ROUTE_REFRESH:
-    parsebgp_bgp_route_refresh_dump(&msg->types.route_refresh, depth);
+    parsebgp_bgp_route_refresh_dump(msg->types.route_refresh, depth);
     break;
 
   default:

@@ -23,14 +23,10 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     return PARSEBGP_INVALID_MSG;
   }
 
-  // read and realloc until we run out of message
+  // read until we run out of message
   while (nread < nlris->len) {
-    // optimistically allocate a new prefix tuple
-    if ((nlris->prefixes =
-           realloc(nlris->prefixes, sizeof(parsebgp_bgp_prefix_t) *
-                                      ((nlris->prefixes_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(nlris->prefixes, sizeof(parsebgp_bgp_prefix_t),
+                           nlris->_prefixes_alloc_cnt, nlris->prefixes_cnt + 1);
     tuple = &nlris->prefixes[nlris->prefixes_cnt];
     nlris->prefixes_cnt++;
 
@@ -58,10 +54,13 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
 
 static void destroy_nlris(parsebgp_bgp_update_nlris_t *nlris)
 {
-  if (nlris == NULL) {
-    return;
-  }
   free(nlris->prefixes);
+  nlris->prefixes_cnt = 0;
+  nlris->_prefixes_alloc_cnt = 0;
+}
+
+static void clear_nlris(parsebgp_bgp_update_nlris_t *nlris)
+{
   nlris->prefixes_cnt = 0;
 }
 
@@ -88,9 +87,8 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
   msg->segs_cnt = 0;
 
   if (raw) {
-    if ((msg->raw = malloc(remain)) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(msg->raw, sizeof(uint8_t), msg->_raw_alloc_len,
+                           remain);
     memcpy(msg->raw, buf, remain);
     *lenp = remain;
     return PARSEBGP_OK;
@@ -99,14 +97,11 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 
   while ((remain - nread) > 0) {
     // create a new segment
-    if ((msg->segs =
-           realloc(msg->segs, sizeof(parsebgp_bgp_update_as_path_seg_t) *
-                                ((msg->segs_cnt) + 1))) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(msg->segs, sizeof(parsebgp_bgp_update_as_path_seg_t),
+                           msg->_segs_alloc_cnt, msg->segs_cnt + 1);
     seg = &(msg->segs)[msg->segs_cnt];
-    seg->asns = NULL; // in case we error out
     msg->segs_cnt++;
+    seg->asns_cnt = 0;
 
     // Segment Type
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, seg->type);
@@ -129,12 +124,10 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
       break;
     }
 
-    // allocate enough space to store the ASNs (we store as 4-byte regardless of
-    // what the path encoding is)
-    if ((seg->asns = malloc(sizeof(uint32_t) * seg->asns_cnt)) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
-
+    // ensure there is enough space to store the ASNs (we store as 4-byte
+    // regardless of what the path encoding is)
+    PARSEBGP_MAYBE_REALLOC(seg->asns, sizeof(uint32_t), seg->_asns_alloc_cnt,
+                           seg->asns_cnt);
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
@@ -155,13 +148,27 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 static void destroy_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
 {
   int i;
+  if (msg == NULL) {
+    return;
+  }
 
   free(msg->raw);
 
-  for (i = 0; i < msg->segs_cnt; i++) {
+  for (i = 0; i < msg->_segs_alloc_cnt; i++) {
     free(msg->segs[i].asns);
   }
   free(msg->segs);
+
+  free(msg);
+}
+
+static void clear_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
+{
+  int i;
+  for (i = 0; i < msg->segs_cnt; i++) {
+    msg->segs[i].asns_cnt = 0;
+  }
+  msg->segs_cnt = 0;
 }
 
 static void dump_attr_as_path(parsebgp_bgp_update_as_path_t *msg, int depth)
@@ -229,9 +236,8 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
 
   if (raw) {
     // don't actually parse the communities
-    if ((msg->raw = malloc(remain)) == NULL) {
-      return PARSEBGP_MALLOC_FAILURE;
-    }
+    PARSEBGP_MAYBE_REALLOC(msg->raw, sizeof(uint8_t), msg->_raw_alloc_len,
+                           remain);
     memcpy(msg->raw, buf, remain);
     msg->communities = NULL;
     *lenp = remain;
@@ -239,10 +245,8 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
   }
   msg->raw = NULL;
 
-  if ((msg->communities = malloc(remain)) == NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
-
+  PARSEBGP_MAYBE_REALLOC(msg->communities, sizeof(uint32_t),
+                         msg->_communities_alloc_cnt, msg->communities_cnt);
   for (i = 0; i < msg->communities_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
       return PARSEBGP_INVALID_MSG;
@@ -257,8 +261,17 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
 
 static void destroy_attr_communities(parsebgp_bgp_update_communities_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   free(msg->communities);
   free(msg->raw);
+  free(msg);
+}
+
+static void clear_attr_communities(parsebgp_bgp_update_communities_t *msg)
+{
+  msg->communities_cnt = 0;
 }
 
 static void dump_attr_communities(parsebgp_bgp_update_communities_t *msg,
@@ -289,10 +302,8 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
   msg->cluster_ids_cnt = remain / sizeof(uint32_t);
 
-  if ((msg->cluster_ids = malloc(sizeof(uint32_t) * msg->cluster_ids_cnt)) ==
-      NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->cluster_ids, sizeof(uint32_t),
+                         msg->_cluster_ids_alloc_cnt, msg->cluster_ids_cnt);
 
   for (i = 0; i < msg->cluster_ids_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
@@ -308,7 +319,16 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
 static void destroy_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   free(msg->cluster_ids);
+  free(msg);
+}
+
+static void clear_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
+{
+  msg->cluster_ids_cnt = 0;
 }
 
 static void dump_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
@@ -353,16 +373,16 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
   size_t len = *lenp, nread = 0;
   int i;
   parsebgp_bgp_update_large_community_t *comm;
+#define LARGE_COMM_LEN 12
 
-  if ((remain % 12) != 0) {
+  if ((remain % LARGE_COMM_LEN) != 0) {
     return PARSEBGP_INVALID_MSG;
   }
 
-  msg->communities_cnt = remain / 12;
+  msg->communities_cnt = remain / LARGE_COMM_LEN;
 
-  if ((msg->communities = malloc(12 * msg->communities_cnt)) == NULL) {
-    return PARSEBGP_MALLOC_FAILURE;
-  }
+  PARSEBGP_MAYBE_REALLOC(msg->communities, LARGE_COMM_LEN,
+                         msg->_communities_alloc_cnt, msg->communities_cnt);
 
   for (i = 0; i < msg->communities_cnt; i++) {
     comm = &msg->communities[i];
@@ -387,7 +407,17 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 static void
 destroy_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   free(msg->communities);
+  free(msg);
+}
+
+static void
+clear_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
+{
+  msg->communities_cnt = 0;
 }
 
 static void
@@ -540,8 +570,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 2:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.as_path);
       if ((err = parse_path_attr_as_path(opts->bgp.asn_4_byte,
-                                         &attr->data.as_path, buf, &slen,
+                                         attr->data.as_path, buf, &slen,
                                          attr->len, raw)) != PARSEBGP_OK) {
         return err;
       }
@@ -583,7 +614,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 8
     case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
-      if ((err = parse_path_attr_communities(&attr->data.communities, buf,
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.communities);
+      if ((err = parse_path_attr_communities(attr->data.communities, buf,
                                              &slen, attr->len, raw)) !=
           PARSEBGP_OK) {
         return err;
@@ -599,8 +631,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 10
     case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.cluster_list);
       if ((err = parse_path_attr_cluster_list(
-             &attr->data.cluster_list, buf, &slen, attr->len)) != PARSEBGP_OK) {
+             attr->data.cluster_list, buf, &slen, attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -611,7 +644,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 14
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
-      if ((err = parsebgp_bgp_update_mp_reach_decode(opts, &attr->data.mp_reach,
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.mp_reach);
+      if ((err = parsebgp_bgp_update_mp_reach_decode(opts, attr->data.mp_reach,
                                                      buf, &slen, attr->len)) !=
           PARSEBGP_OK) {
         return err;
@@ -622,8 +656,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 15
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.mp_unreach);
       if ((err = parsebgp_bgp_update_mp_unreach_decode(
-             opts, &attr->data.mp_unreach, buf, &slen, attr->len)) !=
+             opts, attr->data.mp_unreach, buf, &slen, attr->len)) !=
           PARSEBGP_OK) {
         return err;
       }
@@ -633,8 +668,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 16
     case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.ext_communities);
       if ((err = parsebgp_bgp_update_ext_communities_decode(
-             opts, &attr->data.ext_communities, buf, &slen, attr->len)) !=
+             opts, attr->data.ext_communities, buf, &slen, attr->len)) !=
           PARSEBGP_OK) {
         return err;
       }
@@ -645,7 +681,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 17
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
       // same as AS_PATH, but force 4-byte AS parsing
-      if ((err = parse_path_attr_as_path(1, &attr->data.as_path, buf, &slen,
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.as_path);
+      if ((err = parse_path_attr_as_path(1, attr->data.as_path, buf, &slen,
                                          attr->len, raw)) != PARSEBGP_OK) {
         return err;
       }
@@ -680,8 +717,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 25
     case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.ext_communities);
       if ((err = parsebgp_bgp_update_ext_communities_ipv6_decode(
-             opts, &attr->data.ext_communities, buf, &slen, attr->len)) !=
+             opts, attr->data.ext_communities, buf, &slen, attr->len)) !=
           PARSEBGP_OK) {
         return err;
       }
@@ -704,8 +742,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 32
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.large_communities);
       if ((err = parse_path_attr_large_communities(
-             &attr->data.large_communities, buf, &slen, attr->len)) !=
+             attr->data.large_communities, buf, &slen, attr->len)) !=
           PARSEBGP_OK) {
         return err;
       }
@@ -742,6 +781,72 @@ void parsebgp_bgp_update_path_attrs_destroy(
     assert(attr->type == 0 || attr->type == i);
 
     switch (attr->type) {
+    // Types with no dynamic memory:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ATOMIC_AGGREGATE:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGREGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_AGGREGATOR:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATHLIMIT:
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
+      destroy_attr_as_path(attr->data.as_path);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
+      destroy_attr_communities(attr->data.communities);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
+      destroy_attr_cluster_list(attr->data.cluster_list);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
+      parsebgp_bgp_update_mp_reach_destroy(attr->data.mp_reach);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
+      parsebgp_bgp_update_mp_unreach_destroy(attr->data.mp_unreach);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
+      parsebgp_bgp_update_ext_communities_destroy(attr->data.ext_communities);
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
+      // TODO: add support for BGP-LS
+      break;
+
+    case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
+      destroy_attr_large_communities(attr->data.large_communities);
+      break;
+    }
+  }
+}
+
+void parsebgp_bgp_update_path_attrs_clear(
+  parsebgp_bgp_update_path_attrs_t *msg)
+{
+  int i;
+  parsebgp_bgp_update_path_attr_t *attr;
+
+  if (msg == NULL) {
+    return;
+  }
+
+  for (i = 0; i < UINT8_MAX; i++) {
+    attr = &msg->attrs[i];
+
+    // sanity check
+    assert(attr->type == 0 || attr->type == i);
+
+    switch (attr->type) {
     case 0:
       // unpopulated attribute
       break;
@@ -760,28 +865,28 @@ void parsebgp_bgp_update_path_attrs_destroy(
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
-      destroy_attr_as_path(&attr->data.as_path);
+      clear_attr_as_path(attr->data.as_path);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
-      destroy_attr_communities(&attr->data.communities);
+      clear_attr_communities(attr->data.communities);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
-      destroy_attr_cluster_list(&attr->data.cluster_list);
+      clear_attr_cluster_list(attr->data.cluster_list);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
-      parsebgp_bgp_update_mp_reach_destroy(&attr->data.mp_reach);
+      parsebgp_bgp_update_mp_reach_clear(attr->data.mp_reach);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
-      parsebgp_bgp_update_mp_unreach_destroy(&attr->data.mp_unreach);
+      parsebgp_bgp_update_mp_unreach_clear(attr->data.mp_unreach);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
-      parsebgp_bgp_update_ext_communities_destroy(&attr->data.ext_communities);
+      parsebgp_bgp_update_ext_communities_clear(attr->data.ext_communities);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
@@ -789,9 +894,11 @@ void parsebgp_bgp_update_path_attrs_destroy(
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
-      destroy_attr_large_communities(&attr->data.large_communities);
+      clear_attr_large_communities(attr->data.large_communities);
       break;
     }
+
+    attr->type = 0;
   }
 
   msg->attrs_cnt = 0;
@@ -830,7 +937,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS4_PATH:
-      dump_attr_as_path(&attr->data.as_path, depth);
+      dump_attr_as_path(attr->data.as_path, depth);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
@@ -859,7 +966,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
-      dump_attr_communities(&attr->data.communities, depth);
+      dump_attr_communities(attr->data.communities, depth);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
@@ -867,20 +974,20 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_CLUSTER_LIST:
-      dump_attr_cluster_list(&attr->data.cluster_list, depth);
+      dump_attr_cluster_list(attr->data.cluster_list, depth);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_REACH_NLRI:
-      parsebgp_bgp_update_mp_reach_dump(&attr->data.mp_reach, depth);
+      parsebgp_bgp_update_mp_reach_dump(attr->data.mp_reach, depth);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MP_UNREACH_NLRI:
-      parsebgp_bgp_update_mp_unreach_dump(&attr->data.mp_unreach, depth);
+      parsebgp_bgp_update_mp_unreach_dump(attr->data.mp_unreach, depth);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_EXT_COMMUNITIES:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_IPV6_EXT_COMMUNITIES:
-      parsebgp_bgp_update_ext_communities_dump(&attr->data.ext_communities,
+      parsebgp_bgp_update_ext_communities_dump(attr->data.ext_communities,
                                                depth);
       break;
 
@@ -895,7 +1002,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
-      dump_attr_large_communities(&attr->data.large_communities, depth);
+      dump_attr_large_communities(attr->data.large_communities, depth);
       break;
 
     default:
@@ -962,6 +1069,15 @@ void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg)
   destroy_nlris(&msg->withdrawn_nlris);
   destroy_nlris(&msg->announced_nlris);
   parsebgp_bgp_update_path_attrs_destroy(&msg->path_attrs);
+
+  free(msg);
+}
+
+void parsebgp_bgp_update_clear(parsebgp_bgp_update_t *msg)
+{
+  clear_nlris(&msg->withdrawn_nlris);
+  clear_nlris(&msg->announced_nlris);
+  parsebgp_bgp_update_path_attrs_clear(&msg->path_attrs);
 }
 
 void parsebgp_bgp_update_dump(parsebgp_bgp_update_t *msg, int depth)

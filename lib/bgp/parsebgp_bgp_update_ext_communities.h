@@ -161,6 +161,9 @@ typedef struct parsebgp_bgp_update_ext_communities {
   /** Array of (communities_cnt) EXTENDED COMMUNITIES */
   parsebgp_bgp_update_ext_community_t *communities;
 
+  /** Number of allocated communities (INTERNAL) */
+  int _communities_alloc_cnt;
+
   /** (Inferred) number of communities */
   int communities_cnt;
 
@@ -192,6 +195,10 @@ void parsebgp_bgp_update_ext_communities_dump(
 
 /** Destroy an EXTENDED COMMUNITIES message */
 void parsebgp_bgp_update_ext_communities_destroy(
+  parsebgp_bgp_update_ext_communities_t *msg);
+
+/** Clear an EXTENDED COMMUNITIES message */
+void parsebgp_bgp_update_ext_communities_clear(
   parsebgp_bgp_update_ext_communities_t *msg);
 
 #endif /* __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H */

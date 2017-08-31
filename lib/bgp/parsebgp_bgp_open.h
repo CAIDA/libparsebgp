@@ -111,6 +111,9 @@ typedef struct parsebgp_bgp_open {
       supported) */
   parsebgp_bgp_open_capability_t *capabilities;
 
+  /** Number of allocated capabilities (INTERNAL) */
+  int _capabilities_alloc_cnt;
+
   /** (Inferred) number of capabilities */
   int capabilities_cnt;
 
@@ -124,6 +127,9 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
 
 /** Destroy an OPEN message */
 void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg);
+
+/** Clear an OPEN message */
+void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout

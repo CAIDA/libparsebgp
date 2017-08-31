@@ -34,6 +34,9 @@ typedef struct parsebgp_bgp_update_mp_reach {
   /** NLRI information */
   parsebgp_bgp_prefix_t *nlris;
 
+  /** Number of allocated NLRIs (INTERNAL) */
+  int _nlris_alloc_cnt;
+
   /** (Inferred) number of NLRIs */
   int nlris_cnt;
 
@@ -53,6 +56,9 @@ typedef struct parsebgp_bgp_update_mp_unreach {
   /** NLRI information */
   parsebgp_bgp_prefix_t *withdrawn_nlris;
 
+  /** Number of allocated NLRIs (INTERNAL) */
+  int _withdrawn_nlris_alloc_cnt;
+
   /** (Inferred) number of Withdrawn NLRIs */
   int withdrawn_nlris_cnt;
 
@@ -66,6 +72,9 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
 
 /** Destroy an MP_REACH message */
 void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg);
+
+/** Clear an MP_REACH message */
+void parsebgp_bgp_update_mp_reach_clear(parsebgp_bgp_update_mp_reach_t *msg);
 
 /**
  * Dump a human-readable version of the message to stdout
@@ -88,6 +97,10 @@ parsebgp_error_t parsebgp_bgp_update_mp_unreach_decode(
 
 /** Destroy an MP_UNREACH message */
 void parsebgp_bgp_update_mp_unreach_destroy(
+  parsebgp_bgp_update_mp_unreach_t *msg);
+
+/** Clear an MP_UNREACH message */
+void parsebgp_bgp_update_mp_unreach_clear(
   parsebgp_bgp_update_mp_unreach_t *msg);
 
 /**
