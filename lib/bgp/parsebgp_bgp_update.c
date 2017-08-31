@@ -78,11 +78,18 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bgp_update_as_path_seg_t *seg;
-  uint16_t u16;
   int i;
+  uint8_t asn_size;
+
+  if (asn_4_byte) {
+    asn_size = sizeof(uint32_t);
+  } else {
+    asn_size = sizeof(uint16_t);
+  }
 
   msg->asn_4_byte = asn_4_byte;
   msg->segs_cnt = 0;
+  msg->asns_cnt = 0;
 
   if (raw) {
     PARSEBGP_MAYBE_REALLOC(msg->raw, sizeof(uint8_t), msg->_raw_alloc_len,
@@ -98,28 +105,30 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
                            msg->_segs_alloc_cnt, msg->segs_cnt + 1);
     seg = &(msg->segs)[msg->segs_cnt];
     msg->segs_cnt++;
-    seg->asns_cnt = 0;
+
+    if ((len - nread) < 2) {
+      return PARSEBGP_PARTIAL_MSG;
+    }
 
     // Segment Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, seg->type);
+    seg->type = *(buf++);
 
     // Segment Length (# ASNs)
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, seg->asns_cnt);
+    seg->asns_cnt = *(buf++);
 
-    switch (seg->type) {
-    case PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SET:
+    nread += 2;
+
+    // do one length check to avoid doing checked memcpys
+    if ((len - nread) < (asn_size * seg->asns_cnt)) {
+      return PARSEBGP_PARTIAL_MSG;
+    }
+
+    if (seg->type == PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SEQ) {
+      msg->asns_cnt += seg->asns_cnt;
+    } else if (seg->type == PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SET) {
       // as per RFC 4271
       msg->asns_cnt++;
-      break;
-
-    case PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SEQ:
-      msg->asns_cnt += seg->asns_cnt;
-      break;
-
-    default:
-      // don't count confederations as per RFC 5065
-      break;
-    }
+    } // else: don't count confederations as per RFC 5065
 
     // ensure there is enough space to store the ASNs (we store as 4-byte
     // regardless of what the path encoding is)
@@ -128,16 +137,17 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
-        PARSEBGP_DESERIALIZE_VAL(buf, len, nread, seg->asns[i]);
-        seg->asns[i] = ntohl(seg->asns[i]);
+        seg->asns[i] = ntohl(*(uint32_t*)buf);
       } else {
-        PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-        seg->asns[i] = ntohs(u16);
+        seg->asns[i] = ntohs(*(uint16_t*)buf);
       }
+      buf += asn_size;
     }
+    nread += asn_size * seg->asns_cnt;
   }
-  assert((remain - nread) == 0);
 
+  // TODO: remove:
+  assert((remain - nread) == 0);
   *lenp = nread;
   return PARSEBGP_OK;
 }
@@ -510,6 +520,14 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       len_tmp = u8;
     }
 
+    // if this type is beyond the max type that we understand, skip it now
+    if (type_tmp >= PARSEBGP_BGP_PATH_ATTRS_LEN) {
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(
+        opts, buf, nread, len_tmp,
+        "BGP UPDATE Path Attribute %d is not yet implemented", type_tmp);
+      continue;
+    }
+
     // has the user enabled the filter, and have they (implicitly) filtered out
     // this type of attribute
     if (opts->bgp.path_attr_filter_enabled &&
@@ -530,6 +548,11 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       buf += len_tmp;
       continue;
     }
+
+    PARSEBGP_MAYBE_REALLOC(path_attrs->attrs_used, sizeof(uint8_t),
+                           path_attrs->_attrs_used_alloc_cnt,
+                           path_attrs->attrs_cnt + 1);
+    path_attrs->attrs_used[path_attrs->attrs_cnt] = type_tmp;
     path_attrs->attrs_cnt++;
 
     if (opts->bgp.path_attr_raw_enabled &&
@@ -769,7 +792,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
     return;
   }
 
-  for (i = 0; i < PARSEBGP_BGP_PATH_ATTR_LEN; i++) {
+  for (i = 0; i < PARSEBGP_BGP_PATH_ATTRS_LEN; i++) {
     attr = &msg->attrs[i];
 
     switch (i) {
@@ -820,6 +843,8 @@ void parsebgp_bgp_update_path_attrs_destroy(
       break;
     }
   }
+
+  free(msg->attrs_used);
 }
 
 void parsebgp_bgp_update_path_attrs_clear(
@@ -832,17 +857,14 @@ void parsebgp_bgp_update_path_attrs_clear(
     return;
   }
 
-  for (i = 0; i < PARSEBGP_BGP_PATH_ATTR_LEN; i++) {
-    attr = &msg->attrs[i];
+  for (i = 0; i < msg->attrs_cnt; i++) {
+    attr = &msg->attrs[msg->attrs_used[i]];
 
-    // sanity check
-    assert(attr->type == 0 || attr->type == i);
+    if (attr->type == 0) {
+      continue;
+    }
 
     switch (attr->type) {
-    case 0:
-      // unpopulated attribute
-      break;
-
     // Types with no dynamic memory:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
@@ -907,7 +929,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
   depth++;
   int i;
   parsebgp_bgp_update_path_attr_t *attr;
-  for (i = 0; i < PARSEBGP_BGP_PATH_ATTR_LEN; i++) {
+  for (i = 0; i < PARSEBGP_BGP_PATH_ATTRS_LEN; i++) {
     attr = &msg->attrs[i];
 
     if (attr->type == 0) {

@@ -65,7 +65,7 @@ typedef struct parsebgp_bgp_update_as_path_seg {
   /** Number of allocated ASNs (INTERNAL) */
   uint8_t _asns_alloc_cnt;
 
-} parsebgp_bgp_update_as_path_seg_t;
+} __attribute__((packed)) parsebgp_bgp_update_as_path_seg_t;
 
 /**
  * AS Path (supports both 2 and 4-byte ASNs)
@@ -76,10 +76,10 @@ typedef struct parsebgp_bgp_update_as_path {
   parsebgp_bgp_update_as_path_seg_t *segs;
 
   /** Number of allocated segments (INTERNAL) */
-  int _segs_alloc_cnt;
+  uint8_t _segs_alloc_cnt;
 
   /** Number of Segments in the AS Path */
-  int segs_cnt;
+  uint8_t segs_cnt;
 
   /** Number of ASNs in the AS Path
    *
@@ -87,18 +87,18 @@ typedef struct parsebgp_bgp_update_as_path {
    * 5.3 of [RFC5065] which treats AS_SETs as a single ASN, and does not count
    * CONFED_* segments at all.
    */
-  int asns_cnt;
+  uint8_t asns_cnt;
 
   /** Does the path contain 4-byte ASNs (instead of 2-byte)? */
-  int asn_4_byte;
+  uint8_t asn_4_byte;
 
   /** Pointer to the a copy of the raw AS Path data */
   uint8_t *raw;
 
   /** Allocated length of the raw data (INTERNAL) */
-  int _raw_alloc_len;
+  uint16_t _raw_alloc_len;
 
-} parsebgp_bgp_update_as_path_t;
+} __attribute__((packed)) parsebgp_bgp_update_as_path_t;
 
 /**
  * AGGREGATOR (supports both 2- and 4-byte ASNs)
@@ -268,7 +268,7 @@ typedef enum {
 
   /** Length of Path Attributes array (use when iterating over all path
       attributes) */
-  PARSEBGP_BGP_PATH_ATTR_LEN,
+  PARSEBGP_BGP_PATH_ATTRS_LEN,
 
 } parsebgp_bgp_update_path_attr_type_t;
 
@@ -370,7 +370,14 @@ typedef struct parsebgp_bgp_update_path_attrs {
    * attrs[ATTR_TYPE].type is set (to ATTR_TYPE) before accessing any other
    * fields of the attribute.
    */
-  parsebgp_bgp_update_path_attr_t attrs[PARSEBGP_BGP_PATH_ATTR_LEN];
+  parsebgp_bgp_update_path_attr_t attrs[PARSEBGP_BGP_PATH_ATTRS_LEN];
+
+  /** Array of attrs_cnt ATTR_TYPE values that give indices to attrs.
+   * Facilitates fast iteration over all in-use attributes */
+  uint8_t *attrs_used;
+
+  /** Allocated length of the attrs_used array (INTERNAL) */
+  int _attrs_used_alloc_cnt;
 
   /** Number of populated Path Attributes in the attrs field */
   int attrs_cnt;
