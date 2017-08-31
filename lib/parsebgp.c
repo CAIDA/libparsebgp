@@ -68,8 +68,6 @@ void parsebgp_clear_msg(parsebgp_msg_t *msg)
     // invalid message, give up
     break;
   }
-
-  free(msg);
 }
 
 void parsebgp_destroy_msg(parsebgp_msg_t *msg)

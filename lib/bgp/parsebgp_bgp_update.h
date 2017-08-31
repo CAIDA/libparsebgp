@@ -266,10 +266,9 @@ typedef enum {
   /** LARGE_COMMUNITY (Type Code 32) [RFC8092] */
   PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES = 32, // DONE, TESTED
 
-  // ...
-
-  /** ATTR_SET (PARSEBGP_NOT_IMPLEMENTED) (Type Code 128) [RFC6368] */
-  PARSEBGP_BGP_PATH_ATTR_TYPE_ATTR_SET = 128,
+  /** Length of Path Attributes array (use when iterating over all path
+      attributes) */
+  PARSEBGP_BGP_PATH_ATTR_LEN,
 
 } parsebgp_bgp_update_path_attr_type_t;
 
@@ -304,7 +303,7 @@ typedef struct parsebgp_bgp_update_path_attr {
   uint16_t len;
 
   /** Union of all support Path Attribute data */
-  struct {
+  union {
 
     /** ORIGIN (parsebgp_bgp_update_origin_type_t) */
     uint8_t origin;
@@ -371,7 +370,7 @@ typedef struct parsebgp_bgp_update_path_attrs {
    * attrs[ATTR_TYPE].type is set (to ATTR_TYPE) before accessing any other
    * fields of the attribute.
    */
-  parsebgp_bgp_update_path_attr_t attrs[UINT8_MAX];
+  parsebgp_bgp_update_path_attr_t attrs[PARSEBGP_BGP_PATH_ATTR_LEN];
 
   /** Number of populated Path Attributes in the attrs field */
   int attrs_cnt;

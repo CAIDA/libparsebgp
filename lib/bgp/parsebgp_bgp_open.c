@@ -96,7 +96,6 @@ static parsebgp_error_t parse_params(parsebgp_opts_t *opts,
   parsebgp_error_t err;
   uint8_t u8;
 
-  msg->capabilities = NULL;
   msg->capabilities_cnt = 0;
 
   while ((remain - nread) > 0) {

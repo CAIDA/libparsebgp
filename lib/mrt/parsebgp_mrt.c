@@ -197,10 +197,6 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
 static void
 destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 {
-  if (msg == NULL) {
-    return;
-  }
-
   free(msg->view_name);
   msg->view_name = NULL;
   msg->view_name_len = 0;
@@ -208,8 +204,6 @@ destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
   free(msg->peer_entries);
   msg->peer_entries = NULL;
   msg->peer_count = 0;
-
-  free(msg);
 }
 
 static void
@@ -332,12 +326,8 @@ static void clear_table_dump_v2_rib_entries(
   parsebgp_mrt_table_dump_v2_rib_entry_t *entries, uint16_t entry_count)
 {
   int i;
-  parsebgp_mrt_table_dump_v2_rib_entry_t *entry;
-
   for (i = 0; i < entry_count; i++) {
-    entry = &entries[i];
-
-    parsebgp_bgp_update_path_attrs_clear(&entry->path_attrs);
+    parsebgp_bgp_update_path_attrs_clear(&entries[i].path_attrs);
   }
 }
 

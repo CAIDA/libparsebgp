@@ -13,7 +13,6 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   parsebgp_bgp_prefix_t *tuple;
   parsebgp_error_t err;
 
-  nlris->prefixes = NULL;
   nlris->prefixes_cnt = 0;
 
   if (nlris->len > len) {
@@ -83,7 +82,6 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
   int i;
 
   msg->asn_4_byte = asn_4_byte;
-  msg->segs = NULL;
   msg->segs_cnt = 0;
 
   if (raw) {
@@ -93,7 +91,6 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     *lenp = remain;
     return PARSEBGP_OK;
   }
-  msg->raw = NULL;
 
   while ((remain - nread) > 0) {
     // create a new segment
@@ -239,11 +236,9 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
     PARSEBGP_MAYBE_REALLOC(msg->raw, sizeof(uint8_t), msg->_raw_alloc_len,
                            remain);
     memcpy(msg->raw, buf, remain);
-    msg->communities = NULL;
     *lenp = remain;
     return PARSEBGP_OK;
   }
-  msg->raw = NULL;
 
   PARSEBGP_MAYBE_REALLOC(msg->communities, sizeof(uint32_t),
                          msg->_communities_alloc_cnt, msg->communities_cnt);
@@ -774,13 +769,10 @@ void parsebgp_bgp_update_path_attrs_destroy(
     return;
   }
 
-  for (i = 0; i < UINT8_MAX; i++) {
+  for (i = 0; i < PARSEBGP_BGP_PATH_ATTR_LEN; i++) {
     attr = &msg->attrs[i];
 
-    // sanity check
-    assert(attr->type == 0 || attr->type == i);
-
-    switch (attr->type) {
+    switch (i) {
     // Types with no dynamic memory:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
@@ -840,7 +832,7 @@ void parsebgp_bgp_update_path_attrs_clear(
     return;
   }
 
-  for (i = 0; i < UINT8_MAX; i++) {
+  for (i = 0; i < PARSEBGP_BGP_PATH_ATTR_LEN; i++) {
     attr = &msg->attrs[i];
 
     // sanity check
@@ -915,7 +907,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
   depth++;
   int i;
   parsebgp_bgp_update_path_attr_t *attr;
-  for (i = 0; i < UINT8_MAX; i++) {
+  for (i = 0; i < PARSEBGP_BGP_PATH_ATTR_LEN; i++) {
     attr = &msg->attrs[i];
 
     if (attr->type == 0) {

@@ -175,6 +175,9 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
 void parsebgp_bgp_update_ext_communities_destroy(
   parsebgp_bgp_update_ext_communities_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   // currently no types have dynamic memory
 
   free(msg->communities);

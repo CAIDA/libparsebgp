@@ -505,7 +505,6 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
   size_t len = *lenp, nread = 0;
   parsebgp_bmp_term_tlv_t *tlv = NULL;
 
-  msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
 
   // read until we run out of message
@@ -589,7 +588,6 @@ static void clear_term_msg(parsebgp_bmp_term_msg_t *msg)
   for (i = 0; i < msg->tlvs_cnt; i++) {
     msg->tlvs[i].len = 0;
   }
-  msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
 }
 
@@ -640,7 +638,6 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
   // BGP parser to fall back to 2-byte parsing if the 4-byte parser fails.
   opts->bgp.asn_4_byte = 1;
 
-  msg->tlvs = NULL;
   msg->tlvs_cnt = 0;
 
   // read tlvs until we run out of message

@@ -54,7 +54,6 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
                                   "Unsupported AFI (%d)", afi);
   }
 
-  *nlris = NULL;
   *nlris_cnt = 0;
 
   while ((remain - nread) > 0) {
@@ -284,6 +283,10 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
 
 void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   free(msg->nlris);
   free(msg);
 }
@@ -370,6 +373,9 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
 void parsebgp_bgp_update_mp_unreach_destroy(
   parsebgp_bgp_update_mp_unreach_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   free(msg->withdrawn_nlris);
   free(msg);
 }
