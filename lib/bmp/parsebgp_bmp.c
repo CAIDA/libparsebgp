@@ -194,6 +194,23 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
       sc->data.afi_safi_gauge.gauge_u64 =
         ntohll(sc->data.afi_safi_gauge.gauge_u64);
       break;
+
+    default:
+      fprintf(stderr,
+              "WARN: Unknown Stat Type %d, attempting to parse anyway\n",
+              sc->type);
+      if (sc->len == 8) {
+        PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
+        sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
+      } else if (sc->len == 4) {
+        PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.counter_u32);
+        sc->data.counter_u32 = ntohl(sc->data.counter_u32);
+      } else {
+        fprintf(stderr, "WARN: Unhandled non-standard Stat Value length %d\n",
+                sc->len);
+        buf += sc->len;
+        nread += sc->len;
+      }
     }
   }
 
@@ -265,6 +282,13 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
       // u64 gauge
       PARSEBGP_DUMP_INT(depth, "u64", sc->data.afi_safi_gauge.gauge_u64);
       break;
+
+    default:
+      if (sc->len == 4) {
+        PARSEBGP_DUMP_INT(depth, "u32", sc->data.counter_u32);
+      } else if (sc->len == 8) {
+        PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
+      }
     }
   }
 }
