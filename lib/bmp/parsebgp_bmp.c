@@ -109,7 +109,8 @@ static void dump_info_tlvs(parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
 /* -------------------- BMP Message Type Parsers -------------------- */
 
 // Type 1:
-static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
+static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
+                                           parsebgp_bmp_stats_report_t *msg,
                                            uint8_t *buf, size_t *lenp,
                                            size_t remain)
 {
@@ -196,9 +197,10 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
       break;
 
     default:
-      fprintf(stderr,
-              "WARN: Unknown Stat Type %d, attempting to parse anyway\n",
-              sc->type);
+      // pass remain==0 to macro since we'll try and parse ourselves
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(
+        opts, buf, nread, 0, "Unknown BMP Stat Counter type (%d)", sc->type);
+      // if we reach here, user wants us to struggle on
       if (sc->len == 8) {
         PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
         sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
@@ -206,8 +208,6 @@ static parsebgp_error_t parse_stats_report(parsebgp_bmp_stats_report_t *msg,
         PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.counter_u32);
         sc->data.counter_u32 = ntohl(sc->data.counter_u32);
       } else {
-        fprintf(stderr, "WARN: Unhandled non-standard Stat Value length %d\n",
-                sc->len);
         buf += sc->len;
         nread += sc->len;
       }
@@ -1088,8 +1088,8 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
 
   case PARSEBGP_BMP_TYPE_STATS_REPORT:
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.stats_report);
-    err =
-      parse_stats_report(msg->types.stats_report, buf + nread, &slen, remain);
+    err = parse_stats_report(opts, msg->types.stats_report, buf + nread, &slen,
+                             remain);
     break;
 
   case PARSEBGP_BMP_TYPE_PEER_DOWN:
