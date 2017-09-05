@@ -152,6 +152,21 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
   return PARSEBGP_OK;
 }
 
+static parsebgp_error_t
+parse_path_attr_as_path_safe(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
+                             uint8_t *buf, size_t *lenp, size_t remain, int raw)
+{
+  parsebgp_error_t err;
+  // first we try just parsing as-is
+  if ((err = parse_path_attr_as_path(asn_4_byte, msg, buf, lenp, remain,
+                                     raw)) != PARSEBGP_OK && asn_4_byte != 0) {
+    // if we've been asked to do 4-byte parsing, then maybe the caller made a
+    // mistake
+    return parse_path_attr_as_path(0, msg, buf, lenp, remain, raw);
+  }
+  return err;
+}
+
 static void destroy_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
 {
   int i;
@@ -589,9 +604,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 2:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AS_PATH:
       PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.as_path);
-      if ((err = parse_path_attr_as_path(opts->bgp.asn_4_byte,
-                                         attr->data.as_path, buf, &slen,
-                                         attr->len, raw)) != PARSEBGP_OK) {
+      if ((err = parse_path_attr_as_path_safe(opts->bgp.asn_4_byte,
+                                              attr->data.as_path, buf, &slen,
+                                              attr->len, raw)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
