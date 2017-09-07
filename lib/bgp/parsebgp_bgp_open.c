@@ -77,7 +77,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 
     default:
       PARSEBGP_SKIP_NOT_IMPLEMENTED(
-        opts, buf, nread, remain - nread,
+        opts, buf, nread, cap->len,
         "OPEN Capability %d is either unknown or currently unsupported",
         cap->code);
       break;
