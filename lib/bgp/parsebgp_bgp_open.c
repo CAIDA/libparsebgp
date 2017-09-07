@@ -53,26 +53,17 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
       cap->values.asn = ntohl(cap->values.asn);
       break;
 
-    // capabilities with data that we are ignoring (since OpenBMP is ignoring
-    // it)
+    // capabilities that we are explicitly ignoring (since OpenBMP is ignoring
+    // them)
+    // TODO: either implement parsers for these, or just provide the raw data
     case PARSEBGP_BGP_OPEN_CAPABILITY_OUTBOUND_FILTER:
     case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
     case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
     case PARSEBGP_BGP_OPEN_CAPABILITY_LLGR:
-      nread += cap->len;
-      break;
-
-    // capabilities with no extra data:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
-      if (cap->len != 0) {
-        fprintf(stderr,
-                "ERROR: Expecting no extra data for BGP OPEN capability %d, "
-                "but found %d bytes\n",
-                cap->code, cap->len);
-        return PARSEBGP_INVALID_MSG;
-      }
+      nread += cap->len;
       break;
 
     default:
