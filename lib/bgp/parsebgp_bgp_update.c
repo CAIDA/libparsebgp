@@ -469,29 +469,6 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
     }                                                                          \
   } while (0)
 
-#define PARSE_SIMPLE_ATTR(val, buf, len, nread, remain)                        \
-  do {                                                                         \
-    CHECK_REMAIN(remain, (val));                                               \
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, (val));                          \
-    switch (sizeof(val)) {                                                     \
-    case 1:                                                                    \
-      break;                                                                   \
-    case 2:                                                                    \
-      val = ntohs(val);                                                        \
-      break;                                                                   \
-    case 4:                                                                    \
-      val = ntohl(val);                                                        \
-      break;                                                                   \
-    case 8:                                                                    \
-      val = ntohll(val);                                                       \
-      break;                                                                   \
-    default:                                                                   \
-      /* unsupported value size */                                             \
-      assert(0);                                                               \
-      break;                                                                   \
-    }                                                                          \
-  } while (0)
-
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *path_attrs,
   uint8_t *buf, size_t *lenp, size_t remain)
@@ -598,7 +575,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 1:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
-      PARSE_SIMPLE_ATTR(attr->data.origin, buf, len, nread, remain);
+      CHECK_REMAIN(remain, attr->data.origin);
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.origin);
       break;
 
     // Type 2:
@@ -621,12 +599,16 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 4:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
-      PARSE_SIMPLE_ATTR(attr->data.med, buf, len, nread, remain);
+      CHECK_REMAIN(remain, attr->data.med);
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.med);
+      attr->data.med = ntohl(attr->data.med);
       break;
 
     // Type 5:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
-      PARSE_SIMPLE_ATTR(attr->data.local_pref, buf, len, nread, remain);
+      CHECK_REMAIN(remain, attr->data.local_pref);
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.local_pref);
+      attr->data.local_pref = ntohl(attr->data.local_pref);
       break;
 
     // Type 6:
@@ -659,7 +641,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 9
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
-      PARSE_SIMPLE_ATTR(attr->data.originator_id, buf, len, nread, remain);
+      CHECK_REMAIN(remain, attr->data.originator_id);
+      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.originator_id);
+      attr->data.originator_id = ntohl(attr->data.originator_id);
       break;
 
     // Type 10
