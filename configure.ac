@@ -26,7 +26,20 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_LIBTOOL
 AC_PROG_CC_C99
 
-# TODO: add checks for functions/headers that we need (e.g., assert)
+# Should we dump information about where parser errors were encountered?
+# This is useful when debugging whether an invalid message is really invalid, or
+# if there is a bug in the parser as it will dump the file and line number where
+# the error code is "thrown".
+AC_MSG_CHECKING([whether to output debug information about parse errors])
+AC_ARG_ENABLE([parser-debug],
+    [AS_HELP_STRING([--enable-parser-debug],
+        [enable parser debug info (def=no)])],
+    [parser_debug="$enableval"],
+    [parser_debug=no])
+AC_MSG_RESULT([$parser_debug])
+if test x"$parser_debug" = x"yes"; then
+    AC_DEFINE([PARSER_DEBUG],[],[Parser Debugging])
+fi
 
 AC_SUBST([LIBPARSEBGP_MAJOR_VERSION])
 AC_SUBST([LIBPARSEBGP_MID_VERSION])

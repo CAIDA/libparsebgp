@@ -32,7 +32,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_MPBGP:
       if (cap->len != 4) {
-        return PARSEBGP_INVALID_MSG;
+        PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
       // AFI
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.mpbgp.afi);
@@ -47,7 +47,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
       if (cap->len != 4) {
-        return PARSEBGP_INVALID_MSG;
+        PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.asn);
       cap->values.asn = ntohl(cap->values.asn);
@@ -158,7 +158,7 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
 
   if (nread != remain) {
     fprintf(stderr, "ERROR: Trailing data after OPEN Capabilities.\n");
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   *lenp = nread;

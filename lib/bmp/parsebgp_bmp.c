@@ -44,7 +44,7 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
     // Info data
     if (tlv->len > remain) {
       // the length field doesn't match what we saw in the common header
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     if (tlv->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;
@@ -142,7 +142,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
 
     if (sc->len > remain - nread) {
       // invalid length specification
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
 
     // Read the data
@@ -159,7 +159,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
     case PARSEBGP_BMP_STATS_PREFIX_TREAT_AS_WITHDRAW:
     case PARSEBGP_BMP_STATS_DUP_UPD:
       if (sc->len != sizeof(sc->data.counter_u32)) {
-        return PARSEBGP_INVALID_MSG;
+        PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.counter_u32);
       sc->data.counter_u32 = ntohl(sc->data.counter_u32);
@@ -169,7 +169,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
     case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
       if (sc->len != sizeof(sc->data.gauge_u64)) {
-        return PARSEBGP_INVALID_MSG;
+        PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
       sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
@@ -179,7 +179,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_PER_AFI_SAFI_LOC_RIB:
       if (sc->len != 11) {
-        return PARSEBGP_INVALID_MSG;
+        PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
 
       // AFI
@@ -338,7 +338,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
 
   // we read too much, or too little data according to the common header length
   if (remain != nread) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   *lenp = nread;
@@ -554,7 +554,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
 
     if (tlv->len > remain) {
       // the length field doesn't match what we saw in the common header
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     if (tlv->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;
@@ -579,7 +579,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
       break;
 
     default:
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     remain -= tlv->len;
   }
@@ -687,7 +687,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
 
     if (tlv->len > (remain - nread)) {
       // the length field doesn't match what we saw in the common header
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     if (tlv->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;
@@ -713,7 +713,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
       break;
 
     default:
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
   }
 
@@ -995,7 +995,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
     break;
 
   default:
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   *lenp = nread;
@@ -1033,7 +1033,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
     break;
 
   default:
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   *lenp = nread;

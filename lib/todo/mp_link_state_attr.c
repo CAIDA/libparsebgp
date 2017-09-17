@@ -412,21 +412,21 @@ val_ss.str().data(), val_ss.str().length());*/
 
   case ATTR_LINK_IPV4_ROUTER_ID_REMOTE:
     if (bgp_ls_attr->len != 4)
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
 
     memcpy(bgp_ls_attr->link.link_ipv4_router_id_remote, *data, 4);
     break;
 
   case ATTR_LINK_IPV6_ROUTER_ID_REMOTE:
     if (bgp_ls_attr->len != 16)
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
 
     memcpy(bgp_ls_attr->link.link_ipv6_router_id_remote, *data, 16);
     break;
 
   case ATTR_LINK_MAX_LINK_BW:
     if (bgp_ls_attr->len != 4)
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
 
     float_val = 0;
     memcpy(&float_val, *data, bgp_ls_attr->len);
@@ -437,7 +437,7 @@ val_ss.str().data(), val_ss.str().length());*/
 
   case ATTR_LINK_MAX_RESV_BW:
     if (bgp_ls_attr->len != 4)
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     float_val = 0;
     memcpy(&float_val, *data, bgp_ls_attr->len);
     SWAP_BYTES(&float_val, bgp_ls_attr->len);
@@ -512,7 +512,7 @@ val_ss.str().data(), val_ss.str().length());*/
       bgp_ls_attr->link.link_te_def_metric = 0;
       break;
     } else if (bgp_ls_attr->len > 4)
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     else {
       memcpy(&bgp_ls_attr->link.link_te_def_metric, *data, bgp_ls_attr->len);
       SWAP_BYTES(&bgp_ls_attr->link.link_te_def_metric, bgp_ls_attr->len);
@@ -526,7 +526,7 @@ val_ss.str().data(), val_ss.str().length());*/
     //     (len=%d)", peer_addr.c_str(), len);
 
     if (bgp_ls_attr->len != 32)
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
 
     for (int i = 0; i < 32; i += 4) {
       float_val = 0;

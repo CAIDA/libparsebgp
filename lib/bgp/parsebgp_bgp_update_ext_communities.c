@@ -16,7 +16,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
 
   // sanity check on the length
   if (remain % 8 != 0) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   msg->communities_cnt = remain / 8;
@@ -123,7 +123,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
 
   // sanity check on the length
   if (remain % 20 != 0) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   msg->communities_cnt = remain / 20;

@@ -101,7 +101,7 @@ parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg,
     fprintf(stderr,
             "ERROR: Unexpected Next-Hop length of %d for AFI %" PRIu16 "\n",
             msg->next_hop_len, msg->afi);
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   // handle optional v6 link-local address
@@ -142,7 +142,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
   parsebgp_error_t err;
 
   if ((remain - nread) < msg->next_hop_len) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   if ((len - nread) < msg->next_hop_len) {
     return PARSEBGP_PARTIAL_MSG;

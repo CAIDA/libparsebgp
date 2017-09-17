@@ -1,6 +1,7 @@
 #ifndef __PARSEBGP_UTILS_H
 #define __PARSEBGP_UTILS_H
 
+#include "config.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -68,6 +69,16 @@
       return PARSEBGP_NOT_IMPLEMENTED;                                         \
     }                                                                          \
   } while (0)
+
+#ifdef PARSER_DEBUG
+#define PARSEBGP_RETURN_INVALID_MSG_ERR                                        \
+  do {                                                                         \
+    fprintf(stderr, "ERROR: INVALID_MSG at %s:%d\n", __FILE__, __LINE__);      \
+    return PARSEBGP_INVALID_MSG;                                               \
+  } while (0)
+#else
+#define PARSEBGP_RETURN_INVALID_MSG_ERR return PARSEBGP_INVALID_MSG
+#endif
 
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \

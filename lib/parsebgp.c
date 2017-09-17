@@ -29,7 +29,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
     break;
 
   default:
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   assert(0);
 }

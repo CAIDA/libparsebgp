@@ -19,7 +19,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     return PARSEBGP_PARTIAL_MSG;
   }
   if (nlris->len > remain) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   // read until we run out of message
@@ -269,7 +269,7 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
                          msg->_communities_alloc_cnt, msg->communities_cnt);
   for (i = 0; i < msg->communities_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->communities[i]);
     msg->communities[i] = ntohl(msg->communities[i]);
@@ -327,7 +327,7 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
   for (i = 0; i < msg->cluster_ids_cnt; i++) {
     if ((remain - nread) < sizeof(uint32_t)) {
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->cluster_ids[i]);
     msg->cluster_ids[i] = ntohl(msg->cluster_ids[i]);
@@ -396,7 +396,7 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 #define LARGE_COMM_LEN 12
 
   if ((remain % LARGE_COMM_LEN) != 0) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   msg->communities_cnt = remain / LARGE_COMM_LEN;
@@ -465,7 +465,7 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 #define CHECK_REMAIN(remain, val)                                              \
   do {                                                                         \
     if (remain < sizeof(val)) {                                                \
-      return PARSEBGP_INVALID_MSG;                                             \
+      PARSEBGP_RETURN_INVALID_MSG_ERR;                                             \
     }                                                                          \
   } while (0)
 
@@ -491,7 +491,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     return PARSEBGP_PARTIAL_MSG;
   }
   if (path_attrs->len > remain) {
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   // read until we run out of attributes
@@ -564,7 +564,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     attr->len = len_tmp;
 
     if (attr->len > (remain - nread)) {
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     if (attr->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;

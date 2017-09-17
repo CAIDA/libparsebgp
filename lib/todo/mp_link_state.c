@@ -246,7 +246,7 @@ static ssize_t libparsebgp_parse_nlri_node(mp_reach_ls *mp_reach_ls,
   if (mp_reach_ls->nlri_ls.node_nlri.type != NODE_DESCR_LOCAL_DESCR) {
     // LOG_WARN("%s: bgp-ls: failed to parse node descriptor; Type (%d) is not
     // local descriptor",peer_addr.c_str(), type);
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   // Parse the local descriptor sub-tlv's
@@ -949,7 +949,7 @@ libparsebgp_parse_link_state_nlri_data(update_path_attrs *path_attrs,
       break;
 
     default:
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
     path_attrs->attr_value.mp_reach_nlri_data.mp_reach_nlri_info
       .mp_rch_ls[path_attrs->attr_value.mp_reach_nlri_data.count_mp_rch_ls++] =

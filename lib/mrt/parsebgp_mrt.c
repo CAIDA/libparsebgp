@@ -28,7 +28,7 @@
       break;                                                                   \
                                                                                \
     default:                                                                   \
-      return PARSEBGP_INVALID_MSG;                                             \
+      PARSEBGP_RETURN_INVALID_MSG_ERR;                                             \
     }                                                                          \
   } while (0)
 
@@ -186,7 +186,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
       break;
 
     default:
-      return PARSEBGP_INVALID_MSG;
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
   }
 
@@ -274,7 +274,7 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
   default:
     // programming error
     assert(0);
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   for (i = 0; i < entry_count; i++) {
@@ -461,7 +461,7 @@ static parsebgp_error_t parse_table_dump_v2(
     break;
 
   default:
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
     break;
   }
 }
@@ -564,7 +564,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
     break;
 
   default:
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
     break;
   }
 
@@ -615,7 +615,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
     break;
 
   default:
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
     break;
   }
 
@@ -735,7 +735,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
 
   default:
     // unknown message type
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   *lenp = nread;
@@ -776,7 +776,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
     remain = msg->len - sizeof(msg->timestamp_usec);
   } else {
     // uh oh
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
@@ -816,7 +816,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
 
   default:
     // unknown message type
-    return PARSEBGP_INVALID_MSG;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   if (err != PARSEBGP_OK) {
     return err;
