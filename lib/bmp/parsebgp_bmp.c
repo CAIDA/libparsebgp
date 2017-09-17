@@ -229,6 +229,9 @@ static void destroy_stats_report(parsebgp_bmp_stats_report_t *msg)
 
 static void clear_stats_report(parsebgp_bmp_stats_report_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   msg->stats_count = 0;
 }
 
