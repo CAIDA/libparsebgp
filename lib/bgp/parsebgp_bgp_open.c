@@ -70,9 +70,6 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
-      nread += cap->len;
-      break;
-
     default:
       PARSEBGP_SKIP_NOT_IMPLEMENTED(
         opts, buf, nread, cap->len,
