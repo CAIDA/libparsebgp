@@ -565,7 +565,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     if (attr->len > (remain - nread)) {
       /* It seems that sometimes the length of an attribute conflicts with the
-         reported total path att ributes length. In this case we emit a warning
+         reported total path attributes length. In this case we emit a warning
          and skip the truncated attributed.
 
          This is a case specifically described in Section 4 of RFC 7606
