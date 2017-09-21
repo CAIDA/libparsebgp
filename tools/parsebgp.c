@@ -149,6 +149,8 @@ static void usage()
           "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
           "         (only required if using non-standard file extensions)\n"
           "       -f <attr-type>     Filter to include given Path Attribute\n"
+          "       -i                 Ignore invalid messages and attributes\n"
+          "                            (use multiple times to silence warnings)\n"
           "       -s                 Skip unknown messages and attributes\n"
           "                            (use multiple times to silence warnings)\n"
           "       -h                 Show this help message\n"
@@ -166,7 +168,7 @@ int main(int argc, char **argv)
   parsebgp_opts_t opts;
   parsebgp_opts_init(&opts);
 
-  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:sqvh?")) >= 0) {
+  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:isqvh?")) >= 0) {
     if (optind == prevoptind + 2 && (optarg == NULL || *optarg == '-')) {
       opt = ':';
       --optind;
@@ -177,6 +179,14 @@ int main(int argc, char **argv)
       opts.bgp.path_attr_filter[(uint8_t)atoi(optarg)] = 1;
       fprintf(stderr, "INFO: Filtering to include UPDATE Path Attribute %d\n",
               (uint8_t)atoi(optarg));
+      break;
+
+    case 'i':
+      // if this is the second (or more) time, silence the warnings
+      if (opts.ignore_invalid) {
+        opts.silence_invalid = 1;
+      }
+      opts.ignore_invalid = 1;
       break;
 
     case 's':

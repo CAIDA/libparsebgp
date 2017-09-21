@@ -33,6 +33,30 @@ typedef struct parsebgp_opts {
    */
   int silence_not_implemented;
 
+  /**
+   * Ignore Invalid-Message Errors (to the extent possible)
+   *
+   * If this is set, the parser will attempt to skip portions of messages that
+   * contain invalid features. It will emit a warning that includes the file and
+   * line number to aid with debugging malformed data (see silence_invalid to
+   * disable this warning).
+   *
+   * If this is **not** set, the parser will abort if it finds a feature that it
+   * determines to be malformed.
+   *
+   * Regardless of this setting, the parser will abort if it finds a malformed
+   * message that it cannot skip safely.
+   */
+  int ignore_invalid;
+
+  /**
+   * Silence Invalid-Message Warnings
+   *
+   * If this is set (and ignore_invalid is also set), the parser will **not**
+   * emit warnings when a malformed message feature is encountered.
+   */
+  int silence_invalid;
+
   /** BGP-specific parsing options */
   parsebgp_bgp_opts_t bgp;
 

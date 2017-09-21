@@ -70,6 +70,24 @@
     }                                                                          \
   } while (0)
 
+/** Convenience macro to either abort parsing or skip a malformed feature (e.g.,
+    path attribute) depending on run-time configuration */
+#define PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, remain, msg_fmt, ...)      \
+  do {                                                                         \
+    if ((opts)->ignore_invalid) {                                              \
+      nread += (remain);                                                       \
+      buf += (remain);                                                         \
+      if (!(opts)->silence_invalid) {                                          \
+        fprintf(stderr, "WARN: INVALID_MSG: " msg_fmt " (%s:%d)\n",            \
+                __VA_ARGS__, __FILE__, __LINE__);                              \
+      }                                                                        \
+    } else {                                                                   \
+      fprintf(stderr, "ERROR: INVALID_MSG: " msg_fmt " (%s:%d)\n",             \
+              __VA_ARGS__, __FILE__, __LINE__);                                \
+      return PARSEBGP_INVALID_MSG;                                             \
+    }                                                                          \
+  } while (0)
+
 #ifdef PARSER_DEBUG
 #define PARSEBGP_RETURN_INVALID_MSG_ERR                                        \
   do {                                                                         \

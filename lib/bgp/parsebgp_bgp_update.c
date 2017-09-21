@@ -572,12 +572,13 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
          (https://tools.ietf.org/html/rfc7606#section-4) and should be
          considered as "treat-as-withdraw".
       */
-      fprintf(stderr,
-              "WARN: Path attribute (type %d) has length %d, but only "
-              "%d bytes remain. Skipping truncated attribute.\n",
-              attr->type, attr->len, (int)(remain - nread));
-      nread = remain;
-      break;
+      PARSEBGP_SKIP_INVALID_MSG(
+        opts, buf, nread, 0,
+        "Path attribute (type %d) has length %d, but only %d bytes remain.",
+        attr->type, attr->len, (int)(remain - nread));
+      // if we pass the above macro, the user wants us to struggle on
+      *lenp = remain;
+      return PARSEBGP_OK;
     }
     if (attr->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;
