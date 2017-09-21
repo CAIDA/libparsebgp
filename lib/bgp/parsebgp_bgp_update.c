@@ -586,10 +586,14 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     slen = len - nread;
     switch (attr->type) {
 
+    // NOTE: when adding new types, ensure slen is set to the number of bytes
+    // read so that assert at the bottom is useful
+
     // Type 1:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
       CHECK_REMAIN(remain, attr->data.origin);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.origin);
+      slen = sizeof(attr->data.origin);
       break;
 
     // Type 2:
@@ -608,6 +612,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
       CHECK_REMAIN(remain, attr->data.next_hop);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.next_hop);
+      slen = sizeof(attr->data.next_hop);
       break;
 
     // Type 4:
@@ -615,6 +620,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       CHECK_REMAIN(remain, attr->data.med);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.med);
       attr->data.med = ntohl(attr->data.med);
+      slen = sizeof(attr->data.med);
       break;
 
     // Type 5:
@@ -622,11 +628,13 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       CHECK_REMAIN(remain, attr->data.local_pref);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.local_pref);
       attr->data.local_pref = ntohl(attr->data.local_pref);
+      slen = sizeof(attr->data.local_pref);
       break;
 
     // Type 6:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ATOMIC_AGGREGATE:
       // zero-length attr
+      slen = 0;
       break;
 
     // Type 7
@@ -657,6 +665,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       CHECK_REMAIN(remain, attr->data.originator_id);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.originator_id);
       attr->data.originator_id = ntohl(attr->data.originator_id);
+      slen = sizeof(attr->data.originator_id);
       break;
 
     // Type 10
@@ -766,6 +775,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
         opts, buf, nread, attr->len,
         "BGP UPDATE Path Attribute %d (BGP-LS) is not yet implemented",
         attr->type);
+      slen = attr->len;
       break;
 
     // ...
@@ -786,7 +796,11 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       PARSEBGP_SKIP_NOT_IMPLEMENTED(
         opts, buf, nread, attr->len,
         "BGP UPDATE Path Attribute %d is not yet implemented", attr->type);
+      slen = attr->len;
       break;
+    }
+    if (slen != attr->len) {
+      PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
   }
 
