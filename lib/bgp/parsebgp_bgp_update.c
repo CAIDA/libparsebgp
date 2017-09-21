@@ -564,7 +564,20 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     attr->len = len_tmp;
 
     if (attr->len > (remain - nread)) {
-      PARSEBGP_RETURN_INVALID_MSG_ERR;
+      /* It seems that sometimes the length of an attribute conflicts with the
+         reported total path att ributes length. In this case we emit a warning
+         and skip the truncated attributed.
+
+         This is a case specifically described in Section 4 of RFC 7606
+         (https://tools.ietf.org/html/rfc7606#section-4) and should be
+         considered as "treat-as-withdraw".
+      */
+      fprintf(stderr,
+              "WARN: Path attribute (type %d) has length %d, but only "
+              "%d bytes remain. Skipping truncated attribute.\n",
+              attr->type, attr->len, (int)(remain - nread));
+      nread = remain;
+      break;
     }
     if (attr->len > (len - nread)) {
       return PARSEBGP_PARTIAL_MSG;
