@@ -51,7 +51,10 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
       if (cap->len != 4) {
-        PARSEBGP_RETURN_INVALID_MSG_ERR;
+        PARSEBGP_SKIP_INVALID_MSG(
+          opts, buf, nread, cap->len,
+          "Unexpected AS4 OPEN Capability length (%d), expecting 4 bytes",
+          cap->len);
       }
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.asn);
       cap->values.asn = ntohl(cap->values.asn);
