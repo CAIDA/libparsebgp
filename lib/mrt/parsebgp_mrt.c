@@ -690,7 +690,8 @@ static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   }
 }
 
-static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
+static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
+                                         parsebgp_mrt_msg_t *msg, uint8_t *buf,
                                          size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
@@ -733,6 +734,10 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
     // no usec timestamp to read
     break;
 
+  case PARSEBGP_MRT_TYPE_5:
+    // unsupported
+    break;
+
   default:
     // unknown message type
     PARSEBGP_RETURN_INVALID_MSG_ERR;
@@ -760,7 +765,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
 
   // First, parse the common header
   slen = *len;
-  if ((err = parse_common_hdr(msg, buf, &slen)) != PARSEBGP_OK) {
+  if ((err = parse_common_hdr(opts, msg, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -805,12 +810,15 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
                        &slen, remain);
     break;
 
+  case PARSEBGP_MRT_TYPE_5:
+    // ^ apparently an old MRT format that even bgpdump doesn't support
   case PARSEBGP_MRT_TYPE_ISIS:
   case PARSEBGP_MRT_TYPE_ISIS_ET:
   case PARSEBGP_MRT_TYPE_OSPF_V2:
   case PARSEBGP_MRT_TYPE_OSPF_V3:
   case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
-    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+    slen = 0;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, slen, msg->len,
                                   "MRT Type %d not supported", msg->type);
     break;
 
