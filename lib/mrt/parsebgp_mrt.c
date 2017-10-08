@@ -805,6 +805,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
                        &slen, remain);
     break;
 
+  case PARSEBGP_MRT_TYPE_BGP:
   case PARSEBGP_MRT_TYPE_ISIS:
   case PARSEBGP_MRT_TYPE_ISIS_ET:
   case PARSEBGP_MRT_TYPE_OSPF_V2:

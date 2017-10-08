@@ -288,6 +288,9 @@ typedef struct parsebgp_mrt_bgp4mp {
 
 typedef enum {
 
+  /** 5    BGP (deprecated) */
+  PARSEBGP_MRT_TYPE_BGP = 5,
+
   /** 11   OSPFv2 */
   PARSEBGP_MRT_TYPE_OSPF_V2 = 11,
 
