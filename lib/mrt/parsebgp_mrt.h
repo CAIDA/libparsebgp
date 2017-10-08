@@ -213,6 +213,37 @@ typedef enum {
 } parsebgp_mrt_fsm_code_t;
 
 /**
+ * BGP Message Subtypes
+ */
+typedef enum {
+
+  /** 0    BGP_MESSAGE_NULL */
+  PARSEBGP_MRT_BGP_MESSAGE_NULL = 0,
+
+  /** 1    BGP_MESSAGE_UPDATE */
+  PARSEBGP_MRT_BGP_MESSAGE_UPDATE = 1,
+
+  /** 2    BGP_MESSAGE_PREF_UPDATE */
+  PARSEBGP_MRT_BGP_MESSAGE_PREF_UPDATE = 2,
+
+  /** 3    BGP_MESSAGE_STATE_CHANGE */
+  PARSEBGP_MRT_BGP_MESSAGE_STATE_CHANGE = 3,
+
+  /** 4    BGP_MESSAGE_SYNC */
+  PARSEBGP_MRT_BGP_MESSAGE_SYNC = 4,
+
+  /** 5    BGP_MESSAGE_OPEN */
+  PARSEBGP_MRT_BGP_MESSAGE_OPEN = 5,
+
+  /** 6    BGP_MESSAGE_NOTIFY */
+  PARSEBGP_MRT_BGP_MESSAGE_NOTIFY = 6,
+
+  /** 7    BGP_MESSAGE_KEEPALIVE */
+  PARSEBGP_MRT_BGP_MESSAGE_KEEPALIVE = 7,
+
+} parsebgp_mrt_bgp_subtype_t;
+
+/**
  * BGP4MP State Change information
  */
 typedef struct parsebgp_mrt_bgp4mp_state_change {
@@ -224,6 +255,53 @@ typedef struct parsebgp_mrt_bgp4mp_state_change {
   uint16_t new_state;
 
 } parsebgp_mrt_bgp4mp_state_change_t;
+
+/**
+ * BGP Message
+ * https://tools.ietf.org/html/rfc6396#appendix-B.2.1
+ */
+typedef struct parsebgp_mrt_bgp {
+
+  /** Peer ASN */
+  uint16_t peer_asn;
+
+  /** Peer IP Address */
+  uint8_t peer_ip[16];
+
+  /** Local ASN */
+  uint16_t local_asn;
+
+  /** Local IP Address */
+  uint8_t local_ip[16];
+
+  struct {
+
+    /** NULL Message (Type 0) */
+    // Reserved subtype, no actual implementation.
+
+    /** UPDATE Message (Type 1) */
+    parsebgp_bgp_update_t *update;
+
+    /** PREF_UPDATE Message (Type 2) */
+
+    /** STATE_CHANGE Message (Type 3) */
+    parsebgp_mrt_bgp4mp_state_change_t state_change;
+
+    /** SYNC Message (Type 4) */
+    // There are no known implementations of this subtype, and it SHOULD be ignored.
+
+    /** OPEN Message (Type 5) */
+    parsebgp_bgp_open_t *open;
+
+    /** NOTIFY message (Type 6) */
+    parsebgp_bgp_notification_t *notification;
+
+    /* KEEPALIVE Message(Type 7) */
+    // No extra content.
+
+  } data;
+
+} parsebgp_mrt_bgp_t;
 
 /**
  * BGP4MP Message Subtypes
@@ -249,6 +327,7 @@ typedef enum {
   PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL = 7,
 
 } parsebgp_mrt_bgp4mp_subtype_t;
+
 
 /**
  * BGP4MP Message
@@ -342,6 +421,8 @@ typedef struct parsebgp_mrt_msg {
   uint32_t timestamp_usec;
 
   struct {
+    /** Type 5: BGP */
+    parsebgp_mrt_bgp_t *bgp;
 
     /** Type 12: TABLE_DUMP */
     parsebgp_mrt_table_dump_t *table_dump;
