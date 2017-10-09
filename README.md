@@ -5,6 +5,12 @@ LIBPARSEBGP is an open-source library for the parsing of BGP(Border Gateway Prot
 To get started using LIBPARSEBGP, either download the latest release tarball, or clone the GitHub repository.
 
 To build the library following are the steps to be followed:
+~~~
+$ ./autogen.sh
+$ ./configure
+$ make
+# make install
+~~~
 
 
 # Using LIBPARSEBGP to parse BGP data.
