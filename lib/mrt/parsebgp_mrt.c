@@ -526,6 +526,16 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
 }
 
+
+/**
+   NOTE:
+   `parse_bgp` function parses MRT Type 5 message (deprecated):
+   https://tools.ietf.org/html/rfc6396#appendix-B.2.1
+   This type of message format was only used in very old archive files.
+
+   For newer archive data that uses MRT Type 16 or 17 (BGP4MP or BGP4MP_ET),
+   `parse_bgp4mp` function should be used.
+*/
 static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
                                      parsebgp_mrt_bgp_subtype_t subtype,
                                      parsebgp_mrt_bgp_t *msg, uint8_t *buf,
@@ -833,10 +843,6 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_TYPE_ISIS:
   case PARSEBGP_MRT_TYPE_OSPF_V3:
     // no usec timestamp to read
-    break;
-
-  case PARSEBGP_MRT_TYPE_5:
-    // unsupported
     break;
 
   default:
