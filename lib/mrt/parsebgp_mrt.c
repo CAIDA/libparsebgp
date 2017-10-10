@@ -526,6 +526,116 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
 }
 
+
+/**
+   NOTE:
+   `parse_bgp` function parses MRT Type 5 message (deprecated):
+   https://tools.ietf.org/html/rfc6396#appendix-B.2.1
+   This type of message format was only used in very old archive files.
+
+   For newer archive data that uses MRT Type 16 or 17 (BGP4MP or BGP4MP_ET),
+   `parse_bgp4mp` function should be used.
+*/
+static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
+                                     parsebgp_mrt_bgp_subtype_t subtype,
+                                     parsebgp_mrt_bgp_t *msg, uint8_t *buf,
+                                     size_t *lenp, size_t remain)
+{
+  size_t len = *lenp, nread = 0, slen = 0;
+  uint16_t u16;
+  parsebgp_error_t err;
+
+  // 2-byte Peer ASN
+  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
+  msg->peer_asn = ntohs(u16);
+
+  // Peer IP
+  DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->peer_ip);
+  
+  switch (subtype) {
+  case PARSEBGP_MRT_BGP_MESSAGE_NULL:
+    // The BGP_NULL Subtype is a reserved Subtype.
+  case PARSEBGP_MRT_BGP_MESSAGE_PREF_UPDATE:
+    // The BGP_PREF_UPDATE Subtype is not defined.
+  case PARSEBGP_MRT_BGP_MESSAGE_SYNC:
+    // There are no known implementations of this subtype, and it SHOULD be ignored.
+    break;
+
+  case PARSEBGP_MRT_BGP_MESSAGE_NOTIFY:
+    // 2-byte Local ASN
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
+    msg->peer_asn = ntohs(u16);
+    // Local IP
+    DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
+
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.notification);
+    err = parsebgp_bgp_notification_decode(opts, msg->data.notification, buf,
+                                           &slen, remain-nread);
+    break;
+
+  case PARSEBGP_MRT_BGP_MESSAGE_KEEPALIVE: // subtype 7
+    // 2-byte Local ASN
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
+    msg->peer_asn = ntohs(u16);
+    // Local IP
+    DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
+
+    err = PARSEBGP_OK;
+    slen = 0;
+    break;
+
+  case PARSEBGP_MRT_BGP_MESSAGE_OPEN: // subtype 5
+    // 2-byte Local ASN
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
+    msg->peer_asn = ntohs(u16);
+    // Local IP
+    DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
+
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.open);
+    slen = len - nread;
+    if((
+        err = parsebgp_bgp_open_decode(opts, msg->data.open, buf, &slen, remain-nread)) != PARSEBGP_OK){
+      return err;
+    }
+    nread+=slen;
+    buf += slen;
+    break;
+
+  case PARSEBGP_MRT_BGP_MESSAGE_STATE_CHANGE: // subtype 3
+    // Old State
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.state_change.old_state);
+    msg->data.state_change.old_state = ntohs(msg->data.state_change.old_state);
+    // New State
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.state_change.new_state);
+    msg->data.state_change.new_state = ntohs(msg->data.state_change.new_state);
+    break;
+
+  case PARSEBGP_MRT_BGP_MESSAGE_UPDATE: // subtype 1
+    // 2-byte Local ASN
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
+    msg->peer_asn = ntohs(u16);
+    // Local IP
+    DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
+
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.update);
+    slen = len - nread;
+    if ((err = parsebgp_bgp_update_decode(opts, msg->data.update, buf, &slen, remain-nread)) !=
+        PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  default:
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+    break;
+  }
+
+  *lenp = nread;
+  return PARSEBGP_OK;
+}
+
 static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
                                      parsebgp_mrt_bgp4mp_subtype_t subtype,
                                      parsebgp_mrt_bgp4mp_t *msg, uint8_t *buf,
@@ -690,7 +800,8 @@ static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
   }
 }
 
-static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
+static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
+                                         parsebgp_mrt_msg_t *msg, uint8_t *buf,
                                          size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
@@ -724,6 +835,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_mrt_msg_t *msg, uint8_t *buf,
     msg->timestamp_usec = ntohl(msg->timestamp_usec);
     break;
 
+  case PARSEBGP_MRT_TYPE_BGP:
   case PARSEBGP_MRT_TYPE_OSPF_V2:
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
   case PARSEBGP_MRT_TYPE_TABLE_DUMP_V2:
@@ -760,7 +872,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
 
   // First, parse the common header
   slen = *len;
-  if ((err = parse_common_hdr(msg, buf, &slen)) != PARSEBGP_OK) {
+  if ((err = parse_common_hdr(opts, msg, buf, &slen)) != PARSEBGP_OK) {
     return err;
   }
   nread += slen;
@@ -805,12 +917,19 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
                        &slen, remain);
     break;
 
+  case PARSEBGP_MRT_TYPE_BGP:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.bgp);
+    err = parse_bgp(opts, msg->subtype, msg->types.bgp, buf + nread,
+                       &slen, remain);
+    break;
+
   case PARSEBGP_MRT_TYPE_ISIS:
   case PARSEBGP_MRT_TYPE_ISIS_ET:
   case PARSEBGP_MRT_TYPE_OSPF_V2:
   case PARSEBGP_MRT_TYPE_OSPF_V3:
   case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
-    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+    slen = 0;
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, slen, msg->len,
                                   "MRT Type %d not supported", msg->type);
     break;
 
