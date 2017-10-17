@@ -4,231 +4,314 @@
 #include "parsebgp_bgp_common.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
-#include "../parsebgp_error.h"
-#include "../parsebgp_opts.h"
 #include <stdint.h>
 #include <sys/types.h>
+
 
 /**
  * Node Attribute types
  */
-enum attr_node_types {
-  ATTR_NODE_MT_ID = 263,  ///< Multi-Topology Identifier (len=variable)
-  ATTR_NODE_FLAG = 1024,  ///< Node Flag Bits see enum NODE_FLAG_TYPES (len=1)
-  ATTR_NODE_OPAQUE,       ///< Opaque Node Properties (len=variable)
-  ATTR_NODE_NAME,         ///< Node Name (len=variable)
-  ATTR_NODE_ISIS_AREA_ID, ///< IS-IS Area Identifier (len=variable)
-  ATTR_NODE_IPV4_ROUTER_ID_LOCAL,   ///< Local NODE IPv4 Router ID (len=4)
-                                    ///< (rfc5305/4.3)
-  ATTR_NODE_IPV6_ROUTER_ID_LOCAL,   ///< Local NODE IPv6 Router ID (len=16)
-                                    ///< (rfc6119/4.1)
-  ATTR_NODE_SR_CAPABILITIES = 1034, ///< SR Capabilities
-  ATTR_NODE_SR_ALGORITHM,           ///< SR Algorithm
-  ATTR_NODE_SR_LOCAL_BLOCK,         ///< SR Local block
-  ATTR_NODE_SR_SRMS_PREF            ///< SR mapping server preference
-};
+typedef enum{
 
-enum sub_tlv_types {
-  SUB_TLV_SID_LABEL = 1161 ///< SID/Label Sub-TLV
-};
+    /** Node Attr: Multi-Topology ID (len=variable) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_MT_ID = 263,
+
+    /** Node Attr: Flag bits (len=1) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_FLAG = 1024,
+
+    /** Node Attr: Opaque Node (len=variable) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_OPAQUE = 1025,
+
+    /** Node Attr: Node Name (len=variable) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_NAME = 1026,
+
+    /** Node Attr: IS-IS Area Identifier (len=variable) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_ISIS_AREA_ID = 1027,
+
+    /** Node Attr: Local NODE IPv4 Router ID (len=4) [RFC5305] */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_IPV4_ROUTER_ID_LOCAL = 1028,
+
+    /** Node Attr: Local NODE IPv6 Router ID (len=16) [RFC6119] */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_NODE_IPV6_ROUTER_ID_LOCAL = 1029
+
+} parsebgp_bgp_update_bgp_ls_attr_node_type_t;
+
 
 /**
  * Link Attribute types
  */
-enum attr_link_types {
-  ATTR_LINK_IPV4_ROUTER_ID_LOCAL =
-    1028, ///< IPv4 Router-ID of local node 134/- (rfc5305/4.3)
-  ATTR_LINK_IPV6_ROUTER_ID_LOCAL,  ///< IPv6 Router-ID of local node 140/-
-                                   ///< (rfc6119/4.1)
-  ATTR_LINK_IPV4_ROUTER_ID_REMOTE, ///< IPv4 Router-ID of remote node 134/-
-                                   ///< (rfc5305/4.3)
-  ATTR_LINK_IPV6_ROUTER_ID_REMOTE, ///< IPv6 Router-ID of remote node 140-
-                                   ///< (rfc6119/4.1)
-  ATTR_LINK_ADMIN_GROUP =
-    1088,                  ///< Administrative group (color) 22/3 (rfc5305/3.1)
-  ATTR_LINK_MAX_LINK_BW,   ///< Maximum link bandwidth 22/9 (rfc5305/3.3)
-  ATTR_LINK_MAX_RESV_BW,   ///< Maximum reservable link bandwidth 22/10
-                           ///< (rfc5305/3.5)
-  ATTR_LINK_UNRESV_BW,     ///< Unreserved bandwidth 22/11 (RFC5305/3.6)
-  ATTR_LINK_TE_DEF_METRIC, ///< TE default metric 22/18
-  ATTR_LINK_PROTECTION_TYPE, ///< Link protection type 22/20 (rfc5307/1.2)
-  ATTR_LINK_MPLS_PROTO_MASK, ///< MPLS protocol mask
-  ATTR_LINK_IGP_METRIC,      ///< IGP link metric
-  ATTR_LINK_SRLG,            ///< Shared risk link group
-  ATTR_LINK_OPAQUE,          ///< Opaque link attribute
-  ATTR_LINK_NAME,            ///< Link name
-  ATTR_LINK_ADJACENCY_SID,   ///< Peer Adjacency SID
-                           ///< (https://tools.ietf.org/html/draft-gredler-idr-bgp-ls-segment-routing-ext-04#section-2.2.1)
+typedef enum {
 
-  ATTR_LINK_PEER_EPE_NODE_SID =
-    1101, ///< Peer Node SID (draft-ietf-idr-bgpls-segment-routing-epe)
-  ATTR_LINK_PEER_EPE_ADJ_SID, ///< Peer Adjacency SID
-                              ///< (draft-ietf-idr-bgpls-segment-routing-epe)
-  ATTR_LINK_PEER_EPE_SET_SID  ///< Peer Set SID
-                              ///< (draft-ietf-idr-bgpls-segment-routing-epe)
-};
+    /** Link Attr: IPv4 Router ID of Remote Node 134/- (rfc5305/4.3) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_IPV4_ROUTER_ID_REMOTE = 1030,
 
-/**
- * MPLS Protocol Mask BIT flags/codes
- */
-enum MPLS_PROTO_MASK_CODES {
-  MPLS_PROTO_MASK_LDP = 0x80, ///< Label distribuion protocol (rfc5036)
-  MPLS_PROTO_RSVP_TE = 0x40   ///< Extension to RSVP for LSP tunnels (rfc3209)
-};
+    /** Link Attr: IPv6 Router ID of Remote Node 140/- (rfc6119/4.1) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_IPV6_ROUTER_ID_REMOTE = 1031,
+
+    /** Link Attr: Administrative group (color) 22/3 (rfc5305/3.1) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_ADMIN_GROUP = 1088,
+
+    /** Link Attr: Maximum link bandwidth 22/9 (rfc5305/3.3) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_MAX_LINK_BW = 1089,
+
+    /** Link Attr: Maximum reservable link bandwidth 22/10 (rfc5305/3.5) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_MAX_RESV_BW = 1090,
+
+    /** Link Attr: Unreserved bandwidth 22/11 (RFC5305/3.6) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_UNRESV_BW = 1091,
+
+    /** Link Attr: TE default metric 22/18 */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_TE_DEF_METRIC = 1092,
+
+    /** Link Attr: Link protection type 22/20 (rfc5307/1.2) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_PROTECTION_TYPE = 1093,
+
+    /** Link Attr: MPLS protocol mask */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_MPLS_PROTO_MASK = 1094,
+
+    /** Link Attr: IGP link metric */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_IGP_METRIC = 1095,
+
+    /** Link Attr: Shared risk link group */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_SRLG = 1096,
+
+    /** Link Attr: Opaque link attribute */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_OPAQUE = 1097,
+
+    /** Link Attr: Link name */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_LINK_NAME = 1098
+
+}parsebgp_bgp_update_bgp_ls_attr_link_type_t;
+
 
 /**
  * Prefix Attribute types
  */
-enum ATTR_PREFIX_TYPES {
-  ATTR_PREFIX_IGP_FLAGS = 1152, ///< IGP Flags (len=1)
-  ATTR_PREFIX_ROUTE_TAG,        ///< Route Tag (len=4*n)
-  ATTR_PREFIX_EXTEND_TAG,       ///< Extended Tag (len=8*n)
-  ATTR_PREFIX_PREFIX_METRIC,    ///< Prefix Metric (len=4)
-  ATTR_PREFIX_OSPF_FWD_ADDR,    ///< OSPF Forwarding Address
-  ATTR_PREFIX_OPAQUE_PREFIX,    ///< Opaque prefix attribute (len=variable)
-  ATTR_PREFIX_SID               ///< Prefix-SID TLV (len=variable)
-};
+typedef enum ATTR_PREFIX_TYPES {
 
-#define IEEE_INFINITY 0x7F800000
-#define MINUS_INFINITY (int32_t)0x80000000L
-#define PLUS_INFINITY 0x7FFFFFFF
-#define IEEE_NUMBER_WIDTH 32 /* bits in number */
-#define IEEE_EXP_WIDTH 8     /* bits in exponent */
-#define IEEE_MANTISSA_WIDTH (IEEE_NUMBER_WIDTH - 1 - IEEE_EXP_WIDTH)
-#define IEEE_SIGN_MASK 0x80000000
-#define IEEE_EXPONENT_MASK 0x7F800000
-#define IEEE_MANTISSA_MASK 0x007FFFFF
+    /** Prefix Attr: IGP Flags (len=1) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_PREFIX_IGP_FLAGS = 1152,
 
-#define IEEE_IMPLIED_BIT (1 << IEEE_MANTISSA_WIDTH)
-#define IEEE_INFINITE ((1 << IEEE_EXP_WIDTH) - 1)
-#define IEEE_BIAS ((1 << (IEEE_EXP_WIDTH - 1)) - 1)
+    /** Prefix Attr: Route Tag (len=4*n) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_PREFIX_ROUTE_TAG = 1153,
+
+    /** Prefix Attr: Extended Tag (len=8*n) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_PREFIX_EXTEND_ROUTE_TAG = 1154,
+
+    /** Prefix Attr: Prefix Metric (len=4) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_PREFIX_PREFIX_METRIC = 1155,
+
+    /** Prefix Attr: OSPF Forwarding Address */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_PREFIX_OSPF_FWD_ADDR = 1156,
+
+    /** Prefix Attr: Opaque prefix attribute (len=variable) */
+            PARSEBGP_BGP_UPDATE_LINK_STATE_ATTR_PREFIX_OPAQUE_PREFIX = 1157
+
+}parsebgp_bgp_update_bgp_ls_attr_prefix_type_t;
 
 /**
- * Node (local and remote) common fields
+ * Node attributes
  */
-typedef struct node_descriptor {
-    uint16_t type;
-    uint16_t len;
-    uint32_t asn;             ///< BGP ASN
-    uint32_t bgp_ls_id;       ///< BGP-LS Identifier
-    uint8_t igp_router_id[8]; ///< IGP router ID
-    uint8_t ospf_area_Id[4];  ///< OSPF area ID
-    uint32_t
-            bgp_router_id; ///< BGP router ID (draft-ietf-idr-bgpls-segment-routing-epe)
-    uint8_t hash_bin[16]; ///< binary hash for node descriptor
-} node_descriptor;
+typedef struct parsebgp_bgp_update_bgp_ls_attr_node_attr {
+
+    /** Node Attr: Multi-Topology ID (len=variable) */
+    struct {
+
+        /** Array of mt_ids */
+        uint16_t *ids;
+
+        /** Allocated length of ids */
+        int _ids_alloc_cnt;
+
+        /** Populated ids count */
+        int ids_cnt;
+
+    } node_mt_id;
+
+    /** Node Attr: Flag bits (len=1) */
+    uint8_t  node_flag_bits;
+
+    /** Node Attr: Opaque Node (len=variable) */
+    struct {
+
+        /** Array of opaque values */
+        uint8_t *opaque;
+
+        /** Allocated length of opaque */
+        int _opaque_alloc_cnt;
+
+        /** Populated opaque count */
+        int opaque_cnt;
+
+    } node_opaque;
+
+    /** Node Attr: Node Name (len=variable) */
+    uint8_t node_name[256];
+
+    /** Node Attr: IS-IS Area Identifier (len=variable) */
+    struct {
+
+        /** Array of area_ids */
+        uint16_t *ids;
+
+        /** Allocated length of ids */
+        int _ids_alloc_cnt;
+
+        /** Populated ids count */
+        int ids_cnt;
+
+    } node_isis_area_id;
+
+    /** Node Attr: Local NODE IPv4 Router ID (len=4) [RFC5305] */
+    uint8_t node_ipv4_router_id_local[4];
+
+    /** Node Attr: Local NODE IPv6 Router ID (len=16) [RFC6119] */
+    uint8_t node_ipv6_router_id_local[16];
+
+}parsebgp_bgp_update_bgp_ls_attr_node_attr_t;
 
 /**
- * Link Descriptor common fields
+ * Link attributes
  */
-typedef struct link_descriptor {
-    uint16_t type;
-    uint16_t len;
-    uint32_t local_id;     ///< Link Local ID
-    uint32_t remote_id;    ///< Link Remote ID
-    uint8_t intf_addr[16]; ///< Interface binary address
-    uint8_t nei_addr[16];  ///< Neighbor binary address
-    uint32_t mt_id;        ///< Multi-Topology ID
-    int is_ipv4;           ///< True if IPv4, false if IPv6
-} link_descriptor;
+typedef struct parsebgp_bgp_update_bgp_ls_attr_link_attr {
+
+    /** These two fields ipv4_router_id_local and ipv6_router_id_local are populated in node attributes*/
+
+    /** Link Attr: IPv4 Router ID of Remote Node 134/- (rfc5305/4.3) */
+    uint8_t  link_ipv4_router_id_remote[4];
+
+    /** Link Attr: IPv6 Router ID of Remote Node 140/- (rfc6119/4.1) */
+    uint8_t  link_ipv6_router_id_remote[16];
+
+    /** Link Attr: Administrative group (color) 22/3 (rfc5305/3.1) */
+    uint32_t link_admin_group;
+
+    /** Link Attr: Maximum link bandwidth 22/9 (rfc5305/3.3) */
+    uint32_t link_max_link_bw;
+
+    /** Link Attr: Maximum reservable link bandwidth 22/10 (rfc5305/3.5) */
+    uint32_t link_max_resv_bw;
+
+    /** Link Attr: Unreserved bandwidth 22/11 (RFC5305/3.6) */
+    uint32_t link_unresv_bw[8];
+
+    /** Link Attr: TE default metric 22/18 */
+    uint32_t link_te_def_metric;
+
+    /** Link Attr: Link protection type 22/20 (rfc5307/1.2) */
+    uint8_t  link_protective_type[2];
+
+    /** Link Attr: MPLS protocol mask */
+    uint8_t  link_mpls_protocal_mask;
+
+    /** Link Attr: IGP link metric */
+    uint32_t link_igp_metric;
+
+    /** Link Attr: Shared risk link group */
+    uint32_t link_srlg;
+
+    /** Link Attr: Opaque link attribute */
+    struct {
+
+        /** Array of opaque values */
+        uint8_t *opaque;
+
+        /** Allocated length of opaque */
+        int _opaque_alloc_cnt;
+
+        /** Populated opaque count */
+        int opaque_cnt;
+
+    }link_opaque;
+
+    /** Link Attr: Link name */
+    uint8_t  link_name[256];
+
+}parsebgp_bgp_update_bgp_ls_attr_link_attr_t;
 
 /**
- * Prefix descriptor common fields
+ * Prefix attributes
  */
-typedef struct prefix_descriptor {
-    uint16_t type;
-    uint16_t len;
-    char ospf_route_type[32]; ///< OSPF Route type in string form for DB enum
-    uint32_t mt_id;           ///< Multi-Topology ID
-    uint8_t prefix[16];       ///< Prefix binary address
-    uint8_t prefix_bcast[16]; ///< Prefix broadcast/ending binary address
-    uint8_t prefix_len;       ///< Length of prefix in bits
-} prefix_descriptor;
+typedef struct parsebgp_bgp_update_bgp_ls_attr_prefix_attr {
 
-typedef struct mp_reach_ls {
-    uint16_t nlri_type;
-    uint16_t nlri_len;
-    uint8_t proto_id;
-    uint64_t id;
-    union nlri_ls {
-        struct node_nlri {
-            uint16_t type;
-            uint16_t len;
-            uint16_t count_local_nodes;
-            node_descriptor *local_nodes;
-        } node_nlri;
+    /** Prefix Attr: IGP Flags (len=1) */
+    uint8_t  prefix_igp_flags;
 
-        struct link_nlri {
-            uint16_t type;
-            uint16_t len;
-            uint16_t count_local_nodes;
-            node_descriptor *local_nodes;
-            uint16_t count_remote_nodes;
-            node_descriptor *remote_nodes;
-            uint16_t count_link_desc;
-            link_descriptor *link_desc;
-        } link_nlri;
+    /** Prefix Attr: Route Tag (len=4*n) */
+    struct {
 
-        struct prefix_nlri_ipv4_ipv6 {
-            uint16_t type;
-            uint16_t len;
-            uint16_t count_local_nodes;
-            node_descriptor *local_nodes;
-            uint16_t count_prefix_desc;
-            prefix_descriptor *prefix_desc;
-        } prefix_nlri_ipv4_ipv6;
-    } nlri_ls;
-} mp_reach_ls;
+        /** Array of route tags */
+        uint32_t *tags;
 
-typedef struct link_peer_epe_node_sid {
-    uint8_t L_flag;
-    uint8_t V_flag;
-    uint32_t sid_3;
-    uint32_t sid_4;
-    uint8_t ip_raw[16];
-} link_peer_epe_node_sid;
+        /** Allocated length of tags */
+        int _tags_alloc_cnt;
+
+        /** Populated tags count */
+        int tags_cnt;
+
+    } prefix_route_tag;
+
+    /** Prefix Attr: Extended Tag (len=8*n) */
+    struct {
+
+        /** Array of route extended tags */
+        uint64_t *ex_tags;
+
+        /** Allocated length of extended tags */
+        int _ex_tags_alloc_cnt;
+
+        /** Populated extended tags count */
+        int ex_tags_cnt;
+
+    } prefix_extended_route_tag;
+
+    /** Prefix Attr: Prefix Metric (len=4) */
+    uint32_t prefix_metric;
+
+    /** Prefix Attr: OSPF Forwarding Address */
+    uint8_t  prefix_ospf_forwarding_address[4];
+
+    /** Prefix Attr: Opaque prefix attribute (len=variable) */
+    struct {
+
+        /** Array of opaque values */
+        uint8_t *opaque;
+
+        /** Allocated length of opaque */
+        int _opaque_alloc_cnt;
+
+        /** Populated opaque count */
+        int opaque_cnt;
+
+    } prefix_opaque_prefix_attribute;
+
+}parsebgp_bgp_update_bgp_ls_attr_prefix_attr_t;
 
 /**
  * BGP LINK STATE
  */
 typedef struct parsebgp_bgp_update_bgp_ls_attr {
+
+    /** Type of link state attribute*/
     uint16_t type;
+
+    /** Length of link state attribute*/
     uint16_t len;
-    union node_attr {
-        uint8_t node_flag_bits;
-        uint8_t node_ipv4_router_id_local[4];
-        uint8_t node_ipv6_router_id_local[16];
-        //TODO: check the max length of IS-IS AREA ID
-        uint8_t node_isis_area_id[256];
-        uint8_t node_name[256];
-        uint8_t mt_id[256];
-    } node;
 
-    union link_attr {
-        uint8_t  link_ipv4_router_id_local[4];
-        uint8_t  link_ipv6_router_id_local[16];
-        uint8_t  link_ipv4_router_id_remote[4];
-        uint8_t  link_ipv6_router_id_remote[16];
-        uint32_t link_admin_group;
-        uint32_t link_max_link_bw;
-        uint32_t link_max_resv_bw;
-        uint32_t link_unresv_bw[8];
-        uint32_t link_te_def_metric;
-        uint8_t  link_protective_type[2];
-        uint8_t  link_mpls_protocal_mask;
-        uint32_t link_igp_metric;
-        uint8_t  link_name[256];
-        link_peer_epe_node_sid link_peer_epe_sid;
-    } link;
+    /** Union of node, link and prefix values*/
+    struct {
 
-    union prefix_attr {
-        uint8_t  prefix_igp_flags;
-        uint32_t prefix_route_tag;
-        uint64_t prefix_extended_route_tag;
-        uint32_t prefix_metric;
-        uint8_t  prefix_ospf_forwarding_address[16];
-        uint8_t  prefix_opaque_prefix_attributr[255];
-    } prefix;
+        /** Node attribute value*/
+        parsebgp_bgp_update_bgp_ls_attr_node_attr_t node;
+
+        /** Link attribute value*/
+        parsebgp_bgp_update_bgp_ls_attr_link_attr_t link;
+
+        /** Prefix attribute value*/
+        parsebgp_bgp_update_bgp_ls_attr_prefix_attr_t prefix;
+
+    }attr;
+
 } parsebgp_bgp_update_bgp_ls_attr_t;
 
 /**
@@ -240,7 +323,7 @@ typedef struct parsebgp_bgp_update_bgp_ls {
     parsebgp_bgp_update_bgp_ls_attr_t *bgp_ls;
 
     /** Allocated length of the attrs_used array (INTERNAL) */
-    int _bgp_ls_used_alloc_cnt;
+    int _bgp_ls_attrs_used_alloc_cnt;
 
     /** Number of populated Link State Attributes in the attrs field */
     int bgp_ls_attrs_cnt;
@@ -253,22 +336,6 @@ parsebgp_error_t
 parsebgp_bgp_update_bgp_ls_decode(parsebgp_opts_t *opts,
                                     parsebgp_bgp_update_bgp_ls_t *msg,
                                     uint8_t *buf, size_t *lenp, size_t remain);
-
-/**
- * Parse Link State attribute TLV
- *
- * @details Will handle parsing the link state attribute
- *
- * @param [in]   path_attrs     Reference to struct update_path_attrs
- * @param [in]   attr_len       Length of the attribute data
- * @param [in]   data           Pointer to the attribute data
- *
- * @returns length of the TLV attribute parsed
- */
-parsebgp_error_t
-parsebgp_bgp_update_bgp_ls_tlv_decode(parsebgp_opts_t *opts,
-                                          parsebgp_bgp_update_bgp_ls_attr_t *msg,
-                                          uint8_t *buf, size_t *lenp);
 
 /**
  * Dump a human-readable version of the message to stdout
@@ -284,11 +351,11 @@ parsebgp_bgp_update_bgp_ls_tlv_decode(parsebgp_opts_t *opts,
 void parsebgp_bgp_update_bgp_ls_dump(
         parsebgp_bgp_update_bgp_ls_t *msg, int depth);
 
-/** Destroy an EXTENDED COMMUNITIES message */
+/** Destroy a BGP Link State message */
 void parsebgp_bgp_update_bgp_ls_destroy(
         parsebgp_bgp_update_bgp_ls_t *msg);
 
-/** Clear an EXTENDED COMMUNITIES message */
+/** Clear a BGP Link State message */
 void parsebgp_bgp_update_bgp_ls_clear(
         parsebgp_bgp_update_bgp_ls_t *msg);
 
