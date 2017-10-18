@@ -121,6 +121,7 @@
     printf(__VA_ARGS__);                                                       \
   } while (0)
 
+//TODO: check/add for uint64
 #define PARSEBGP_DUMP_INT(depth, name, val)                                    \
   PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),       \
                      (int)val);
