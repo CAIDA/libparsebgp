@@ -28,6 +28,6 @@ libparsebgp_la_LIBADD = 			\
 	$(top_builddir)/lib/bmp/libparsebgp_bmp.la	\
 	$(top_builddir)/lib/mrt/libparsebgp_mrt.la
 
-libparsebgp_la_LDFLAGS = -version-info @LIBPARSEBGP_MAJOR_VERSION@:@LIBPARSEBGP_MID_VERSION@:@LIBPARSEBGP_MINOR_VERSION@
+libparsebgp_la_LDFLAGS = -version-info @LIBPARSEBGP_MAJOR_VERSION@:@LIBPARSEBGP_MINOR_VERSION@:@LIBPARSEBGP_MID_VERSION@
 
 CLEANFILES = *~
