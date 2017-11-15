@@ -1,8 +1,8 @@
 #ifndef __PARSEBGP_UTILS_H
 #define __PARSEBGP_UTILS_H
 
-#include "config.h"
 #include "parsebgp_error.h"
+#include "config.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>

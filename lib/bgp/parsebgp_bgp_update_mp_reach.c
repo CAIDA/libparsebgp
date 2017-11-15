@@ -84,8 +84,8 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
 }
 
 static parsebgp_error_t
-parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain)
+parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
+                             size_t *lenp, size_t remain)
 {
   size_t nread = 0;
   // size of the link-local address (zero if there isn't one)
@@ -380,8 +380,7 @@ void parsebgp_bgp_update_mp_unreach_destroy(
   free(msg);
 }
 
-void parsebgp_bgp_update_mp_unreach_clear(
-  parsebgp_bgp_update_mp_unreach_t *msg)
+void parsebgp_bgp_update_mp_unreach_clear(parsebgp_bgp_update_mp_unreach_t *msg)
 {
   msg->withdrawn_nlris_cnt = 0;
 }

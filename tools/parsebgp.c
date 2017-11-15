@@ -144,19 +144,20 @@ err:
 
 static void usage()
 {
-  fprintf(stderr,
-          "usage: %s [options] [type:]file [[type:]file...]\n"
-          "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
-          "         (only required if using non-standard file extensions)\n"
-          "       -f <attr-type>     Filter to include given Path Attribute\n"
-          "       -i                 Ignore invalid messages and attributes\n"
-          "                            (use multiple times to silence warnings)\n"
-          "       -s                 Skip unknown messages and attributes\n"
-          "                            (use multiple times to silence warnings)\n"
-          "       -h                 Show this help message\n"
-          "       -q                 Do not dump parsed messages (quiet mode)\n"
-          "       -v                 Show version of the libparsebgp library\n",
-          NAME);
+  fprintf(
+    stderr,
+    "usage: %s [options] [type:]file [[type:]file...]\n"
+    "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
+    "         (only required if using non-standard file extensions)\n"
+    "       -f <attr-type>     Filter to include given Path Attribute\n"
+    "       -i                 Ignore invalid messages and attributes\n"
+    "                            (use multiple times to silence warnings)\n"
+    "       -s                 Skip unknown messages and attributes\n"
+    "                            (use multiple times to silence warnings)\n"
+    "       -h                 Show this help message\n"
+    "       -q                 Do not dump parsed messages (quiet mode)\n"
+    "       -v                 Show version of the libparsebgp library\n",
+    NAME);
 }
 
 int main(int argc, char **argv)

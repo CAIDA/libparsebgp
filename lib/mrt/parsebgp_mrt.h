@@ -288,7 +288,8 @@ typedef struct parsebgp_mrt_bgp {
     parsebgp_mrt_bgp4mp_state_change_t state_change;
 
     /** SYNC Message (Type 4) */
-    // There are no known implementations of this subtype, and it SHOULD be ignored.
+    // There are no known implementations of this subtype, and it SHOULD be
+    // ignored.
 
     /** OPEN Message (Type 5) */
     parsebgp_bgp_open_t *open;
@@ -327,7 +328,6 @@ typedef enum {
   PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL = 7,
 
 } parsebgp_mrt_bgp4mp_subtype_t;
-
 
 /**
  * BGP4MP Message

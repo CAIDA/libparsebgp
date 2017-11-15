@@ -137,9 +137,9 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
-        seg->asns[i] = ntohl(*(uint32_t*)buf);
+        seg->asns[i] = ntohl(*(uint32_t *)buf);
       } else {
-        seg->asns[i] = ntohs(*(uint16_t*)buf);
+        seg->asns[i] = ntohs(*(uint16_t *)buf);
       }
       buf += asn_size;
     }
@@ -159,7 +159,8 @@ parse_path_attr_as_path_safe(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
   parsebgp_error_t err;
   // first we try just parsing as-is
   if ((err = parse_path_attr_as_path(asn_4_byte, msg, buf, lenp, remain,
-                                     raw)) != PARSEBGP_OK && asn_4_byte != 0) {
+                                     raw)) != PARSEBGP_OK &&
+      asn_4_byte != 0) {
     // if we've been asked to do 4-byte parsing, then maybe the caller made a
     // mistake
     return parse_path_attr_as_path(0, msg, buf, lenp, remain, raw);
@@ -248,8 +249,7 @@ parse_path_attr_aggregator(int asn_4_byte,
 
 static parsebgp_error_t
 parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
-                            uint8_t *buf, size_t *lenp, size_t remain,
-                            int raw)
+                            uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -465,7 +465,7 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 #define CHECK_REMAIN(remain, val)                                              \
   do {                                                                         \
     if (remain < sizeof(val)) {                                                \
-      PARSEBGP_RETURN_INVALID_MSG_ERR;                                             \
+      PARSEBGP_RETURN_INVALID_MSG_ERR;                                         \
     }                                                                          \
   } while (0)
 
@@ -652,9 +652,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 8
     case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
       PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.communities);
-      if ((err = parse_path_attr_communities(attr->data.communities, buf,
-                                             &slen, attr->len, raw)) !=
-          PARSEBGP_OK) {
+      if ((err = parse_path_attr_communities(attr->data.communities, buf, &slen,
+                                             attr->len, raw)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -784,8 +783,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 32
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
       PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.large_communities);
-      if ((err = parse_path_attr_large_communities(
-             attr->data.large_communities, buf, &slen, attr->len)) !=
+      if ((err = parse_path_attr_large_communities(attr->data.large_communities,
+                                                   buf, &slen, attr->len)) !=
           PARSEBGP_OK) {
         return err;
       }
@@ -874,8 +873,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
   free(msg->attrs_used);
 }
 
-void parsebgp_bgp_update_path_attrs_clear(
-  parsebgp_bgp_update_path_attrs_t *msg)
+void parsebgp_bgp_update_path_attrs_clear(parsebgp_bgp_update_path_attrs_t *msg)
 {
   int i;
   parsebgp_bgp_update_path_attr_t *attr;

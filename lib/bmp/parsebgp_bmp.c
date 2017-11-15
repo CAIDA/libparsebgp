@@ -61,7 +61,8 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
   return PARSEBGP_OK;
 }
 
-static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_alloc_cnt)
+static void destroy_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
+                              int *tlvs_alloc_cnt)
 {
   int i;
   if (*tlvs == NULL || *tlvs_alloc_cnt == 0) {
@@ -315,8 +316,8 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
   case PARSEBGP_BMP_PEER_DOWN_REMOTE_CLOSE_WITH_NOTIF:
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.notification);
     slen = len - nread;
-    if ((err = parsebgp_bgp_decode(opts, msg->data.notification, buf,
-                                   &slen)) != PARSEBGP_OK) {
+    if ((err = parsebgp_bgp_decode(opts, msg->data.notification, buf, &slen)) !=
+        PARSEBGP_OK) {
       return err;
     }
     nread += slen;

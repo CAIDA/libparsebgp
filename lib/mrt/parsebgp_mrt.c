@@ -28,7 +28,7 @@
       break;                                                                   \
                                                                                \
     default:                                                                   \
-      PARSEBGP_RETURN_INVALID_MSG_ERR;                                             \
+      PARSEBGP_RETURN_INVALID_MSG_ERR;                                         \
     }                                                                          \
   } while (0)
 
@@ -112,7 +112,7 @@ static void dump_table_dump(parsebgp_bgp_afi_t afi,
   PARSEBGP_DUMP_IP(depth, "Peer IP", afi, msg->peer_ip);
   PARSEBGP_DUMP_INT(depth, "Peer ASN", msg->peer_asn);
 
-   parsebgp_bgp_update_path_attrs_dump(&msg->path_attrs, depth + 1);
+  parsebgp_bgp_update_path_attrs_dump(&msg->path_attrs, depth + 1);
 }
 
 static parsebgp_error_t
@@ -322,8 +322,9 @@ static void destroy_table_dump_v2_rib_entries(
   free(entries);
 }
 
-static void clear_table_dump_v2_rib_entries(
-  parsebgp_mrt_table_dump_v2_rib_entry_t *entries, uint16_t entry_count)
+static void
+clear_table_dump_v2_rib_entries(parsebgp_mrt_table_dump_v2_rib_entry_t *entries,
+                                uint16_t entry_count)
 {
   int i;
   for (i = 0; i < entry_count; i++) {
@@ -390,9 +391,9 @@ static void destroy_table_dump_v2_afi_safi_rib(
   msg->_entries_alloc_cnt = 0;
 }
 
-static void clear_table_dump_v2_afi_safi_rib(
-  parsebgp_mrt_table_dump_v2_subtype_t subtype,
-  parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg)
+static void
+clear_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
+                                 parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg)
 {
   clear_table_dump_v2_rib_entries(msg->entries, msg->entry_count);
   msg->entry_count = 0;
@@ -526,7 +527,6 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   }
 }
 
-
 /**
    NOTE:
    `parse_bgp` function parses MRT Type 5 message (deprecated):
@@ -537,9 +537,9 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
    `parse_bgp4mp` function should be used.
 */
 static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
-                                     parsebgp_mrt_bgp_subtype_t subtype,
-                                     parsebgp_mrt_bgp_t *msg, uint8_t *buf,
-                                     size_t *lenp, size_t remain)
+                                  parsebgp_mrt_bgp_subtype_t subtype,
+                                  parsebgp_mrt_bgp_t *msg, uint8_t *buf,
+                                  size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
   uint16_t u16;
@@ -551,14 +551,15 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
   // Peer IP
   DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->peer_ip);
-  
+
   switch (subtype) {
   case PARSEBGP_MRT_BGP_MESSAGE_NULL:
-    // The BGP_NULL Subtype is a reserved Subtype.
+  // The BGP_NULL Subtype is a reserved Subtype.
   case PARSEBGP_MRT_BGP_MESSAGE_PREF_UPDATE:
-    // The BGP_PREF_UPDATE Subtype is not defined.
+  // The BGP_PREF_UPDATE Subtype is not defined.
   case PARSEBGP_MRT_BGP_MESSAGE_SYNC:
-    // There are no known implementations of this subtype, and it SHOULD be ignored.
+    // There are no known implementations of this subtype, and it SHOULD be
+    // ignored.
     break;
 
   case PARSEBGP_MRT_BGP_MESSAGE_NOTIFY:
@@ -570,7 +571,7 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.notification);
     err = parsebgp_bgp_notification_decode(opts, msg->data.notification, buf,
-                                           &slen, remain-nread);
+                                           &slen, remain - nread);
     break;
 
   case PARSEBGP_MRT_BGP_MESSAGE_KEEPALIVE: // subtype 7
@@ -593,11 +594,11 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.open);
     slen = len - nread;
-    if((
-        err = parsebgp_bgp_open_decode(opts, msg->data.open, buf, &slen, remain-nread)) != PARSEBGP_OK){
+    if ((err = parsebgp_bgp_open_decode(opts, msg->data.open, buf, &slen,
+                                        remain - nread)) != PARSEBGP_OK) {
       return err;
     }
-    nread+=slen;
+    nread += slen;
     buf += slen;
     break;
 
@@ -619,8 +620,8 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.update);
     slen = len - nread;
-    if ((err = parsebgp_bgp_update_decode(opts, msg->data.update, buf, &slen, remain-nread)) !=
-        PARSEBGP_OK) {
+    if ((err = parsebgp_bgp_update_decode(opts, msg->data.update, buf, &slen,
+                                          remain - nread)) != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
@@ -746,7 +747,7 @@ static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
 }
 
 static void clear_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
-                           parsebgp_mrt_bgp4mp_t *msg)
+                         parsebgp_mrt_bgp4mp_t *msg)
 {
   switch (subtype) {
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
@@ -919,8 +920,8 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_TYPE_BGP:
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.bgp);
-    err = parse_bgp(opts, msg->subtype, msg->types.bgp, buf + nread,
-                       &slen, remain);
+    err =
+      parse_bgp(opts, msg->subtype, msg->types.bgp, buf + nread, &slen, remain);
     break;
 
   case PARSEBGP_MRT_TYPE_ISIS:

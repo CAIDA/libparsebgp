@@ -2,11 +2,11 @@
 #include <stdlib.h>
 
 char *err_strings[] = {
-  "No Error", // PARSEBGP_OK
+  "No Error",        // PARSEBGP_OK
   "Partial Message", // PARSEBGP_PARTIAL_MSG
   "Invalid Message", // PARSEBGP_INVALID_MSG
   "Not Implemented", // PARSEBGP_NOT_IMPLEMENTED
-  "Malloc Failure", // PARSEBGP_MALLOC_FAILURE
+  "Malloc Failure",  // PARSEBGP_MALLOC_FAILURE
 };
 
 const char *parsebgp_strerror(parsebgp_error_t err)
