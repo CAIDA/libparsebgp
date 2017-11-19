@@ -298,6 +298,29 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
     buf += slen;
     break;
 
+  case PARSEBGP_BGP_AFI_BGPLS:
+    slen = len - nread;
+    if ((err = parsebgp_bgp_update_mp_reach_link_state_decode(opts,
+                                                              msg,
+                                                              buf,
+                                                              &slen,
+                                                              remain - nread))
+        != PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  case PARSEBGP_BGP_AFI_L2VPN:
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts,
+                                  buf,
+                                  nread,
+                                  remain - nread,
+                                  "Unsupported AFI (%d): L2VPN not implemented",
+                                  msg->afi);
+    break;
+
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported AFI (%d)", msg->afi);
