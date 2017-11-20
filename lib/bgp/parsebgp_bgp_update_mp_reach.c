@@ -25,6 +25,7 @@
  */
 
 #include "parsebgp_bgp_update_mp_reach.h"
+#include "parsebgp_bgp_update_mp_link_state.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <assert.h>
@@ -408,6 +409,29 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
     }
     nread += slen;
     buf += slen;
+    break;
+
+  case PARSEBGP_BGP_AFI_BGPLS:
+    slen = len - nread;
+    if ((err = parsebgp_bgp_update_mp_unreach_link_state_decode(opts,
+                                                              msg,
+                                                              buf,
+                                                              &slen,
+                                                              remain - nread))
+        != PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  case PARSEBGP_BGP_AFI_L2VPN:
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts,
+                                  buf,
+                                  nread,
+                                  remain - nread,
+                                  "Unsupported AFI (%d): L2VPN not implemented",
+                                  msg->afi);
     break;
 
   default:

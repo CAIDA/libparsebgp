@@ -6,21 +6,21 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  */
-#include "parsebgp_bgp_update_mp_reach_link_state.h"
+#include "parsebgp_bgp_update_mp_link_state.h"
+#include "parsebgp_bgp_update_mp_reach.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
-#include "parsebgp_bgp_update_mp_reach.h"
-#include "../parsebgp_utils.h"
+#include "parsebgp_utils.h"
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-parsebgp_error_t
-parse_reach_link_state_nlri_node_val(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t *node,
-                                 uint8_t *buf,
-                                 size_t *lenp) {
+static parsebgp_error_t
+parse_link_state_nlri_node_val(parsebgp_opts_t *opts,
+                               parsebgp_bgp_update_mp_link_state_node_descriptor_t *node,
+                               uint8_t *buf,
+                               size_t *lenp) {
 
   size_t len = *lenp, nread = 0;
 
@@ -34,7 +34,7 @@ parse_reach_link_state_nlri_node_val(parsebgp_opts_t *opts,
 
   switch (node->type) {
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NODE_DESCR_AS:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_AS:
     if (node->len != sizeof(node->node_value.asn)){
         PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -43,7 +43,7 @@ parse_reach_link_state_nlri_node_val(parsebgp_opts_t *opts,
     node->node_value.asn = ntohs(node->node_value.asn);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NODE_DESCR_BGP_LS_ID:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_BGP_LS_ID:
     if (node->len != sizeof(node->node_value.bgp_ls_id)){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -52,7 +52,7 @@ parse_reach_link_state_nlri_node_val(parsebgp_opts_t *opts,
     node->node_value.bgp_ls_id = ntohs(node->node_value.bgp_ls_id);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NODE_DESCR_OSPF_AREA_ID:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_OSPF_AREA_ID:
     if (node->len != sizeof(node->node_value.ospf_area_Id)){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -61,7 +61,7 @@ parse_reach_link_state_nlri_node_val(parsebgp_opts_t *opts,
     node->node_value.ospf_area_Id = ntohs(node->node_value.ospf_area_Id);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
     if (node->len > 8) {
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -85,11 +85,11 @@ parse_reach_link_state_nlri_node_val(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t
-parse_reach_link_state_nlri_node(parsebgp_opts_t *opts,
-                                 parsebgp_bgp_update_mp_reach_link_state_t *msg,
-                                 uint8_t *buf,
-                                 size_t *lenp, size_t remain) {
+static parsebgp_error_t
+parse_link_state_nlri_node(parsebgp_opts_t *opts,
+                           parsebgp_bgp_update_mp_link_state_t *msg,
+                           uint8_t *buf,
+                           size_t *lenp, size_t remain) {
 
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -104,11 +104,11 @@ parse_reach_link_state_nlri_node(parsebgp_opts_t *opts,
 
   msg->nlri_ls.node_nlri.local_node_desc.nodes_cnt = 0;
 
-  parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t *node;
+  parsebgp_bgp_update_mp_link_state_node_descriptor_t *node;
 
   while(nread < msg->nlri_ls.node_nlri.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.node_nlri.local_node_desc.nodes,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_node_descriptor_t),
                            msg->nlri_ls.node_nlri.local_node_desc._nodes_alloc_cnt,
                            msg->nlri_ls.node_nlri.local_node_desc.nodes_cnt
                                + 1);
@@ -118,7 +118,7 @@ parse_reach_link_state_nlri_node(parsebgp_opts_t *opts,
 
     slen = len - nread;
 
-    if ((err = parse_reach_link_state_nlri_node_val(
+    if ((err = parse_link_state_nlri_node_val(
         opts, node, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
@@ -132,11 +132,11 @@ parse_reach_link_state_nlri_node(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t
-parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_update_mp_reach_link_state_link_descriptor_t *link,
-                                     uint8_t *buf,
-                                     size_t *lenp) {
+static parsebgp_error_t
+parse_link_state_nlri_link_val(parsebgp_opts_t *opts,
+                               parsebgp_bgp_update_mp_link_state_link_descriptor_t *link,
+                               uint8_t *buf,
+                               size_t *lenp) {
 
   size_t len = *lenp, nread = 0;
 
@@ -150,7 +150,7 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
 
   switch (link->type) {
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_LINK_DESCR_ID:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_LINK_DESCR_ID:
 
     if (link->len != 8){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
@@ -164,7 +164,7 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
 
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_LINK_DESCR_IPV4_INTF_ADDR:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_LINK_DESCR_IPV4_INTF_ADDR:
     if (link->len != 4){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -172,7 +172,7 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, link->link_ipv4_intf_addr);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_LINK_DESCR_IPV4_NEI_ADDR:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_LINK_DESCR_IPV4_NEI_ADDR:
     if (link->len != 4){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -180,7 +180,7 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, link->link_ipv4_neigh_addr);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_LINK_DESCR_IPV6_INTF_ADDR:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_LINK_DESCR_IPV6_INTF_ADDR:
     if (link->len != 16){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -188,7 +188,7 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, link->link_ipv6_intf_addr);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_LINK_DESCR_IPV6_NEI_ADDR:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_LINK_DESCR_IPV6_NEI_ADDR:
     if (link->len != 16){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -196,7 +196,7 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, link->link_ipv6_neigh_addr);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_LINK_DESCR_MT_ID:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_LINK_DESCR_MT_ID:
 
     if ((link->len % sizeof(uint16_t)) != 0) {
       PARSEBGP_RETURN_INVALID_MSG_ERR;
@@ -233,11 +233,11 @@ parse_reach_link_state_nlri_link_val(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t
-parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
-                                 parsebgp_bgp_update_mp_reach_link_state_t *msg,
-                                 uint8_t *buf,
-                                 size_t *lenp, size_t remain) {
+static parsebgp_error_t
+parse_link_state_nlri_link(parsebgp_opts_t *opts,
+                           parsebgp_bgp_update_mp_link_state_t *msg,
+                           uint8_t *buf,
+                           size_t *lenp, size_t remain) {
 
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -252,11 +252,11 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
   msg->nlri_ls.link_nlri.local_node_desc.nodes_cnt = 0;
 
-  parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t *node;
+  parsebgp_bgp_update_mp_link_state_node_descriptor_t *node;
 
   while(nread < msg->nlri_ls.link_nlri.local_node_desc.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.link_nlri.local_node_desc.nodes,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_node_descriptor_t),
                            msg->nlri_ls.link_nlri.local_node_desc._nodes_alloc_cnt,
                            msg->nlri_ls.link_nlri.local_node_desc.nodes_cnt
                                + 1);
@@ -266,7 +266,7 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
     slen = len - nread;
 
-    if ((err = parse_reach_link_state_nlri_node_val(
+    if ((err = parse_link_state_nlri_node_val(
         opts, node, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
@@ -289,7 +289,7 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
   while(nread < msg->nlri_ls.link_nlri.remote_node_desc.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.link_nlri.remote_node_desc.nodes,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_node_descriptor_t),
                            msg->nlri_ls.link_nlri.remote_node_desc._nodes_alloc_cnt,
                            msg->nlri_ls.link_nlri.remote_node_desc.nodes_cnt
                                + 1);
@@ -299,7 +299,7 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
     slen = len - nread;
 
-    if ((err = parse_reach_link_state_nlri_node_val(
+    if ((err = parse_link_state_nlri_node_val(
         opts, node, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
@@ -320,11 +320,11 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
   msg->nlri_ls.link_nlri.link_desc.links_cnt = 0;
 
-  parsebgp_bgp_update_mp_reach_link_state_link_descriptor_t *link;
+  parsebgp_bgp_update_mp_link_state_link_descriptor_t *link;
 
   while(nread < msg->nlri_ls.link_nlri.link_desc.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.link_nlri.link_desc.links,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_link_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_link_descriptor_t),
                            msg->nlri_ls.link_nlri.link_desc._links_alloc_cnt,
                            msg->nlri_ls.link_nlri.link_desc.links_cnt
                                + 1);
@@ -334,7 +334,7 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
     slen = len - nread;
 
-    if ((err = parse_reach_link_state_nlri_link_val(
+    if ((err = parse_link_state_nlri_link_val(
         opts, link, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
@@ -349,11 +349,11 @@ parse_reach_link_state_nlri_link(parsebgp_opts_t *opts,
 
 }
 
-parsebgp_error_t
-parse_reach_link_state_nlri_prefix_val(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_update_mp_reach_link_state_prefix_descriptor_t *prefix,
-                                     uint8_t *buf,
-                                     size_t *lenp) {
+static parsebgp_error_t
+parse_link_state_nlri_prefix_val(parsebgp_opts_t *opts,
+                                 parsebgp_bgp_update_mp_link_state_prefix_descriptor_t *prefix,
+                                 uint8_t *buf,
+                                 size_t *lenp) {
 
   size_t len = *lenp, nread = 0;
 
@@ -367,7 +367,7 @@ parse_reach_link_state_nlri_prefix_val(parsebgp_opts_t *opts,
 
   switch (prefix->type) {
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_PREFIX_DESCR_MT_ID:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_MT_ID:
 
     if ((prefix->len % sizeof(uint16_t)) != 0) {
       PARSEBGP_RETURN_INVALID_MSG_ERR;
@@ -390,7 +390,7 @@ parse_reach_link_state_nlri_prefix_val(parsebgp_opts_t *opts,
     }
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_PREFIX_DESCR_OSPF_ROUTE_TYPE:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_OSPF_ROUTE_TYPE:
     if (prefix->len != sizeof(prefix->prefix_ospf_route_type)){
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
@@ -398,7 +398,7 @@ parse_reach_link_state_nlri_prefix_val(parsebgp_opts_t *opts,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, prefix->prefix_ospf_route_type);
     break;
 
-  case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_PREFIX_DESCR_IP_REACH_INFO:
+  case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_IP_REACH_INFO:
     //TODO: Ask Alistair
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts,
                                   buf,
@@ -423,11 +423,11 @@ parse_reach_link_state_nlri_prefix_val(parsebgp_opts_t *opts,
 }
 
 
-parsebgp_error_t
-parse_reach_link_state_nlri_prefix(parsebgp_opts_t *opts,
-                                   parsebgp_bgp_update_mp_reach_link_state_t *msg,
-                                   uint8_t *buf,
-                                   size_t *lenp, size_t remain) {
+static parsebgp_error_t
+parse_link_state_nlri_prefix(parsebgp_opts_t *opts,
+                             parsebgp_bgp_update_mp_link_state_t *msg,
+                             uint8_t *buf,
+                             size_t *lenp, size_t remain) {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
@@ -441,11 +441,11 @@ parse_reach_link_state_nlri_prefix(parsebgp_opts_t *opts,
 
   msg->nlri_ls.prefix_nlri.local_node_desc.nodes_cnt = 0;
 
-  parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t *node;
+  parsebgp_bgp_update_mp_link_state_node_descriptor_t *node;
 
   while(nread < msg->nlri_ls.prefix_nlri.local_node_desc.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.prefix_nlri.local_node_desc.nodes,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_node_descriptor_t),
                            msg->nlri_ls.prefix_nlri.local_node_desc._nodes_alloc_cnt,
                            msg->nlri_ls.prefix_nlri.local_node_desc.nodes_cnt
                                + 1);
@@ -455,7 +455,7 @@ parse_reach_link_state_nlri_prefix(parsebgp_opts_t *opts,
 
     slen = len - nread;
 
-    if ((err = parse_reach_link_state_nlri_node_val(
+    if ((err = parse_link_state_nlri_node_val(
         opts, node, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
@@ -475,11 +475,11 @@ parse_reach_link_state_nlri_prefix(parsebgp_opts_t *opts,
 
   msg->nlri_ls.prefix_nlri.local_node_desc.nodes_cnt = 0;
 
-  parsebgp_bgp_update_mp_reach_link_state_prefix_descriptor_t *prefix;
+  parsebgp_bgp_update_mp_link_state_prefix_descriptor_t *prefix;
 
   while(nread < msg->nlri_ls.prefix_nlri.prefix_desc.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.prefix_nlri.prefix_desc.pref,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_node_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_node_descriptor_t),
                            msg->nlri_ls.prefix_nlri.prefix_desc._pref_alloc_cnt,
                            msg->nlri_ls.prefix_nlri.prefix_desc.pref_cnt
                                + 1);
@@ -489,7 +489,7 @@ parse_reach_link_state_nlri_prefix(parsebgp_opts_t *opts,
 
     slen = len - nread;
 
-    if ((err = parse_reach_link_state_nlri_prefix_val(
+    if ((err = parse_link_state_nlri_prefix_val(
         opts, prefix, buf, &slen)) !=
         PARSEBGP_OK) {
       return err;
@@ -504,31 +504,31 @@ parse_reach_link_state_nlri_prefix(parsebgp_opts_t *opts,
 
 }
 
-parsebgp_error_t
+static parsebgp_error_t
 parse_reach_link_state_nlri(parsebgp_opts_t *opts,
-                            parsebgp_bgp_update_mp_reach_t *msg,
-                            uint8_t *buf,
-                            size_t *lenp,
-                            size_t remain) {
+                      parsebgp_bgp_update_mp_reach_t *msg,
+                      uint8_t *buf,
+                      size_t *lenp,
+                      size_t remain) {
 
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
-  msg->mp_reach_ls.mp_ls_cnt = 0;
+  msg->mp_ls.mp_ls_cnt = 0;
 
-  parsebgp_bgp_update_mp_reach_link_state_t *ls_nlri;
+  parsebgp_bgp_update_mp_link_state_t *ls_nlri;
 
   /**
    * Loop through all TLV's for the attribute
    */
   while (nread < remain) {
 
-    PARSEBGP_MAYBE_REALLOC(msg->mp_reach_ls._mp_ls_alloc_cnt,
-                           sizeof(parsebgp_bgp_update_mp_reach_link_state_t),
-                           msg->mp_reach_ls._mp_ls_alloc_cnt,
-                           msg->mp_reach_ls.mp_ls_cnt + 1);
+    PARSEBGP_MAYBE_REALLOC(msg->mp_ls.mp_ls,
+                           sizeof(parsebgp_bgp_update_mp_link_state_t),
+                           msg->mp_ls._mp_ls_alloc_cnt,
+                           msg->mp_ls.mp_ls_cnt + 1);
 
-    ls_nlri = &msg->mp_reach_ls.mp_ls[msg->mp_reach_ls.mp_ls_cnt];
-    msg->mp_reach_ls.mp_ls_cnt += 1;
+    ls_nlri = &msg->mp_ls.mp_ls[msg->mp_ls.mp_ls_cnt];
+    msg->mp_ls.mp_ls_cnt += 1;
 
     // Read the nlri type
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, ls_nlri->nlri_type);
@@ -551,9 +551,9 @@ parse_reach_link_state_nlri(parsebgp_opts_t *opts,
      * Decode based on bgp-ls NLRI type
      */
     switch (ls_nlri->nlri_type) {
-    case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NLRI_TYPE_NODE:
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_NODE:
 
-      if ((err = parse_reach_link_state_nlri_node(
+      if ((err = parse_link_state_nlri_node(
           opts, ls_nlri, buf, &slen, remain - nread)) !=
           PARSEBGP_OK) {
         return err;
@@ -561,8 +561,8 @@ parse_reach_link_state_nlri(parsebgp_opts_t *opts,
 
       break;
 
-    case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NLRI_TYPE_LINK:
-      if ((err = parse_reach_link_state_nlri_link(
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_LINK:
+      if ((err = parse_link_state_nlri_link(
           opts, ls_nlri, buf, &slen, remain - nread)) !=
           PARSEBGP_OK) {
         return err;
@@ -570,8 +570,8 @@ parse_reach_link_state_nlri(parsebgp_opts_t *opts,
 
       break;
 
-    case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NLRI_TYPE_IPV4_PREFIX:
-      if ((err = parse_reach_link_state_nlri_prefix(
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_IPV4_PREFIX:
+      if ((err = parse_link_state_nlri_prefix(
           opts, ls_nlri, buf, &slen, remain - nread)) !=
           PARSEBGP_OK) {
         return err;
@@ -579,8 +579,106 @@ parse_reach_link_state_nlri(parsebgp_opts_t *opts,
 
       break;
 
-    case PARSEBGP_BGP_UPDATE_MP_REACH_LINK_STATE_NLRI_TYPE_IPV6_PREFIX:
-      if ((err = parse_reach_link_state_nlri_prefix(
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_IPV6_PREFIX:
+      if ((err = parse_link_state_nlri_prefix(
+          opts, ls_nlri, buf, &slen, remain - nread)) !=
+          PARSEBGP_OK) {
+        return err;
+      }
+
+      break;
+
+    default:
+      PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                    "Unsupported NLRI type (%d)", ls_nlri->nlri_type);
+
+    }
+
+    nread += slen;
+    buf += slen;
+  }
+
+  *lenp = nread;
+  return PARSEBGP_OK;
+}
+
+static parsebgp_error_t
+parse_unreach_link_state_nlri(parsebgp_opts_t *opts,
+                      parsebgp_bgp_update_mp_unreach_t *msg,
+                      uint8_t *buf,
+                      size_t *lenp,
+                      size_t remain) {
+
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_error_t err;
+  msg->mp_ls.mp_ls_cnt = 0;
+
+  parsebgp_bgp_update_mp_link_state_t *ls_nlri;
+
+  /**
+   * Loop through all TLV's for the attribute
+   */
+  while (nread < remain) {
+
+    PARSEBGP_MAYBE_REALLOC(msg->mp_ls.mp_ls,
+                           sizeof(parsebgp_bgp_update_mp_link_state_t),
+                           msg->mp_ls._mp_ls_alloc_cnt,
+                           msg->mp_ls.mp_ls_cnt + 1);
+
+    ls_nlri = &msg->mp_ls.mp_ls[msg->mp_ls.mp_ls_cnt];
+    msg->mp_ls.mp_ls_cnt += 1;
+
+    // Read the nlri type
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, ls_nlri->nlri_type);
+    ls_nlri->nlri_type = ntohs(ls_nlri->nlri_type);
+
+    // Read the nlri length
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, ls_nlri->nlri_len);
+    ls_nlri->nlri_len = ntohs(ls_nlri->nlri_len);
+
+    // Read the protocol id
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, ls_nlri->protocol_id);
+
+    // Read the identifier
+    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, ls_nlri->identifier);
+    ls_nlri->identifier = ntohs(ls_nlri->identifier);
+
+    slen = len - nread;
+
+    /*
+     * Decode based on bgp-ls NLRI type
+     */
+    switch (ls_nlri->nlri_type) {
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_NODE:
+
+      if ((err = parse_link_state_nlri_node(
+          opts, ls_nlri, buf, &slen, remain - nread)) !=
+          PARSEBGP_OK) {
+        return err;
+      }
+
+      break;
+
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_LINK:
+      if ((err = parse_link_state_nlri_link(
+          opts, ls_nlri, buf, &slen, remain - nread)) !=
+          PARSEBGP_OK) {
+        return err;
+      }
+
+      break;
+
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_IPV4_PREFIX:
+      if ((err = parse_link_state_nlri_prefix(
+          opts, ls_nlri, buf, &slen, remain - nread)) !=
+          PARSEBGP_OK) {
+        return err;
+      }
+
+      break;
+
+    case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_IPV6_PREFIX:
+      if ((err = parse_link_state_nlri_prefix(
           opts, ls_nlri, buf, &slen, remain - nread)) !=
           PARSEBGP_OK) {
         return err;
@@ -649,6 +747,28 @@ parsebgp_bgp_update_mp_unreach_link_state_decode(parsebgp_opts_t *opts,
                                                  size_t *lenp,
                                                  size_t remain) {
 
+  size_t len = *lenp, nread = 0, slen;
+  parsebgp_error_t err;
 
+  switch (msg->safi) {
+
+  case PARSEBGP_BGP_SAFI_BGPLS:
+    slen = len - nread;
+    if ((err = parse_unreach_link_state_nlri(opts, msg, buf, &slen,
+                                           remain - nread)) != PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  default:
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
+                                  "Unsupported SAFI (%d)", msg->safi);
+
+  }
+
+  *lenp = nread;
+  return PARSEBGP_OK;
 
 }
