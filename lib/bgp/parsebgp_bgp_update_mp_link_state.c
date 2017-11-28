@@ -1632,7 +1632,7 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
   }
 }
 
-void parsebgp_bgp_update_mp_unreach_destroy(
+void parsebgp_bgp_update_mp_unreach_link_state_destroy(
     parsebgp_bgp_update_mp_unreach_t *msg)
 {
   int i, j;
