@@ -1138,7 +1138,7 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_IP_REACH_INFO:
-            ARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_INFO(depth,
                               "MP_REACH Link State IP_REACH_INFO No implemented\n");
             break;
 
