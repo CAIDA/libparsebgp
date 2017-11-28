@@ -342,6 +342,7 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
   }
 
   if(msg->mp_ls.mp_ls){
+    parsebgp_bgp_update_mp_reach_link_state_destroy(msg);
     free(msg->mp_ls.mp_ls);
   }
 
@@ -351,8 +352,8 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
 void parsebgp_bgp_update_mp_reach_clear(parsebgp_bgp_update_mp_reach_t *msg)
 {
   msg->nlris_cnt = 0;
+  parsebgp_bgp_update_mp_reach_link_state_clear(msg);
   msg->mp_ls.mp_ls_cnt = 0;
-
 }
 
 void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
@@ -469,6 +470,7 @@ void parsebgp_bgp_update_mp_unreach_destroy(
   }
 
   if(msg->mp_ls.mp_ls){
+    parsebgp_bgp_update_mp_unreach_link_state_destroy(msg);
     free(msg->mp_ls.mp_ls);
   }
   free(msg);
@@ -477,6 +479,7 @@ void parsebgp_bgp_update_mp_unreach_destroy(
 void parsebgp_bgp_update_mp_unreach_clear(parsebgp_bgp_update_mp_unreach_t *msg)
 {
   msg->withdrawn_nlris_cnt = 0;
+  parsebgp_bgp_update_mp_unreach_link_state_clear(msg);
   msg->mp_ls.mp_ls_cnt = 0;
 }
 

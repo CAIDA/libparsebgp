@@ -140,8 +140,15 @@ parsebgp_bgp_update_mp_reach_link_state_decode(parsebgp_opts_t *opts,
                                                uint8_t *buf,
                                                size_t *lenp,
                                                size_t remain);
+
 void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t *msg,
                                                   int depth);
+
+void parsebgp_bgp_update_mp_reach_link_state_destroy(
+    parsebgp_bgp_update_mp_reach_t *msg);
+
+void parsebgp_bgp_update_mp_reach_link_state_clear(
+    parsebgp_bgp_update_mp_reach_t *msg);
 
 /** Decode an MP_REACH message */
 parsebgp_error_t
@@ -153,5 +160,11 @@ parsebgp_bgp_update_mp_unreach_link_state_decode(parsebgp_opts_t *opts,
 
 void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unreach_t *msg,
                                                   int depth);
+
+void parsebgp_bgp_update_mp_unreach_link_state_destroy(
+    parsebgp_bgp_update_mp_unreach_t *msg);
+
+void parsebgp_bgp_update_mp_unreach_link_state_clear(
+    parsebgp_bgp_update_mp_unreach_t *msg);
 
 #endif __PARSEBGP_BGP_UPDATE_MP_LINK_STATE_H
