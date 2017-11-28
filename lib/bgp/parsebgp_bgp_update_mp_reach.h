@@ -28,7 +28,6 @@
 #define __PARSEBGP_BGP_UPDATE_MP_REACH_H
 
 #include "parsebgp_bgp_common.h"
-//#include "parsebgp_bgp_update_mp_link_state.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
 #include <inttypes.h>
@@ -322,7 +321,7 @@ typedef struct parsebgp_bgp_update_mp_reach {
   /** (Inferred) number of NLRIs */
   int nlris_cnt;
 
-  struct mp_ls {
+  struct mp_reach_ls {
 
     /** MP LS NLRI information */
     parsebgp_bgp_update_mp_link_state_t *mp_ls;
@@ -358,7 +357,7 @@ typedef struct parsebgp_bgp_update_mp_unreach {
   /** (Inferred) number of Withdrawn NLRIs */
   int withdrawn_nlris_cnt;
 
-  struct mp_ls {
+  struct mp_unreach_ls {
 
     /** MP LS NLRI information */
     parsebgp_bgp_update_mp_link_state_t *mp_ls;
