@@ -523,24 +523,24 @@ parse_link_state_nlri_prefix(parsebgp_opts_t *opts,
                            len,
                            nread,
                            msg->nlri_ls.prefix_nlri.prefix_desc.type);
-  msg->nlri_ls.prefix_nlri.local_node_desc.type =
-      ntohs(msg->nlri_ls.prefix_nlri.local_node_desc.type);
+  msg->nlri_ls.prefix_nlri.prefix_desc.type =
+      ntohs(msg->nlri_ls.prefix_nlri.prefix_desc.type);
 
   // Read the node length
   PARSEBGP_DESERIALIZE_VAL(buf,
                            len,
                            nread,
-                           msg->nlri_ls.prefix_nlri.local_node_desc.len);
-  msg->nlri_ls.prefix_nlri.local_node_desc.len =
-      ntohs(msg->nlri_ls.prefix_nlri.local_node_desc.len);
+                           msg->nlri_ls.prefix_nlri.prefix_desc.len);
+  msg->nlri_ls.prefix_nlri.prefix_desc.len =
+      ntohs(msg->nlri_ls.prefix_nlri.prefix_desc.len);
 
-  msg->nlri_ls.prefix_nlri.local_node_desc.nodes_cnt = 0;
+  msg->nlri_ls.prefix_nlri.prefix_desc.pref_cnt = 0;
 
   parsebgp_bgp_update_mp_link_state_prefix_descriptor_t *prefix;
 
   while (nread < msg->nlri_ls.prefix_nlri.prefix_desc.len) {
     PARSEBGP_MAYBE_REALLOC(msg->nlri_ls.prefix_nlri.prefix_desc.pref,
-                           sizeof(parsebgp_bgp_update_mp_link_state_node_descriptor_t),
+                           sizeof(parsebgp_bgp_update_mp_link_state_prefix_descriptor_t),
                            msg->nlri_ls.prefix_nlri.prefix_desc._pref_alloc_cnt,
                            msg->nlri_ls.prefix_nlri.prefix_desc.pref_cnt
                                + 1);
@@ -867,9 +867,9 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               node->node_value.igp_router_id);
+                               node->node_value.igp_router_id, node->len);
             break;
           }
           depth--;
@@ -918,9 +918,9 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               link_node->node_value.igp_router_id);
+                               link_node->node_value.igp_router_id, link_node->len);
             break;
           }
           depth--;
@@ -964,9 +964,9 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               link_node->node_value.igp_router_id);
+                               link_node->node_value.igp_router_id, link_node->len);
             break;
           }
           depth--;
@@ -1094,9 +1094,9 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               prefix_node->node_value.igp_router_id);
+                               prefix_node->node_value.igp_router_id, prefix_node->len);
             break;
           }
           depth--;
@@ -1124,7 +1124,7 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
           switch (prefix->type) {
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_MT_ID:
-            for (k = 0; k < link->link_mt_id.ids_cnt; k++) {
+            for (k = 0; k < prefix->prefix_mt_id.ids_cnt; k++) {
               PARSEBGP_DUMP_INT(depth,
                                 "Prefix MT ID",
                                 prefix->prefix_mt_id.ids[k]);
@@ -1138,33 +1138,36 @@ void parsebgp_bgp_update_mp_reach_link_state_dump(parsebgp_bgp_update_mp_reach_t
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_IP_REACH_INFO:
-            PARSEBGP_DUMP_INFO(depth,
-                              "MP_REACH Link State IP_REACH_INFO No implemented\n");
+            //TODO: Ask Alistair
+//            PARSEBGP_SKIP_NOT_IMPLEMENTED(opts,
+//                                          buf,
+//                                          nread,
+//                                          len,
+//                                          "Unsupported NLRI node type (%d)",
+//                                          prefix->type);
             break;
 
           default:
             PARSEBGP_DUMP_INFO(depth,
                                "MP_REACH Link State Prefix type %d Not Supported\n",
                                prefix->type);
-            depth--;
+            break;
           }
-
-          break;
-
-        default:
-          PARSEBGP_DUMP_INFO(depth,
-                             "MP_REACH Link State NLRI type %d Not Supported\n",
-                             mp_ls->nlri_type);
-
+          depth--;
         }
-        depth--;
-      }
-      break;
-    }
 
-    default:
-      PARSEBGP_DUMP_INFO(depth, "MP_REACH SAFI %d Not Supported\n", msg->safi);
-      break;
+      default:
+        PARSEBGP_DUMP_INFO(depth,
+                           "MP_REACH Link State NLRI type %d Not Supported\n",
+                           mp_ls->nlri_type);
+
+      }
+    }
+    break;
+
+  default:
+    PARSEBGP_DUMP_INFO(depth, "MP_REACH SAFI %d Not Supported\n", msg->safi);
+    break;
   }
 }
 
@@ -1326,9 +1329,9 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               node->node_value.igp_router_id);
+                               node->node_value.igp_router_id, node->len);
             break;
           }
           depth--;
@@ -1377,9 +1380,9 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               link_node->node_value.igp_router_id);
+                               link_node->node_value.igp_router_id, link_node->len);
             break;
           }
           depth--;
@@ -1423,9 +1426,9 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               link_node->node_value.igp_router_id);
+                               link_node->node_value.igp_router_id, link_node->len);
             break;
           }
           depth--;
@@ -1553,9 +1556,9 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
             break;
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NODE_DESCR_IGP_ROUTER_ID:
-            PARSEBGP_DUMP_INFO(depth,
+            PARSEBGP_DUMP_DATA(depth,
                                "IGP Router ID",
-                               prefix_node->node_value.igp_router_id);
+                               prefix_node->node_value.igp_router_id, prefix_node->len);
             break;
           }
           depth--;
@@ -1583,7 +1586,7 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
           switch (prefix->type) {
 
           case PARSEBGP_BGP_UPDATE_MP_LINK_STATE_PREFIX_DESCR_MT_ID:
-            for (k = 0; k < link->link_mt_id.ids_cnt; k++) {
+            for (k = 0; k < prefix->prefix_mt_id.ids_cnt; k++) {
               PARSEBGP_DUMP_INT(depth,
                                 "Prefix MT ID",
                                 prefix->prefix_mt_id.ids[k]);
@@ -1610,10 +1613,10 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
             PARSEBGP_DUMP_INFO(depth,
                                "MP_REACH Link State Prefix type %d Not Supported\n",
                                prefix->type);
-            depth--;
+            break;
           }
-
-          break;
+          depth--;
+        }
 
         default:
           PARSEBGP_DUMP_INFO(depth,
@@ -1621,10 +1624,8 @@ void parsebgp_bgp_update_mp_unreach_link_state_dump(parsebgp_bgp_update_mp_unrea
                              mp_ls->nlri_type);
 
         }
-        depth--;
       }
       break;
-    }
 
   default:
     PARSEBGP_DUMP_INFO(depth, "MP_REACH SAFI %d Not Supported\n", msg->safi);

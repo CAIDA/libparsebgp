@@ -28,9 +28,9 @@
 #define __PARSEBGP_BGP_UPDATE_MP_LINK_STATE_H
 
 #include "parsebgp_bgp_common.h"
+#include "parsebgp_bgp_update_mp_reach.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
-#include "parsebgp_bgp_update_mp_reach.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -53,14 +53,6 @@ typedef enum {
       PARSEBGP_BGP_UPDATE_MP_LINK_STATE_NLRI_TYPE_IPV6_PREFIX = 4
 
 } parsebgp_bgp_update_mp_link_state_nlri_types_t;
-
-
-typedef enum {
-
-  /** Routing Universe: Default Layer 3 Routing topology */
-      PARSEBGP_BGP_UPDATE_MP_LINK_STATE_DEF_LAYER_3_ROUTING_TOPOLOGY = 0,
-
-} parsebgp_bgp_update_mp_link_state_identifier_t;
 
 /**
  * Node descriptor Sub-TLV's
@@ -167,4 +159,4 @@ void parsebgp_bgp_update_mp_unreach_link_state_destroy(
 void parsebgp_bgp_update_mp_unreach_link_state_clear(
     parsebgp_bgp_update_mp_unreach_t *msg);
 
-#endif __PARSEBGP_BGP_UPDATE_MP_LINK_STATE_H
+#endif /* __PARSEBGP_BGP_UPDATE_MP_LINK_STATE_H */
