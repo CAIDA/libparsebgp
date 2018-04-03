@@ -123,6 +123,10 @@ static void destroy_table_dump(parsebgp_bgp_afi_t afi,
 static void clear_table_dump(parsebgp_bgp_afi_t afi,
                              parsebgp_mrt_table_dump_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   parsebgp_bgp_update_path_attrs_clear(&msg->path_attrs);
 }
 
@@ -235,6 +239,10 @@ destroy_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 static void
 clear_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   msg->view_name_len = 0;
   msg->peer_count = 0;
 }
@@ -421,6 +429,9 @@ static void
 clear_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                  parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
   clear_table_dump_v2_rib_entries(msg->entries, msg->entry_count);
   msg->entry_count = 0;
 }
@@ -509,6 +520,10 @@ static void destroy_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 static void clear_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                 parsebgp_mrt_table_dump_v2_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   // table dump v2 has no common header, so just call the appropriate subtype
   // clear
   switch (subtype) {
@@ -775,6 +790,10 @@ static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
 static void clear_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
                          parsebgp_mrt_bgp4mp_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   switch (subtype) {
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
@@ -995,6 +1014,10 @@ void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg)
 
 void parsebgp_mrt_clear_msg(parsebgp_mrt_msg_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   switch (msg->type) {
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
     clear_table_dump(msg->subtype, msg->types.table_dump);
