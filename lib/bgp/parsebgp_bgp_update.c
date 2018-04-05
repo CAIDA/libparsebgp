@@ -521,7 +521,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   }
 
   // read until we run out of attributes
-  while (nread < path_attrs->len) {
+  while ((nread - sizeof(path_attrs->len)) < path_attrs->len) {
 
     // Attribute Flags
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, flags_tmp);
