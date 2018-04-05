@@ -180,7 +180,7 @@
         if (_byte != 0) {                                                      \
           printf(" ");                                                         \
         }                                                                      \
-        printf("%02X", data[_byte]);                                           \
+        printf("%02X", (data)[_byte]);                                         \
       }                                                                        \
       printf("\n");                                                            \
     }                                                                          \
