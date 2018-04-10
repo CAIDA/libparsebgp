@@ -988,29 +988,15 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
   }
   nread += slen;
 
-  if ((MRT_HDR_LEN + msg->len) > nread) {
-    // reported message length is too long.
+  if ((MRT_HDR_LEN + msg->len) != nread) {
+    // reported message length is incorrect
     //
-    // we have two options: believe the reported message length, skip over the
-    // trailing junk and keep reading, or trust that we have read the message
-    // correctly and it is the message length itself that is wrong, so we just
-    // keep reading from where we are now.
-    //
-    // chances are that neither of these options will work and we should just
-    // stop parsing now. but if the user has decided they want to struggle on in
-    // the face of invalid data, then we need to pick one.
-    //
-    // let's say that it is more likely that the MRT encoder is wrong than the
-    // BGP encoder, so we ignore the MRT message length, and just keep
-    // reading. (this also happens to be what happened in the one example i have
-    // seen of this -- although in that case the next message was even more
-    // corrupt.)
-    PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, 0,
-                              "Unexpected end of MRT message. "
-                              "Expected %d bytes, found %d",
-                              (int)msg->len + MRT_HDR_LEN, (int)nread);
-  } else {
-    assert(MRT_HDR_LEN + msg->len == nread);
+    // previously we were trying to do our best to struggle on past this corrupt
+    // data, but this was problematic and lead to more problems. now we just
+    // decide that this file is corrupt and stop processing. (i have not seen
+    // any examples of data where trying to carry on actually resulted in
+    // parsing any more data, so this is hardly a sacrifice.)
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   *len = nread;
