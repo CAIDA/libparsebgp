@@ -1140,6 +1140,10 @@ void parsebgp_bgp_update_destroy(parsebgp_bgp_update_t *msg)
 
 void parsebgp_bgp_update_clear(parsebgp_bgp_update_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   clear_nlris(&msg->withdrawn_nlris);
   clear_nlris(&msg->announced_nlris);
   parsebgp_bgp_update_path_attrs_clear(&msg->path_attrs);
