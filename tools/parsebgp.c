@@ -97,7 +97,9 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
     goto err;
   }
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if (strcmp(fname, "-") == 0) {
+    fp = stdin;
+  } else if ((fp = fopen(fname, "r")) == NULL) {
     fprintf(stderr, "ERROR: Could not open %s (%s)\n", fname, strerror(errno));
     goto err;
   }
@@ -152,7 +154,7 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
 
   fprintf(stderr, "INFO: Read %" PRIu64 " messages from %s\n", cnt, fname);
 
-  if (fp != NULL) {
+  if (fp != NULL && fp != stdin) {
     fclose(fp);
   }
 
