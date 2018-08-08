@@ -35,6 +35,16 @@
 typedef struct parsebgp_bgp_opts {
 
   /**
+   * Has the 16-byte marker field been omitted from the message?
+   *
+   * If set, BGP messages are assumed to start from immediately after the marker
+   * field. I.e., the first field in the message is the 2-byte length (that does
+   * not count the 16 marker bytes).  In this case, the marker field in the
+   * parsed structure will *not* be populated.
+   */
+  int marker_omitted;
+
+  /**
    * Does the BGP message to be parsed use 4-byte AS numbers?
    *
    * If set, messages are assumed to be encoded using 4-byte AS numbers,

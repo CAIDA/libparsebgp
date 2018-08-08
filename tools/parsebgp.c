@@ -183,6 +183,7 @@ static void usage()
     "                            (use multiple times to silence warnings)\n"
     "       -s                 Skip unknown messages and attributes\n"
     "                            (use multiple times to silence warnings)\n"
+    "       -m                 BGP messages do not include the 16-octet marker\n"
     "       -h                 Show this help message\n"
     "       -q                 Do not dump parsed messages (quiet mode)\n"
     "       -v                 Show version of the libparsebgp library\n",
@@ -198,7 +199,7 @@ int main(int argc, char **argv)
   parsebgp_opts_t opts;
   parsebgp_opts_init(&opts);
 
-  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:isq4vh?")) >= 0) {
+  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:i4smqvh?")) >= 0) {
     if (optind == prevoptind + 2 && (optarg == NULL || *optarg == '-')) {
       opt = ':';
       --optind;
@@ -229,6 +230,10 @@ int main(int argc, char **argv)
         opts.silence_not_implemented = 1;
       }
       opts.ignore_not_implemented = 1;
+      break;
+
+    case 'm':
+      opts.bgp.marker_omitted = 1;
       break;
 
     case 'q':
