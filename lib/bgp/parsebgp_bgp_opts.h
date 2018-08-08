@@ -45,6 +45,16 @@ typedef struct parsebgp_bgp_opts {
   int marker_omitted;
 
   /**
+   * Copy the marker field into the parsed message structure.
+   *
+   * Since the marker field bits MUST all always be set to 1, for normal parsing
+   * this field has no use, so avoiding the memcpy from the buffer into the
+   * result structure improves parsing efficiency. Users that want to inspect
+   * the contents of this field should set this option to a non-zero value.
+   */
+  int marker_copy;
+
+  /**
    * Does the BGP message to be parsed use 4-byte AS numbers?
    *
    * If set, messages are assumed to be encoded using 4-byte AS numbers,

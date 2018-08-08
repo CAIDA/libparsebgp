@@ -43,7 +43,14 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
 
   // Marker
   if (opts->bgp.marker_omitted == 0) {
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->marker);
+    if ((len - nread) < sizeof(msg->marker)) {
+      return PARSEBGP_PARTIAL_MSG;
+    }
+    if (opts->bgp.marker_copy != 0) {
+      memcpy(&msg->marker, buf, sizeof(msg->marker));
+    }
+    nread += sizeof(msg->marker);
+    buf += sizeof(msg->marker);
   }
 
   // Length
