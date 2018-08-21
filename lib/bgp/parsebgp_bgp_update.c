@@ -257,6 +257,15 @@ parse_path_attr_aggregator(int asn_4_byte,
   size_t len = *lenp, nread = 0;
   uint16_t u16;
 
+  // infer whether there is a 4-byte or 2-byte ASN in the aggregator attribute
+  if (remain == 8) {
+    asn_4_byte = 1;
+  } else if (remain == 6) {
+    asn_4_byte = 0;
+  } else {
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+  }
+
   // Aggregator ASN
   if (asn_4_byte) {
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, aggregator->asn);
