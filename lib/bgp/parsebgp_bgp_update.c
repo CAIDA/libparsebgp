@@ -666,8 +666,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 7
     case PARSEBGP_BGP_PATH_ATTR_TYPE_AGGREGATOR:
-      if ((err = parse_path_attr_aggregator(0, &attr->data.aggregator, buf,
-                                            &slen, attr->len)) != PARSEBGP_OK) {
+      if ((err = parse_path_attr_aggregator(opts->bgp.asn_4_byte,
+                                            &attr->data.aggregator, buf, &slen,
+                                            attr->len)) != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
