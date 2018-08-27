@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_common.h"
 #include "parsebgp_bgp_update_ext_communities.h"
 #include "parsebgp_bgp_update_mp_reach.h"
+#include "parsebgp_bgp_update_link_state_attr.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
 #include <inttypes.h>
@@ -376,6 +377,9 @@ typedef struct parsebgp_bgp_update_path_attr {
 
     /** LARGE COMMUNITIES */
     parsebgp_bgp_update_large_communities_t *large_communities;
+
+    /** BGP LINK STATE */
+    parsebgp_bgp_update_bgp_ls_t *bgp_ls;
 
   } data;
 
