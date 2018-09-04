@@ -39,7 +39,8 @@ include_HEADERS =				\
 	parsebgp_bgp_route_refresh.h		\
 	parsebgp_bgp_update.h			\
 	parsebgp_bgp_update_ext_communities.h	\
-	parsebgp_bgp_update_mp_reach.h
+	parsebgp_bgp_update_mp_reach.h  \
+	parsebgp_bgp_update_mp_link_state.h
 
 noinst_LTLIBRARIES = libparsebgp_bgp.la
 
@@ -61,6 +62,8 @@ libparsebgp_bgp_la_SOURCES = 			\
 	parsebgp_bgp_update_ext_communities.c	\
 	parsebgp_bgp_update_ext_communities.h	\
 	parsebgp_bgp_update_mp_reach.c		\
-	parsebgp_bgp_update_mp_reach.h
+	parsebgp_bgp_update_mp_reach.h  \
+	parsebgp_bgp_update_mp_link_state.c       \
+	parsebgp_bgp_update_mp_link_state.h
 
 CLEANFILES = *~

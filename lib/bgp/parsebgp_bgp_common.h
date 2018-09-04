@@ -40,7 +40,11 @@ typedef enum {
   /** IPv6 Address */
   PARSEBGP_BGP_AFI_IPV6 = 2,
 
-  // TODO: add support for L2VPN, BGPLS
+  /** Layer 2 VPNs */
+  PARSEBGP_BGP_AFI_L2VPN = 25,
+
+  /** BGP Link State */
+  PARSEBGP_BGP_AFI_BGPLS = 16388,
 
 } parsebgp_bgp_afi_t;
 
@@ -55,7 +59,11 @@ typedef enum {
   /** Multicast */
   PARSEBGP_BGP_SAFI_MULTICAST = 2,
 
-  // TODO: add support for EVPN, NLRI_LABEL
+  PARSEBGP_BGP_NLRI_LABEL = 4,
+
+  PARSEBGP_BGP_SAFI_EVPN = 70,
+
+  PARSEBGP_BGP_SAFI_BGPLS = 71,
 
   /** MPLS */
   PARSEBGP_BGP_SAFI_MPLS = 128,

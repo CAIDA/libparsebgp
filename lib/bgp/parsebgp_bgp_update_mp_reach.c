@@ -25,6 +25,7 @@
  */
 
 #include "parsebgp_bgp_update_mp_reach.h"
+#include "parsebgp_bgp_update_mp_link_state.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <assert.h>
@@ -160,7 +161,7 @@ parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
 }
 
 static parsebgp_error_t
-parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
+ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
                           parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
                           size_t *lenp, size_t remain)
 {
@@ -298,6 +299,29 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
     buf += slen;
     break;
 
+  case PARSEBGP_BGP_AFI_BGPLS:
+    slen = len - nread;
+    if ((err = parsebgp_bgp_update_mp_reach_link_state_decode(opts,
+                                                              msg,
+                                                              buf,
+                                                              &slen,
+                                                              remain - nread))
+        != PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  case PARSEBGP_BGP_AFI_L2VPN:
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts,
+                                  buf,
+                                  nread,
+                                  remain - nread,
+                                  "Unsupported AFI (%d): L2VPN not implemented",
+                                  msg->afi);
+    break;
+
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported AFI (%d)", msg->afi);
@@ -313,13 +337,23 @@ void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg)
     return;
   }
 
-  free(msg->nlris);
+  if(msg->nlris) {
+    free(msg->nlris);
+  }
+
+  if(msg->mp_ls.mp_ls){
+    parsebgp_bgp_update_mp_reach_link_state_destroy(msg);
+    free(msg->mp_ls.mp_ls);
+  }
+
   free(msg);
 }
 
 void parsebgp_bgp_update_mp_reach_clear(parsebgp_bgp_update_mp_reach_t *msg)
 {
   msg->nlris_cnt = 0;
+  parsebgp_bgp_update_mp_reach_link_state_clear(msg);
+  msg->mp_ls.mp_ls_cnt = 0;
 }
 
 void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
@@ -332,7 +366,8 @@ void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
   PARSEBGP_DUMP_INT(depth, "Next Hop Length", msg->next_hop_len);
 
   if (msg->safi != PARSEBGP_BGP_SAFI_UNICAST &&
-      msg->safi != PARSEBGP_BGP_SAFI_MULTICAST) {
+      msg->safi != PARSEBGP_BGP_SAFI_MULTICAST &&
+      msg->safi != PARSEBGP_BGP_SAFI_BGPLS) {
     PARSEBGP_DUMP_INFO(depth, "MP_REACH SAFI %d Not Supported\n", msg->safi);
     return;
   }
@@ -350,6 +385,11 @@ void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
     PARSEBGP_DUMP_INT(depth, "NLRIs Count", msg->nlris_cnt);
 
     parsebgp_bgp_dump_prefixes(msg->nlris, msg->nlris_cnt, depth + 1);
+    break;
+
+  case PARSEBGP_BGP_AFI_BGPLS:
+    PARSEBGP_DUMP_IP(depth, "Next Hop", msg->afi, msg->next_hop);
+    parsebgp_bgp_update_mp_reach_link_state_dump(msg, depth);
     break;
 
   default:
@@ -387,6 +427,29 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
     buf += slen;
     break;
 
+  case PARSEBGP_BGP_AFI_BGPLS:
+    slen = len - nread;
+    if ((err = parsebgp_bgp_update_mp_unreach_link_state_decode(opts,
+                                                              msg,
+                                                              buf,
+                                                              &slen,
+                                                              remain - nread))
+        != PARSEBGP_OK) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
+    break;
+
+  case PARSEBGP_BGP_AFI_L2VPN:
+    PARSEBGP_SKIP_NOT_IMPLEMENTED(opts,
+                                  buf,
+                                  nread,
+                                  remain - nread,
+                                  "Unsupported AFI (%d): L2VPN not implemented",
+                                  msg->afi);
+    break;
+
   default:
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                   "Unsupported AFI (%d)", msg->afi);
@@ -402,13 +465,22 @@ void parsebgp_bgp_update_mp_unreach_destroy(
   if (msg == NULL) {
     return;
   }
-  free(msg->withdrawn_nlris);
+  if(msg->withdrawn_nlris) {
+    free(msg->withdrawn_nlris);
+  }
+
+  if(msg->mp_ls.mp_ls){
+    parsebgp_bgp_update_mp_unreach_link_state_destroy(msg);
+    free(msg->mp_ls.mp_ls);
+  }
   free(msg);
 }
 
 void parsebgp_bgp_update_mp_unreach_clear(parsebgp_bgp_update_mp_unreach_t *msg)
 {
   msg->withdrawn_nlris_cnt = 0;
+  parsebgp_bgp_update_mp_unreach_link_state_clear(msg);
+  msg->mp_ls.mp_ls_cnt = 0;
 }
 
 void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
@@ -432,6 +504,9 @@ void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
 
     parsebgp_bgp_dump_prefixes(msg->withdrawn_nlris, msg->withdrawn_nlris_cnt,
                                depth + 1);
+    break;
+  case PARSEBGP_BGP_AFI_BGPLS:
+    parsebgp_bgp_update_mp_unreach_link_state_dump(msg,depth);
     break;
 
   default:
