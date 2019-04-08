@@ -36,6 +36,9 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
                                         uint8_t *buf, size_t *buf_len)
 {
   uint8_t bytes, junk;
+  if (pfx_len > 128) {
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+  }
   // prefixes are encoded in a compact format the min number of bytes is used,
   // so we first need to figure out how many bytes it takes to represent a
   // prefix of this length.
