@@ -937,11 +937,11 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   if (remain > slen) {
-    // we already know that the message will be longer than what we have in the
-    // buffer, give up now
+    // the buffer is too short to hold the full MRT msg; give up now
     return PARSEBGP_PARTIAL_MSG;
   }
 
+  slen = remain; // don't let sub-parsers go past the end of the MRT message
   switch (msg->type) {
 
   case PARSEBGP_MRT_TYPE_TABLE_DUMP:
@@ -984,6 +984,11 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   if (err != PARSEBGP_OK) {
+    if (err == PARSEBGP_PARTIAL_MSG) {
+      // we have the full MRT msg, but it was too short to hold the full sub-msg
+      *len = nread + remain;
+      return PARSEBGP_TRUNCATED_MSG;
+    }
     return err;
   }
   nread += slen;
