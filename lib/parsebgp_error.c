@@ -28,16 +28,17 @@
 #include <stdlib.h>
 
 char *err_strings[] = {
-  "No Error",        // PARSEBGP_OK
-  "Partial Message", // PARSEBGP_PARTIAL_MSG
-  "Invalid Message", // PARSEBGP_INVALID_MSG
-  "Not Implemented", // PARSEBGP_NOT_IMPLEMENTED
-  "Malloc Failure",  // PARSEBGP_MALLOC_FAILURE
+  "No Error",           // PARSEBGP_OK
+  "Partial Message",    // PARSEBGP_PARTIAL_MSG
+  "Invalid Message",    // PARSEBGP_INVALID_MSG
+  "Not Implemented",    // PARSEBGP_NOT_IMPLEMENTED
+  "Malloc Failure",     // PARSEBGP_MALLOC_FAILURE
+  "Truncated Message",  // PARSEBGP_TRUNCATED_MSG
 };
 
 const char *parsebgp_strerror(parsebgp_error_t err)
 {
-  if (err > 0 || err < PARSEBGP_MALLOC_FAILURE) {
+  if (err > 0 || err <= PARSEBGP_N_ERR) {
     return "Unknown Error";
   }
   return err_strings[abs(err)];

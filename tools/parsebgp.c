@@ -126,6 +126,15 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
           // refill the buffer and try again
           parsebgp_clear_msg(msg);
           break;
+        } else if (err == PARSEBGP_TRUNCATED_MSG && opts->ignore_invalid) {
+          if (!(opts)->silence_invalid) {
+            fprintf(stderr, "WARN: truncated message %" PRIu64 " in %s\n",
+              cnt, fname);
+          }
+          ptr += dec_len;
+          remain -= dec_len;
+          cnt++;
+          continue;
         }
         // else: its a fatal error
         fprintf(stderr, "ERROR: Failed to parse message (%d:%s)\n", err,

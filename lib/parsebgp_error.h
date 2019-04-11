@@ -50,6 +50,11 @@ typedef enum parsebgp_error {
   /** Memory allocation failure */
   PARSEBGP_MALLOC_FAILURE = -4,
 
+  /** Message does not contain an entire sub-message */
+  PARSEBGP_TRUNCATED_MSG = -5,
+
+  PARSEBGP_N_ERR = -6,
+
 } parsebgp_error_t;
 
 /**
