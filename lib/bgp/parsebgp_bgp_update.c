@@ -497,9 +497,9 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
   printf("\n");
 }
 
-#define CHECK_REMAIN(remain, val)                                              \
+#define CHECK_ATTR_LEN(attr_len, val)                                          \
   do {                                                                         \
-    if (remain < sizeof(val)) {                                                \
+    if (attr_len != sizeof(val)) {                                             \
       PARSEBGP_RETURN_INVALID_MSG_ERR;                                         \
     }                                                                          \
   } while (0)
@@ -522,15 +522,31 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, path_attrs->len);
   path_attrs->len = ntohs(path_attrs->len);
 
-  if (path_attrs->len > len) {
+  if (nread + path_attrs->len > len) {
     return PARSEBGP_PARTIAL_MSG;
   }
-  if (path_attrs->len > remain) {
+  if (nread + path_attrs->len > remain) {
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
+  remain = nread + path_attrs->len; // remaining within path attributes
 
   // read until we run out of attributes
-  while ((nread - sizeof(path_attrs->len)) < path_attrs->len) {
+  while (nread < remain) {
+
+    if ((remain - nread < 3) ||
+      ((*buf & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) && remain - nread < 4))
+    {
+      /* The remaining data in Path Attributes is insufficient to encode a
+         single minimum-sized path attribute, and should be considered as
+         "treat-as-withdraw" (https://tools.ietf.org/html/rfc7606#section-4).
+       */
+      PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, 0,
+        "Path attribute requires at least 3-4 bytes, but only %d bytes remain.",
+        (int)(remain - nread));
+      // If we pass the above macro, the user wants us to struggle on.
+      *lenp = remain;
+      return PARSEBGP_OK;
+    }
 
     // Attribute Flags
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, flags_tmp);
@@ -545,6 +561,20 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     } else {
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
       len_tmp = u8;
+    }
+
+    if (len_tmp > (remain - nread)) {
+      /* The length of the path attribute would cause the Total Attribute
+         Length to be exceeded, and should be considered as
+         "treat-as-withdraw" (https://tools.ietf.org/html/rfc7606#section-4).
+       */
+      PARSEBGP_SKIP_INVALID_MSG(
+        opts, buf, nread, 0,
+        "Path attribute (type %d) has length %d, but only %d bytes remain.",
+        type_tmp, len_tmp, (int)(remain - nread));
+      // If we pass the above macro, the user wants us to struggle on.
+      *lenp = remain;
+      return PARSEBGP_OK;
     }
 
     // if this type is beyond the max type that we understand, skip it now
@@ -598,27 +628,6 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Attribute Length
     attr->len = len_tmp;
 
-    if (attr->len > (remain - nread)) {
-      /* It seems that sometimes the length of an attribute conflicts with the
-         reported total path attributes length. In this case we emit a warning
-         and skip the truncated attributed.
-
-         This is a case specifically described in Section 4 of RFC 7606
-         (https://tools.ietf.org/html/rfc7606#section-4) and should be
-         considered as "treat-as-withdraw".
-      */
-      PARSEBGP_SKIP_INVALID_MSG(
-        opts, buf, nread, 0,
-        "Path attribute (type %d) has length %d, but only %d bytes remain.",
-        attr->type, attr->len, (int)(remain - nread));
-      // if we pass the above macro, the user wants us to struggle on
-      *lenp = remain;
-      return PARSEBGP_OK;
-    }
-    if (attr->len > (len - nread)) {
-      return PARSEBGP_PARTIAL_MSG;
-    }
-
     slen = len - nread;
     switch (attr->type) {
 
@@ -627,7 +636,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 1:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
-      CHECK_REMAIN(remain, attr->data.origin);
+      CHECK_ATTR_LEN(attr->len, attr->data.origin);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.origin);
       slen = sizeof(attr->data.origin);
       break;
@@ -646,14 +655,14 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 3:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
-      CHECK_REMAIN(remain, attr->data.next_hop);
+      CHECK_ATTR_LEN(attr->len, attr->data.next_hop);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.next_hop);
       slen = sizeof(attr->data.next_hop);
       break;
 
     // Type 4:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
-      CHECK_REMAIN(remain, attr->data.med);
+      CHECK_ATTR_LEN(attr->len, attr->data.med);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.med);
       attr->data.med = ntohl(attr->data.med);
       slen = sizeof(attr->data.med);
@@ -661,7 +670,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 5:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
-      CHECK_REMAIN(remain, attr->data.local_pref);
+      CHECK_ATTR_LEN(attr->len, attr->data.local_pref);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.local_pref);
       attr->data.local_pref = ntohl(attr->data.local_pref);
       slen = sizeof(attr->data.local_pref);
@@ -697,7 +706,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 9
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
-      CHECK_REMAIN(remain, attr->data.originator_id);
+      CHECK_ATTR_LEN(attr->len, attr->data.originator_id);
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.originator_id);
       attr->data.originator_id = ntohl(attr->data.originator_id);
       slen = sizeof(attr->data.originator_id);
