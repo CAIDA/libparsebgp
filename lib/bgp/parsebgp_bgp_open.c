@@ -210,6 +210,10 @@ void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg)
 
 void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   msg->capabilities_cnt = 0;
 }
 
