@@ -72,6 +72,10 @@ void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg)
 
 void parsebgp_bgp_notification_clear(parsebgp_bgp_notification_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   msg->data_len = 0;
 }
 

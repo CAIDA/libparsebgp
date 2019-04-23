@@ -76,6 +76,10 @@ void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg)
 
 void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg)
 {
+  if (msg == NULL) {
+    return;
+  }
+
   msg->data_len = 0;
 }
 
