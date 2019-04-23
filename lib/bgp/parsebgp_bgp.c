@@ -119,7 +119,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
     break;
 
   default:
-    break;
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   if (err != PARSEBGP_OK) {
     // parser failed
