@@ -47,9 +47,6 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   if (nlris->len > remain) {
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
-  if (len > remain) {
-    len = remain; // limit parsing to the shorter of buffer and message
-  }
 
   // read until we run out of message
   while (nread < nlris->len) {
@@ -67,11 +64,11 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tuple->len);
 
     // Prefix
-    slen = len - nread;
+    slen = nlris->len - nread;
     err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen);
     if (err != PARSEBGP_OK) {
-      if (err == PARSEBGP_PARTIAL_MSG && len == remain) {
-        // decode_prefix() reached the end of the message, not the buffer
+      if (err == PARSEBGP_PARTIAL_MSG) {
+        // decode_prefix() reached the end of the nlris, not the buffer
         PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
       return err;
