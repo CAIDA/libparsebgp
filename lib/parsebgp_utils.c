@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
-                                        uint8_t *buf, size_t *buf_len)
+                                        const uint8_t *buf, size_t *buf_len)
 {
   uint8_t bytes, junk;
   if (pfx_len > 128) {

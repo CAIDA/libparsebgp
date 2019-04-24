@@ -35,7 +35,7 @@
 static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   parsebgp_opts_t *opts, parsebgp_bgp_afi_t afi, parsebgp_bgp_safi_t safi,
   parsebgp_bgp_prefix_t **nlris, int *nlris_alloc_cnt, int *nlris_cnt,
-  uint8_t *buf, size_t *lenp, size_t remain)
+  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   uint8_t p_type;
@@ -110,7 +110,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
 }
 
 static parsebgp_error_t
-parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
+parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, const uint8_t *buf,
                              size_t *lenp, size_t remain)
 {
   size_t nread = 0;
@@ -161,7 +161,7 @@ parse_next_hop_afi_ipv4_ipv6(parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
 
 static parsebgp_error_t
 parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
-                          parsebgp_bgp_update_mp_reach_t *msg, uint8_t *buf,
+                          parsebgp_bgp_update_mp_reach_t *msg, const uint8_t *buf,
                           size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -216,7 +216,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
 
 static parsebgp_error_t
 parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
-                            parsebgp_bgp_update_mp_unreach_t *msg, uint8_t *buf,
+                            parsebgp_bgp_update_mp_unreach_t *msg, const uint8_t *buf,
                             size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -252,7 +252,7 @@ parse_unreach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
 parsebgp_error_t
 parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
                                     parsebgp_bgp_update_mp_reach_t *msg,
-                                    uint8_t *buf, size_t *lenp, size_t remain)
+                                    const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -361,7 +361,7 @@ void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
 parsebgp_error_t
 parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
                                       parsebgp_bgp_update_mp_unreach_t *msg,
-                                      uint8_t *buf, size_t *lenp, size_t remain)
+                                      const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;

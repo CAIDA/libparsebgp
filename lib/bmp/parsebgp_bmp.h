@@ -584,7 +584,7 @@ typedef struct parsebgp_bmp_msg {
  * code otherwise
  */
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bmp_msg_t *msg, uint8_t *buffer,
+                                     parsebgp_bmp_msg_t *msg, const uint8_t *buffer,
                                      size_t *len);
 
 /** Destroy the given BMP message structure

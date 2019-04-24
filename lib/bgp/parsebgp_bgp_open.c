@@ -34,7 +34,7 @@
 
 static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
                                            parsebgp_bgp_open_t *msg,
-                                           uint8_t *buf, size_t *lenp,
+                                           const uint8_t *buf, size_t *lenp,
                                            size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -110,7 +110,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 }
 
 static parsebgp_error_t parse_params(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_open_t *msg, uint8_t *buf,
+                                     parsebgp_bgp_open_t *msg, const uint8_t *buf,
                                      size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -148,7 +148,7 @@ static parsebgp_error_t parse_params(parsebgp_opts_t *opts,
 
 parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
                                           parsebgp_bgp_open_t *msg,
-                                          uint8_t *buf, size_t *lenp,
+                                          const uint8_t *buf, size_t *lenp,
                                           size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;

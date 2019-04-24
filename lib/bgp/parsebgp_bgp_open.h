@@ -148,7 +148,7 @@ typedef struct parsebgp_bgp_open {
 /** Decode an OPEN message */
 parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
                                           parsebgp_bgp_open_t *msg,
-                                          uint8_t *buf, size_t *lenp,
+                                          const uint8_t *buf, size_t *lenp,
                                           size_t remain);
 
 /** Destroy an OPEN message */

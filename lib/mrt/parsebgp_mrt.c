@@ -61,7 +61,7 @@
 static parsebgp_error_t parse_table_dump(parsebgp_opts_t *opts,
                                          parsebgp_bgp_afi_t afi,
                                          parsebgp_mrt_table_dump_t *msg,
-                                         uint8_t *buf, size_t *lenp,
+                                         const uint8_t *buf, size_t *lenp,
                                          size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -147,7 +147,7 @@ static void dump_table_dump(parsebgp_bgp_afi_t afi,
 
 static parsebgp_error_t
 parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
-                               uint8_t *buf, size_t *lenp, size_t remain)
+                               const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -275,7 +275,7 @@ dump_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
 static parsebgp_error_t parse_table_dump_v2_rib_entries(
   parsebgp_opts_t *opts, parsebgp_mrt_table_dump_v2_subtype_t subtype,
   parsebgp_mrt_table_dump_v2_rib_entry_t *entries, uint16_t entry_count,
-  uint8_t *buf, size_t *lenp, size_t remain)
+  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   int i;
@@ -370,7 +370,7 @@ static parsebgp_error_t
 parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
                                  parsebgp_mrt_table_dump_v2_subtype_t subtype,
                                  parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg,
-                                 uint8_t *buf, size_t *lenp, size_t remain)
+                                 const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
@@ -469,7 +469,7 @@ dump_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 
 static parsebgp_error_t parse_table_dump_v2(
   parsebgp_opts_t *opts, parsebgp_mrt_table_dump_v2_subtype_t subtype,
-  parsebgp_mrt_table_dump_v2_t *msg, uint8_t *buf, size_t *lenp, size_t remain)
+  parsebgp_mrt_table_dump_v2_t *msg, const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t nread = 0;
   // table dump v2 has no common header, so just call the appropriate subtype
@@ -579,7 +579,7 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 */
 static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
                                   parsebgp_mrt_bgp_subtype_t subtype,
-                                  parsebgp_mrt_bgp_t *msg, uint8_t *buf,
+                                  parsebgp_mrt_bgp_t *msg, const uint8_t *buf,
                                   size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
@@ -680,7 +680,7 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
 static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
                                      parsebgp_mrt_bgp4mp_subtype_t subtype,
-                                     parsebgp_mrt_bgp4mp_t *msg, uint8_t *buf,
+                                     parsebgp_mrt_bgp4mp_t *msg, const uint8_t *buf,
                                      size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
@@ -847,7 +847,7 @@ static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
 }
 
 static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
-                                         parsebgp_mrt_msg_t *msg, uint8_t *buf,
+                                         parsebgp_mrt_msg_t *msg, const uint8_t *buf,
                                          size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
@@ -910,7 +910,7 @@ static void dump_common_hdr(parsebgp_mrt_msg_t *msg, int depth)
 }
 
 parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
-                                     parsebgp_mrt_msg_t *msg, uint8_t *buf,
+                                     parsebgp_mrt_msg_t *msg, const uint8_t *buf,
                                      size_t *len)
 {
   parsebgp_error_t err;

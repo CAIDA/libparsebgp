@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
-                                    uint8_t *buf, size_t *lenp, size_t remain)
+                                    const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_bgp_prefix_t *tuple;
@@ -104,7 +104,7 @@ static void dump_nlris(parsebgp_bgp_update_nlris_t *nlris, int depth)
 
 static parsebgp_error_t
 parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
-                        uint8_t *buf, size_t *lenp, size_t remain, int raw)
+                        const uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bgp_update_as_path_seg_t *seg;
@@ -167,9 +167,9 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
-        seg->asns[i] = ntohl(*(uint32_t *)buf);
+        seg->asns[i] = ntohl(*(const uint32_t *)buf);
       } else {
-        seg->asns[i] = ntohs(*(uint16_t *)buf);
+        seg->asns[i] = ntohs(*(const uint16_t *)buf);
       }
       buf += asn_size;
     }
@@ -184,7 +184,7 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_as_path_safe(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain, int raw)
+                             const uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   parsebgp_error_t err;
   // first we try just parsing as-is
@@ -256,7 +256,7 @@ static void dump_attr_as_path(parsebgp_bgp_update_as_path_t *msg, int depth)
 static parsebgp_error_t
 parse_path_attr_aggregator(int asn_4_byte,
                            parsebgp_bgp_update_aggregator_t *aggregator,
-                           uint8_t *buf, size_t *lenp, size_t remain)
+                           const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   uint16_t u16;
@@ -288,7 +288,7 @@ parse_path_attr_aggregator(int asn_4_byte,
 
 static parsebgp_error_t
 parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
-                            uint8_t *buf, size_t *lenp, size_t remain, int raw)
+                            const uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -354,7 +354,7 @@ static void dump_attr_communities(parsebgp_bgp_update_communities_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain)
+                             const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -410,7 +410,7 @@ static void dump_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain)
+                             const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
 
@@ -427,7 +427,7 @@ parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
-                                  uint8_t *buf, size_t *lenp, size_t remain)
+                                  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -510,7 +510,7 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *path_attrs,
-  uint8_t *buf, size_t *lenp, size_t remain)
+  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
   parsebgp_bgp_update_path_attr_t *attr;
@@ -1102,7 +1102,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
 
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
                                             parsebgp_bgp_update_t *msg,
-                                            uint8_t *buf, size_t *lenp,
+                                            const uint8_t *buf, size_t *lenp,
                                             size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;

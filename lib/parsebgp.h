@@ -89,7 +89,7 @@ typedef struct parsebgp_msg {
  * otherwise
  */
 parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
-                                 parsebgp_msg_t *msg, uint8_t *buffer,
+                                 parsebgp_msg_t *msg, const uint8_t *buffer,
                                  size_t *len);
 
 /**

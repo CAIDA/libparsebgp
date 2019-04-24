@@ -40,7 +40,7 @@
 
 static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
                                         int *tlvs_alloc_cnt, int *tlvs_cnt,
-                                        uint8_t *buf, size_t *lenp,
+                                        const uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -138,7 +138,7 @@ static void dump_info_tlvs(parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
 // Type 1:
 static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
                                            parsebgp_bmp_stats_report_t *msg,
-                                           uint8_t *buf, size_t *lenp,
+                                           const uint8_t *buf, size_t *lenp,
                                            size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -326,7 +326,7 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
 // Type 2:
 static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
                                         parsebgp_bmp_peer_down_t *msg,
-                                        uint8_t *buf, size_t *lenp,
+                                        const uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -422,7 +422,7 @@ static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
 
 // Type 3:
 static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
-                                      parsebgp_bmp_peer_up_t *msg, uint8_t *buf,
+                                      parsebgp_bmp_peer_up_t *msg, const uint8_t *buf,
                                       size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -522,7 +522,7 @@ static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
 
 // Type 4:
 static parsebgp_error_t parse_init_msg(parsebgp_bmp_init_msg_t *msg,
-                                       uint8_t *buf, size_t *lenp,
+                                       const uint8_t *buf, size_t *lenp,
                                        size_t remain)
 {
   return parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf,
@@ -553,7 +553,7 @@ static void dump_init_msg(parsebgp_bmp_init_msg_t *msg, int depth)
 
 // Type 5:
 static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
-                                       uint8_t *buf, size_t *lenp,
+                                       const uint8_t *buf, size_t *lenp,
                                        size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -680,7 +680,7 @@ static void dump_term_msg(parsebgp_bmp_term_msg_t *msg, int depth)
 // Type 6:
 static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
                                                parsebgp_bmp_route_mirror_t *msg,
-                                               uint8_t *buf, size_t *lenp,
+                                               const uint8_t *buf, size_t *lenp,
                                                size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -824,7 +824,7 @@ static void dump_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg, int depth)
 
 static parsebgp_error_t parse_peer_hdr(parsebgp_opts_t *opts,
                                        parsebgp_bmp_peer_hdr_t *hdr,
-                                       uint8_t *buf, size_t *lenp)
+                                       const uint8_t *buf, size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
 
@@ -909,7 +909,7 @@ static void dump_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr, int depth)
 
 static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
                                             parsebgp_bmp_msg_t *msg,
-                                            uint8_t *buf, size_t *lenp)
+                                            const uint8_t *buf, size_t *lenp)
 {
   parsebgp_error_t err;
   size_t len = *lenp, nread = 0, slen = 0;
@@ -979,7 +979,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
 
 static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
                                             parsebgp_bmp_msg_t *msg,
-                                            uint8_t *buf, size_t *lenp)
+                                            const uint8_t *buf, size_t *lenp)
 {
   parsebgp_error_t err;
   size_t len = *lenp, nread = 0;
@@ -1030,7 +1030,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
 }
 
 static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
-                                         parsebgp_bmp_msg_t *msg, uint8_t *buf,
+                                         parsebgp_bmp_msg_t *msg, const uint8_t *buf,
                                          size_t *lenp)
 {
   parsebgp_error_t err;
@@ -1084,7 +1084,7 @@ static void dump_common_hdr(parsebgp_bmp_msg_t *msg, int depth)
 /* -------------------- Main BMP Parser ----------------------------- */
 
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bmp_msg_t *msg, uint8_t *buf,
+                                     parsebgp_bmp_msg_t *msg, const uint8_t *buf,
                                      size_t *len)
 {
   parsebgp_error_t err;

@@ -34,7 +34,7 @@
 
 parsebgp_error_t
 parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
-                                 parsebgp_bgp_notification_t *msg, uint8_t *buf,
+                                 parsebgp_bgp_notification_t *msg, const uint8_t *buf,
                                  size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;

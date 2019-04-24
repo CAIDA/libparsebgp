@@ -35,7 +35,7 @@
 parsebgp_error_t
 parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
                                   parsebgp_bgp_route_refresh_t *msg,
-                                  uint8_t *buf, size_t *lenp, size_t remain)
+                                  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
 
