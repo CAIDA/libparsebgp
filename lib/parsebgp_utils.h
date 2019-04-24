@@ -126,9 +126,9 @@
 
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \
-    int i;                                                                     \
-    for (i = 0; i < depth; i++) {                                              \
-      if (i == depth - 1) {                                                    \
+    int _i;                                                                     \
+    for (_i = 0; _i < depth; _i++) {                                              \
+      if (_i == depth - 1) {                                                    \
         printf(" ");                                                           \
       } else {                                                                 \
         printf("  ");                                                          \
@@ -139,9 +139,9 @@
 
 #define PARSEBGP_DUMP_INFO(depth, ...)                                         \
   do {                                                                         \
-    int i;                                                                     \
+    int _i;                                                                     \
     printf(" ");                                                               \
-    for (i = 0; i < depth; i++) {                                              \
+    for (_i = 0; _i < depth; _i++) {                                              \
       printf("  ");                                                            \
     }                                                                          \
     printf(__VA_ARGS__);                                                       \
