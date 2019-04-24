@@ -179,7 +179,7 @@ err:
   return -1;
 }
 
-static void usage()
+static void usage(void)
 {
   fprintf(
     stderr,

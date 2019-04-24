@@ -60,7 +60,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
   assert(0);
 }
 
-parsebgp_msg_t *parsebgp_create_msg()
+parsebgp_msg_t *parsebgp_create_msg(void)
 {
   parsebgp_msg_t *msg = NULL;
 
