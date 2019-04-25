@@ -70,6 +70,7 @@
  */
 #define PARSEBGP_DESERIALIZE_VAL(buf, len, read, to)                           \
   do {                                                                         \
+    assert((len) >= (read));                                                   \
     if (((len) - (read)) < sizeof(to)) {                                       \
       return PARSEBGP_PARTIAL_MSG;                                             \
     }                                                                          \
