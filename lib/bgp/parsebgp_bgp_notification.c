@@ -47,7 +47,7 @@ parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
 
   // Data
   msg->data_len = remain - nread;
-  if ((len - nread) < msg->data_len) {
+  if (len < nread + msg->data_len) {
     return PARSEBGP_PARTIAL_MSG;
   }
   PARSEBGP_MAYBE_REALLOC(msg->data, sizeof(uint8_t), msg->_data_alloc_len,
