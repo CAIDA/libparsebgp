@@ -167,9 +167,9 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
-        seg->asns[i] = ntohl(*(const uint32_t *)buf);
+        seg->asns[i] = nptohl(buf);
       } else {
-        seg->asns[i] = ntohs(*(const uint16_t *)buf);
+        seg->asns[i] = nptohs(buf);
       }
       buf += asn_size;
     }

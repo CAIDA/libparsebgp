@@ -55,6 +55,20 @@
    (uint32_t)ntohl(((int)(x >> 32))))
 #endif
 
+/* Convert a network-order 16 bit integer pointed to by p to host order.
+ * Safe even if value is unaligned, unlike ntohs(*(uint16_t*)p). */
+#define nptohs(p)                                                              \
+  ((((const uint8_t*)(p))[0] << 8) |                                                 \
+   (((const uint8_t*)(p))[1]))
+
+/* Convert a network-order 32 bit integer pointed to by p to host order.
+ * Safe even if value is unaligned, unlike ntohl(*(uint32_t*)p). */
+#define nptohl(p)                                                              \
+  ((((const uint8_t*)(p))[0] << 24) |                                                \
+   (((const uint8_t*)(p))[1] << 16) |                                                \
+   (((const uint8_t*)(p))[2] << 8) |                                                 \
+   (((const uint8_t*)(p))[3]))
+
 /** Byte-swap a 64-bit integer */
 #ifndef htonll
 #define htonll(x) ntohll(x)
