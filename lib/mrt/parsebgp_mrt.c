@@ -528,14 +528,14 @@ static void clear_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
   // clear
   switch (subtype) {
   case PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE:
-    return clear_table_dump_v2_peer_index(&msg->peer_index);
+    clear_table_dump_v2_peer_index(&msg->peer_index);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
-    return clear_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
+    clear_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
@@ -551,15 +551,14 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 
   switch (subtype) {
   case PARSEBGP_MRT_TABLE_DUMP_V2_PEER_INDEX_TABLE:
-    return dump_table_dump_v2_peer_index(&msg->peer_index, depth + 1);
+    dump_table_dump_v2_peer_index(&msg->peer_index, depth + 1);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
-    return dump_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib,
-                                           depth + 1);
+    dump_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib, depth + 1);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
