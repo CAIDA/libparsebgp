@@ -269,9 +269,8 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
   PARSEBGP_DUMP_INT(depth, "Stats Count", msg->stats_count);
 
   depth++;
-  int i;
   parsebgp_bmp_stats_counter_t *sc;
-  for (i = 0; i < msg->stats_count; i++) {
+  for (uint32_t i = 0; i < msg->stats_count; i++) {
     sc = &msg->counters[i];
 
     PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_stats_counter_t, depth);
