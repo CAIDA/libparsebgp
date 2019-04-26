@@ -185,6 +185,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
                                comm->types.ip_addr.local_admin);
       comm->types.ip_addr.local_admin = ntohs(comm->types.ip_addr.local_admin);
+      break;
 
     default:
       // this is an especially unusual error
