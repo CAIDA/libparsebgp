@@ -38,7 +38,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
-  uint8_t p_type;
+  uint8_t p_type = 0;
   parsebgp_bgp_prefix_t *tuple;
   parsebgp_error_t err;
 
