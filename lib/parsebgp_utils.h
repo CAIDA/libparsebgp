@@ -212,9 +212,18 @@
     printf(__VA_ARGS__);                                                       \
   } while (0)
 
+#define STATIC_ASSERT(cond, msg) extern char msg [(cond)?1:-1]
+
 #define PARSEBGP_DUMP_INT(depth, name, val)                                    \
-  PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),       \
-                     (int)val);
+  do {                                                                         \
+    STATIC_ASSERT(sizeof(val) <= sizeof(int), val_is_larger_than_int);         \
+    PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),     \
+                       (int)val);                                              \
+  } while (0)
+
+#define PARSEBGP_DUMP_VAL(depth, name, fmt, val)                               \
+  PARSEBGP_DUMP_INFO(depth, name ": %*" fmt "\n",                              \
+                     20 - (int)strlen(name ": "), val)
 
 #define PARSEBGP_DUMP_IP(depth, name, afi, ipaddr)                             \
   do {                                                                         \

@@ -284,7 +284,7 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
     // 64-bit gauge types:
     case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
-      PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
+      PARSEBGP_DUMP_VAL(depth, "u64", PRIu64, sc->data.gauge_u64);
       break;
 
     // AFI/SAFI 64-bit gauge types:
@@ -297,14 +297,14 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
       PARSEBGP_DUMP_INT(depth, "SAFI", sc->data.afi_safi_gauge.safi);
 
       // u64 gauge
-      PARSEBGP_DUMP_INT(depth, "u64", sc->data.afi_safi_gauge.gauge_u64);
+      PARSEBGP_DUMP_VAL(depth, "u64", PRIu64, sc->data.afi_safi_gauge.gauge_u64);
       break;
 
     default:
       if (sc->len == 4) {
         PARSEBGP_DUMP_INT(depth, "u32", sc->data.counter_u32);
       } else if (sc->len == 8) {
-        PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
+        PARSEBGP_DUMP_VAL(depth, "u64", PRIu64, sc->data.gauge_u64);
       }
     }
   }
@@ -871,7 +871,7 @@ static void dump_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr, int depth)
 
   PARSEBGP_DUMP_INT(depth, "Type", hdr->type);
   PARSEBGP_DUMP_INT(depth, "Flags", hdr->flags);
-  PARSEBGP_DUMP_INT(depth, "Route Distinguisher", hdr->dist_id);
+  PARSEBGP_DUMP_VAL(depth, "Route Distinguisher", PRIu64, hdr->dist_id);
   int afi = (hdr->flags & PARSEBGP_BMP_PEER_FLAG_IPV6) ? PARSEBGP_BGP_AFI_IPV6
                                                        : PARSEBGP_BGP_AFI_IPV4;
   PARSEBGP_DUMP_IP(depth, "IP", afi, hdr->addr);
