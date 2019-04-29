@@ -38,7 +38,7 @@
 // Read 1MB of the file at a time
 #define BUFLEN (1024 * 1024)
 
-char *type_strs[] = {
+static const char *type_strs[] = {
   NULL,  // PARSEBGP_MSG_TYPE_INVALID
   "bgp", // PARSEBGP_MSG_TYPE_BGP
   "bmp", // PARSEBGP_MSG_TYPE_BMP
@@ -179,7 +179,7 @@ err:
   return -1;
 }
 
-static void usage()
+static void usage(void)
 {
   fprintf(
     stderr,

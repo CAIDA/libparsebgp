@@ -55,6 +55,35 @@
    (uint32_t)ntohl(((int)(x >> 32))))
 #endif
 
+/* Convert a network-order 16 bit integer pointed to by p to host order.
+ * Safe even if value is unaligned, unlike ntohs(*(uint16_t*)p). */
+#define nptohs(p)                                                              \
+  ((uint16_t)                                                                  \
+  (((uint16_t)((const uint8_t*)(p))[0] << 8) |                                 \
+   ((uint16_t)((const uint8_t*)(p))[1])))
+
+/* Convert a network-order 32 bit integer pointed to by p to host order.
+ * Safe even if value is unaligned, unlike ntohl(*(uint32_t*)p). */
+#define nptohl(p)                                                              \
+  ((uint32_t)                                                                  \
+  (((uint32_t)((const uint8_t*)(p))[0] << 24) |                                \
+   ((uint32_t)((const uint8_t*)(p))[1] << 16) |                                \
+   ((uint32_t)((const uint8_t*)(p))[2] << 8) |                                 \
+   ((uint32_t)((const uint8_t*)(p))[3])))
+
+/* Convert a network-order 64 bit integer pointed to by p to host order.
+ * Safe even if value is unaligned, unlike ntohll(*(uint64_t*)p). */
+#define nptohll(p)                                                             \
+  ((uint64_t)                                                                  \
+  (((uint64_t)((const uint8_t*)(p))[0] << 56) |                                \
+   ((uint64_t)((const uint8_t*)(p))[1] << 48) |                                \
+   ((uint64_t)((const uint8_t*)(p))[2] << 40) |                                \
+   ((uint64_t)((const uint8_t*)(p))[3] << 32) |                                \
+   ((uint64_t)((const uint8_t*)(p))[4] << 24) |                                \
+   ((uint64_t)((const uint8_t*)(p))[5] << 16) |                                \
+   ((uint64_t)((const uint8_t*)(p))[6] << 8) |                                 \
+   ((uint64_t)((const uint8_t*)(p))[7])))
+
 /** Byte-swap a 64-bit integer */
 #ifndef htonll
 #define htonll(x) ntohll(x)
@@ -70,6 +99,7 @@
  */
 #define PARSEBGP_DESERIALIZE_VAL(buf, len, read, to)                           \
   do {                                                                         \
+    assert((len) >= (read));                                                   \
     if (((len) - (read)) < sizeof(to)) {                                       \
       return PARSEBGP_PARTIAL_MSG;                                             \
     }                                                                          \
@@ -77,6 +107,41 @@
     read += sizeof(to);                                                        \
     buf += sizeof(to);                                                         \
   } while (0)
+
+/** Convenience macros to deserialize a network-order integer from a byte array.
+ * (They're also faster than PARSEBGP_DESERIALIZE_VAL() followed by ntoh*(),
+ * and allow storing a value into a variable of a different size.)
+ *
+ * @param buf           pointer to the buffer (will be updated)
+ * @param len           total length of the buffer
+ * @param read          the number of bytes already read from the buffer
+ *                      (will be updated)
+ * @param to            the variable to deserialize into
+ */
+#define PARSEBGP_DESERIALIZE_UINT8(buf, len, read, to)                         \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint8_t, *(const uint8_t*))
+
+#define PARSEBGP_DESERIALIZE_UINT16(buf, len, read, to)                        \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint16_t, nptohs)
+
+#define PARSEBGP_DESERIALIZE_UINT32(buf, len, read, to)                        \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint32_t, nptohl)
+
+#define PARSEBGP_DESERIALIZE_UINT64(buf, len, read, to)                        \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint64_t, nptohll)
+
+#define PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, type, getval)      \
+  do {                                                                         \
+    /* static_assert(sizeof(to) == sizeof(type), "size mismatch"); */          \
+    assert((len) >= (read));                                                   \
+    if (((len) - (read)) < sizeof(type)) {                                     \
+      return PARSEBGP_PARTIAL_MSG;                                             \
+    }                                                                          \
+    to = getval(buf);                                                          \
+    read += sizeof(type);                                                      \
+    buf += sizeof(type);                                                       \
+  } while (0)
+
 
 /** Convenience macro to either abort parsing or skip an unimplemented feature
     depending on run-time configuration */
@@ -126,9 +191,9 @@
 
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \
-    int i;                                                                     \
-    for (i = 0; i < depth; i++) {                                              \
-      if (i == depth - 1) {                                                    \
+    int _i;                                                                     \
+    for (_i = 0; _i < depth; _i++) {                                              \
+      if (_i == depth - 1) {                                                    \
         printf(" ");                                                           \
       } else {                                                                 \
         printf("  ");                                                          \
@@ -139,17 +204,26 @@
 
 #define PARSEBGP_DUMP_INFO(depth, ...)                                         \
   do {                                                                         \
-    int i;                                                                     \
+    int _i;                                                                     \
     printf(" ");                                                               \
-    for (i = 0; i < depth; i++) {                                              \
+    for (_i = 0; _i < depth; _i++) {                                              \
       printf("  ");                                                            \
     }                                                                          \
     printf(__VA_ARGS__);                                                       \
   } while (0)
 
+#define STATIC_ASSERT(cond, msg) extern char msg [(cond)?1:-1]
+
 #define PARSEBGP_DUMP_INT(depth, name, val)                                    \
-  PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),       \
-                     (int)val);
+  do {                                                                         \
+    STATIC_ASSERT(sizeof(val) <= sizeof(int), val_is_larger_than_int);         \
+    PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),     \
+                       (int)val);                                              \
+  } while (0)
+
+#define PARSEBGP_DUMP_VAL(depth, name, fmt, val)                               \
+  PARSEBGP_DUMP_INFO(depth, name ": %*" fmt "\n",                              \
+                     20 - (int)strlen(name ": "), val)
 
 #define PARSEBGP_DUMP_IP(depth, name, afi, ipaddr)                             \
   do {                                                                         \
@@ -202,7 +276,7 @@
  * only updated if PARSEBGP_OK is returned.
  */
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
-                                        uint8_t *buf, size_t *buf_len);
+                                        const uint8_t *buf, size_t *buf_len);
 
 /** Convenience function to allocate and zero memory */
 void *malloc_zero(const size_t size);

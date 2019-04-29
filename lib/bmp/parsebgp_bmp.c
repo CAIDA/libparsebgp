@@ -40,7 +40,7 @@
 
 static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
                                         int *tlvs_alloc_cnt, int *tlvs_cnt,
-                                        uint8_t *buf, size_t *lenp,
+                                        const uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -58,12 +58,10 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
 
     // read the TLV header
     // Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->type);
-    tlv->type = ntohs(tlv->type);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->type);
 
     // Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->len);
-    tlv->len = ntohs(tlv->len);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->len);
 
     remain -= sizeof(tlv->type) + sizeof(tlv->len);
 
@@ -138,7 +136,7 @@ static void dump_info_tlvs(parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
 // Type 1:
 static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
                                            parsebgp_bmp_stats_report_t *msg,
-                                           uint8_t *buf, size_t *lenp,
+                                           const uint8_t *buf, size_t *lenp,
                                            size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -146,8 +144,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
   parsebgp_bmp_stats_counter_t *sc;
 
   // Stats Count
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->stats_count);
-  msg->stats_count = ntohl(msg->stats_count);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->stats_count);
 
   // Allocate enough counter structures
   PARSEBGP_MAYBE_REALLOC(msg->counters, sizeof(parsebgp_bmp_stats_counter_t),
@@ -160,12 +157,10 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
     sc = &msg->counters[i];
 
     // Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->type);
-    sc->type = ntohs(sc->type);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, sc->type);
 
     // Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->len);
-    sc->len = ntohs(sc->len);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, sc->len);
 
     if (sc->len > remain - nread) {
       // invalid length specification
@@ -188,8 +183,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
       if (sc->len != sizeof(sc->data.counter_u32)) {
         PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.counter_u32);
-      sc->data.counter_u32 = ntohl(sc->data.counter_u32);
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, sc->data.counter_u32);
       break;
 
     // 64-bit gauge types:
@@ -198,8 +192,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
       if (sc->len != sizeof(sc->data.gauge_u64)) {
         PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
-      sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
+      PARSEBGP_DESERIALIZE_UINT64(buf, len, nread, sc->data.gauge_u64);
       break;
 
     // AFI/SAFI 64-bit gauge types:
@@ -210,17 +203,14 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
       }
 
       // AFI
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.afi_safi_gauge.afi);
-      sc->data.afi_safi_gauge.afi = ntohs(sc->data.afi_safi_gauge.afi);
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, sc->data.afi_safi_gauge.afi);
 
       // SAFI
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.afi_safi_gauge.safi);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, sc->data.afi_safi_gauge.safi);
 
       // u64 gauge
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT64(buf, len, nread,
                                sc->data.afi_safi_gauge.gauge_u64);
-      sc->data.afi_safi_gauge.gauge_u64 =
-        ntohll(sc->data.afi_safi_gauge.gauge_u64);
       break;
 
     default:
@@ -229,11 +219,9 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
         opts, buf, nread, 0, "Unknown BMP Stat Counter type (%d)", sc->type);
       // if we reach here, user wants us to struggle on
       if (sc->len == 8) {
-        PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.gauge_u64);
-        sc->data.gauge_u64 = ntohll(sc->data.gauge_u64);
+        PARSEBGP_DESERIALIZE_UINT64(buf, len, nread, sc->data.gauge_u64);
       } else if (sc->len == 4) {
-        PARSEBGP_DESERIALIZE_VAL(buf, len, nread, sc->data.counter_u32);
-        sc->data.counter_u32 = ntohl(sc->data.counter_u32);
+        PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, sc->data.counter_u32);
       } else {
         buf += sc->len;
         nread += sc->len;
@@ -269,9 +257,8 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
   PARSEBGP_DUMP_INT(depth, "Stats Count", msg->stats_count);
 
   depth++;
-  int i;
   parsebgp_bmp_stats_counter_t *sc;
-  for (i = 0; i < msg->stats_count; i++) {
+  for (uint32_t i = 0; i < msg->stats_count; i++) {
     sc = &msg->counters[i];
 
     PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_stats_counter_t, depth);
@@ -297,7 +284,7 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
     // 64-bit gauge types:
     case PARSEBGP_BMP_STATS_ROUTES_ADJ_RIB_IN:
     case PARSEBGP_BMP_STATS_ROUTES_LOC_RIB:
-      PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
+      PARSEBGP_DUMP_VAL(depth, "u64", PRIu64, sc->data.gauge_u64);
       break;
 
     // AFI/SAFI 64-bit gauge types:
@@ -310,14 +297,14 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
       PARSEBGP_DUMP_INT(depth, "SAFI", sc->data.afi_safi_gauge.safi);
 
       // u64 gauge
-      PARSEBGP_DUMP_INT(depth, "u64", sc->data.afi_safi_gauge.gauge_u64);
+      PARSEBGP_DUMP_VAL(depth, "u64", PRIu64, sc->data.afi_safi_gauge.gauge_u64);
       break;
 
     default:
       if (sc->len == 4) {
         PARSEBGP_DUMP_INT(depth, "u32", sc->data.counter_u32);
       } else if (sc->len == 8) {
-        PARSEBGP_DUMP_INT(depth, "u64", sc->data.gauge_u64);
+        PARSEBGP_DUMP_VAL(depth, "u64", PRIu64, sc->data.gauge_u64);
       }
     }
   }
@@ -326,14 +313,14 @@ static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
 // Type 2:
 static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
                                         parsebgp_bmp_peer_down_t *msg,
-                                        uint8_t *buf, size_t *lenp,
+                                        const uint8_t *buf, size_t *lenp,
                                         size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
   // Reason
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reason);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->reason);
 
   // Read the data (if present)
   switch (msg->reason) {
@@ -352,8 +339,7 @@ static parsebgp_error_t parse_peer_down(parsebgp_opts_t *opts,
 
   case PARSEBGP_BMP_PEER_DOWN_LOCAL_CLOSE:
     // read the fsm code
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.fsm_code);
-    msg->data.fsm_code = ntohs(msg->data.fsm_code);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.fsm_code);
     break;
 
   default:
@@ -422,7 +408,7 @@ static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
 
 // Type 3:
 static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
-                                      parsebgp_bmp_peer_up_t *msg, uint8_t *buf,
+                                      parsebgp_bmp_peer_up_t *msg, const uint8_t *buf,
                                       size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -448,12 +434,10 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   }
 
   // Local port
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_port);
-  msg->local_port = ntohs(msg->local_port);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->local_port);
 
   // Remote port
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->remote_port);
-  msg->remote_port = ntohs(msg->remote_port);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->remote_port);
 
   PARSEBGP_MAYBE_MALLOC_ZERO(msg->sent_open);
   slen = len - nread;
@@ -522,7 +506,7 @@ static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
 
 // Type 4:
 static parsebgp_error_t parse_init_msg(parsebgp_bmp_init_msg_t *msg,
-                                       uint8_t *buf, size_t *lenp,
+                                       const uint8_t *buf, size_t *lenp,
                                        size_t remain)
 {
   return parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf,
@@ -553,7 +537,7 @@ static void dump_init_msg(parsebgp_bmp_init_msg_t *msg, int depth)
 
 // Type 5:
 static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
-                                       uint8_t *buf, size_t *lenp,
+                                       const uint8_t *buf, size_t *lenp,
                                        size_t remain)
 {
   size_t len = *lenp, nread = 0;
@@ -570,12 +554,10 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
 
     // read the TLV header
     // Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->type);
-    tlv->type = ntohs(tlv->type);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->type);
 
     // Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->len);
-    tlv->len = ntohs(tlv->len);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->len);
 
     remain -= sizeof(tlv->type) + sizeof(tlv->len);
 
@@ -601,8 +583,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
       break;
 
     case PARSEBGP_BMP_TERM_INFO_TYPE_REASON:
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->info.reason);
-      tlv->info.reason = ntohs(tlv->info.reason);
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->info.reason);
       break;
 
     default:
@@ -680,7 +661,7 @@ static void dump_term_msg(parsebgp_bmp_term_msg_t *msg, int depth)
 // Type 6:
 static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
                                                parsebgp_bmp_route_mirror_t *msg,
-                                               uint8_t *buf, size_t *lenp,
+                                               const uint8_t *buf, size_t *lenp,
                                                size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -705,12 +686,10 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
     // read the TLV header
 
     // Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->type);
-    tlv->type = ntohs(tlv->type);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->type);
 
     // Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->len);
-    tlv->len = ntohs(tlv->len);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->len);
 
     if (tlv->len > (remain - nread)) {
       // the length field doesn't match what we saw in the common header
@@ -735,8 +714,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
       break;
 
     case PARSEBGP_BMP_ROUTE_MIRROR_TYPE_INFO:
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tlv->values.code);
-      tlv->values.code = ntohs(tlv->values.code);
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->values.code);
       break;
 
     default:
@@ -824,15 +802,15 @@ static void dump_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg, int depth)
 
 static parsebgp_error_t parse_peer_hdr(parsebgp_opts_t *opts,
                                        parsebgp_bmp_peer_hdr_t *hdr,
-                                       uint8_t *buf, size_t *lenp)
+                                       const uint8_t *buf, size_t *lenp)
 {
   size_t len = *lenp, nread = 0;
 
   // Type
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->type);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, hdr->type);
 
   // Flags
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->flags);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, hdr->flags);
 
   // pass some of our flags back in the options so other parts of the parser can
   // use them
@@ -871,19 +849,16 @@ static parsebgp_error_t parse_peer_hdr(parsebgp_opts_t *opts,
   }
 
   // AS Number
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->asn);
-  hdr->asn = ntohl(hdr->asn);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, hdr->asn);
 
   // BGP ID
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->bgp_id);
 
   // Timestamp (seconds component)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->ts_sec);
-  hdr->ts_sec = ntohl(hdr->ts_sec);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, hdr->ts_sec);
 
   // Timestamp (microseconds component)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, hdr->ts_usec);
-  hdr->ts_usec = ntohl(hdr->ts_usec);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, hdr->ts_usec);
 
   assert(nread == BMP_PEER_HDR_LEN);
   *lenp = nread;
@@ -896,7 +871,7 @@ static void dump_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr, int depth)
 
   PARSEBGP_DUMP_INT(depth, "Type", hdr->type);
   PARSEBGP_DUMP_INT(depth, "Flags", hdr->flags);
-  PARSEBGP_DUMP_INT(depth, "Route Distinguisher", hdr->dist_id);
+  PARSEBGP_DUMP_VAL(depth, "Route Distinguisher", PRIu64, hdr->dist_id);
   int afi = (hdr->flags & PARSEBGP_BMP_PEER_FLAG_IPV6) ? PARSEBGP_BGP_AFI_IPV6
                                                        : PARSEBGP_BGP_AFI_IPV4;
   PARSEBGP_DUMP_IP(depth, "IP", afi, hdr->addr);
@@ -909,7 +884,7 @@ static void dump_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr, int depth)
 
 static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
                                             parsebgp_bmp_msg_t *msg,
-                                            uint8_t *buf, size_t *lenp)
+                                            const uint8_t *buf, size_t *lenp)
 {
   parsebgp_error_t err;
   size_t len = *lenp, nread = 0, slen = 0;
@@ -918,7 +893,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
   assert(msg->version == 2 || msg->version == 1);
 
   // Get the message type
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->type);
 
   // All v1/2 messages include the peer header
   slen = len;
@@ -936,8 +911,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
     if (len - nread < 18) {
       return PARSEBGP_PARTIAL_MSG;
     }
-    memcpy(&bgp_len, buf + 16, sizeof(uint16_t));
-    bgp_len = ntohs(bgp_len);
+    bgp_len = nptohs(buf + 16);
     msg->len += bgp_len;
     break;
 
@@ -958,8 +932,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
       if (len - nread < 19) {
         return PARSEBGP_PARTIAL_MSG;
       }
-      memcpy(&bgp_len, buf + 17, sizeof(uint16_t));
-      bgp_len = ntohs(bgp_len);
+      bgp_len = nptohs(buf + 17);
       msg->len += bgp_len;
     }
     break;
@@ -979,7 +952,7 @@ static parsebgp_error_t parse_common_hdr_v2(parsebgp_opts_t *opts,
 
 static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
                                             parsebgp_bmp_msg_t *msg,
-                                            uint8_t *buf, size_t *lenp)
+                                            const uint8_t *buf, size_t *lenp)
 {
   parsebgp_error_t err;
   size_t len = *lenp, nread = 0;
@@ -990,11 +963,10 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
   assert(msg->version == 3);
 
   // Get the message length (including headers)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->len);
-  msg->len = ntohl(msg->len);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->len);
 
   // Get the message type
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->type);
 
   // do quick sanity check on the message length
   bmplen = msg->len - BMP_HDR_V3_LEN;
@@ -1030,7 +1002,7 @@ static parsebgp_error_t parse_common_hdr_v3(parsebgp_opts_t *opts,
 }
 
 static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
-                                         parsebgp_bmp_msg_t *msg, uint8_t *buf,
+                                         parsebgp_bmp_msg_t *msg, const uint8_t *buf,
                                          size_t *lenp)
 {
   parsebgp_error_t err;
@@ -1038,7 +1010,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   size_t slen;
 
   // Get the message version
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->version);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->version);
 
   switch (msg->version) {
   case 1:
@@ -1084,7 +1056,7 @@ static void dump_common_hdr(parsebgp_bmp_msg_t *msg, int depth)
 /* -------------------- Main BMP Parser ----------------------------- */
 
 parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bmp_msg_t *msg, uint8_t *buf,
+                                     parsebgp_bmp_msg_t *msg, const uint8_t *buf,
                                      size_t *len)
 {
   parsebgp_error_t err;

@@ -33,7 +33,7 @@
 #include <stdio.h>
 
 parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
-                                 parsebgp_msg_t *msg, uint8_t *buffer,
+                                 parsebgp_msg_t *msg, const uint8_t *buffer,
                                  size_t *len)
 {
   msg->type = type;
@@ -60,7 +60,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
   assert(0);
 }
 
-parsebgp_msg_t *parsebgp_create_msg()
+parsebgp_msg_t *parsebgp_create_msg(void)
 {
   parsebgp_msg_t *msg = NULL;
 

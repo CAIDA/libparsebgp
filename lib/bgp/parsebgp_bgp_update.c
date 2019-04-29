@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
-                                    uint8_t *buf, size_t *lenp, size_t remain)
+                                    const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
   parsebgp_bgp_prefix_t *tuple;
@@ -61,7 +61,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     tuple->safi = PARSEBGP_BGP_SAFI_UNICAST;
 
     // Read the prefix length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tuple->len);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
 
     // Prefix
     slen = nlris->len - nread;
@@ -104,7 +104,7 @@ static void dump_nlris(parsebgp_bgp_update_nlris_t *nlris, int depth)
 
 static parsebgp_error_t
 parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
-                        uint8_t *buf, size_t *lenp, size_t remain, int raw)
+                        const uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   size_t len = *lenp, nread = 0;
   parsebgp_bgp_update_as_path_seg_t *seg;
@@ -167,9 +167,9 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
-        seg->asns[i] = ntohl(*(uint32_t *)buf);
+        seg->asns[i] = nptohl(buf);
       } else {
-        seg->asns[i] = ntohs(*(uint16_t *)buf);
+        seg->asns[i] = nptohs(buf);
       }
       buf += asn_size;
     }
@@ -184,7 +184,7 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_as_path_safe(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain, int raw)
+                             const uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   parsebgp_error_t err;
   // first we try just parsing as-is
@@ -256,10 +256,9 @@ static void dump_attr_as_path(parsebgp_bgp_update_as_path_t *msg, int depth)
 static parsebgp_error_t
 parse_path_attr_aggregator(int asn_4_byte,
                            parsebgp_bgp_update_aggregator_t *aggregator,
-                           uint8_t *buf, size_t *lenp, size_t remain)
+                           const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
-  uint16_t u16;
 
   // infer whether there is a 4-byte or 2-byte ASN in the aggregator attribute
   if (remain == 8) {
@@ -272,11 +271,9 @@ parse_path_attr_aggregator(int asn_4_byte,
 
   // Aggregator ASN
   if (asn_4_byte) {
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, aggregator->asn);
-    aggregator->asn = ntohl(aggregator->asn);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, aggregator->asn);
   } else {
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    aggregator->asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, aggregator->asn);
   }
 
   // Aggregator IP Address (IPv4-only)
@@ -288,7 +285,7 @@ parse_path_attr_aggregator(int asn_4_byte,
 
 static parsebgp_error_t
 parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
-                            uint8_t *buf, size_t *lenp, size_t remain, int raw)
+                            const uint8_t *buf, size_t *lenp, size_t remain, int raw)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -310,8 +307,7 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
     if ((remain - nread) < sizeof(uint32_t)) {
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->communities[i]);
-    msg->communities[i] = ntohl(msg->communities[i]);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->communities[i]);
   }
 
   *lenp = nread;
@@ -354,7 +350,7 @@ static void dump_attr_communities(parsebgp_bgp_update_communities_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain)
+                             const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -368,8 +364,7 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
     if ((remain - nread) < sizeof(uint32_t)) {
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->cluster_ids[i]);
-    msg->cluster_ids[i] = ntohl(msg->cluster_ids[i]);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->cluster_ids[i]);
   }
 
   *lenp = nread;
@@ -410,16 +405,15 @@ static void dump_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
-                             uint8_t *buf, size_t *lenp, size_t remain)
+                             const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
 
   // Max # ASNs
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->max_asns);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->max_asns);
 
   // ASN
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->asn);
-  msg->asn = ntohs(msg->asn);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->asn);
 
   *lenp = nread;
   return PARSEBGP_OK;
@@ -427,7 +421,7 @@ parse_path_attr_as_pathlimit(parsebgp_bgp_update_as_pathlimit_t *msg,
 
 static parsebgp_error_t
 parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
-                                  uint8_t *buf, size_t *lenp, size_t remain)
+                                  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -447,16 +441,13 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
     comm = &msg->communities[i];
 
     // Global Admin
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->global_admin);
-    comm->global_admin = ntohl(comm->global_admin);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, comm->global_admin);
 
     // Local Data Part 1
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->local_1);
-    comm->local_1 = ntohl(comm->local_1);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, comm->local_1);
 
     // Local Data Part 2
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->local_2);
-    comm->local_2 = ntohl(comm->local_2);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, comm->local_2);
   }
 
   *lenp = nread;
@@ -510,21 +501,19 @@ dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *path_attrs,
-  uint8_t *buf, size_t *lenp, size_t remain)
+  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
   parsebgp_bgp_update_path_attr_t *attr;
   uint8_t flags_tmp, type_tmp;
   uint16_t len_tmp;
-  uint8_t u8;
   parsebgp_error_t err = PARSEBGP_OK;
   int raw = 0;
 
   path_attrs->attrs_cnt = 0;
 
   // Path Attributes Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, path_attrs->len);
-  path_attrs->len = ntohs(path_attrs->len);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, path_attrs->len);
 
   if (nread + path_attrs->len > len) {
     return PARSEBGP_PARTIAL_MSG;
@@ -553,18 +542,16 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     }
 
     // Attribute Flags
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, flags_tmp);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, flags_tmp);
 
     // Attribute Type
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, type_tmp);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, type_tmp);
 
     // Attribute Length
     if (flags_tmp & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) {
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, len_tmp);
-      len_tmp = ntohs(len_tmp);
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, len_tmp);
     } else {
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
-      len_tmp = u8;
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, len_tmp);
     }
 
     if (len_tmp > (remain - nread)) {
@@ -641,7 +628,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 1:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
       CHECK_ATTR_LEN(attr->len, attr->data.origin);
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.origin);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, attr->data.origin);
       slen = sizeof(attr->data.origin);
       break;
 
@@ -667,16 +654,14 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 4:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
       CHECK_ATTR_LEN(attr->len, attr->data.med);
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.med);
-      attr->data.med = ntohl(attr->data.med);
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, attr->data.med);
       slen = sizeof(attr->data.med);
       break;
 
     // Type 5:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
       CHECK_ATTR_LEN(attr->len, attr->data.local_pref);
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.local_pref);
-      attr->data.local_pref = ntohl(attr->data.local_pref);
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, attr->data.local_pref);
       slen = sizeof(attr->data.local_pref);
       break;
 
@@ -711,8 +696,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     // Type 9
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
       CHECK_ATTR_LEN(attr->len, attr->data.originator_id);
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.originator_id);
-      attr->data.originator_id = ntohl(attr->data.originator_id);
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, attr->data.originator_id);
       slen = sizeof(attr->data.originator_id);
       break;
 
@@ -1102,15 +1086,14 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
 
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
                                             parsebgp_bgp_update_t *msg,
-                                            uint8_t *buf, size_t *lenp,
+                                            const uint8_t *buf, size_t *lenp,
                                             size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
   parsebgp_error_t err;
 
   // Withdrawn Routes Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->withdrawn_nlris.len);
-  msg->withdrawn_nlris.len = ntohs(msg->withdrawn_nlris.len);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->withdrawn_nlris.len);
 
   // Withdrawn Routes
   slen = len - nread;

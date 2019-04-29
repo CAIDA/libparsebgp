@@ -34,7 +34,7 @@
 
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
-  uint8_t *buf, size_t *lenp, size_t remain)
+  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -58,31 +58,27 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
     comm = &msg->communities[i];
 
     // Type (High)
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->type);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->type);
 
     switch (comm->type) {
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_TWO_OCTET_AS:
     case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_TWO_OCTET_AS:
       // Sub-Type
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->subtype);
 
       // Global Admin
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread,
                                comm->types.two_octet.global_admin);
-      comm->types.two_octet.global_admin =
-        ntohs(comm->types.two_octet.global_admin);
 
       // Local Admin
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread,
                                comm->types.two_octet.local_admin);
-      comm->types.two_octet.local_admin =
-        ntohl(comm->types.two_octet.local_admin);
       break;
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV4:
     case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV4:
       // Sub-Type
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->subtype);
 
       // AFI
       comm->types.ip_addr.global_admin_ip_afi = PARSEBGP_BGP_AFI_IPV4;
@@ -97,33 +93,28 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
       buf += 4;
 
       // Local Admin
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread,
                                comm->types.ip_addr.local_admin);
-      comm->types.ip_addr.local_admin = ntohs(comm->types.ip_addr.local_admin);
       break;
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_FOUR_OCTET_AS:
     case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_FOUR_OCTET_AS:
       // Sub-Type
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->subtype);
 
       // Global Admin
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread,
                                comm->types.four_octet.global_admin);
-      comm->types.four_octet.global_admin =
-        ntohl(comm->types.four_octet.global_admin);
 
       // Local Admin
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread,
                                comm->types.four_octet.local_admin);
-      comm->types.four_octet.local_admin =
-        ntohs(comm->types.four_octet.local_admin);
       break;
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_OPAQUE:
     case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_OPAQUE:
       // Sub-Type
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->subtype);
 
       // Opaque (6 bytes)
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->types.opaque);
@@ -141,7 +132,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
 
 parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
-  uint8_t *buf, size_t *lenp, size_t remain)
+  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
   int i;
@@ -165,14 +156,14 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
     comm = &msg->communities[i];
 
     // Type (High)
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->type);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->type);
 
     switch (comm->type) {
 
     case PARSEBGP_BGP_EXT_COMM_TYPE_TRANS_IPV6:
     case PARSEBGP_BGP_EXT_COMM_TYPE_NONTRANS_IPV6:
       // Sub-type
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, comm->subtype);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, comm->subtype);
 
       // AFI
       comm->types.ip_addr.global_admin_ip_afi = PARSEBGP_BGP_AFI_IPV6;
@@ -182,9 +173,8 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
                                comm->types.ip_addr.global_admin_ip);
 
       // Local Admin
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread,
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread,
                                comm->types.ip_addr.local_admin);
-      comm->types.ip_addr.local_admin = ntohs(comm->types.ip_addr.local_admin);
       break;
 
     default:

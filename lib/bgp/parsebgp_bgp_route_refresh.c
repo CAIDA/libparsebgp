@@ -35,23 +35,22 @@
 parsebgp_error_t
 parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
                                   parsebgp_bgp_route_refresh_t *msg,
-                                  uint8_t *buf, size_t *lenp, size_t remain)
+                                  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
 
   // AFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
-  msg->afi = ntohs(msg->afi);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
 
   // Subtype (Reserved)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->subtype);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->subtype);
 
   // SAFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->safi);
 
   // Data
   msg->data_len = remain - nread;
-  if ((len - nread) < msg->data_len) {
+  if (len < nread + msg->data_len) {
     return PARSEBGP_PARTIAL_MSG;
   }
   PARSEBGP_MAYBE_REALLOC(msg->data, sizeof(uint8_t), msg->_data_alloc_len,

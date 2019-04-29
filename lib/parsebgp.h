@@ -89,7 +89,7 @@ typedef struct parsebgp_msg {
  * otherwise
  */
 parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
-                                 parsebgp_msg_t *msg, uint8_t *buffer,
+                                 parsebgp_msg_t *msg, const uint8_t *buffer,
                                  size_t *len);
 
 /**
@@ -100,7 +100,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
  * The caller owns the returned structure and must call parsebgp_msg_destroy to
  * free allocated memory.
  */
-parsebgp_msg_t *parsebgp_create_msg();
+parsebgp_msg_t *parsebgp_create_msg(void);
 
 /**
  * Clear the given message structure ready for reuse

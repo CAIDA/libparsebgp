@@ -106,7 +106,7 @@ typedef struct parsebgp_bgp_msg {
  * code otherwise
  */
 parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_msg_t *msg, uint8_t *buffer,
+                                     parsebgp_bgp_msg_t *msg, const uint8_t *buffer,
                                      size_t *len);
 
 /** Destroy the given BGP message structure

@@ -34,20 +34,20 @@
 
 parsebgp_error_t
 parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
-                                 parsebgp_bgp_notification_t *msg, uint8_t *buf,
+                                 parsebgp_bgp_notification_t *msg, const uint8_t *buf,
                                  size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0;
 
   // Error Code
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->code);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->code);
 
   // Error Subcode
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->subcode);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->subcode);
 
   // Data
   msg->data_len = remain - nread;
-  if ((len - nread) < msg->data_len) {
+  if (len < nread + msg->data_len) {
     return PARSEBGP_PARTIAL_MSG;
   }
   PARSEBGP_MAYBE_REALLOC(msg->data, sizeof(uint8_t), msg->_data_alloc_len,

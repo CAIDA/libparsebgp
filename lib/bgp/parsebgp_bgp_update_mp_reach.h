@@ -94,7 +94,7 @@ typedef struct parsebgp_bgp_update_mp_unreach {
 parsebgp_error_t
 parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
                                     parsebgp_bgp_update_mp_reach_t *msg,
-                                    uint8_t *buf, size_t *lenp, size_t remain);
+                                    const uint8_t *buf, size_t *lenp, size_t remain);
 
 /** Destroy an MP_REACH message */
 void parsebgp_bgp_update_mp_reach_destroy(parsebgp_bgp_update_mp_reach_t *msg);
@@ -118,7 +118,7 @@ void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
 
 /** Decode an MP_UNREACH message */
 parsebgp_error_t parsebgp_bgp_update_mp_unreach_decode(
-  parsebgp_opts_t *opts, parsebgp_bgp_update_mp_unreach_t *msg, uint8_t *buf,
+  parsebgp_opts_t *opts, parsebgp_bgp_update_mp_unreach_t *msg, const uint8_t *buf,
   size_t *lenp, size_t remain);
 
 /** Destroy an MP_UNREACH message */

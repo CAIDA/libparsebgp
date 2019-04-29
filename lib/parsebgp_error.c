@@ -27,7 +27,7 @@
 #include "parsebgp_error.h"
 #include <stdlib.h>
 
-char *err_strings[] = {
+static const char *err_strings[] = {
   "No Error",           // PARSEBGP_OK
   "Partial Message",    // PARSEBGP_PARTIAL_MSG
   "Invalid Message",    // PARSEBGP_INVALID_MSG

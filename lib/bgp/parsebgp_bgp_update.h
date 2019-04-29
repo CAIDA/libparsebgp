@@ -448,7 +448,7 @@ typedef struct parsebgp_bgp_update {
 /** Decode an UPDATE message */
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
                                             parsebgp_bgp_update_t *msg,
-                                            uint8_t *buf, size_t *lenp,
+                                            const uint8_t *buf, size_t *lenp,
                                             size_t remain);
 
 /** Destroy an UPDATE message */
@@ -472,7 +472,7 @@ void parsebgp_bgp_update_dump(parsebgp_bgp_update_t *msg, int depth);
 
 /** Decode PATH ATTRIBUTES */
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
-  parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *msg, uint8_t *buf,
+  parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *msg, const uint8_t *buf,
   size_t *lenp, size_t remain);
 
 /** Destroy a Path Attributes message */

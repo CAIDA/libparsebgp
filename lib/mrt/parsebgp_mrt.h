@@ -476,7 +476,7 @@ typedef struct parsebgp_mrt_msg {
  * code otherwise
  */
 parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
-                                     parsebgp_mrt_msg_t *msg, uint8_t *buf,
+                                     parsebgp_mrt_msg_t *msg, const uint8_t *buf,
                                      size_t *len);
 
 /** Destroy the given MRT message structure
