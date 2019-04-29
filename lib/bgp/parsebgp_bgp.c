@@ -54,11 +54,10 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   }
 
   // Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->len);
-  msg->len = ntohs(msg->len);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->len);
 
   // Type
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->type);
 
   *lenp = nread;
   return PARSEBGP_OK;

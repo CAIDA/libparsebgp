@@ -58,16 +58,31 @@
 /* Convert a network-order 16 bit integer pointed to by p to host order.
  * Safe even if value is unaligned, unlike ntohs(*(uint16_t*)p). */
 #define nptohs(p)                                                              \
-  ((((const uint8_t*)(p))[0] << 8) |                                                 \
-   (((const uint8_t*)(p))[1]))
+  ((uint16_t)                                                                  \
+  (((uint16_t)((const uint8_t*)(p))[0] << 8) |                                 \
+   ((uint16_t)((const uint8_t*)(p))[1])))
 
 /* Convert a network-order 32 bit integer pointed to by p to host order.
  * Safe even if value is unaligned, unlike ntohl(*(uint32_t*)p). */
 #define nptohl(p)                                                              \
-  ((((const uint8_t*)(p))[0] << 24) |                                                \
-   (((const uint8_t*)(p))[1] << 16) |                                                \
-   (((const uint8_t*)(p))[2] << 8) |                                                 \
-   (((const uint8_t*)(p))[3]))
+  ((uint32_t)                                                                  \
+  (((uint32_t)((const uint8_t*)(p))[0] << 24) |                                \
+   ((uint32_t)((const uint8_t*)(p))[1] << 16) |                                \
+   ((uint32_t)((const uint8_t*)(p))[2] << 8) |                                 \
+   ((uint32_t)((const uint8_t*)(p))[3])))
+
+/* Convert a network-order 64 bit integer pointed to by p to host order.
+ * Safe even if value is unaligned, unlike ntohll(*(uint64_t*)p). */
+#define nptohll(p)                                                             \
+  ((uint64_t)                                                                  \
+  (((uint64_t)((const uint8_t*)(p))[0] << 56) |                                \
+   ((uint64_t)((const uint8_t*)(p))[1] << 48) |                                \
+   ((uint64_t)((const uint8_t*)(p))[2] << 40) |                                \
+   ((uint64_t)((const uint8_t*)(p))[3] << 32) |                                \
+   ((uint64_t)((const uint8_t*)(p))[4] << 24) |                                \
+   ((uint64_t)((const uint8_t*)(p))[5] << 16) |                                \
+   ((uint64_t)((const uint8_t*)(p))[6] << 8) |                                 \
+   ((uint64_t)((const uint8_t*)(p))[7])))
 
 /** Byte-swap a 64-bit integer */
 #ifndef htonll
@@ -92,6 +107,41 @@
     read += sizeof(to);                                                        \
     buf += sizeof(to);                                                         \
   } while (0)
+
+/** Convenience macros to deserialize a network-order integer from a byte array.
+ * (They're also faster than PARSEBGP_DESERIALIZE_VAL() followed by ntoh*(),
+ * and allow storing a value into a variable of a different size.)
+ *
+ * @param buf           pointer to the buffer (will be updated)
+ * @param len           total length of the buffer
+ * @param read          the number of bytes already read from the buffer
+ *                      (will be updated)
+ * @param to            the variable to deserialize into
+ */
+#define PARSEBGP_DESERIALIZE_UINT8(buf, len, read, to)                         \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint8_t, *(const uint8_t*))
+
+#define PARSEBGP_DESERIALIZE_UINT16(buf, len, read, to)                        \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint16_t, nptohs)
+
+#define PARSEBGP_DESERIALIZE_UINT32(buf, len, read, to)                        \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint32_t, nptohl)
+
+#define PARSEBGP_DESERIALIZE_UINT64(buf, len, read, to)                        \
+  PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, uint64_t, nptohll)
+
+#define PARSEBGP_DESERIALIZE_INT_HELPER(buf, len, read, to, type, getval)      \
+  do {                                                                         \
+    /* static_assert(sizeof(to) == sizeof(type), "size mismatch"); */          \
+    assert((len) >= (read));                                                   \
+    if (((len) - (read)) < sizeof(type)) {                                     \
+      return PARSEBGP_PARTIAL_MSG;                                             \
+    }                                                                          \
+    to = getval(buf);                                                          \
+    read += sizeof(type);                                                      \
+    buf += sizeof(type);                                                       \
+  } while (0)
+
 
 /** Convenience macro to either abort parsing or skip an unimplemented feature
     depending on run-time configuration */

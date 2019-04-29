@@ -68,32 +68,28 @@ static parsebgp_error_t parse_table_dump(parsebgp_opts_t *opts,
   parsebgp_error_t err;
 
   // View Number
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->view_number);
-  msg->view_number = ntohs(msg->view_number);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->view_number);
 
   // Sequence
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->sequence);
-  msg->sequence = ntohs(msg->sequence);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->sequence);
 
   // Prefix Address
   DESERIALIZE_IP(afi, buf, len, nread, msg->prefix);
 
   // Prefix Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->prefix_len);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->prefix_len);
 
   // Status (unused)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->status);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->status);
 
   // Originated Time
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->originated_time);
-  msg->originated_time = ntohl(msg->originated_time);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->originated_time);
 
   // Peer IP address
   DESERIALIZE_IP(afi, buf, len, nread, msg->peer_ip);
 
   // Peer ASN (2-byte only)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->peer_asn);
-  msg->peer_asn = ntohs(msg->peer_asn);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
 
   // Path Attributes
   slen = len - nread;
@@ -153,14 +149,12 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   int i;
   parsebgp_mrt_table_dump_v2_peer_entry_t *pe = NULL;
   uint8_t u8;
-  uint16_t u16;
 
   // Collector BGP ID
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->collector_bgp_id);
 
   // View Name Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->view_name_len);
-  msg->view_name_len = ntohs(msg->view_name_len);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->view_name_len);
   if (msg->view_name_len > (len - nread)) {
     return PARSEBGP_PARTIAL_MSG;
   }
@@ -176,8 +170,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
   }
 
   // Peer Count
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->peer_count);
-  msg->peer_count = ntohs(msg->peer_count);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_count);
 
   // allocate some space for the peer entries
   PARSEBGP_MAYBE_REALLOC(msg->peer_entries,
@@ -191,7 +184,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
     pe = &msg->peer_entries[i];
 
     // Peer Type (discarded)
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, u8);
 
     // parse the peer type and afi
     pe->asn_type = (u8 & 0x02) >> 1;
@@ -206,13 +199,11 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
     // Peer ASN
     switch (pe->asn_type) {
     case PARSEBGP_MRT_ASN_2_BYTE:
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-      pe->asn = ntohs(u16);
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, pe->asn);
       break;
 
     case PARSEBGP_MRT_ASN_4_BYTE:
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, pe->asn);
-      pe->asn = ntohl(pe->asn);
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, pe->asn);
       break;
 
     default:
@@ -315,12 +306,10 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
     entry = &entries[i];
 
     // Peer Index
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, entry->peer_index);
-    entry->peer_index = ntohs(entry->peer_index);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, entry->peer_index);
 
     // Originated Time
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, entry->originated_time);
-    entry->originated_time = ntohl(entry->originated_time);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, entry->originated_time);
 
     // Path Attributes
     slen = len - nread;
@@ -376,11 +365,10 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
   parsebgp_error_t err;
 
   // Sequence Number
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->sequence);
-  msg->sequence = ntohl(msg->sequence);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->sequence);
 
   // Prefix Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->prefix_len);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->prefix_len);
 
   // Prefix
   slen = len - nread;
@@ -392,8 +380,7 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
   buf += slen;
 
   // Entry Count
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->entry_count);
-  msg->entry_count = ntohs(msg->entry_count);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->entry_count);
 
   // RIB Entries
   // allocate some memory for the entries
@@ -582,12 +569,10 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
                                   size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
-  uint16_t u16;
   parsebgp_error_t err;
 
   // 2-byte Peer ASN
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-  msg->peer_asn = ntohs(u16);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
 
   // Peer IP
   DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->peer_ip);
@@ -604,8 +589,7 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_BGP_MESSAGE_NOTIFY:
     // 2-byte Local ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    msg->peer_asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
     // Local IP
     DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
 
@@ -616,8 +600,7 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_BGP_MESSAGE_KEEPALIVE: // subtype 7
     // 2-byte Local ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    msg->peer_asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
     // Local IP
     DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
 
@@ -627,8 +610,7 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_BGP_MESSAGE_OPEN: // subtype 5
     // 2-byte Local ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    msg->peer_asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
     // Local IP
     DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
 
@@ -644,17 +626,14 @@ static parsebgp_error_t parse_bgp(parsebgp_opts_t *opts,
 
   case PARSEBGP_MRT_BGP_MESSAGE_STATE_CHANGE: // subtype 3
     // Old State
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.state_change.old_state);
-    msg->data.state_change.old_state = ntohs(msg->data.state_change.old_state);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.old_state);
     // New State
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.state_change.new_state);
-    msg->data.state_change.new_state = ntohs(msg->data.state_change.new_state);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.new_state);
     break;
 
   case PARSEBGP_MRT_BGP_MESSAGE_UPDATE: // subtype 1
     // 2-byte Local ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    msg->peer_asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
     // Local IP
     DESERIALIZE_IP(PARSEBGP_BGP_AFI_IPV4, buf, len, nread, msg->local_ip);
 
@@ -683,7 +662,6 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
                                      size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
-  uint16_t u16;
   parsebgp_error_t err;
 
   // ASN fields
@@ -693,12 +671,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
     // Peer ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    msg->peer_asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
 
     // Local ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u16);
-    msg->local_asn = ntohs(u16);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->local_asn);
     break;
 
   // 4-byte ASN subtypes:
@@ -706,12 +682,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
     // Peer ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->peer_asn);
-    msg->peer_asn = ntohl(msg->peer_asn);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->peer_asn);
 
     // Local ASN
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->local_asn);
-    msg->local_asn = ntohl(msg->local_asn);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->local_asn);
     break;
 
   default:
@@ -720,12 +694,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   }
 
   // Interface Index
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->interface_index);
-  msg->interface_index = ntohs(msg->interface_index);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->interface_index);
 
   // Address Family
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
-  msg->afi = ntohs(msg->afi);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
 
   // Peer IP
   DESERIALIZE_IP(msg->afi, buf, len, nread, msg->peer_ip);
@@ -740,12 +712,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
     // Old State
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.state_change.old_state);
-    msg->data.state_change.old_state = ntohs(msg->data.state_change.old_state);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.old_state);
 
     // New State
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->data.state_change.new_state);
-    msg->data.state_change.new_state = ntohs(msg->data.state_change.new_state);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.new_state);
     break;
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
@@ -852,20 +822,16 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0;
 
   // Timestamp
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->timestamp_sec);
-  msg->timestamp_sec = ntohl(msg->timestamp_sec);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->timestamp_sec);
 
   // Type
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->type);
-  msg->type = ntohs(msg->type);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->type);
 
   // Sub-type
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->subtype);
-  msg->subtype = ntohs(msg->subtype);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->subtype);
 
   // Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->len);
-  msg->len = ntohl(msg->len);
+  PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->len);
   if (msg->len > len - nread) {
     return PARSEBGP_PARTIAL_MSG;
   }
@@ -876,8 +842,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_TYPE_BGP4MP_ET:
   case PARSEBGP_MRT_TYPE_ISIS_ET:
   case PARSEBGP_MRT_TYPE_OSPF_V3_ET:
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->timestamp_usec);
-    msg->timestamp_usec = ntohl(msg->timestamp_usec);
+    PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->timestamp_usec);
     break;
 
   case PARSEBGP_MRT_TYPE_BGP:

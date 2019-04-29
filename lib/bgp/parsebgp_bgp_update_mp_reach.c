@@ -93,7 +93,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
     tuple->safi = safi;
 
     // Read the prefix length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, tuple->len);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
 
     // Prefix
     slen = len - nread;
@@ -189,7 +189,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
       msg->reserved = 0;
     } else {
       // Reserved (always zero, apparently)
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->reserved);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->reserved);
     }
 
     // Parse the NLRIs
@@ -273,15 +273,14 @@ parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
     opts->bgp.mp_reach_no_afi_safi_reserved = 0;
 
     // AFI
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
-    msg->afi = ntohs(msg->afi);
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
 
     // SAFI
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->safi);
   }
 
   // Next-Hop Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->next_hop_len);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->next_hop_len);
 
   // process next-hop and NLRI based on AFI
   // these functions must also read the "reserved" field
@@ -367,11 +366,10 @@ parsebgp_bgp_update_mp_unreach_decode(parsebgp_opts_t *opts,
   parsebgp_error_t err;
 
   // AFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
-  msg->afi = ntohs(msg->afi);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
 
   // SAFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->safi);
 
   // process NLRIs based on AFI
   // TODO: support other AFIs (BGPLS etc.)

@@ -40,14 +40,13 @@ parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0;
 
   // AFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->afi);
-  msg->afi = ntohs(msg->afi);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
 
   // Subtype (Reserved)
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->subtype);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->subtype);
 
   // SAFI
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->safi);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->safi);
 
   // Data
   msg->data_len = remain - nread;

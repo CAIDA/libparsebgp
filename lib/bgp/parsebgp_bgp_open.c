@@ -48,10 +48,10 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
     cap = &msg->capabilities[msg->capabilities_cnt++];
 
     // Code
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->code);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, cap->code);
 
     // Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->len);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, cap->len);
 
     // process data based on the code
     switch (cap->code) {
@@ -65,14 +65,13 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
         continue;
       }
       // AFI
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.mpbgp.afi);
-      cap->values.mpbgp.afi = ntohs(cap->values.mpbgp.afi);
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, cap->values.mpbgp.afi);
 
       // Reserved
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.mpbgp.reserved);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, cap->values.mpbgp.reserved);
 
       // SAFI
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.mpbgp.safi);
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, cap->values.mpbgp.safi);
       break;
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
@@ -82,8 +81,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
           "Unexpected AS4 OPEN Capability length (%d), expecting 4 bytes",
           cap->len);
       }
-      PARSEBGP_DESERIALIZE_VAL(buf, len, nread, cap->values.asn);
-      cap->values.asn = ntohl(cap->values.asn);
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, cap->values.asn);
       break;
 
     // capabilities that we are explicitly ignoring (since OpenBMP is ignoring
@@ -121,7 +119,7 @@ static parsebgp_error_t parse_params(parsebgp_opts_t *opts,
 
   while ((remain - nread) > 0) {
     // Ensure this is a capabilities parameter
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, u8);
     if (u8 != 2) {
       PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain - nread,
                                     "Unsupported BGP OPEN parameter type (%d). "
@@ -131,7 +129,7 @@ static parsebgp_error_t parse_params(parsebgp_opts_t *opts,
     }
 
     // Capabilities Length
-    PARSEBGP_DESERIALIZE_VAL(buf, len, nread, u8);
+    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, u8);
 
     // parse this capabilities parameter
     slen = len - nread;
@@ -155,21 +153,19 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
   parsebgp_error_t err;
 
   // Version
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->version);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->version);
 
   // ASN
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->asn);
-  msg->asn = ntohs(msg->asn);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->asn);
 
   // Hold Time
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->hold_time);
-  msg->hold_time = ntohs(msg->hold_time);
+  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->hold_time);
 
   // BGP ID
   PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->bgp_id);
 
   // Parameters Length
-  PARSEBGP_DESERIALIZE_VAL(buf, len, nread, msg->param_len);
+  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->param_len);
 
   // no params
   if (msg->param_len == 0) {
