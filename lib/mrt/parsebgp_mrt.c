@@ -362,6 +362,7 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
                                  const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
+  size_t max_pfx;
   parsebgp_error_t err;
 
   // Sequence Number
@@ -372,8 +373,12 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
 
   // Prefix
   slen = len - nread;
-  if ((err = parsebgp_decode_prefix(msg->prefix_len, msg->prefix, buf,
-                                    &slen)) != PARSEBGP_OK) {
+  max_pfx = (subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST ||
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST) ?
+              32 : 128;
+  err = parsebgp_decode_prefix(msg->prefix_len, msg->prefix, buf, &slen,
+      max_pfx);
+  if (err != PARSEBGP_OK) {
     return err;
   }
   nread += slen;

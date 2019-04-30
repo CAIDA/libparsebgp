@@ -272,11 +272,13 @@
  * @param buf_len       Total length of the buffer (to prevent overrun). Updated
  *                      to the number of bytes read from the buffer if
  *                      successful.
+ * @param max_pfx_len   Maximum allowed pfx_len (32 for IPv4, 128 for IPv6)
  * @return PARSEBGP_OK if successful, or an error code otherwise. buf_len is
  * only updated if PARSEBGP_OK is returned.
  */
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
-                                        const uint8_t *buf, size_t *buf_len);
+                                        const uint8_t *buf, size_t *buf_len,
+                                        size_t max_pfx_len);
 
 /** Convenience function to allocate and zero memory */
 void *malloc_zero(const size_t size);

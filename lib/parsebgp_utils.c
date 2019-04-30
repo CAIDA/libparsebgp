@@ -33,10 +33,11 @@
 #include <unistd.h>
 
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
-                                        const uint8_t *buf, size_t *buf_len)
+                                        const uint8_t *buf, size_t *buf_len,
+                                        size_t max_pfx_len)
 {
   uint8_t bytes, junk;
-  if (pfx_len > 128) {
+  if (pfx_len > max_pfx_len) {
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
   // prefixes are encoded in a compact format the min number of bytes is used,
