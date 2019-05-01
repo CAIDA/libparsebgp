@@ -59,13 +59,14 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     tuple->type = PARSEBGP_BGP_PREFIX_UNICAST_IPV4;
     tuple->afi = PARSEBGP_BGP_AFI_IPV4;
     tuple->safi = PARSEBGP_BGP_SAFI_UNICAST;
+    size_t max_pfx = 32;
 
     // Read the prefix length
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
 
     // Prefix
     slen = nlris->len - nread;
-    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen);
+    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx);
     if (err != PARSEBGP_OK) {
       if (err == PARSEBGP_PARTIAL_MSG) {
         // decode_prefix() reached the end of the nlris, not the buffer

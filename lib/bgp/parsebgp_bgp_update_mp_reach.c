@@ -38,12 +38,14 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   const uint8_t *buf, size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen;
+  size_t max_pfx;
   uint8_t p_type = 0;
   parsebgp_bgp_prefix_t *tuple;
   parsebgp_error_t err;
 
   switch (afi) {
   case PARSEBGP_BGP_AFI_IPV4:
+    max_pfx = 32;
     switch (safi) {
     case PARSEBGP_BGP_SAFI_UNICAST:
       p_type = PARSEBGP_BGP_PREFIX_UNICAST_IPV4;
@@ -60,6 +62,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
     break;
 
   case PARSEBGP_BGP_AFI_IPV6:
+    max_pfx = 128;
     switch (safi) {
     case PARSEBGP_BGP_SAFI_UNICAST:
       p_type = PARSEBGP_BGP_PREFIX_UNICAST_IPV6;
@@ -97,8 +100,8 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
 
     // Prefix
     slen = len - nread;
-    if ((err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen)) !=
-        PARSEBGP_OK) {
+    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx);
+    if (err != PARSEBGP_OK) {
       return err;
     }
     nread += slen;
