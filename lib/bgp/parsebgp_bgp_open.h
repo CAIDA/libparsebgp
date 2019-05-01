@@ -168,6 +168,6 @@ void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bgp_open_dump(parsebgp_bgp_open_t *msg, int depth);
+void parsebgp_bgp_open_dump(const parsebgp_bgp_open_t *msg, int depth);
 
 #endif /* __PARSEBGP_BGP_OPEN_H */

@@ -127,7 +127,7 @@ static void clear_table_dump(parsebgp_bgp_afi_t afi,
 }
 
 static void dump_table_dump(parsebgp_bgp_afi_t afi,
-                            parsebgp_mrt_table_dump_t *msg, int depth)
+                            const parsebgp_mrt_table_dump_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_t, depth);
   PARSEBGP_DUMP_INT(depth, "View Number", msg->view_number);
@@ -239,8 +239,8 @@ clear_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg)
 }
 
 static void
-dump_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
-                              int depth)
+dump_table_dump_v2_peer_index(
+    const parsebgp_mrt_table_dump_v2_peer_index_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_peer_index_t, depth);
 
@@ -424,9 +424,10 @@ clear_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 }
 
 static void
-dump_table_dump_v2_afi_safi_rib(parsebgp_mrt_table_dump_v2_subtype_t subtype,
-                                parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg,
-                                int depth)
+dump_table_dump_v2_afi_safi_rib(
+    parsebgp_mrt_table_dump_v2_subtype_t subtype,
+    const parsebgp_mrt_table_dump_v2_afi_safi_rib_t *msg,
+    int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_afi_safi_rib_t, depth);
 
@@ -532,7 +533,8 @@ static void clear_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
 }
 
 static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
-                               parsebgp_mrt_table_dump_v2_t *msg, int depth)
+                               const parsebgp_mrt_table_dump_v2_t *msg,
+                               int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_t, depth);
 
@@ -782,7 +784,7 @@ static void clear_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
 }
 
 static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
-                        parsebgp_mrt_bgp4mp_t *msg, int depth)
+                        const parsebgp_mrt_bgp4mp_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_bgp4mp_t, depth);
 
@@ -864,7 +866,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-static void dump_common_hdr(parsebgp_mrt_msg_t *msg, int depth)
+static void dump_common_hdr(const parsebgp_mrt_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_INT(depth, "Timestamp.sec", msg->timestamp_sec);
   PARSEBGP_DUMP_INT(depth, "Type", msg->type);
@@ -1019,7 +1021,7 @@ void parsebgp_mrt_clear_msg(parsebgp_mrt_msg_t *msg)
   }
 }
 
-void parsebgp_mrt_dump_msg(parsebgp_mrt_msg_t *msg, int depth)
+void parsebgp_mrt_dump_msg(const parsebgp_mrt_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_msg_t, depth);
   dump_common_hdr(msg, depth);

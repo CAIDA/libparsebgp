@@ -113,8 +113,8 @@ void parsebgp_bgp_update_mp_reach_clear(parsebgp_bgp_update_mp_reach_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
-                                       int depth);
+void parsebgp_bgp_update_mp_reach_dump(
+    const parsebgp_bgp_update_mp_reach_t *msg, int depth);
 
 /** Decode an MP_UNREACH message */
 parsebgp_error_t parsebgp_bgp_update_mp_unreach_decode(
@@ -140,7 +140,7 @@ void parsebgp_bgp_update_mp_unreach_clear(
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
-                                         int depth);
+void parsebgp_bgp_update_mp_unreach_dump(
+    const parsebgp_bgp_update_mp_unreach_t *msg, int depth);
 
 #endif /* __PARSEBGP_BGP_UPDATE_MP_REACH_H */

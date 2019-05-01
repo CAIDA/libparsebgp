@@ -109,7 +109,7 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg)
   free(msg);
 }
 
-void parsebgp_dump_msg(parsebgp_msg_t *msg)
+void parsebgp_dump_msg(const parsebgp_msg_t *msg)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_msg_t, 0);
   PARSEBGP_DUMP_INT(0, "Type", msg->type);

@@ -82,7 +82,7 @@ void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg)
   msg->data_len = 0;
 }
 
-void parsebgp_bgp_route_refresh_dump(parsebgp_bgp_route_refresh_t *msg,
+void parsebgp_bgp_route_refresh_dump(const parsebgp_bgp_route_refresh_t *msg,
                                      int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_route_refresh_t, depth);

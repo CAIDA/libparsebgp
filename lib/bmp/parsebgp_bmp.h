@@ -610,6 +610,6 @@ void parsebgp_bmp_clear_msg(parsebgp_bmp_msg_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bmp_dump_msg(parsebgp_bmp_msg_t *msg, int depth);
+void parsebgp_bmp_dump_msg(const parsebgp_bmp_msg_t *msg, int depth);
 
 #endif /* __PARSEBGP_BMP_H */

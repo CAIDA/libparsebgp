@@ -321,8 +321,8 @@ void parsebgp_bgp_update_mp_reach_clear(parsebgp_bgp_update_mp_reach_t *msg)
   msg->nlris_cnt = 0;
 }
 
-void parsebgp_bgp_update_mp_reach_dump(parsebgp_bgp_update_mp_reach_t *msg,
-                                       int depth)
+void parsebgp_bgp_update_mp_reach_dump(
+    const parsebgp_bgp_update_mp_reach_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_reach_t, depth);
 
@@ -409,8 +409,8 @@ void parsebgp_bgp_update_mp_unreach_clear(parsebgp_bgp_update_mp_unreach_t *msg)
   msg->withdrawn_nlris_cnt = 0;
 }
 
-void parsebgp_bgp_update_mp_unreach_dump(parsebgp_bgp_update_mp_unreach_t *msg,
-                                         int depth)
+void parsebgp_bgp_update_mp_unreach_dump(
+    const parsebgp_bgp_update_mp_unreach_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_mp_unreach_t, depth);
 

@@ -182,7 +182,7 @@ void parsebgp_bgp_clear_msg(parsebgp_bgp_msg_t *msg)
   }
 }
 
-void parsebgp_bgp_dump_msg(parsebgp_bgp_msg_t *msg, int depth)
+void parsebgp_bgp_dump_msg(const parsebgp_bgp_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_msg_t, depth);
 

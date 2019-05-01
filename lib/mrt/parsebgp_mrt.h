@@ -502,6 +502,6 @@ void parsebgp_mrt_clear_msg(parsebgp_mrt_msg_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_mrt_dump_msg(parsebgp_mrt_msg_t *msg, int depth);
+void parsebgp_mrt_dump_msg(const parsebgp_mrt_msg_t *msg, int depth);
 
 #endif /* __PARSEBGP_MRT_H */
