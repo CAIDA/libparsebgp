@@ -115,11 +115,11 @@ static void clear_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs, int *tlvs_cnt)
   *tlvs_cnt = 0;
 }
 
-static void dump_info_tlvs(parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
+static void dump_info_tlvs(const parsebgp_bmp_info_tlv_t *tlvs, int tlvs_cnt,
                            int depth)
 {
   int i;
-  parsebgp_bmp_info_tlv_t *tlv;
+  const parsebgp_bmp_info_tlv_t *tlv;
 
   for (i = 0; i < tlvs_cnt; i++) {
     tlv = &tlvs[i];
@@ -250,7 +250,7 @@ static void clear_stats_report(parsebgp_bmp_stats_report_t *msg)
   msg->stats_count = 0;
 }
 
-static void dump_stats_report(parsebgp_bmp_stats_report_t *msg, int depth)
+static void dump_stats_report(const parsebgp_bmp_stats_report_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_stats_report_t, depth);
 
@@ -383,7 +383,7 @@ static void clear_peer_down(parsebgp_bmp_peer_down_t *msg)
   }
 }
 
-static void dump_peer_down(parsebgp_bmp_peer_down_t *msg, int depth)
+static void dump_peer_down(const parsebgp_bmp_peer_down_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_peer_down_t, depth);
 
@@ -483,7 +483,7 @@ static void clear_peer_up(parsebgp_bmp_peer_up_t *msg)
   clear_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
 }
 
-static void dump_peer_up(parsebgp_bmp_peer_up_t *msg, int depth)
+static void dump_peer_up(const parsebgp_bmp_peer_up_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_peer_up_t, depth);
 
@@ -527,7 +527,7 @@ static void clear_init_msg(parsebgp_bmp_init_msg_t *msg)
   clear_info_tlvs(&msg->tlvs, &msg->tlvs_cnt);
 }
 
-static void dump_init_msg(parsebgp_bmp_init_msg_t *msg, int depth)
+static void dump_init_msg(const parsebgp_bmp_init_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_init_msg_t, depth);
 
@@ -626,7 +626,7 @@ static void clear_term_msg(parsebgp_bmp_term_msg_t *msg)
   msg->tlvs_cnt = 0;
 }
 
-static void dump_term_msg(parsebgp_bmp_term_msg_t *msg, int depth)
+static void dump_term_msg(const parsebgp_bmp_term_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_term_msg_t, depth);
 
@@ -766,7 +766,8 @@ static void clear_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg)
   msg->tlvs_cnt = 0;
 }
 
-static void dump_route_mirror_msg(parsebgp_bmp_route_mirror_t *msg, int depth)
+static void dump_route_mirror_msg(const parsebgp_bmp_route_mirror_t *msg,
+    int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_route_mirror_t, depth);
 
@@ -865,7 +866,7 @@ static parsebgp_error_t parse_peer_hdr(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-static void dump_peer_hdr(parsebgp_bmp_peer_hdr_t *hdr, int depth)
+static void dump_peer_hdr(const parsebgp_bmp_peer_hdr_t *hdr, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_peer_hdr_t, depth);
 
@@ -1039,7 +1040,7 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-static void dump_common_hdr(parsebgp_bmp_msg_t *msg, int depth)
+static void dump_common_hdr(const parsebgp_bmp_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_INT(depth, "Version", msg->version);
   PARSEBGP_DUMP_INT(depth, "Length", msg->len);
@@ -1187,7 +1188,7 @@ void parsebgp_bmp_clear_msg(parsebgp_bmp_msg_t *msg)
   }
 }
 
-void parsebgp_bmp_dump_msg(parsebgp_bmp_msg_t *msg, int depth)
+void parsebgp_bmp_dump_msg(const parsebgp_bmp_msg_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_msg_t, depth);
 

@@ -213,7 +213,7 @@ void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg)
   msg->capabilities_cnt = 0;
 }
 
-void parsebgp_bgp_open_dump(parsebgp_bgp_open_t *msg, int depth)
+void parsebgp_bgp_open_dump(const parsebgp_bgp_open_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_open_t, depth);
 

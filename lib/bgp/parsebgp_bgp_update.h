@@ -468,7 +468,7 @@ void parsebgp_bgp_update_clear(parsebgp_bgp_update_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bgp_update_dump(parsebgp_bgp_update_t *msg, int depth);
+void parsebgp_bgp_update_dump(const parsebgp_bgp_update_t *msg, int depth);
 
 /** Decode PATH ATTRIBUTES */
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
@@ -494,7 +494,7 @@ void parsebgp_bgp_update_path_attrs_clear(
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
-                                         int depth);
+void parsebgp_bgp_update_path_attrs_dump(
+    const parsebgp_bgp_update_path_attrs_t *msg, int depth);
 
 #endif /* __PARSEBGP_BGP_UPDATE_H */

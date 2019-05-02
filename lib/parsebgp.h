@@ -78,7 +78,7 @@ typedef struct parsebgp_msg {
  * @param [in] opts     Options for the parser
  * @param [in] type     Type of message to parse
  * @param [in] msg      Pointer to a message structure to fill (created using
- *                      parsebgp_msg_create)
+ *                      parsebgp_create_msg)
  * @param [in] buffer   Buffer containing the raw (unparsed) message
 
  * @param [in,out] len   Number of bytes in buffer. Updated with number of bytes
@@ -97,7 +97,7 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
  *
  * @return pointer to a fresh message structure
  *
- * The caller owns the returned structure and must call parsebgp_msg_destroy to
+ * The caller owns the returned structure and must call parsebgp_destroy_msg to
  * free allocated memory.
  */
 parsebgp_msg_t *parsebgp_create_msg(void);
@@ -126,6 +126,6 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_dump_msg(parsebgp_msg_t *msg);
+void parsebgp_dump_msg(const parsebgp_msg_t *msg);
 
 #endif // __PARSEBGP_H

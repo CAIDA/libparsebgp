@@ -207,7 +207,7 @@ void parsebgp_bgp_update_ext_communities_clear(
   msg->communities_cnt = 0;
 }
 
-static void dump_ext_community(parsebgp_bgp_update_ext_community_t *comm,
+static void dump_ext_community(const parsebgp_bgp_update_ext_community_t *comm,
                                int depth)
 {
   PARSEBGP_DUMP_INT(depth, "Type", comm->type);
@@ -264,7 +264,7 @@ static void dump_ext_community(parsebgp_bgp_update_ext_community_t *comm,
 }
 
 void parsebgp_bgp_update_ext_communities_dump(
-  parsebgp_bgp_update_ext_communities_t *msg, int depth)
+  const parsebgp_bgp_update_ext_communities_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_ext_communities_t, depth);
 

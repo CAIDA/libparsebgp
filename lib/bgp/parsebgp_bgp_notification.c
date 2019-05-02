@@ -79,7 +79,8 @@ void parsebgp_bgp_notification_clear(parsebgp_bgp_notification_t *msg)
   msg->data_len = 0;
 }
 
-void parsebgp_bgp_notification_dump(parsebgp_bgp_notification_t *msg, int depth)
+void parsebgp_bgp_notification_dump(const parsebgp_bgp_notification_t *msg,
+    int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_notification_t, depth);
 

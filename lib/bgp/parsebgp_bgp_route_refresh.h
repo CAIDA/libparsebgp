@@ -98,7 +98,7 @@ void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg);
  * and sizes of structures. It may be useful to potential users of the library
  * to get a sense of their data.
  */
-void parsebgp_bgp_route_refresh_dump(parsebgp_bgp_route_refresh_t *msg,
+void parsebgp_bgp_route_refresh_dump(const parsebgp_bgp_route_refresh_t *msg,
                                      int depth);
 
 #endif /* __PARSEBGP_BGP_ROUTE_REFRESH_H */

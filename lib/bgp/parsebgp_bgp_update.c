@@ -94,7 +94,7 @@ static void clear_nlris(parsebgp_bgp_update_nlris_t *nlris)
   nlris->prefixes_cnt = 0;
 }
 
-static void dump_nlris(parsebgp_bgp_update_nlris_t *nlris, int depth)
+static void dump_nlris(const parsebgp_bgp_update_nlris_t *nlris, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_nlris_t, depth);
 
@@ -225,7 +225,8 @@ static void clear_attr_as_path(parsebgp_bgp_update_as_path_t *msg)
   msg->segs_cnt = 0;
 }
 
-static void dump_attr_as_path(parsebgp_bgp_update_as_path_t *msg, int depth)
+static void dump_attr_as_path(const parsebgp_bgp_update_as_path_t *msg,
+    int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_as_path_t, depth);
 
@@ -330,7 +331,7 @@ static void clear_attr_communities(parsebgp_bgp_update_communities_t *msg)
   msg->communities_cnt = 0;
 }
 
-static void dump_attr_communities(parsebgp_bgp_update_communities_t *msg,
+static void dump_attr_communities(const parsebgp_bgp_update_communities_t *msg,
                                   int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_communities_t, depth);
@@ -386,8 +387,8 @@ static void clear_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg)
   msg->cluster_ids_cnt = 0;
 }
 
-static void dump_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
-                                   int depth)
+static void dump_attr_cluster_list(
+    const parsebgp_bgp_update_cluster_list_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_cluster_list_t, depth);
 
@@ -472,7 +473,7 @@ clear_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg)
 }
 
 static void
-dump_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
+dump_attr_large_communities(const parsebgp_bgp_update_large_communities_t *msg,
                             int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_large_communities_t, depth);
@@ -976,8 +977,8 @@ void parsebgp_bgp_update_path_attrs_clear(parsebgp_bgp_update_path_attrs_t *msg)
   msg->attrs_cnt = 0;
 }
 
-void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
-                                         int depth)
+void parsebgp_bgp_update_path_attrs_dump(
+    const parsebgp_bgp_update_path_attrs_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_path_attrs_t, depth);
 
@@ -986,7 +987,7 @@ void parsebgp_bgp_update_path_attrs_dump(parsebgp_bgp_update_path_attrs_t *msg,
 
   depth++;
   int i;
-  parsebgp_bgp_update_path_attr_t *attr;
+  const parsebgp_bgp_update_path_attr_t *attr;
   for (i = 0; i < PARSEBGP_BGP_PATH_ATTRS_LEN; i++) {
     attr = &msg->attrs[i];
 
@@ -1155,7 +1156,7 @@ void parsebgp_bgp_update_clear(parsebgp_bgp_update_t *msg)
   parsebgp_bgp_update_path_attrs_clear(&msg->path_attrs);
 }
 
-void parsebgp_bgp_update_dump(parsebgp_bgp_update_t *msg, int depth)
+void parsebgp_bgp_update_dump(const parsebgp_bgp_update_t *msg, int depth)
 {
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_update_t, depth);
 

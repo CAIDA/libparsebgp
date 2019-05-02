@@ -217,7 +217,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
  * to get a sense of their data.
  */
 void parsebgp_bgp_update_ext_communities_dump(
-  parsebgp_bgp_update_ext_communities_t *msg, int depth);
+  const parsebgp_bgp_update_ext_communities_t *msg, int depth);
 
 /** Destroy an EXTENDED COMMUNITIES message */
 void parsebgp_bgp_update_ext_communities_destroy(
