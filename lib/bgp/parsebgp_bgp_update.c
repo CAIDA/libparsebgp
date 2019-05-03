@@ -44,9 +44,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
   if (nlris->len > len) {
     return PARSEBGP_PARTIAL_MSG;
   }
-  if (nlris->len > remain) {
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-  }
+  PARSEBGP_ASSERT(nlris->len <= remain);
 
   // read until we run out of message
   while (nread < nlris->len) {
@@ -306,9 +304,7 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
   PARSEBGP_MAYBE_REALLOC(msg->communities, sizeof(uint32_t),
                          msg->_communities_alloc_cnt, msg->communities_cnt);
   for (i = 0; i < msg->communities_cnt; i++) {
-    if ((remain - nread) < sizeof(uint32_t)) {
-      PARSEBGP_RETURN_INVALID_MSG_ERR;
-    }
+    PARSEBGP_ASSERT((remain - nread) >= sizeof(uint32_t));
     PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->communities[i]);
   }
 
@@ -363,9 +359,7 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
                          msg->_cluster_ids_alloc_cnt, msg->cluster_ids_cnt);
 
   for (i = 0; i < msg->cluster_ids_cnt; i++) {
-    if ((remain - nread) < sizeof(uint32_t)) {
-      PARSEBGP_RETURN_INVALID_MSG_ERR;
-    }
+    PARSEBGP_ASSERT((remain - nread) >= sizeof(uint32_t));
     PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->cluster_ids[i]);
   }
 
@@ -430,9 +424,7 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
   parsebgp_bgp_update_large_community_t *comm;
 #define LARGE_COMM_LEN 12
 
-  if ((remain % LARGE_COMM_LEN) != 0) {
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-  }
+  PARSEBGP_ASSERT((remain % LARGE_COMM_LEN) == 0);
 
   msg->communities_cnt = remain / LARGE_COMM_LEN;
 
@@ -494,13 +486,6 @@ dump_attr_large_communities(const parsebgp_bgp_update_large_communities_t *msg,
   printf("\n");
 }
 
-#define CHECK_ATTR_LEN(attr_len, val)                                          \
-  do {                                                                         \
-    if (attr_len != sizeof(val)) {                                             \
-      PARSEBGP_RETURN_INVALID_MSG_ERR;                                         \
-    }                                                                          \
-  } while (0)
-
 parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_path_attrs_t *path_attrs,
   const uint8_t *buf, size_t *lenp, size_t remain)
@@ -520,9 +505,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   if (nread + path_attrs->len > len) {
     return PARSEBGP_PARTIAL_MSG;
   }
-  if (nread + path_attrs->len > remain) {
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-  }
+  PARSEBGP_ASSERT(nread + path_attrs->len <= remain);
   remain = nread + path_attrs->len; // remaining within path attributes
 
   // read until we run out of attributes
@@ -629,7 +612,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 1:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGIN:
-      CHECK_ATTR_LEN(attr->len, attr->data.origin);
+      PARSEBGP_ASSERT(attr->len == sizeof(attr->data.origin));
       PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, attr->data.origin);
       slen = sizeof(attr->data.origin);
       break;
@@ -648,21 +631,21 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 3:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_NEXT_HOP:
-      CHECK_ATTR_LEN(attr->len, attr->data.next_hop);
+      PARSEBGP_ASSERT(attr->len == sizeof(attr->data.next_hop));
       PARSEBGP_DESERIALIZE_VAL(buf, len, nread, attr->data.next_hop);
       slen = sizeof(attr->data.next_hop);
       break;
 
     // Type 4:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_MED:
-      CHECK_ATTR_LEN(attr->len, attr->data.med);
+      PARSEBGP_ASSERT(attr->len == sizeof(attr->data.med));
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, attr->data.med);
       slen = sizeof(attr->data.med);
       break;
 
     // Type 5:
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LOCAL_PREF:
-      CHECK_ATTR_LEN(attr->len, attr->data.local_pref);
+      PARSEBGP_ASSERT(attr->len == sizeof(attr->data.local_pref));
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, attr->data.local_pref);
       slen = sizeof(attr->data.local_pref);
       break;
@@ -697,7 +680,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 9
     case PARSEBGP_BGP_PATH_ATTR_TYPE_ORIGINATOR_ID:
-      CHECK_ATTR_LEN(attr->len, attr->data.originator_id);
+      PARSEBGP_ASSERT(attr->len == sizeof(attr->data.originator_id));
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, attr->data.originator_id);
       slen = sizeof(attr->data.originator_id);
       break;
@@ -833,9 +816,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       slen = attr->len;
       break;
     }
-    if (slen != attr->len) {
-      PARSEBGP_RETURN_INVALID_MSG_ERR;
-    }
+    PARSEBGP_ASSERT(slen == attr->len);
   }
 
   *lenp = nread;

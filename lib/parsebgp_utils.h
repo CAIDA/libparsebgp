@@ -201,6 +201,14 @@
 #define PARSEBGP_RETURN_INVALID_MSG_ERR return PARSEBGP_INVALID_MSG
 #endif
 
+#define PARSEBGP_ASSERT(condition)                                             \
+  do {                                                                         \
+    if (!(condition)) {                                                        \
+      PARSEBGP_RETURN_INVALID_MSG_ERR;                                         \
+    }                                                                          \
+  } while (0)
+
+
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \
     int _i;                                                                     \
