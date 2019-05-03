@@ -70,14 +70,9 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
       // the length field doesn't match what we saw in the common header
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
-    if (tlv->len > (len - nread)) {
-      return PARSEBGP_PARTIAL_MSG;
-    }
     PARSEBGP_MAYBE_REALLOC(tlv->info, sizeof(uint8_t), tlv->_info_alloc_len,
                            tlv->len);
-    memcpy(tlv->info, buf, tlv->len);
-    nread += tlv->len;
-    buf += tlv->len;
+    PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, tlv->info, tlv->len);
     remain -= tlv->len;
   }
 
@@ -565,9 +560,6 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
       // the length field doesn't match what we saw in the common header
       PARSEBGP_RETURN_INVALID_MSG_ERR;
     }
-    if (tlv->len > (len - nread)) {
-      return PARSEBGP_PARTIAL_MSG;
-    }
 
     // parse the info based on the type
     switch (tlv->type) {
@@ -576,13 +568,13 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
       PARSEBGP_MAYBE_REALLOC(tlv->info.string, sizeof(char),
                              tlv->info._string_alloc_len, tlv->len + 1);
       // and then copy it in
-      memcpy(tlv->info.string, buf, tlv->len);
+      PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, tlv->info.string, tlv->len);
       tlv->info.string[tlv->len] = '\0';
-      nread += tlv->len;
-      buf += tlv->len;
       break;
 
     case PARSEBGP_BMP_TERM_INFO_TYPE_REASON:
+      if (tlv->len != 2)
+        PARSEBGP_RETURN_INVALID_MSG_ERR;
       PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, tlv->info.reason);
       break;
 

@@ -84,13 +84,8 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
       comm->types.ip_addr.global_admin_ip_afi = PARSEBGP_BGP_AFI_IPV4;
 
       // Global Admin (IP Address)
-      // manual copy since the destination can also hold v6 addr
-      if ((len - nread) < 4) {
-        return PARSEBGP_PARTIAL_MSG;
-      }
-      memcpy(comm->types.ip_addr.global_admin_ip, buf, 4);
-      nread += 4;
-      buf += 4;
+      // note: the destination can also hold v6 addr
+      PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, comm->types.ip_addr.global_admin_ip, 4);
 
       // Local Admin
       PARSEBGP_DESERIALIZE_UINT16(buf, len, nread,
