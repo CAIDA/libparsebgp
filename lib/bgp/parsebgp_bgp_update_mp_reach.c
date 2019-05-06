@@ -170,9 +170,7 @@ parse_reach_afi_ipv4_ipv6(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
-  if ((remain - nread) < msg->next_hop_len) {
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-  }
+  PARSEBGP_ASSERT((remain - nread) >= msg->next_hop_len);
   if ((len - nread) < msg->next_hop_len) {
     return PARSEBGP_PARTIAL_MSG;
   }

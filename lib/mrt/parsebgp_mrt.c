@@ -41,12 +41,7 @@
   do {                                                                         \
     switch ((afi)) {                                                           \
     case PARSEBGP_BGP_AFI_IPV4:                                                \
-      if (len - nread < sizeof(uint32_t)) {                                    \
-        return PARSEBGP_PARTIAL_MSG;                                           \
-      }                                                                        \
-      memcpy(&(to), buf, sizeof(uint32_t));                                    \
-      nread += sizeof(uint32_t);                                               \
-      buf += sizeof(uint32_t);                                                 \
+      PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, &(to), 4);                   \
       break;                                                                   \
                                                                                \
     case PARSEBGP_BGP_AFI_IPV6:                                                \

@@ -41,9 +41,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   parsebgp_bgp_update_ext_community_t *comm;
 
   // sanity check on the length
-  if (remain % 8 != 0) {
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-  }
+  PARSEBGP_ASSERT(remain % 8 == 0);
 
   msg->communities_cnt = remain / 8;
 
@@ -84,13 +82,8 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
       comm->types.ip_addr.global_admin_ip_afi = PARSEBGP_BGP_AFI_IPV4;
 
       // Global Admin (IP Address)
-      // manual copy since the destination can also hold v6 addr
-      if ((len - nread) < 4) {
-        return PARSEBGP_PARTIAL_MSG;
-      }
-      memcpy(comm->types.ip_addr.global_admin_ip, buf, 4);
-      nread += 4;
-      buf += 4;
+      // note: the destination can also hold v6 addr
+      PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, comm->types.ip_addr.global_admin_ip, 4);
 
       // Local Admin
       PARSEBGP_DESERIALIZE_UINT16(buf, len, nread,
@@ -139,9 +132,7 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   parsebgp_bgp_update_ext_community_t *comm;
 
   // sanity check on the length
-  if (remain % 20 != 0) {
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-  }
+  PARSEBGP_ASSERT(remain % 20 == 0);
 
   msg->communities_cnt = remain / 20;
 

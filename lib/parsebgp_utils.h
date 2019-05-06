@@ -98,15 +98,7 @@
  * @param to            the variable to deserialize
  */
 #define PARSEBGP_DESERIALIZE_VAL(buf, len, read, to)                           \
-  do {                                                                         \
-    assert((len) >= (read));                                                   \
-    if (((len) - (read)) < sizeof(to)) {                                       \
-      return PARSEBGP_PARTIAL_MSG;                                             \
-    }                                                                          \
-    memcpy(&(to), (buf), sizeof(to));                                          \
-    read += sizeof(to);                                                        \
-    buf += sizeof(to);                                                         \
-  } while (0)
+  PARSEBGP_DESERIALIZE_BYTES(buf, len, read, &(to), sizeof(to))
 
 /** Convenience macros to deserialize a network-order integer from a byte array.
  * (They're also faster than PARSEBGP_DESERIALIZE_VAL() followed by ntoh*(),
@@ -140,6 +132,26 @@
     to = getval(buf);                                                          \
     read += sizeof(type);                                                      \
     buf += sizeof(type);                                                       \
+  } while (0)
+
+/** Convenience macro to deserialize raw bytes from a byte array.
+ *
+ * @param buf           pointer to the buffer (will be updated)
+ * @param len           total length of the buffer
+ * @param read          the number of bytes already read from the buffer
+ *                      (will be updated)
+ * @param ptr           pointer to memory to deserialize into
+ * @param n             number of bytes to deserialize
+ */
+#define PARSEBGP_DESERIALIZE_BYTES(buf, len, read, ptr, n)                     \
+  do {                                                                         \
+    assert((len) >= (read));                                                   \
+    if (((len) - (read)) < (n)) {                                              \
+      return PARSEBGP_PARTIAL_MSG;                                             \
+    }                                                                          \
+    memcpy((ptr), (buf), (n));                                                 \
+    read += (n);                                                               \
+    buf += (n);                                                                \
   } while (0)
 
 
@@ -188,6 +200,14 @@
 #else
 #define PARSEBGP_RETURN_INVALID_MSG_ERR return PARSEBGP_INVALID_MSG
 #endif
+
+#define PARSEBGP_ASSERT(condition)                                             \
+  do {                                                                         \
+    if (!(condition)) {                                                        \
+      PARSEBGP_RETURN_INVALID_MSG_ERR;                                         \
+    }                                                                          \
+  } while (0)
+
 
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \
