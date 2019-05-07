@@ -511,8 +511,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   // read until we run out of attributes
   while (nread < remain) {
 
-    if ((remain - nread < 3) ||
-      ((*buf & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) && remain - nread < 4))
+    /* Optimization: the vast majority of cases will short-circuit after the
+     * <4 condition. */
+    if ((remain - nread < 4) &&
+      ((*buf & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) || remain - nread < 3))
     {
       /* The remaining data in Path Attributes is insufficient to encode a
          single minimum-sized path attribute, and should be considered as
@@ -526,17 +528,18 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       return PARSEBGP_OK;
     }
 
-    // Attribute Flags
-    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, flags_tmp);
-
-    // Attribute Type
-    PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, type_tmp);
-
-    // Attribute Length
+    /* Optimization: since the length was already checked above, we can skip
+     * the PARSEBGP_DESERIALIZE_* calls and read the buf directly. */
+    flags_tmp = *(buf++); // Attribute Flags
+    type_tmp = *(buf++);  // Attribute Type
     if (flags_tmp & PARSEBGP_BGP_PATH_ATTR_FLAG_EXTENDED) {
-      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, len_tmp);
+      len_tmp = nptohs(buf); // Attribute Length
+      buf += 2;
+      nread += 4;
     } else {
-      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, len_tmp);
+      len_tmp = *buf; // Attribute Length
+      buf += 1;
+      nread += 3;
     }
 
     if (len_tmp > (remain - nread)) {
