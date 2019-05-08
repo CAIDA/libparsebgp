@@ -42,8 +42,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
 
   while ((remain - nread) > 0) {
 
-    PARSEBGP_MAYBE_REALLOC(
-      msg->capabilities, sizeof(parsebgp_bgp_open_capability_t),
+    PARSEBGP_MAYBE_REALLOC(msg->capabilities,
       msg->_capabilities_alloc_cnt, msg->capabilities_cnt + 1);
     cap = &msg->capabilities[msg->capabilities_cnt++];
 

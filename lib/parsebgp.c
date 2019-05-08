@@ -132,5 +132,5 @@ void parsebgp_dump_msg(const parsebgp_msg_t *msg)
     break;
   }
 
-  printf("\n");
+  fputs("\n", stdout);
 }

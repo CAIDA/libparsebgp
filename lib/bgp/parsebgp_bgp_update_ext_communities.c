@@ -46,7 +46,6 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   msg->communities_cnt = remain / 8;
 
   PARSEBGP_MAYBE_REALLOC(msg->communities,
-                         sizeof(parsebgp_bgp_update_ext_community_t),
                          msg->_communities_alloc_cnt, msg->communities_cnt);
   // TODO: does this really need to be zeroed?
   memset(msg->communities, 0,
@@ -137,7 +136,6 @@ parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
   msg->communities_cnt = remain / 20;
 
   PARSEBGP_MAYBE_REALLOC(msg->communities,
-                         sizeof(parsebgp_bgp_update_ext_community_t),
                          msg->_communities_alloc_cnt, msg->communities_cnt);
   // TODO: does this really need to be zeroed?
   memset(msg->communities, 0,

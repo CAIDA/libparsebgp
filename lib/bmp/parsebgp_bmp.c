@@ -51,8 +51,7 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
 
   // read and realloc tlvs until we run out of message
   while (remain > 0) {
-    PARSEBGP_MAYBE_REALLOC(*tlvs, sizeof(parsebgp_bmp_info_tlv_t),
-                           *tlvs_alloc_cnt, *tlvs_cnt + 1);
+    PARSEBGP_MAYBE_REALLOC(*tlvs, *tlvs_alloc_cnt, *tlvs_cnt + 1);
     tlv = &(*tlvs)[*tlvs_cnt];
     (*tlvs_cnt)++;
 
@@ -67,8 +66,7 @@ static parsebgp_error_t parse_info_tlvs(parsebgp_bmp_info_tlv_t **tlvs,
 
     // Info data
     PARSEBGP_ASSERT(tlv->len <= remain); // length field must match the common header
-    PARSEBGP_MAYBE_REALLOC(tlv->info, sizeof(uint8_t), tlv->_info_alloc_len,
-                           tlv->len);
+    PARSEBGP_MAYBE_REALLOC(tlv->info, tlv->_info_alloc_len, tlv->len);
     PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, tlv->info, tlv->len);
     remain -= tlv->len;
   }
@@ -139,7 +137,7 @@ static parsebgp_error_t parse_stats_report(parsebgp_opts_t *opts,
   PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->stats_count);
 
   // Allocate enough counter structures
-  PARSEBGP_MAYBE_REALLOC(msg->counters, sizeof(parsebgp_bmp_stats_counter_t),
+  PARSEBGP_MAYBE_REALLOC(msg->counters,
                          msg->_counters_alloc_cnt, msg->stats_count);
   memset(msg->counters, 0,
          sizeof(parsebgp_bmp_stats_counter_t) * msg->stats_count);
@@ -528,8 +526,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
 
   // read until we run out of message
   while (remain > 0) {
-    PARSEBGP_MAYBE_REALLOC(msg->tlvs, sizeof(parsebgp_bmp_term_tlv_t),
-                           msg->_tlvs_alloc_cnt, msg->tlvs_cnt + 1);
+    PARSEBGP_MAYBE_REALLOC(msg->tlvs, msg->_tlvs_alloc_cnt, msg->tlvs_cnt + 1);
     tlv = &msg->tlvs[msg->tlvs_cnt];
     msg->tlvs_cnt++;
 
@@ -549,7 +546,7 @@ static parsebgp_error_t parse_term_msg(parsebgp_bmp_term_msg_t *msg,
     switch (tlv->type) {
     case PARSEBGP_BMP_TERM_INFO_TYPE_STRING:
       // allocate a string buffer for the data
-      PARSEBGP_MAYBE_REALLOC(tlv->info.string, sizeof(char),
+      PARSEBGP_MAYBE_REALLOC(tlv->info.string,
                              tlv->info._string_alloc_len, tlv->len + 1);
       // and then copy it in
       PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, tlv->info.string, tlv->len);
@@ -652,8 +649,7 @@ static parsebgp_error_t parse_route_mirror_msg(parsebgp_opts_t *opts,
 
   // read tlvs until we run out of message
   while ((remain - nread) > 0) {
-    PARSEBGP_MAYBE_REALLOC(msg->tlvs, sizeof(parsebgp_bmp_route_mirror_tlv_t),
-                           msg->_tlvs_alloc_cnt, msg->tlvs_cnt + 1);
+    PARSEBGP_MAYBE_REALLOC(msg->tlvs, msg->_tlvs_alloc_cnt, msg->tlvs_cnt + 1);
     tlv = &msg->tlvs[msg->tlvs_cnt];
     memset(tlv, 0, sizeof(*tlv));
     msg->tlvs_cnt++;
