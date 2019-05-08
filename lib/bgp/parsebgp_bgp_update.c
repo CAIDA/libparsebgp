@@ -304,7 +304,6 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
   PARSEBGP_MAYBE_REALLOC(msg->communities, sizeof(uint32_t),
                          msg->_communities_alloc_cnt, msg->communities_cnt);
   for (i = 0; i < msg->communities_cnt; i++) {
-    PARSEBGP_ASSERT((remain - nread) >= sizeof(uint32_t));
     PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->communities[i]);
   }
 
