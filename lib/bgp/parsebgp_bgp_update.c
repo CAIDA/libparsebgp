@@ -491,7 +491,6 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   uint8_t flags_tmp, type_tmp;
   uint16_t len_tmp;
   parsebgp_error_t err = PARSEBGP_OK;
-  int raw = 0;
 
   path_attrs->attrs_cnt = 0;
 
@@ -587,13 +586,6 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     path_attrs->attrs_used[path_attrs->attrs_cnt] = type_tmp;
     path_attrs->attrs_cnt++;
 
-    if (opts->bgp.path_attr_raw_enabled &&
-        opts->bgp.path_attr_raw[type_tmp] != 0) {
-      raw = 1;
-    } else {
-      raw = 0;
-    }
-
     // Attribute Flags
     attr->flags = flags_tmp;
 
@@ -602,6 +594,9 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Attribute Length
     attr->len = len_tmp;
+
+#define RAW(opts, attr) \
+    (opts->bgp.path_attr_raw_enabled && opts->bgp.path_attr_raw[attr->type])
 
     slen = len - nread;
     switch (attr->type) {
@@ -621,7 +616,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.as_path);
       if ((err = parse_path_attr_as_path_safe(opts->bgp.asn_4_byte,
                                               attr->data.as_path, buf, &slen,
-                                              attr->len, raw)) != PARSEBGP_OK) {
+                                              attr->len, RAW(opts, attr)))
+                                              != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -670,7 +666,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
     case PARSEBGP_BGP_PATH_ATTR_TYPE_COMMUNITIES:
       PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.communities);
       if ((err = parse_path_attr_communities(attr->data.communities, buf, &slen,
-                                             attr->len, raw)) != PARSEBGP_OK) {
+                                             attr->len, RAW(opts, attr)))
+                                             != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
@@ -738,7 +735,8 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       // same as AS_PATH, but force 4-byte AS parsing
       PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.as_path);
       if ((err = parse_path_attr_as_path(1, attr->data.as_path, buf, &slen,
-                                         attr->len, raw)) != PARSEBGP_OK) {
+                                         attr->len, RAW(opts, attr)))
+                                         != PARSEBGP_OK) {
         return err;
       }
       nread += slen;
