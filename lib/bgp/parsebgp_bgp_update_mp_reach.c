@@ -86,8 +86,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   *nlris_cnt = 0;
 
   while ((remain - nread) > 0) {
-    PARSEBGP_MAYBE_REALLOC(*nlris, sizeof(parsebgp_bgp_prefix_t),
-                           *nlris_alloc_cnt, *nlris_cnt + 1);
+    PARSEBGP_MAYBE_REALLOC(*nlris, *nlris_alloc_cnt, *nlris_cnt + 1);
     tuple = &(*nlris)[*nlris_cnt];
     (*nlris_cnt)++;
 

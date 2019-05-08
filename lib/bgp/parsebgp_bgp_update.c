@@ -48,7 +48,7 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
 
   // read until we run out of message
   while (nread < nlris->len) {
-    PARSEBGP_MAYBE_REALLOC(nlris->prefixes, sizeof(parsebgp_bgp_prefix_t),
+    PARSEBGP_MAYBE_REALLOC(nlris->prefixes,
                            nlris->_prefixes_alloc_cnt, nlris->prefixes_cnt + 1);
     tuple = &nlris->prefixes[nlris->prefixes_cnt];
     nlris->prefixes_cnt++;
@@ -121,7 +121,7 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
   msg->asns_cnt = 0;
 
   if (raw) {
-    PARSEBGP_MAYBE_REALLOC(msg->raw, sizeof(uint8_t), msg->_raw_alloc_len,
+    PARSEBGP_MAYBE_REALLOC(msg->raw, msg->_raw_alloc_len,
                            remain);
     memcpy(msg->raw, buf, remain);
     *lenp = remain;
@@ -130,8 +130,7 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 
   while ((remain - nread) > 0) {
     // create a new segment
-    PARSEBGP_MAYBE_REALLOC(msg->segs, sizeof(parsebgp_bgp_update_as_path_seg_t),
-                           msg->_segs_alloc_cnt, msg->segs_cnt + 1);
+    PARSEBGP_MAYBE_REALLOC(msg->segs, msg->_segs_alloc_cnt, msg->segs_cnt + 1);
     seg = &(msg->segs)[msg->segs_cnt];
     msg->segs_cnt++;
 
@@ -161,8 +160,7 @@ parse_path_attr_as_path(int asn_4_byte, parsebgp_bgp_update_as_path_t *msg,
 
     // ensure there is enough space to store the ASNs (we store as 4-byte
     // regardless of what the path encoding is)
-    PARSEBGP_MAYBE_REALLOC(seg->asns, sizeof(uint32_t), seg->_asns_alloc_cnt,
-                           seg->asns_cnt);
+    PARSEBGP_MAYBE_REALLOC(seg->asns, seg->_asns_alloc_cnt, seg->asns_cnt);
     // Segment ASNs
     for (i = 0; i < seg->asns_cnt; i++) {
       if (asn_4_byte) {
@@ -294,14 +292,13 @@ parse_path_attr_communities(parsebgp_bgp_update_communities_t *msg,
 
   if (raw) {
     // don't actually parse the communities
-    PARSEBGP_MAYBE_REALLOC(msg->raw, sizeof(uint8_t), msg->_raw_alloc_len,
-                           remain);
+    PARSEBGP_MAYBE_REALLOC(msg->raw, msg->_raw_alloc_len, remain);
     memcpy(msg->raw, buf, remain);
     *lenp = remain;
     return PARSEBGP_OK;
   }
 
-  PARSEBGP_MAYBE_REALLOC(msg->communities, sizeof(uint32_t),
+  PARSEBGP_MAYBE_REALLOC(msg->communities,
                          msg->_communities_alloc_cnt, msg->communities_cnt);
   for (i = 0; i < msg->communities_cnt; i++) {
     PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->communities[i]);
@@ -354,7 +351,7 @@ parse_path_attr_cluster_list(parsebgp_bgp_update_cluster_list_t *msg,
 
   msg->cluster_ids_cnt = remain / sizeof(uint32_t);
 
-  PARSEBGP_MAYBE_REALLOC(msg->cluster_ids, sizeof(uint32_t),
+  PARSEBGP_MAYBE_REALLOC(msg->cluster_ids,
                          msg->_cluster_ids_alloc_cnt, msg->cluster_ids_cnt);
 
   for (i = 0; i < msg->cluster_ids_cnt; i++) {
@@ -427,7 +424,7 @@ parse_path_attr_large_communities(parsebgp_bgp_update_large_communities_t *msg,
 
   msg->communities_cnt = remain / LARGE_COMM_LEN;
 
-  PARSEBGP_MAYBE_REALLOC(msg->communities, LARGE_COMM_LEN,
+  PARSEBGP_MAYBE_REALLOC(msg->communities,
                          msg->_communities_alloc_cnt, msg->communities_cnt);
 
   for (i = 0; i < msg->communities_cnt; i++) {
@@ -584,7 +581,7 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
       continue;
     }
 
-    PARSEBGP_MAYBE_REALLOC(path_attrs->attrs_used, sizeof(uint8_t),
+    PARSEBGP_MAYBE_REALLOC(path_attrs->attrs_used,
                            path_attrs->_attrs_used_alloc_cnt,
                            path_attrs->attrs_cnt + 1);
     path_attrs->attrs_used[path_attrs->attrs_cnt] = type_tmp;

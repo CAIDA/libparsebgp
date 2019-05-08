@@ -303,14 +303,17 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
 /** Convenience function to allocate and zero memory */
 void *malloc_zero(const size_t size);
 
-/** Conditionally reallocate memory if not enough is currently allocated */
-#define PARSEBGP_MAYBE_REALLOC(ptr, size, alloc_len, len)                      \
+/** Conditionally reallocate memory if not enough is currently allocated.
+ *
+ * Note: Relies on the type of ptr to determine the correct size to allocate.
+ */
+#define PARSEBGP_MAYBE_REALLOC(ptr, alloc_len, len)                            \
   do {                                                                         \
-    if (((size) * (alloc_len)) < ((size) * (len))) {                           \
-      if (((ptr) = realloc((ptr), (size) * (size) * (len))) == NULL) {         \
+    if ((alloc_len) < (len)) {                                                 \
+      if (((ptr) = realloc((ptr), sizeof(*(ptr)) * (len))) == NULL) {          \
         return PARSEBGP_MALLOC_FAILURE;                                        \
       }                                                                        \
-      memset(ptr + alloc_len, 0, ((size) * (len)) - ((size) * (alloc_len)));   \
+      memset(ptr + alloc_len, 0, sizeof(*(ptr)) * ((len) - (alloc_len)));      \
       alloc_len = len;                                                         \
     }                                                                          \
   } while (0)

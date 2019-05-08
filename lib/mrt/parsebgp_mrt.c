@@ -156,7 +156,7 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
 
   // View Name
   if (msg->view_name_len > 0) {
-    PARSEBGP_MAYBE_REALLOC(msg->view_name, sizeof(char),
+    PARSEBGP_MAYBE_REALLOC(msg->view_name,
                            msg->_view_name_alloc_len, msg->view_name_len + 1);
     memcpy(msg->view_name, buf, msg->view_name_len);
     msg->view_name[msg->view_name_len] = '\0';
@@ -169,7 +169,6 @@ parse_table_dump_v2_peer_index(parsebgp_mrt_table_dump_v2_peer_index_t *msg,
 
   // allocate some space for the peer entries
   PARSEBGP_MAYBE_REALLOC(msg->peer_entries,
-                         sizeof(parsebgp_mrt_table_dump_v2_peer_entry_t),
                          msg->_peer_entries_alloc_cnt, msg->peer_count);
   memset(msg->peer_entries, 0,
          sizeof(parsebgp_mrt_table_dump_v2_peer_entry_t) * msg->peer_count);
@@ -385,7 +384,6 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
   // RIB Entries
   // allocate some memory for the entries
   PARSEBGP_MAYBE_REALLOC(msg->entries,
-                         sizeof(parsebgp_mrt_table_dump_v2_rib_entry_t),
                          msg->_entries_alloc_cnt, msg->entry_count);
 
   // and then parse the entries

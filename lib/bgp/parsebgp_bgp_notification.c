@@ -47,8 +47,7 @@ parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
 
   // Data
   msg->data_len = remain - nread;
-  PARSEBGP_MAYBE_REALLOC(msg->data, sizeof(uint8_t), msg->_data_alloc_len,
-                         msg->data_len);
+  PARSEBGP_MAYBE_REALLOC(msg->data, msg->_data_alloc_len, msg->data_len);
   PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, msg->data, msg->data_len);
 
   *lenp = nread;
