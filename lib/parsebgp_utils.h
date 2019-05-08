@@ -211,12 +211,12 @@
 
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \
-    int _i;                                                                     \
-    for (_i = 0; _i < depth; _i++) {                                              \
-      if (_i == depth - 1) {                                                    \
-        printf(" ");                                                           \
+    int _i;                                                                    \
+    for (_i = 0; _i < depth; _i++) {                                           \
+      if (_i == depth - 1) {                                                   \
+        fputs(" ", stdout);                                                    \
       } else {                                                                 \
-        printf("  ");                                                          \
+        fputs("  ", stdout);                                                   \
       }                                                                        \
     }                                                                          \
     printf(">> " STR(struct_name) " (%ld bytes):\n", sizeof(struct_name));     \
@@ -224,10 +224,10 @@
 
 #define PARSEBGP_DUMP_INFO(depth, ...)                                         \
   do {                                                                         \
-    int _i;                                                                     \
-    printf(" ");                                                               \
-    for (_i = 0; _i < depth; _i++) {                                              \
-      printf("  ");                                                            \
+    int _i;                                                                    \
+    fputs(" ", stdout);                                                        \
+    for (_i = 0; _i < depth; _i++) {                                           \
+      fputs("  ", stdout);                                                     \
     }                                                                          \
     printf(__VA_ARGS__);                                                       \
   } while (0)
@@ -268,15 +268,15 @@
     int _byte;                                                                 \
     PARSEBGP_DUMP_INFO(depth, name ": ");                                      \
     if ((len) == 0) {                                                          \
-      printf("NONE\n");                                                        \
+      fputs("NONE\n", stdout);                                                 \
     } else {                                                                   \
       for (_byte = 0; _byte < len; _byte++) {                                  \
         if (_byte != 0) {                                                      \
-          printf(" ");                                                         \
+          fputs(" ", stdout);                                                  \
         }                                                                      \
         printf("%02X", (data)[_byte]);                                         \
       }                                                                        \
-      printf("\n");                                                            \
+      fputs("\n", stdout);                                                     \
     }                                                                          \
   } while (0)
 
