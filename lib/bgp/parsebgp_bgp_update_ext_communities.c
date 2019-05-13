@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_update_ext_communities.h"
+#include "parsebgp_bgp_update_ext_communities_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <assert.h>

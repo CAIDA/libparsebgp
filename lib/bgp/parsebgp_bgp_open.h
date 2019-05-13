@@ -145,29 +145,4 @@ typedef struct parsebgp_bgp_open {
 
 } parsebgp_bgp_open_t;
 
-/** Decode an OPEN message */
-parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
-                                          parsebgp_bgp_open_t *msg,
-                                          const uint8_t *buf, size_t *lenp,
-                                          size_t remain);
-
-/** Destroy an OPEN message */
-void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg);
-
-/** Clear an OPEN message */
-void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg);
-
-/**
- * Dump a human-readable version of the message to stdout
- *
- * @param msg           Pointer to the parsed OPEN message to dump
- * @param depth         Depth of the message within the overall message
- *
- * The output from these functions is designed to help with debugging the
- * library and also includes internal implementation information like the names
- * and sizes of structures. It may be useful to potential users of the library
- * to get a sense of their data.
- */
-void parsebgp_bgp_open_dump(const parsebgp_bgp_open_t *msg, int depth);
-
 #endif /* __PARSEBGP_BGP_OPEN_H */

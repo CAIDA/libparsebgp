@@ -24,63 +24,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_notification_impl.h"
-#include "parsebgp_error.h"
-#include "parsebgp_utils.h"
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+#ifndef __PARSEBGP_BGP_NOTIFICATION_IMPL_H
+#define __PARSEBGP_BGP_NOTIFICATION_IMPL_H
 
+#include "parsebgp_bgp_notification.h"
+
+/** Decode a NOTIFICATION message */
 parsebgp_error_t
 parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,
                                  parsebgp_bgp_notification_t *msg, const uint8_t *buf,
-                                 size_t *lenp, size_t remain)
-{
-  size_t len = *lenp, nread = 0;
+                                 size_t *lenp, size_t remain);
 
-  // Error Code
-  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->code);
+/** Destroy a NOTIFICATION message */
+void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg);
 
-  // Error Subcode
-  PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->subcode);
+/** Clear a NOTIFICATION message */
+void parsebgp_bgp_notification_clear(parsebgp_bgp_notification_t *msg);
 
-  // Data
-  msg->data_len = remain - nread;
-  PARSEBGP_MAYBE_REALLOC(msg->data, msg->_data_alloc_len, msg->data_len);
-  PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, msg->data, msg->data_len);
-
-  *lenp = nread;
-  return PARSEBGP_OK;
-}
-
-void parsebgp_bgp_notification_destroy(parsebgp_bgp_notification_t *msg)
-{
-  if (msg == NULL) {
-    return;
-  }
-
-  free(msg->data);
-
-  free(msg);
-}
-
-void parsebgp_bgp_notification_clear(parsebgp_bgp_notification_t *msg)
-{
-  if (msg == NULL) {
-    return;
-  }
-
-  msg->data_len = 0;
-}
-
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed NOTIFICATION message to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
 void parsebgp_bgp_notification_dump(const parsebgp_bgp_notification_t *msg,
-    int depth)
-{
-  PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_notification_t, depth);
+                                    int depth);
 
-  PARSEBGP_DUMP_INT(depth, "Error Code", msg->code);
-  PARSEBGP_DUMP_INT(depth, "Error Subcode", msg->subcode);
-  PARSEBGP_DUMP_INT(depth, "Data Length", msg->data_len);
-  PARSEBGP_DUMP_DATA(depth, "Data", msg->data, msg->data_len);
-}
+#endif /* __PARSEBGP_BGP_NOTIFICATION_IMPL_H */

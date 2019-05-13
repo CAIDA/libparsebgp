@@ -24,9 +24,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_update.h"
+#include "parsebgp_bgp_update_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
+#include "parsebgp_bgp_update_ext_communities_impl.h"
+#include "parsebgp_bgp_update_mp_reach_impl.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

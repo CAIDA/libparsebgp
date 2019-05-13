@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_route_refresh.h"
+#include "parsebgp_bgp_route_refresh_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <assert.h>
