@@ -24,15 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include "parsebgp_bgp_update_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include "parsebgp_bgp_update_ext_communities_impl.h"
 #include "parsebgp_bgp_update_mp_reach_impl.h"
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 
 static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
                                     const uint8_t *buf, size_t *lenp, size_t remain)

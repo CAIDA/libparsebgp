@@ -27,8 +27,8 @@
 #ifndef __PARSEBGP_BMP_OPTS_H
 #define __PARSEBGP_BMP_OPTS_H
 
-#include "parsebgp_bgp_common.h"
 #include <inttypes.h>
+#include "parsebgp_bgp_common.h"
 
 /**
  * BMP Parsing Options

@@ -24,6 +24,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <arpa/inet.h>
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include "parsebgp_bgp.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
@@ -31,11 +36,6 @@
 #include "parsebgp_bgp_update_impl.h"
 #include "parsebgp_bgp_notification_impl.h"
 #include "parsebgp_bgp_route_refresh_impl.h"
-#include <arpa/inet.h>
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 
 #define BGP_HDR_LEN 19
 

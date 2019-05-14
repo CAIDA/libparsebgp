@@ -27,10 +27,10 @@
 #ifndef __PARSEBGP_MRT_H
 #define __PARSEBGP_MRT_H
 
-#include "parsebgp_bgp.h"
-#include "parsebgp_error.h"
 #include <inttypes.h>
 #include <stdlib.h>
+#include "parsebgp_bgp.h"
+#include "parsebgp_error.h"
 
 /**
  * MRT ASN Types (2 or 4 byte)

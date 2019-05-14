@@ -27,8 +27,8 @@
 #ifndef __PARSEBGP_UTILS_H
 #define __PARSEBGP_UTILS_H
 
-#include "parsebgp_error.h"
 #include "config.h"
+
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +39,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+
+#include "parsebgp_error.h"
 
 /** Internal to the STR macro */
 #define XSTR(a) #a

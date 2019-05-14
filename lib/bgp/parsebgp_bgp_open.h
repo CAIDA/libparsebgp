@@ -27,10 +27,10 @@
 #ifndef __PARSEBGP_BGP_OPEN_H
 #define __PARSEBGP_BGP_OPEN_H
 
-#include "parsebgp_error.h"
-#include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stdlib.h>
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /**
  * Supported BGP Capabilities

@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_error.h"
 #include <stdlib.h>
+#include "parsebgp_error.h"
 
 static const char *err_strings[] = {
   "No Error",           // PARSEBGP_OK

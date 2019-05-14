@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_opts.h"
 #include <string.h>
+#include "parsebgp_opts.h"
 
 void parsebgp_opts_init(parsebgp_opts_t *opts)
 {
