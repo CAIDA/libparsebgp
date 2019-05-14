@@ -784,12 +784,14 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
 
     // Type 29
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
-      // TODO: add support for BGP-LS
-      PARSEBGP_SKIP_NOT_IMPLEMENTED(
-        opts, buf, nread, attr->len,
-        "BGP UPDATE Path Attribute %d (BGP-LS) is not yet implemented",
-        attr->type);
-      slen = attr->len;
+      PARSEBGP_MAYBE_MALLOC_ZERO(attr->data.bgp_ls);
+      if ((err = parsebgp_bgp_update_bgp_ls_decode(
+              opts, attr->data.bgp_ls, buf, &slen, attr->len)) !=
+          PARSEBGP_OK) {
+        return err;
+      }
+      nread += slen;
+      buf += slen;
       break;
 
     // ...
@@ -873,7 +875,7 @@ void parsebgp_bgp_update_path_attrs_destroy(
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
-      // TODO: add support for BGP-LS
+      parsebgp_bgp_update_bgp_ls_destroy(attr->data.bgp_ls);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
@@ -941,7 +943,7 @@ void parsebgp_bgp_update_path_attrs_clear(parsebgp_bgp_update_path_attrs_t *msg)
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
-      // TODO: add support for BGP-LS
+      parsebgp_bgp_update_bgp_ls_clear(attr->data.bgp_ls);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
@@ -1049,7 +1051,7 @@ void parsebgp_bgp_update_path_attrs_dump(
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_BGP_LS:
-      PARSEBGP_DUMP_INFO(depth, "BGP-LS Support Not Implemented\n");
+      parsebgp_bgp_update_bgp_ls_dump(attr->data.bgp_ls, depth);
       break;
 
     case PARSEBGP_BGP_PATH_ATTR_TYPE_LARGE_COMMUNITIES:
