@@ -28,6 +28,8 @@
 #define __PARSEBGP_BGP_NOTIFICATION_IMPL_H
 
 #include "parsebgp_bgp_notification.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /** Decode a NOTIFICATION message */
 parsebgp_error_t

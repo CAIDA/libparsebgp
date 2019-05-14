@@ -28,6 +28,8 @@
 #define __PARSEBGP_BGP_OPEN_IMPL_H
 
 #include "parsebgp_bgp_open.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /** Decode an OPEN message */
 parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,

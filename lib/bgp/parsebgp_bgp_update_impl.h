@@ -28,6 +28,8 @@
 #define __PARSEBGP_BGP_UPDATE_IMPL_H
 
 #include "parsebgp_bgp_update.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /** Decode an UPDATE message */
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,

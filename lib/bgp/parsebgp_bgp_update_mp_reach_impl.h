@@ -28,6 +28,8 @@
 #define __PARSEBGP_BGP_UPDATE_MP_REACH_IMPL_H
 
 #include "parsebgp_bgp_update_mp_reach.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /** Decode an MP_REACH message */
 parsebgp_error_t

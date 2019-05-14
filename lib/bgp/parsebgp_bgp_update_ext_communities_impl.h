@@ -28,6 +28,8 @@
 #define __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_IMPL_H
 
 #include "parsebgp_bgp_update_ext_communities.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /** Decode an EXTENDED COMMUNITIES message */
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(

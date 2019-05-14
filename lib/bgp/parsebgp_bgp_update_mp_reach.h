@@ -29,8 +29,6 @@
 
 #include <inttypes.h>
 #include "parsebgp_bgp_common.h"
-#include "parsebgp_error.h"
-#include "parsebgp_opts.h"
 
 /**
  * MP_REACH_NLRI

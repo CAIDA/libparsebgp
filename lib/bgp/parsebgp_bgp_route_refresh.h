@@ -28,8 +28,6 @@
 #define __PARSEBGP_BGP_ROUTE_REFRESH_H
 
 #include <inttypes.h>
-#include "parsebgp_error.h"
-#include "parsebgp_opts.h"
 
 /**
  * BGP ROUTE-REFRESH Subtypes

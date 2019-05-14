@@ -28,6 +28,8 @@
 #define __PARSEBGP_BGP_ROUTE_REFRESH_IMPL_H
 
 #include "parsebgp_bgp_route_refresh.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
 
 /** Decode a ROUTE REFRESH message */
 parsebgp_error_t
