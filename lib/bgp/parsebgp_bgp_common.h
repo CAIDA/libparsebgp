@@ -104,14 +104,4 @@ typedef struct parsebgp_bgp_prefix {
 
 } parsebgp_bgp_prefix_t;
 
-/**
- * Dump a human-readable version of the given array of prefixes to stdout
- *
- * @param prefixes      Array of prefixes to dump
- * @param prefixes_cnt  Number of prefixes to dump
- * @param depth         Depth of the message within the overall message
- */
-void parsebgp_bgp_prefixes_dump(parsebgp_bgp_prefix_t *prefixes,
-                                int prefixes_cnt, int depth);
-
 #endif /* __PARSEBGP_BGP_COMMON_H */

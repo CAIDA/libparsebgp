@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include "parsebgp_bgp_common_impl.h"
 #include "parsebgp_bgp_update_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
