@@ -28,7 +28,6 @@
 #define __PARSEBGP_BMP_H
 
 #include <inttypes.h>
-#include <stdlib.h>
 #include "parsebgp_bgp.h"   //< BMP encapsulates BGP messages
 #include "parsebgp_error.h" //< for parsebgp_error_t
 

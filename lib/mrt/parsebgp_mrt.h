@@ -28,7 +28,6 @@
 #define __PARSEBGP_MRT_H
 
 #include <inttypes.h>
-#include <stdlib.h>
 #include "parsebgp_bgp.h"
 #include "parsebgp_error.h"
 

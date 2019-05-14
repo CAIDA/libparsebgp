@@ -28,7 +28,6 @@
 #define __PARSEBGP_BGP_OPEN_H
 
 #include <inttypes.h>
-#include <stdlib.h>
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
 

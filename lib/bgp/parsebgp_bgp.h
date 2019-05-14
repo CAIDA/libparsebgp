@@ -28,7 +28,6 @@
 #define __PARSEBGP_BGP_H
 
 #include <inttypes.h>
-#include <stdlib.h>
 #include "parsebgp_bgp_notification.h"
 #include "parsebgp_bgp_open.h"
 #include "parsebgp_bgp_route_refresh.h"

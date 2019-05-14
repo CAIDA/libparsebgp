@@ -32,7 +32,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 // for inet_ntop:
 #include <arpa/inet.h>
 #include <netinet/in.h>
