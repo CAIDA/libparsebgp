@@ -24,13 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_update_mp_reach.h"
+#include "parsebgp_bgp_common_impl.h"
+#include "parsebgp_bgp_update_mp_reach_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   parsebgp_opts_t *opts, parsebgp_bgp_afi_t afi, parsebgp_bgp_safi_t safi,
@@ -348,7 +348,7 @@ void parsebgp_bgp_update_mp_reach_dump(
     PARSEBGP_DUMP_INT(depth, "Reserved", msg->reserved);
     PARSEBGP_DUMP_INT(depth, "NLRIs Count", msg->nlris_cnt);
 
-    parsebgp_bgp_dump_prefixes(msg->nlris, msg->nlris_cnt, depth + 1);
+    parsebgp_bgp_prefixes_dump(msg->nlris, msg->nlris_cnt, depth + 1);
     break;
 
   default:
@@ -428,7 +428,7 @@ void parsebgp_bgp_update_mp_unreach_dump(
   case PARSEBGP_BGP_AFI_IPV6:
     PARSEBGP_DUMP_INT(depth, "Withdrawn NLRIs Count", msg->withdrawn_nlris_cnt);
 
-    parsebgp_bgp_dump_prefixes(msg->withdrawn_nlris, msg->withdrawn_nlris_cnt,
+    parsebgp_bgp_prefixes_dump(msg->withdrawn_nlris, msg->withdrawn_nlris_cnt,
                                depth + 1);
     break;
 

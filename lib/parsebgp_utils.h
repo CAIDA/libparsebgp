@@ -32,8 +32,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 // for inet_ntop:
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -237,20 +235,20 @@
 #define PARSEBGP_DUMP_INT(depth, name, val)                                    \
   do {                                                                         \
     STATIC_ASSERT(sizeof(val) <= sizeof(int), val_is_larger_than_int);         \
-    PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)strlen(name ": "),     \
+    PARSEBGP_DUMP_INFO(depth, name ": %*d\n", 20 - (int)sizeof(name ":"),      \
                        (int)val);                                              \
   } while (0)
 
 #define PARSEBGP_DUMP_VAL(depth, name, fmt, val)                               \
   PARSEBGP_DUMP_INFO(depth, name ": %*" fmt "\n",                              \
-                     20 - (int)strlen(name ": "), val)
+                     20 - (int)sizeof(name ":"), val)
 
 #define PARSEBGP_DUMP_IP(depth, name, afi, ipaddr)                             \
   do {                                                                         \
     int mapping[] = {-1, AF_INET, AF_INET6};                                   \
     char ip_buf[INET6_ADDRSTRLEN];                                             \
     inet_ntop(mapping[afi], ipaddr, ip_buf, INET6_ADDRSTRLEN);                 \
-    PARSEBGP_DUMP_INFO(depth, name ": %*s\n", 20 - (int)strlen(name ": "),     \
+    PARSEBGP_DUMP_INFO(depth, name ": %*s\n", 20 - (int)sizeof(name ":"),      \
                        ip_buf);                                                \
   } while (0)
 
@@ -259,7 +257,7 @@
     int mapping[] = {-1, AF_INET, AF_INET6};                                   \
     char ip_buf[INET6_ADDRSTRLEN];                                             \
     inet_ntop(mapping[afi], ipaddr, ip_buf, INET6_ADDRSTRLEN);                 \
-    PARSEBGP_DUMP_INFO(depth, name ": %*s/%d\n", 20 - (int)strlen(name ": "),  \
+    PARSEBGP_DUMP_INFO(depth, name ": %*s/%d\n", 20 - (int)sizeof(name ":"),   \
                        ip_buf, len);                                           \
   } while (0)
 

@@ -27,6 +27,9 @@
 #include "parsebgp_mrt.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
+#include "parsebgp_bgp_update_impl.h"
+#include "parsebgp_bgp_notification_impl.h"
+#include "parsebgp_bgp_open_impl.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

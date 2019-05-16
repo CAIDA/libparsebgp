@@ -28,10 +28,7 @@
 #define __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H
 
 #include "parsebgp_bgp_common.h"
-#include "parsebgp_error.h"
-#include "parsebgp_opts.h"
 #include <inttypes.h>
-#include <stdlib.h>
 
 /**
  * Extended Community Types (High-byte)
@@ -194,37 +191,5 @@ typedef struct parsebgp_bgp_update_ext_communities {
   int communities_cnt;
 
 } parsebgp_bgp_update_ext_communities_t;
-
-/** Decode an EXTENDED COMMUNITIES message */
-parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
-  parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
-  const uint8_t *buf, size_t *lenp, size_t remain);
-
-/** Decode an IPv6 EXTENDED COMMUNITIES message */
-parsebgp_error_t parsebgp_bgp_update_ext_communities_ipv6_decode(
-  parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,
-  const uint8_t *buf, size_t *lenp, size_t remain);
-
-/**
- * Dump a human-readable version of the message to stdout
- *
- * @param msg           Pointer to the parsed MP_REACH attribute to dump
- * @param depth         Depth of the message within the overall message
- *
- * The output from these functions is designed to help with debugging the
- * library and also includes internal implementation information like the names
- * and sizes of structures. It may be useful to potential users of the library
- * to get a sense of their data.
- */
-void parsebgp_bgp_update_ext_communities_dump(
-  const parsebgp_bgp_update_ext_communities_t *msg, int depth);
-
-/** Destroy an EXTENDED COMMUNITIES message */
-void parsebgp_bgp_update_ext_communities_destroy(
-  parsebgp_bgp_update_ext_communities_t *msg);
-
-/** Clear an EXTENDED COMMUNITIES message */
-void parsebgp_bgp_update_ext_communities_clear(
-  parsebgp_bgp_update_ext_communities_t *msg);
 
 #endif /* __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H */

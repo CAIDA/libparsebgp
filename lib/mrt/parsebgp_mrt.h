@@ -30,7 +30,7 @@
 #include "parsebgp_bgp.h"
 #include "parsebgp_error.h"
 #include <inttypes.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 /**
  * MRT ASN Types (2 or 4 byte)

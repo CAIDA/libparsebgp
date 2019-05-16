@@ -30,14 +30,14 @@
 #include "parsebgp_bgp.h"   //< BMP encapsulates BGP messages
 #include "parsebgp_error.h" //< for parsebgp_error_t
 #include <inttypes.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 /* -------------------- Info TLV -------------------- */
 
 /**
  * BMP Info TLV Types
  */
-typedef enum parsebmp_bmp_info_tlv_type {
+typedef enum parsebgp_bmp_info_tlv_type {
 
   /** The information is a free form UTF-8 string (not nul-terminated). */
   PARSEBGP_BMP_INFO_TLV_TYPE_STRING = 0,
@@ -50,14 +50,14 @@ typedef enum parsebmp_bmp_info_tlv_type {
       object (not nul-terminated) */
   PARSEBGP_BMP_INFO_TLV_TYPE_SYSNAME = 2,
 
-} parsebmp_bmp_info_tlv_type_t;
+} parsebgp_bmp_info_tlv_type_t;
 
 /**
  * BMP Information TLV
  */
 typedef struct parsebgp_bmp_info_tlv {
 
-  /** Type of the information in the TLV (parsebmp_bmp_info_tlv_type_t) */
+  /** Type of the information in the TLV (parsebgp_bmp_info_tlv_type_t) */
   uint16_t type;
 
   /** Length of the information in the following field */

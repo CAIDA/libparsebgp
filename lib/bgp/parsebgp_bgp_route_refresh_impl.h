@@ -24,45 +24,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_utils.h"
-#include "parsebgp.h"
-#include <assert.h>
-#include <inttypes.h>
-#include <stdio.h>
-#include <string.h>
+#ifndef __PARSEBGP_BGP_ROUTE_REFRESH_IMPL_H
+#define __PARSEBGP_BGP_ROUTE_REFRESH_IMPL_H
 
-parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
-                                        const uint8_t *buf, size_t *buf_len,
-                                        size_t max_pfx_len)
-{
-  uint8_t bytes, junk;
-  PARSEBGP_ASSERT(pfx_len <= max_pfx_len);
-  // prefixes are encoded in a compact format the min number of bytes is used,
-  // so we first need to figure out how many bytes it takes to represent a
-  // prefix of this length.
-  bytes = pfx_len / 8;
-  if ((junk = (pfx_len % 8)) != 0) {
-    bytes++;
-  }
-  // now read the prefix
-  if (*buf_len < bytes) {
-    return PARSEBGP_PARTIAL_MSG;
-  }
-  memcpy(dst, buf, bytes);
-  // technically the trailing bits can be anything, so zero them out just to be
-  // helpful.
-  if (junk != 0) {
-    junk = 8 - junk;
-    dst[bytes - 1] = dst[bytes - 1] & (0xFF << junk);
-  }
-  // and ensure the rest of the buffer is clean
-  memset(dst + bytes, 0, 16 - bytes);
+#include "parsebgp_bgp_route_refresh.h"
+#include "parsebgp_error.h"
+#include "parsebgp_opts.h"
+#include <stddef.h>
 
-  *buf_len = bytes;
-  return PARSEBGP_OK;
-}
+/** Decode a ROUTE REFRESH message */
+parsebgp_error_t
+parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
+                                  parsebgp_bgp_route_refresh_t *msg,
+                                  const uint8_t *buf, size_t *lenp, size_t remain);
 
-void *malloc_zero(const size_t size)
-{
-  return calloc(size, 1);
-}
+/** Destroy a ROUTE REFRESH message */
+void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg);
+
+/** Clear a ROUTE REFRESH message */
+void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg);
+
+/**
+ * Dump a human-readable version of the message to stdout
+ *
+ * @param msg           Pointer to the parsed ROUTE-REFRESH message to dump
+ * @param depth         Depth of the message within the overall message
+ *
+ * The output from these functions is designed to help with debugging the
+ * library and also includes internal implementation information like the names
+ * and sizes of structures. It may be useful to potential users of the library
+ * to get a sense of their data.
+ */
+void parsebgp_bgp_route_refresh_dump(const parsebgp_bgp_route_refresh_t *msg,
+                                     int depth);
+
+#endif /* __PARSEBGP_BGP_ROUTE_REFRESH_IMPL_H */

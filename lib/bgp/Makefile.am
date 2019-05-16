@@ -61,6 +61,13 @@ libparsebgp_bgp_la_SOURCES = 			\
 	parsebgp_bgp_update_ext_communities.c	\
 	parsebgp_bgp_update_ext_communities.h	\
 	parsebgp_bgp_update_mp_reach.c		\
-	parsebgp_bgp_update_mp_reach.h
+	parsebgp_bgp_update_mp_reach.h		\
+	parsebgp_bgp_common_impl.h			\
+	parsebgp_bgp_notification_impl.h		\
+	parsebgp_bgp_open_impl.h			\
+	parsebgp_bgp_route_refresh_impl.h		\
+	parsebgp_bgp_update_impl.h			\
+	parsebgp_bgp_update_ext_communities_impl.h	\
+	parsebgp_bgp_update_mp_reach_impl.h
 
 CLEANFILES = *~

@@ -24,13 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_update.h"
+#include "parsebgp_bgp_common_impl.h"
+#include "parsebgp_bgp_update_impl.h"
 #include "parsebgp_error.h"
 #include "parsebgp_utils.h"
+#include "parsebgp_bgp_update_ext_communities_impl.h"
+#include "parsebgp_bgp_update_mp_reach_impl.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
                                     const uint8_t *buf, size_t *lenp, size_t remain)
@@ -98,7 +100,7 @@ static void dump_nlris(const parsebgp_bgp_update_nlris_t *nlris, int depth)
 
   PARSEBGP_DUMP_INT(depth, "Prefixes Count", nlris->prefixes_cnt);
 
-  parsebgp_bgp_dump_prefixes(nlris->prefixes, nlris->prefixes_cnt, depth + 1);
+  parsebgp_bgp_prefixes_dump(nlris->prefixes, nlris->prefixes_cnt, depth + 1);
 }
 
 static parsebgp_error_t

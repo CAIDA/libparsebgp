@@ -27,10 +27,7 @@
 #ifndef __PARSEBGP_BGP_ROUTE_REFRESH_H
 #define __PARSEBGP_BGP_ROUTE_REFRESH_H
 
-#include "parsebgp_error.h"
-#include "parsebgp_opts.h"
 #include <inttypes.h>
-#include <stdlib.h>
 
 /**
  * BGP ROUTE-REFRESH Subtypes
@@ -74,31 +71,5 @@ typedef struct parsebgp_bgp_route_refresh {
   int data_len;
 
 } parsebgp_bgp_route_refresh_t;
-
-/** Decode a ROUTE REFRESH message */
-parsebgp_error_t
-parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,
-                                  parsebgp_bgp_route_refresh_t *msg,
-                                  const uint8_t *buf, size_t *lenp, size_t remain);
-
-/** Destroy a ROUTE REFRESH message */
-void parsebgp_bgp_route_refresh_destroy(parsebgp_bgp_route_refresh_t *msg);
-
-/** Clear a ROUTE REFRESH message */
-void parsebgp_bgp_route_refresh_clear(parsebgp_bgp_route_refresh_t *msg);
-
-/**
- * Dump a human-readable version of the message to stdout
- *
- * @param msg           Pointer to the parsed ROUTE-REFRESH message to dump
- * @param depth         Depth of the message within the overall message
- *
- * The output from these functions is designed to help with debugging the
- * library and also includes internal implementation information like the names
- * and sizes of structures. It may be useful to potential users of the library
- * to get a sense of their data.
- */
-void parsebgp_bgp_route_refresh_dump(const parsebgp_bgp_route_refresh_t *msg,
-                                     int depth);
 
 #endif /* __PARSEBGP_BGP_ROUTE_REFRESH_H */

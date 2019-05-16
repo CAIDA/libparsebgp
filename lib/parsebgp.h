@@ -32,7 +32,7 @@
 #include "parsebgp_mrt.h"
 #include "parsebgp_opts.h"
 #include <inttypes.h>
-#include <unistd.h>
+#include <stddef.h>
 
 /**
  * Message types supported by libparsebgp

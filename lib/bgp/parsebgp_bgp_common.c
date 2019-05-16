@@ -24,10 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_bgp_common.h"
+#include "parsebgp_bgp_common_impl.h"
 #include "parsebgp_utils.h"
 
-void parsebgp_bgp_dump_prefixes(parsebgp_bgp_prefix_t *prefixes,
+void parsebgp_bgp_prefixes_dump(parsebgp_bgp_prefix_t *prefixes,
                                 int prefixes_cnt, int depth)
 {
   int i;

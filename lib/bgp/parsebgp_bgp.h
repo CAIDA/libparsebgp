@@ -34,7 +34,7 @@
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
 #include <inttypes.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 /**
  * BGP Message Types

@@ -24,45 +24,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "parsebgp_utils.h"
-#include "parsebgp.h"
-#include <assert.h>
-#include <inttypes.h>
-#include <stdio.h>
-#include <string.h>
+#ifndef __PARSEBGP_BGP_COMMON_IMPL_H
+#define __PARSEBGP_BGP_COMMON_IMPL_H
 
-parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
-                                        const uint8_t *buf, size_t *buf_len,
-                                        size_t max_pfx_len)
-{
-  uint8_t bytes, junk;
-  PARSEBGP_ASSERT(pfx_len <= max_pfx_len);
-  // prefixes are encoded in a compact format the min number of bytes is used,
-  // so we first need to figure out how many bytes it takes to represent a
-  // prefix of this length.
-  bytes = pfx_len / 8;
-  if ((junk = (pfx_len % 8)) != 0) {
-    bytes++;
-  }
-  // now read the prefix
-  if (*buf_len < bytes) {
-    return PARSEBGP_PARTIAL_MSG;
-  }
-  memcpy(dst, buf, bytes);
-  // technically the trailing bits can be anything, so zero them out just to be
-  // helpful.
-  if (junk != 0) {
-    junk = 8 - junk;
-    dst[bytes - 1] = dst[bytes - 1] & (0xFF << junk);
-  }
-  // and ensure the rest of the buffer is clean
-  memset(dst + bytes, 0, 16 - bytes);
+#include "parsebgp_bgp_common.h"
 
-  *buf_len = bytes;
-  return PARSEBGP_OK;
-}
+/**
+ * Dump a human-readable version of the given array of prefixes to stdout
+ *
+ * @param prefixes      Array of prefixes to dump
+ * @param prefixes_cnt  Number of prefixes to dump
+ * @param depth         Depth of the message within the overall message
+ */
+void parsebgp_bgp_prefixes_dump(parsebgp_bgp_prefix_t *prefixes,
+                                int prefixes_cnt, int depth);
 
-void *malloc_zero(const size_t size)
-{
-  return calloc(size, 1);
-}
+#endif /* __PARSEBGP_BGP_COMMON_IMPL_H */
