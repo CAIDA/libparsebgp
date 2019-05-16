@@ -24,13 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "parsebgp_bmp.h"
+#include "parsebgp_utils.h"
 #include <arpa/inet.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parsebgp_bmp.h"
-#include "parsebgp_utils.h"
 
 #define BMP_HDR_V1V2_LEN 43 ///< BMP v1/2 header length
 #define BMP_HDR_V3_LEN 6    ///< BMP v3 header length

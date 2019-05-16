@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_open.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <stddef.h>
 
 /** Decode an OPEN message */
 parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,

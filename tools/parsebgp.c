@@ -24,6 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "parsebgp.h"
 #include "config.h"
 #include <assert.h>
 #include <errno.h>
@@ -32,7 +33,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "parsebgp.h"
 
 #define NAME "parsebgp"
 

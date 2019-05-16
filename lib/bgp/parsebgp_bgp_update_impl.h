@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <stddef.h>
 
 /** Decode an UPDATE message */
 parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,

@@ -27,9 +27,10 @@
 #ifndef __PARSEBGP_BMP_H
 #define __PARSEBGP_BMP_H
 
-#include <inttypes.h>
 #include "parsebgp_bgp.h"   //< BMP encapsulates BGP messages
 #include "parsebgp_error.h" //< for parsebgp_error_t
+#include <inttypes.h>
+#include <stddef.h>
 
 /* -------------------- Info TLV -------------------- */
 

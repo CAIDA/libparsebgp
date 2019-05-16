@@ -27,8 +27,8 @@
 #ifndef __PARSEBGP_BGP_UPDATE_MP_REACH_H
 #define __PARSEBGP_BGP_UPDATE_MP_REACH_H
 
-#include <inttypes.h>
 #include "parsebgp_bgp_common.h"
+#include <inttypes.h>
 
 /**
  * MP_REACH_NLRI

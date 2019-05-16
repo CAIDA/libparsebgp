@@ -27,13 +27,14 @@
 #ifndef __PARSEBGP_BGP_H
 #define __PARSEBGP_BGP_H
 
-#include <inttypes.h>
 #include "parsebgp_bgp_notification.h"
 #include "parsebgp_bgp_open.h"
 #include "parsebgp_bgp_route_refresh.h"
 #include "parsebgp_bgp_update.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <inttypes.h>
+#include <stddef.h>
 
 /**
  * BGP Message Types

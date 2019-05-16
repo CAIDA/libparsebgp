@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_route_refresh.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <stddef.h>
 
 /** Decode a ROUTE REFRESH message */
 parsebgp_error_t

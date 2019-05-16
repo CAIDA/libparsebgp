@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_update_ext_communities.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <stddef.h>
 
 /** Decode an EXTENDED COMMUNITIES message */
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(

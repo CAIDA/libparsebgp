@@ -27,8 +27,8 @@
 #ifndef __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H
 #define __PARSEBGP_BGP_UPDATE_EXT_COMMUNITIES_H
 
-#include <inttypes.h>
 #include "parsebgp_bgp_common.h"
+#include <inttypes.h>
 
 /**
  * Extended Community Types (High-byte)

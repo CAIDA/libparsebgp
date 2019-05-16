@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_notification.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <stddef.h>
 
 /** Decode a NOTIFICATION message */
 parsebgp_error_t

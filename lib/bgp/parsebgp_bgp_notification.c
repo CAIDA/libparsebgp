@@ -24,13 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "parsebgp_bgp_notification_impl.h"
+#include "parsebgp_error.h"
+#include "parsebgp_utils.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include "parsebgp_bgp_notification_impl.h"
-#include "parsebgp_error.h"
-#include "parsebgp_utils.h"
 
 parsebgp_error_t
 parsebgp_bgp_notification_decode(parsebgp_opts_t *opts,

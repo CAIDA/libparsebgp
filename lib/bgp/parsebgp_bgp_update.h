@@ -27,10 +27,10 @@
 #ifndef __PARSEBGP_BGP_UPDATE_H
 #define __PARSEBGP_BGP_UPDATE_H
 
-#include <inttypes.h>
 #include "parsebgp_bgp_common.h"
 #include "parsebgp_bgp_update_ext_communities.h"
 #include "parsebgp_bgp_update_mp_reach.h"
+#include <inttypes.h>
 
 /**
  * BGP ORIGIN Path Attribute values

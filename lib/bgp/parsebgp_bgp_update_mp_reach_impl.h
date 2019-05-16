@@ -30,6 +30,7 @@
 #include "parsebgp_bgp_update_mp_reach.h"
 #include "parsebgp_error.h"
 #include "parsebgp_opts.h"
+#include <stddef.h>
 
 /** Decode an MP_REACH message */
 parsebgp_error_t
