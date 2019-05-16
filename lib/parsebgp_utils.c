@@ -30,7 +30,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
                                         const uint8_t *buf, size_t *buf_len,

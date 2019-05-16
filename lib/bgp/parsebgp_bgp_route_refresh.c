@@ -30,7 +30,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 parsebgp_error_t
 parsebgp_bgp_route_refresh_decode(parsebgp_opts_t *opts,

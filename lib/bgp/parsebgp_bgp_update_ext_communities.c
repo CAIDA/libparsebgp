@@ -30,7 +30,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 parsebgp_error_t parsebgp_bgp_update_ext_communities_decode(
   parsebgp_opts_t *opts, parsebgp_bgp_update_ext_communities_t *msg,

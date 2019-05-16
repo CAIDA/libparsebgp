@@ -31,7 +31,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   parsebgp_opts_t *opts, parsebgp_bgp_afi_t afi, parsebgp_bgp_safi_t safi,
