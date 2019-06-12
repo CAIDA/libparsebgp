@@ -230,10 +230,16 @@
     printf(__VA_ARGS__);                                                       \
   } while (0)
 
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
-#define STATIC_ASSERT(cond, msg) _Static_assert((cond), #msg)
+#if defined(__GNUC__)
+ #define UNUSED  __attribute__((unused))
 #else
-#define STATIC_ASSERT(cond, msg) typedef char msg [(cond)?1:-1]
+ #define UNUSED  /* empty */
+#endif
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+ #define STATIC_ASSERT(cond, msg) _Static_assert((cond), #msg)
+#else
+ #define STATIC_ASSERT(cond, msg) typedef char msg [(cond)?1:-1] UNUSED
 #endif
 
 #define PARSEBGP_DUMP_INT(depth, name, val)                                    \
