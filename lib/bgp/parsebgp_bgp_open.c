@@ -82,6 +82,17 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, cap->values.asn);
       break;
 
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
+      if (cap->len != 0) {
+        PARSEBGP_SKIP_INVALID_MSG(
+          opts, buf, nread, cap->len,
+          "Unexpected ROUTE_REFRESH* Capability length (%d), expecting 0 bytes",
+          cap->len);
+      }
+      break;
+
     // capabilities that we are explicitly ignoring (since OpenBMP is ignoring
     // them)
     // TODO: either implement parsers for these, or just provide the raw data
@@ -89,14 +100,14 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
     case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
     case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
     case PARSEBGP_BGP_OPEN_CAPABILITY_LLGR:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
     default:
-      PARSEBGP_SKIP_NOT_IMPLEMENTED(
-        opts, buf, nread, cap->len,
-        "OPEN Capability %d is either unknown or currently unsupported",
-        cap->code);
+      // if len==0, there's nothing else to parse
+      if (cap->len > 0) {
+        PARSEBGP_SKIP_NOT_IMPLEMENTED(
+          opts, buf, nread, cap->len,
+          "OPEN Capability %d is either unknown or currently unsupported",
+          cap->code);
+      }
       break;
     }
   }
