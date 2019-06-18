@@ -63,11 +63,11 @@ typedef enum {
   /** AS_SEQ: Ordered set of ASes a route in the UPDATE message has traversed */
   PARSEBGP_BGP_UPDATE_AS_PATH_SEG_AS_SEQ = 2,
 
-  /** AS Path Segment Confederation Set */
-  PARSEBGP_BGP_UPDATE_AS_PATH_SEG_CONFED_SET = 3,
+  /** AS Path Segment Confederation Sequence (RFC 5065) */
+  PARSEBGP_BGP_UPDATE_AS_PATH_SEG_CONFED_SEQ = 3,
 
-  /** AS Path Segment Confederation Sequence */
-  PARSEBGP_BGP_UPDATE_AS_PATH_SEG_CONFED_SEQ = 4,
+  /** AS Path Segment Confederation Set (RFC 5065) */
+  PARSEBGP_BGP_UPDATE_AS_PATH_SEG_CONFED_SET = 4,
 
 } parsebgp_bgp_update_as_path_seg_type_t;
 
