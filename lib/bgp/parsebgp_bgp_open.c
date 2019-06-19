@@ -82,21 +82,39 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, cap->values.asn);
       break;
 
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
+      if (cap->len != 0) {
+        PARSEBGP_SKIP_INVALID_MSG(
+          opts, buf, nread, cap->len,
+          "Unexpected ROUTE_REFRESH* Capability length (%d), expecting 0 bytes",
+          cap->len);
+      }
+      break;
+
+    // If you add more parsers here, you must also add their codes to
+    // BGPSTREAM_OPEN_CAPABILITY_IS_RAW()
+
     // capabilities that we are explicitly ignoring (since OpenBMP is ignoring
     // them)
-    // TODO: either implement parsers for these, or just provide the raw data
+    // For now, don't parse, just provide the raw data
     case PARSEBGP_BGP_OPEN_CAPABILITY_OUTBOUND_FILTER:
     case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
     case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
     case PARSEBGP_BGP_OPEN_CAPABILITY_LLGR:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
     default:
-      PARSEBGP_SKIP_NOT_IMPLEMENTED(
-        opts, buf, nread, cap->len,
-        "OPEN Capability %d is either unknown or currently unsupported",
-        cap->code);
+      if (cap->len == 0) {
+        // no data
+      } else if (cap->len <= sizeof(cap->values.databuf)) {
+        // small data can be stored directly in cap->values
+        PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, cap->values.databuf, cap->len);
+      } else {
+        // larger data needs an allocation
+        if (!(cap->values.datap = (uint8_t *)malloc(cap->len)))
+          return PARSEBGP_MALLOC_FAILURE;
+        PARSEBGP_DESERIALIZE_BYTES(buf, len, nread, cap->values.datap, cap->len);
+      }
       break;
     }
   }
@@ -195,8 +213,14 @@ void parsebgp_bgp_open_destroy(parsebgp_bgp_open_t *msg)
     return;
   }
 
-  // we don't (currently) have any capabilities that use dynamic memory, so for
-  // now just free the capabilities array
+  for (int i = 0; i < msg->capabilities_cnt; i++) {
+    parsebgp_bgp_open_capability_t *cap = &msg->capabilities[i];
+    if (BGPSTREAM_OPEN_CAPABILITY_IS_RAW(cap) &&
+      (cap)->len > sizeof(cap->values.databuf) && (cap)->values.datap)
+    {
+      free(cap->values.datap);
+    }
+  }
   free(msg->capabilities);
 
   free(msg);
@@ -208,6 +232,17 @@ void parsebgp_bgp_open_clear(parsebgp_bgp_open_t *msg)
     return;
   }
 
+  // Dynamic memory is relatively rare; the small gain of reusing it isn't
+  // worth the cost of keeping track of it, so we just free it.
+  for (int i = 0; i < msg->capabilities_cnt; i++) {
+    parsebgp_bgp_open_capability_t *cap = &msg->capabilities[i];
+    if (BGPSTREAM_OPEN_CAPABILITY_IS_RAW(cap) &&
+      (cap)->len > sizeof(cap->values.databuf) && (cap)->values.datap)
+    {
+      free(cap->values.datap);
+      cap->values.datap = NULL;
+    }
+  }
   msg->capabilities_cnt = 0;
 }
 
@@ -222,9 +257,9 @@ void parsebgp_bgp_open_dump(const parsebgp_bgp_open_t *msg, int depth)
   PARSEBGP_DUMP_INT(depth, "Parameters Length", msg->param_len);
   PARSEBGP_DUMP_INT(depth, "Capabilities Count", msg->capabilities_cnt);
   depth++;
-  int i;
   parsebgp_bgp_open_capability_t *cap;
-  for (i = 0; i < msg->capabilities_cnt; i++) {
+  uint8_t *data;
+  for (int i = 0; i < msg->capabilities_cnt; i++) {
     cap = &msg->capabilities[i];
 
     PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bgp_open_capability_t, depth);
@@ -246,21 +281,11 @@ void parsebgp_bgp_open_dump(const parsebgp_bgp_open_t *msg, int depth)
       PARSEBGP_DUMP_INT(depth, "AS4 ASN", cap->values.asn);
       break;
 
-    // capabilities with data that we are ignoring (since OpenBMP is ignoring
-    // it)
-    case PARSEBGP_BGP_OPEN_CAPABILITY_OUTBOUND_FILTER:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_GRACEFUL_RESTART:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION:
-      PARSEBGP_DUMP_INFO(depth, "Note: Ignored Capability Data\n");
-      break;
-
-    // capabilities with no extra data:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
-    case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
-      break;
-
     default:
+      data = BGPSTREAM_OPEN_CAPABILITY_RAW_DATA(cap);
+      if (data) {
+        PARSEBGP_DUMP_DATA(depth, "Raw data", data, cap->len);
+      }
       break;
     }
     depth--;

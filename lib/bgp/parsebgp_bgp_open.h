@@ -102,9 +102,28 @@ typedef struct parsebgp_bgp_open_capability {
     /** AS4 Capability */
     uint32_t asn;
 
+    /** Raw data; access via BGPSTREAM_OPEN_CAPABILITY_RAW_DATA() */
+    uint8_t *datap;
+
+    /** Raw data; access via BGPSTREAM_OPEN_CAPABILITY_RAW_DATA() */
+    uint8_t databuf[sizeof(uint8_t *)];
+
   } values;
 
 } parsebgp_bgp_open_capability_t;
+
+/** Determine if capability has raw (unparsed) data. */
+#define BGPSTREAM_OPEN_CAPABILITY_IS_RAW(cap)                                  \
+  ((cap)->len > 0 &&                                                           \
+   (cap)->code != PARSEBGP_BGP_OPEN_CAPABILITY_MPBGP &&                        \
+   (cap)->code != PARSEBGP_BGP_OPEN_CAPABILITY_AS4)
+
+/** Get pointer to capability's raw data, or NULL if capability does not have
+ * raw data. */
+#define BGPSTREAM_OPEN_CAPABILITY_RAW_DATA(cap)                                \
+  (!BGPSTREAM_OPEN_CAPABILITY_IS_RAW(cap) ? NULL :                             \
+  (cap)->len > sizeof((cap)->values.databuf) ? (cap)->values.datap :           \
+  &(cap)->values.databuf[0])
 
 /**
  * BGP OPEN Message
