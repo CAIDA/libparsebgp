@@ -701,11 +701,11 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   // IPs in STATE_CHANGE and OPEN messages.
   // For the state change, we can easily detect this by checking the
   // subtype and length, but for OPEN, we have to peek and see if the
-  // ifindex appears to be 0xFFFF which is actually the start of the
-  // BGP marker.
+  // AFI appears to be 0xFFFF which is actually the part of the BGP
+  // marker.
   if ((subtype == PARSEBGP_MRT_BGP4MP_STATE_CHANGE && len == 8) ||
-      (subtype == PARSEBGP_MRT_BGP4MP_MESSAGE && (len - nread) > 2 &&
-       remain > 2 && (*(uint16_t *)buf) == 0xFFFF)) {
+      (subtype == PARSEBGP_MRT_BGP4MP_MESSAGE && (len - nread) > 4 &&
+       remain > 4 && memcmp(buf+2, "\xff\xff", 2) == 0)) {
     msg->interface_index = 0;
     msg->afi = 0;
     memset(msg->peer_ip, 0, sizeof(msg->peer_ip));
