@@ -256,7 +256,7 @@
 #define PARSEBGP_DUMP_IP(depth, name, afi, ipaddr)                             \
   do {                                                                         \
     int mapping[] = {-1, AF_INET, AF_INET6};                                   \
-    char ip_buf[INET6_ADDRSTRLEN];                                             \
+    char ip_buf[INET6_ADDRSTRLEN] = "[invalid IP]";                            \
     inet_ntop(mapping[afi], ipaddr, ip_buf, INET6_ADDRSTRLEN);                 \
     PARSEBGP_DUMP_INFO(depth, name ": %*s\n", 20 - (int)sizeof(name ":"),      \
                        ip_buf);                                                \
@@ -265,7 +265,7 @@
 #define PARSEBGP_DUMP_PFX(depth, name, afi, ipaddr, len)                       \
   do {                                                                         \
     int mapping[] = {-1, AF_INET, AF_INET6};                                   \
-    char ip_buf[INET6_ADDRSTRLEN];                                             \
+    char ip_buf[INET6_ADDRSTRLEN] = "[invalid IP]";                            \
     inet_ntop(mapping[afi], ipaddr, ip_buf, INET6_ADDRSTRLEN);                 \
     PARSEBGP_DUMP_INFO(depth, name ": %*s/%d\n", 20 - (int)sizeof(name ":"),   \
                        ip_buf, len);                                           \
