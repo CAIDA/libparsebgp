@@ -696,17 +696,33 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
     break;
   }
 
-  // Interface Index
-  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->interface_index);
+  // The following checks are to handle non-compliant MRT data from
+  // really old Quagga versions which did not dump ifindex or src/dest
+  // IPs in STATE_CHANGE and OPEN messages.
+  // For the state change, we can easily detect this by checking the
+  // subtype and length, but for OPEN, we have to peek and see if the
+  // ifindex appears to be 0xFFFF which is actually the start of the
+  // BGP marker.
+  if ((subtype == PARSEBGP_MRT_BGP4MP_STATE_CHANGE && len == 8) ||
+      (subtype == PARSEBGP_MRT_BGP4MP_MESSAGE && (len - nread) > 2 &&
+       remain > 2 && (*(uint16_t *)buf) == 0xFFFF)) {
+    msg->interface_index = 0;
+    msg->afi = 0;
+    memset(msg->peer_ip, 0, sizeof(msg->peer_ip));
+    memset(msg->local_ip, 0, sizeof(msg->local_ip));
+  } else { // normal case
+    // Interface Index
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->interface_index);
 
-  // Address Family
-  PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
+    // Address Family
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->afi);
 
-  // Peer IP
-  DESERIALIZE_IP(msg->afi, buf, len, nread, msg->peer_ip);
+    // Peer IP
+    DESERIALIZE_IP(msg->afi, buf, len, nread, msg->peer_ip);
 
-  // Local IP
-  DESERIALIZE_IP(msg->afi, buf, len, nread, msg->local_ip);
+    // Local IP
+    DESERIALIZE_IP(msg->afi, buf, len, nread, msg->local_ip);
+  }
 
   // And then the actual data, based on the subtype
   // the _AS4 subtypes actually only change the common part of the message, so
