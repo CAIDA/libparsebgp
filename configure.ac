@@ -26,18 +26,25 @@
 
 AC_PREREQ([2.68])
 
-AC_INIT([libparsebgp], [1.0.0], [bgpstream-info@caida.org])
 
-LIBPARSEBGP_MAJOR_VERSION=1
-LIBPARSEBGP_MID_VERSION=0
-LIBPARSEBGP_MINOR_VERSION=0
+# libparsebgp package version
+m4_define([PKG_MAJOR_VERSION], [1])
+m4_define([PKG_MID_VERSION],   [0])
+m4_define([PKG_MINOR_VERSION], [0])
 
-AC_DEFINE_UNQUOTED([LIBPARSEBGP_MAJOR_VERSION],$LIBPARSEBGP_MAJOR_VERSION,
-	[libparsebgp major version])
-AC_DEFINE_UNQUOTED([LIBPARSEBGP_MID_VERSION],$LIBPARSEBGP_MID_VERSION,
-	[libparsebgp mid version])
-AC_DEFINE_UNQUOTED([LIBPARSEBGP_MINOR_VERSION],$LIBPARSEBGP_MINOR_VERSION,
-	[libparsebgp minor version])
+AC_INIT([libparsebgp], PKG_MAJOR_VERSION.PKG_MID_VERSION.PKG_MINOR_VERSION, [bgpstream-info@caida.org])
+
+# libparsebgp shared library version
+# (no relation to pkg version)
+# see https://www.gnu.org/software/libtool/manual/html_node/Versioning.html
+# If changes break ABI compatability: CURRENT++, REVISION=0, AGE=0
+# elseif changes only add to ABI:     CURRENT++, REVISION=0, AGE++
+# else changes do not affect ABI:     REVISION++
+LIBPARSEBGP_SHLIB_CURRENT=2
+LIBPARSEBGP_SHLIB_REVISION=0
+LIBPARSEBGP_SHLIB_AGE=0
+
+######################################################################
 
 LT_INIT
 
@@ -67,12 +74,17 @@ if test x"$parser_debug" = x"yes"; then
     AC_DEFINE([PARSER_DEBUG],[],[Parser Debugging])
 fi
 
-AC_SUBST([LIBPARSEBGP_MAJOR_VERSION])
-AC_SUBST([LIBPARSEBGP_MID_VERSION])
-AC_SUBST([LIBPARSEBGP_MINOR_VERSION])
+AC_SUBST([LIBPARSEBGP_MAJOR_VERSION], PKG_MAJOR_VERSION)
+AC_SUBST([LIBPARSEBGP_MID_VERSION],   PKG_MID_VERSION)
+AC_SUBST([LIBPARSEBGP_MINOR_VERSION], PKG_MINOR_VERSION)
+
+AC_SUBST([LIBPARSEBGP_SHLIB_CURRENT])
+AC_SUBST([LIBPARSEBGP_SHLIB_REVISION])
+AC_SUBST([LIBPARSEBGP_SHLIB_AGE])
 
 AC_CONFIG_FILES([Makefile
                 lib/Makefile
+                lib/parsebgp.h
                 lib/bgp/Makefile
                 lib/bmp/Makefile
                 lib/mrt/Makefile

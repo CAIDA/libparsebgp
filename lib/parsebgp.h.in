@@ -34,6 +34,10 @@
 #include <inttypes.h>
 #include <stddef.h>
 
+#define LIBPARSEBGP_MAJOR_VERSION @LIBPARSEBGP_MAJOR_VERSION@
+#define LIBPARSEBGP_MID_VERSION   @LIBPARSEBGP_MID_VERSION@
+#define LIBPARSEBGP_MINOR_VERSION @LIBPARSEBGP_MINOR_VERSION@
+
 /**
  * Message types supported by libparsebgp
  */
