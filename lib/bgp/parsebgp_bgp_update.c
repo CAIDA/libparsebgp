@@ -37,23 +37,26 @@
 static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
                                     const uint8_t *buf, size_t *lenp, size_t remain)
 {
-  size_t len = *lenp, nread = 0, slen;
+  size_t len = *lenp, nread = 0, slen, parsable;
   parsebgp_bgp_prefix_t *tuple;
   parsebgp_error_t err;
 
   nlris->prefixes_cnt = 0;
 
   if (nlris->len > len) {
-    return PARSEBGP_PARTIAL_MSG;
+    // The list is truncated, but we'll parse what we can, ensuring that
+    // the contents of *nlris are valid at any point that might return
+    // PARTIAL_MSG.
+    parsable = len;
+  } else {
+    parsable = nlris->len;
   }
-  PARSEBGP_ASSERT(nlris->len <= remain);
 
   // read until we run out of message
-  while (nread < nlris->len) {
+  while (nread < parsable) {
     PARSEBGP_MAYBE_REALLOC(nlris->prefixes,
                            nlris->_prefixes_alloc_cnt, nlris->prefixes_cnt + 1);
     tuple = &nlris->prefixes[nlris->prefixes_cnt];
-    nlris->prefixes_cnt++;
 
     // Fix the prefix type to v4 unicast
     tuple->type = PARSEBGP_BGP_PREFIX_UNICAST_IPV4;
@@ -65,17 +68,22 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
 
     // Prefix
-    slen = nlris->len - nread;
+    slen = parsable - nread;
     err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx);
     if (err != PARSEBGP_OK) {
-      if (err == PARSEBGP_PARTIAL_MSG) {
+      if (err == PARSEBGP_PARTIAL_MSG && nlris->len <= len) {
         // decode_prefix() reached the end of the nlris, not the buffer
         PARSEBGP_RETURN_INVALID_MSG_ERR;
       }
       return err;
     }
+    nlris->prefixes_cnt++; // increment now that we have a complete valid nlri
     nread += slen;
     buf += slen;
+  }
+
+  if (nread < nlris->len) {
+    return PARSEBGP_PARTIAL_MSG;
   }
 
   *lenp = nread;
@@ -500,6 +508,10 @@ parsebgp_error_t parsebgp_bgp_update_path_attrs_decode(
   PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, path_attrs->len);
 
   if (nread + path_attrs->len > len) {
+    // TODO: parse what we can, so that the caller can return
+    // PARSEBGP_TRUNCATED_MSG with as much data as possible?  (OTOH, if the
+    // caller can't return PARSEBGP_TRUNCATED_MSG, then we will have done all
+    // that parsing for nothing, when we maybe just needed a buffer refill.)
     return PARSEBGP_PARTIAL_MSG;
   }
   PARSEBGP_ASSERT(nread + path_attrs->len <= remain);
@@ -1079,8 +1091,8 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
 
   // Withdrawn Routes
   slen = len - nread;
-  if ((err = parse_nlris(&msg->withdrawn_nlris, buf, &slen, remain - nread)) !=
-      PARSEBGP_OK) {
+  err = parse_nlris(&msg->withdrawn_nlris, buf, &slen, remain - nread);
+  if (err != PARSEBGP_OK) {
     return err;
   }
   assert(slen == msg->withdrawn_nlris.len);
@@ -1100,8 +1112,8 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
   // NLRIs
   slen = len - nread;
   msg->announced_nlris.len = remain - nread;
-  if ((err = parse_nlris(&msg->announced_nlris, buf, &slen,
-                         msg->announced_nlris.len)) != PARSEBGP_OK) {
+  err = parse_nlris(&msg->announced_nlris, buf, &slen, msg->announced_nlris.len);
+  if (err != PARSEBGP_OK) {
     return err;
   }
   assert(slen == msg->announced_nlris.len);

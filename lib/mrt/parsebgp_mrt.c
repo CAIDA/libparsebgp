@@ -665,7 +665,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
                                      size_t *lenp, size_t remain)
 {
   size_t len = *lenp, nread = 0, slen = 0;
-  parsebgp_error_t err;
+  parsebgp_error_t err = PARSEBGP_OK;
 
   // ASN fields
   switch (subtype) {
@@ -746,8 +746,8 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
     slen = len - nread;
-    if ((err = parsebgp_bgp_decode(opts, msg->data.bgp_msg, buf, &slen)) !=
-        PARSEBGP_OK) {
+    err = parsebgp_bgp_decode_ext(opts, msg->data.bgp_msg, buf, &slen, 1);
+    if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
       return err;
     }
     nread += slen;
@@ -760,7 +760,7 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   }
 
   *lenp = nread;
-  return PARSEBGP_OK;
+  return err;
 }
 
 static void destroy_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
@@ -896,7 +896,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
                                      parsebgp_mrt_msg_t *msg, const uint8_t *buf,
                                      size_t *len)
 {
-  parsebgp_error_t err;
+  parsebgp_error_t err = PARSEBGP_OK;
   size_t slen = 0, nread = 0, remain = 0;
 
   // First, parse the common header
@@ -966,12 +966,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
     // unknown message type
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
-  if (err != PARSEBGP_OK) {
-    if (err == PARSEBGP_PARTIAL_MSG) {
-      // we have the full MRT msg, but it was too short to hold the full sub-msg
-      *len = nread + remain;
-      return PARSEBGP_TRUNCATED_MSG;
-    }
+  if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
     return err;
   }
   nread += slen;
@@ -988,7 +983,7 @@ parsebgp_error_t parsebgp_mrt_decode(parsebgp_opts_t *opts,
   }
 
   *len = nread;
-  return PARSEBGP_OK;
+  return err;
 }
 
 void parsebgp_mrt_destroy_msg(parsebgp_mrt_msg_t *msg)

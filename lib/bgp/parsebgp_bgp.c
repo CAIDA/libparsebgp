@@ -66,9 +66,10 @@ static parsebgp_error_t parse_common_hdr(parsebgp_opts_t *opts,
   return PARSEBGP_OK;
 }
 
-parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
-                                     parsebgp_bgp_msg_t *msg, const uint8_t *buf,
-                                     size_t *len)
+parsebgp_error_t parsebgp_bgp_decode_ext(parsebgp_opts_t *opts,
+                                         parsebgp_bgp_msg_t *msg,
+                                         const uint8_t *buf,
+                                         size_t *len, int allow_truncation)
 {
   parsebgp_error_t err;
   size_t slen = 0, nread = 0, remain = 0;
@@ -84,7 +85,7 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
   remain = msg->len - nread; // number of bytes left in the message
   slen = *len - nread;       // number of bytes left in the buffer
 
-  if (remain > slen) {
+  if (remain > slen && !allow_truncation) {
     // we already know that the message will be longer than what we have in the
     // buffer, give up now
     return PARSEBGP_PARTIAL_MSG;
@@ -100,6 +101,10 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.update);
     err =
       parsebgp_bgp_update_decode(opts, msg->types.update, buf, &slen, remain);
+    if (err == PARSEBGP_PARTIAL_MSG && allow_truncation) {
+      // leave *len unchanged; i.e., we consumed everything available
+      return PARSEBGP_TRUNCATED_MSG;
+    }
     break;
 
   case PARSEBGP_BGP_TYPE_NOTIFICATION:
@@ -132,6 +137,14 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
   assert(msg->len == nread);
   *len = nread;
   return PARSEBGP_OK;
+}
+
+parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
+                                     parsebgp_bgp_msg_t *msg,
+                                     const uint8_t *buf,
+                                     size_t *len)
+{
+  return parsebgp_bgp_decode_ext(opts, msg, buf, len, 0);
 }
 
 void parsebgp_bgp_destroy_msg(parsebgp_bgp_msg_t *msg)

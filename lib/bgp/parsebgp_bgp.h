@@ -109,6 +109,28 @@ parsebgp_error_t parsebgp_bgp_decode(parsebgp_opts_t *opts,
                                      parsebgp_bgp_msg_t *msg, const uint8_t *buffer,
                                      size_t *len);
 
+/**
+ * Decode (parse) a single BGP message from the given buffer into the given BGP
+ * message structure.
+ *
+ * @param [in] opts     Options for the parser
+ * @param [in] msg      Pointer to the BGP Message structure to fill
+ * @param [in] buffer   Pointer to the start of a raw BGP message
+ * @param [in,out] len  Length of the data buffer (used to prevent overrun).
+ *                      Updated to the number of bytes read from the buffer.
+ * @param [in] allow_truncation  If nonzero, and the message length exceeds
+ *                      `*len`, this function may return
+ *                      PARSEBGP_TRUNCATED_MSG instead of
+ *                      PARSEBGP_PARTIAL_MSG if it was able to store a valid
+ *                      (but incomplete) message in *msg.
+ * @return PARSEBGP_OK (0) if a message was parsed successfully, or an error
+ * code otherwise
+ */
+parsebgp_error_t parsebgp_bgp_decode_ext(parsebgp_opts_t *opts,
+                                         parsebgp_bgp_msg_t *msg,
+                                         const uint8_t *buffer,
+                                         size_t *len, int allow_truncation);
+
 /** Destroy the given BGP message structure
  *
  * @param msg           Pointer to message structure to destroy

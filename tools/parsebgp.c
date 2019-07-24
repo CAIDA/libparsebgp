@@ -132,15 +132,12 @@ static int parse(parsebgp_opts_t *opts, parsebgp_msg_type_t type, char *fname)
             fprintf(stderr, "WARN: truncated message %" PRIu64 " in %s\n",
               cnt, fname);
           }
-          ptr += dec_len;
-          remain -= dec_len;
-          cnt++;
-          continue;
+        } else {
+          // else: its a fatal error
+          fprintf(stderr, "ERROR: Failed to parse message (%d:%s)\n", err,
+                  parsebgp_strerror(err));
+          goto err;
         }
-        // else: its a fatal error
-        fprintf(stderr, "ERROR: Failed to parse message (%d:%s)\n", err,
-                parsebgp_strerror(err));
-        goto err;
       }
       // else: successful read
       assert(dec_len > 0);
