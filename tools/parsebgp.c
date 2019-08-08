@@ -185,6 +185,7 @@ static void usage(void)
     "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
     "         (only required if using non-standard file extensions)\n"
     "       -4                 Force 4-byte ASN parsing\n"
+    "       -b                 Perform shallow BMP parsing\n"
     "       -f <attr-type>     Filter to include given Path Attribute\n"
     "       -i                 Ignore invalid messages and attributes\n"
     "                            (use multiple times to silence warnings)\n"
@@ -206,7 +207,7 @@ int main(int argc, char **argv)
   parsebgp_opts_t opts;
   parsebgp_opts_init(&opts);
 
-  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:i4smqvh?")) >= 0) {
+  while (prevoptind = optind, (opt = getopt(argc, argv, ":f:t:i4bsmqvh?")) >= 0) {
     if (optind == prevoptind + 2 && (optarg == NULL || *optarg == '-')) {
       opt = ':';
       --optind;
@@ -214,6 +215,10 @@ int main(int argc, char **argv)
     switch (opt) {
     case '4':
       opts.bgp.asn_4_byte = 1;
+      break;
+
+    case 'b':
+      opts.bmp.parse_headers_only = 1;
       break;
 
     case 'f':

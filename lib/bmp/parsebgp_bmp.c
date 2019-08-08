@@ -1043,6 +1043,13 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
   slen = *len - nread;       // number of bytes left in the buffer
   remain = msg->len - nread; // number of bytes left in the message
 
+  if (opts->bmp.parse_headers_only) {
+    msg->types_valid = 0;
+    *len = msg->len;
+    return PARSEBGP_OK;
+  }
+  msg->types_valid = 1;
+
   if (remain > slen) {
     // we already know that the message will be longer than what we have in the
     // buffer, give up now
@@ -1125,6 +1132,9 @@ void parsebgp_bmp_destroy_msg(parsebgp_bmp_msg_t *msg)
 void parsebgp_bmp_clear_msg(parsebgp_bmp_msg_t *msg)
 {
   // Common header has no dynamically allocated memory
+  if (!msg->types_valid) {
+    return;
+  }
 
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
@@ -1162,6 +1172,10 @@ void parsebgp_bmp_dump_msg(const parsebgp_bmp_msg_t *msg, int depth)
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_bmp_msg_t, depth);
 
   dump_common_hdr(msg, depth);
+
+  if (!msg->types_valid) {
+    return;
+  }
 
   depth++;
   switch (msg->type) {

@@ -543,6 +543,12 @@ typedef struct parsebgp_bmp_msg {
   /** Peer header (Not filled for TYPE_INIT_MSG and TYPE_TERM_MSG) */
   parsebgp_bmp_peer_hdr_t peer_hdr;
 
+  /** Set if the message was fully parsed and the types structure can
+   * be used. If this is not set, then only a shallow parse was
+   * performed, so only the common header and peer header fields have
+   * been populated. */
+  int types_valid;
+
   /** Union of structures for all supported BMP message types */
   struct {
 
