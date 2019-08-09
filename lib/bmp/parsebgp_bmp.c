@@ -1043,18 +1043,18 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
   slen = *len - nread;       // number of bytes left in the buffer
   remain = msg->len - nread; // number of bytes left in the message
 
+  if (remain > slen) {
+    // we already know that the message will be longer than what we have in the
+    // buffer, give up now
+    return PARSEBGP_PARTIAL_MSG;
+  }
+
   if (opts->bmp.parse_headers_only) {
     msg->types_valid = 0;
     *len = msg->len;
     return PARSEBGP_OK;
   }
   msg->types_valid = 1;
-
-  if (remain > slen) {
-    // we already know that the message will be longer than what we have in the
-    // buffer, give up now
-    return PARSEBGP_PARTIAL_MSG;
-  }
 
   switch (msg->type) {
   case PARSEBGP_BMP_TYPE_ROUTE_MON:
