@@ -42,6 +42,17 @@ typedef struct parsebgp_bmp_opts {
    */
   parsebgp_bgp_afi_t peer_ip_afi;
 
+  /**
+   * Shallow BMP Parsing
+   *
+   * If this is set, then do not parse past the end of the peer header
+   * (or the common header in case there is no peer header).
+   *
+   * The parser will only fill the common header fields, and
+   * (possibly) the peer_hdr information.
+   */
+  int parse_headers_only;
+
 } parsebgp_bmp_opts_t;
 
 /**
