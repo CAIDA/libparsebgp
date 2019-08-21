@@ -437,10 +437,11 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   buf += slen;
 
   // Information TLVs (optional)
-  parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf, lenp,
+  slen = len - nread;
+  parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf, &slen,
                   remain - nread);
 
-  *lenp = nread;
+  *lenp = nread + slen;
   return PARSEBGP_OK;
 }
 
