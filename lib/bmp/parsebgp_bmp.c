@@ -440,8 +440,10 @@ static parsebgp_error_t parse_peer_up(parsebgp_opts_t *opts,
   slen = len - nread;
   parse_info_tlvs(&msg->tlvs, &msg->_tlvs_alloc_cnt, &msg->tlvs_cnt, buf, &slen,
                   remain - nread);
+  nread += slen;
+  buf += slen;
 
-  *lenp = nread + slen;
+  *lenp = nread;
   return PARSEBGP_OK;
 }
 
