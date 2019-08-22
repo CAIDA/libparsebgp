@@ -1104,7 +1104,16 @@ parsebgp_error_t parsebgp_bmp_decode(parsebgp_opts_t *opts,
   }
   nread += slen;
 
-  assert(msg->len == nread);
+  if (nread != msg->len) {
+    // we didn't parse all the bytes in the BMP message (according to
+    // the length in the header).
+    // either we don't know how to parse this message fully, or there
+    // is trailing content in the BMP message.
+    assert(nread < msg->len);
+    PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, msg->len - nread,
+                              "Unparsed data at end of BMP message (%zu bytes)",
+                              msg->len - nread);
+  }
 
   *len = nread;
   return PARSEBGP_OK;
