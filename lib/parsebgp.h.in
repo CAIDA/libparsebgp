@@ -46,11 +46,12 @@ typedef enum parsebgp_msg_type {
   PARSEBGP_MSG_TYPE_BGP = 1,
   PARSEBGP_MSG_TYPE_BMP = 2,
   PARSEBGP_MSG_TYPE_MRT = 3,
+  PARSEBGP_MSG_TYPE_OPENBMP = 4,
 } parsebgp_msg_type_t;
 
 /** Convenience macro to allow iterating over all valid message types */
 #define PARSEBGP_FOREACH_MSG_TYPE(iter)                                        \
-  for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_MRT;        \
+  for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_OPENBMP;        \
        (iter)++)
 
 /** Structure into which a message is parsed */
