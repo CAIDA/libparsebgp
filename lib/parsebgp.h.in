@@ -30,6 +30,7 @@
 #include "parsebgp_bgp.h"
 #include "parsebgp_bmp.h"
 #include "parsebgp_mrt.h"
+#include "parsebgp_openbmp.h"
 #include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stddef.h>
@@ -71,6 +72,9 @@ typedef struct parsebgp_msg {
 
     /** Parsed MRT message */
     parsebgp_mrt_msg_t *mrt;
+
+    /** Parsed OpenBMP message */
+    parsebgp_openbmp_msg_t *openbmp;
 
   } types;
 

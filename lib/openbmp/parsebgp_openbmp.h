@@ -33,16 +33,49 @@
 #include "parsebgp_error.h" // for parsebgp_error_t
 #include <inttypes.h>
 #include <stddef.h>
+#include <string.h>
+#include <assert.h>
 
+#define STR_NAME_LEN 256
 
 typedef struct parsebgp_openbmp_msg {
-	// will populate the bmp msg if full msg parsing is required
+    // OpenBMP version numbers
+    uint8_t ver_maj, ver_min;
+
+    // OpenBMP msg flags
+    uint8_t flags;
+
+    // Collection time (seconds component)
+    uint32_t time_sec;
+
+    // Collection time (microseconds component)
+    uint32_t time_usec;
+
+    // Collector name
+    int collector_name_len;
+    char collector_name[STR_NAME_LEN];
+
+    // Router name
+    int router_name_len;
+    char router_name[STR_NAME_LEN];
+
+    // Router IP
+    uint8_t router_ip[16];
+    // Router IP Address AFI (based on openbmp header flags)
+    parsebgp_bgp_afi_t router_ip_afi;
+
+    // Parsed bmp msg if full msg parsing is required
     parsebgp_bmp_msg_t *bmp_msg;
 
 } parsebgp_openbmp_msg_t;
 
+void parsebgp_openbmp_clear_msg(parsebgp_openbmp_msg_t *msg);
+
+void parsebgp_openbmp_destroy_msg(parsebgp_openbmp_msg_t *msg);
+
+void parsebgp_openbmp_dump_msg(const parsebgp_openbmp_msg_t *msg, int depth);
+
 parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts, parsebgp_openbmp_msg_t *msg,
-										 const uint8_t *buf, size_t *len);
+                                         const uint8_t *buf, size_t *len);
 
 #endif /* __PARSEBGP_OPENBMP_H */
-
