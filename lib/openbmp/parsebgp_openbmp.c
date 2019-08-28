@@ -73,7 +73,7 @@ void parsebgp_openbmp_dump_msg(const parsebgp_openbmp_msg_t *msg, int depth) {
 parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
                                          parsebgp_openbmp_msg_t *msg,
                                          const uint8_t *buf, size_t *buf_len) {
-    // remaining bytes in buffer
+    // remember the buf_len
     size_t len = *buf_len;
     // how many bytes are read so far
     size_t nread = 0;
@@ -86,38 +86,14 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
     // we want at least a few bytes to do header checks
     if (len < 4) {
         *buf_len = 0;
-        printf("we want at least a few bytes to do header checks\n");
-        return 0;
+        return PARSEBGP_PARTIAL_MSG;
     }
 
-    // is this an OpenBMP ASCII header (either "text" or "legacy-text")?
-    if (*buf == 'V') {
-        // skip until we find double-newlines
-        while ((len - nread) > 0) {
-            if (newln == 2) {
-                // this is the first byte of the payload
-                *buf_len = nread - 1;
-                return 0;
-            }
-            if (*buf == '\n') {
-                newln++;
-            } else {
-                newln = 0;
-            }
-            nread++;
-            buf++;
-        }
-        // if we reach here, then we've failed to parse the header. just give up
-        *buf_len = 0;
-        return 0;
-    }
-
-    // double-check the magic number
+    // check if buf starts with the magic number
     if (memcmp(buf, "OBMP", 4) != 0) {
         // it's not a known OpenBMP header, assume that it is raw BMP
         *buf_len = 0;
-        printf("it's not a known OpenBMP header, assume that it is raw BMP\n");
-        return 0;
+        return PARSEBGP_INVALID_MSG;
     }
     nread += 4;
     buf += 4;
@@ -126,9 +102,7 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
     PARSEBGP_DESERIALIZE_VAL(buf, len - nread, nread, msg->ver_maj);
     PARSEBGP_DESERIALIZE_VAL(buf, len - nread, nread, msg->ver_min);
     if (msg->ver_maj != 1 || msg->ver_min != 7) {
-        printf("Unrecognized OpenBMP header version (%" PRIu8 ".%" PRIu8 ")",
-                msg->ver_maj, msg->ver_min);
-        return 0;
+        return PARSEBGP_INVALID_MSG;
     }
 
     // skip past the header length and the message length (since we'll parse the
@@ -141,14 +115,14 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
     // check the flags
     // we only care about bmp raw messages, which are always router messages
     if (!(msg->flags & 0x80)) {
-        return 0;
+        return PARSEBGP_NOT_IMPLEMENTED;
     }
 
     // check the object type
     PARSEBGP_DESERIALIZE_VAL(buf, len - nread, nread, u8);
     if (u8 != 12) {
         // we only want BMP RAW messages, so skip this one
-        return 0;
+        return PARSEBGP_NOT_IMPLEMENTED;
     }
 
     // load the time stamps into the record
@@ -173,7 +147,7 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
     }
     // copy the collector name in
     if ((len - nread) < u16) {
-        return -1;
+        return PARSEBGP_PARTIAL_MSG;
     }
     msg->collector_name_len = name_len;
     memcpy(msg->collector_name, buf, name_len);
@@ -183,7 +157,7 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
 
     if ((len - nread) < 32) {
         // not enough buffer left for router hash and IP
-        return -1;
+        return PARSEBGP_PARTIAL_MSG;
     }
 
     // skip past the router hash
@@ -211,7 +185,7 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
     }
     // copy the router name in
     if ((len - nread) < u16) {
-        return -1;
+        return PARSEBGP_PARTIAL_MSG;
     }
     msg->router_name_len = name_len;
     memcpy(msg->router_name, buf, name_len);
