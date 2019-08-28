@@ -34,8 +34,7 @@
  * OpenBMP Parsing Options
  */
 typedef struct parsebgp_openbmp_opts {
-
-
+    /* placeholder for openbmp opts */
 } parsebgp_openbmp_opts_t;
 
 /**

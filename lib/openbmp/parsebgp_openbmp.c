@@ -29,12 +29,26 @@
 #include "parsebgp_bmp.h"
 
 void parsebgp_openbmp_clear_msg(parsebgp_openbmp_msg_t *msg) {
-    // TODO: reset openbmp header values to zero
+    // reset openbmp header values to zero
+    msg->ver_maj = 0;
+    msg->ver_min = 0;
+    msg->flags = 0;
+    msg->time_sec = 0;
+    msg->time_usec = 0;
+    msg->collector_name_len = 0;
+    memset(msg->collector_name, 0, sizeof(msg->collector_name));
+    msg->router_name_len = 0;
+    memset(msg->router_name, 0, sizeof(msg->router_name));
+
+    // clear bmp msg too
     parsebgp_bmp_clear_msg(msg->bmp_msg);
 }
 
 void parsebgp_openbmp_destroy_msg(parsebgp_openbmp_msg_t *msg) {
+    // free bmp msg
     parsebgp_bmp_destroy_msg(msg->bmp_msg);
+
+    // now free openbmp msg itself
     free(msg);
 }
 
@@ -45,8 +59,12 @@ void parsebgp_openbmp_dump_msg(const parsebgp_openbmp_msg_t *msg, int depth) {
     PARSEBGP_DUMP_INT(depth, "Flags", msg->flags);
     PARSEBGP_DUMP_INT(depth, "Time.sec", msg->time_sec);
     PARSEBGP_DUMP_INT(depth, "Time.usec", msg->time_usec);
-    PARSEBGP_DUMP_INFO(depth, "Collector name" ": %*s\n", 20 - (int)sizeof("Collector name" ":"), msg->collector_name);
-    PARSEBGP_DUMP_INFO(depth, "Router name" ": %*s\n", 20 - (int)sizeof("Router name" ":"), msg->router_name);
+
+    PARSEBGP_DUMP_INFO(depth, "Collector name" ": %*s\n",
+                       msg->collector_name_len, msg->collector_name);
+    PARSEBGP_DUMP_INFO(depth, "Router name" ": %*s\n",
+                       msg->router_name_len, msg->router_name);
+    PARSEBGP_DUMP_IP(depth, "Router IP", msg->router_afi, msg->router_ip);
 
     // dump bmp msg
     parsebgp_bmp_dump_msg(msg->bmp_msg, depth);
@@ -174,9 +192,9 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
 
     // grab the router IP
     if (msg->flags & 0x40) { // IS_ROUTER_IPV6
-        msg->router_ip_afi = PARSEBGP_BGP_AFI_IPV6;
+        msg->router_afi = PARSEBGP_BGP_AFI_IPV6;
     } else {
-        msg->router_ip_afi = PARSEBGP_BGP_AFI_IPV4;
+        msg->router_afi = PARSEBGP_BGP_AFI_IPV4;
     }
     // this marco should automatically increment nread and buf
     PARSEBGP_DESERIALIZE_VAL(buf, len - nread, nread, msg->router_ip);

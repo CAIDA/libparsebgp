@@ -29,7 +29,7 @@
 
 #include "parsebgp_opts.h"  // the header includes all sub type opts including parsebgp_openbmp_opts.h
 #include "parsebgp_bgp.h"   // BMP encapsulates BGP messages
-#include "parsebgp_bmp.h"   // OPENBMP encapsulates BMP messages
+#include "parsebgp_bmp.h"   // OpenBMP encapsulates BMP messages
 #include "parsebgp_error.h" // for parsebgp_error_t
 #include <inttypes.h>
 #include <stddef.h>
@@ -62,7 +62,7 @@ typedef struct parsebgp_openbmp_msg {
     // Router IP
     uint8_t router_ip[16];
     // Router IP Address AFI (based on openbmp header flags)
-    parsebgp_bgp_afi_t router_ip_afi;
+    parsebgp_bgp_afi_t router_afi;
 
     // Parsed bmp msg if full msg parsing is required
     parsebgp_bmp_msg_t *bmp_msg;
