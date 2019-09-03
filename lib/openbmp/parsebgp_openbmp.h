@@ -44,6 +44,9 @@ typedef struct parsebgp_openbmp_msg {
 
     // OpenBMP msg flags
     uint8_t flags;
+    //
+    // OpenBMP topic type (collector or raw_bmp)
+    uint8_t topic_type;
 
     // Collection time (seconds component)
     uint32_t time_sec;

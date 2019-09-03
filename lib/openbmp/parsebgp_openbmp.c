@@ -57,6 +57,7 @@ void parsebgp_openbmp_dump_msg(const parsebgp_openbmp_msg_t *msg, int depth) {
     PARSEBGP_DUMP_INT(depth, "Version major", msg->ver_maj);
     PARSEBGP_DUMP_INT(depth, "Version minor", msg->ver_min);
     PARSEBGP_DUMP_INT(depth, "Flags", msg->flags);
+    PARSEBGP_DUMP_INT(depth, "Topic type", msg->topic_type);
     PARSEBGP_DUMP_INT(depth, "Time.sec", msg->time_sec);
     PARSEBGP_DUMP_INT(depth, "Time.usec", msg->time_usec);
 
@@ -118,12 +119,13 @@ parsebgp_error_t parsebgp_openbmp_decode(parsebgp_opts_t *opts,
         return PARSEBGP_NOT_IMPLEMENTED;
     }
 
-    // check the object type
+    // check the openbmp topic type
     PARSEBGP_DESERIALIZE_VAL(buf, len - nread, nread, u8);
     if (u8 != 12) {
         // we only want BMP RAW messages, so skip this one
         return PARSEBGP_NOT_IMPLEMENTED;
     }
+    msg->topic_type = u8;
 
     // load the time stamps into the record
     PARSEBGP_DESERIALIZE_VAL(buf, len - nread, nread, u32);
