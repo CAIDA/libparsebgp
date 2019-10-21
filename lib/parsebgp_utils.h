@@ -210,7 +210,7 @@
 #define PARSEBGP_DUMP_STRUCT_HDR(struct_name, depth)                           \
   do {                                                                         \
     int _i;                                                                    \
-    for (_i = 0; _i < depth; _i++) {                                           \
+    for (_i = 0; _i < (depth); _i++) {                                         \
       if (_i == depth - 1) {                                                   \
         fputs(" ", stdout);                                                    \
       } else {                                                                 \
@@ -224,7 +224,7 @@
   do {                                                                         \
     int _i;                                                                    \
     fputs(" ", stdout);                                                        \
-    for (_i = 0; _i < depth; _i++) {                                           \
+    for (_i = 0; _i < (depth); _i++) {                                         \
       fputs("  ", stdout);                                                     \
     }                                                                          \
     printf(__VA_ARGS__);                                                       \
@@ -278,7 +278,7 @@
     if ((len) == 0) {                                                          \
       fputs("NONE\n", stdout);                                                 \
     } else {                                                                   \
-      for (_byte = 0; _byte < len; _byte++) {                                  \
+      for (_byte = 0; _byte < (len); _byte++) {                                \
         if (_byte != 0) {                                                      \
           fputs(" ", stdout);                                                  \
         }                                                                      \
