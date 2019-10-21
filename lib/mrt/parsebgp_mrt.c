@@ -692,8 +692,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
     break;
 
   default:
-    PARSEBGP_RETURN_INVALID_MSG_ERR;
-    break;
+    PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, remain,
+      "unknown bgp4mp subtype %d", subtype);
+    *lenp = nread;
+    return PARSEBGP_OK; // skip
   }
 
   // The following checks are to handle non-compliant MRT data from
