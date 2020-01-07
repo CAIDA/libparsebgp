@@ -36,6 +36,10 @@
 #include <inttypes.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * BGP Message Types
  */
@@ -155,5 +159,9 @@ void parsebgp_bgp_clear_msg(parsebgp_bgp_msg_t *msg);
  * to get a sense of their data.
  */
 void parsebgp_bgp_dump_msg(const parsebgp_bgp_msg_t *msg, int depth);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_H */

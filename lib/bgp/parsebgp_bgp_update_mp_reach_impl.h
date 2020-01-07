@@ -32,6 +32,10 @@
 #include "parsebgp_opts.h"
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Decode an MP_REACH message */
 parsebgp_error_t
 parsebgp_bgp_update_mp_reach_decode(parsebgp_opts_t *opts,
@@ -84,5 +88,9 @@ void parsebgp_bgp_update_mp_unreach_clear(
  */
 void parsebgp_bgp_update_mp_unreach_dump(
     const parsebgp_bgp_update_mp_unreach_t *msg, int depth);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_UPDATE_MP_REACH_IMPL_H */

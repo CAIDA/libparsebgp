@@ -29,6 +29,10 @@
 
 #include <inttypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * BGP Address Families (AFI)
  */
@@ -103,5 +107,9 @@ typedef struct parsebgp_bgp_prefix {
   uint8_t addr[16];
 
 } parsebgp_bgp_prefix_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_COMMON_H */
