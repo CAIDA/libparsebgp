@@ -1,6 +1,6 @@
 function(target_public_headers target)
   foreach (arg IN LISTS ARGN)
-    if(NOT IS_ABSOLUTE arg)
+    if(NOT IS_ABSOLUTE ${arg})
       set(arg "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
     endif()
     set_property(TARGET ${target} APPEND PROPERTY PUBLIC_HEADER "${arg}")
@@ -25,7 +25,7 @@ target_include_directories(parsebgp PUBLIC
 configure_file(parsebgp.h.in parsebgp.h @ONLY)
 
 target_public_headers(parsebgp
-    parsebgp.h
+    "${CMAKE_CURRENT_BINARY_DIR}/parsebgp.h"
     parsebgp_error.h
     parsebgp_opts.h
 )
