@@ -1,7 +1,7 @@
 # Tested with 3.13, feel free to modify VERSION if you tested it with an older version.
 cmake_minimum_required(VERSION 3.13)
 
-function(read_version VERSION_OUTPUT_VAR MAJOR_OUTPUT_VAR MID_OUTPUT_VAR MINOR_OUTPUT_VAR)
+function(read_ac_version VERSION_OUTPUT_VAR MAJOR_OUTPUT_VAR MID_OUTPUT_VAR MINOR_OUTPUT_VAR)
     file(READ "${CMAKE_CURRENT_LIST_DIR}/configure.ac" configure)
     string(REGEX MATCH "m4_define\\(\\[PKG_MAJOR_VERSION\\],[^\\[]+\\[([0-9]+)\\]\\)" _ ${configure})
     set(${MAJOR_OUTPUT_VAR} ${CMAKE_MATCH_1})
@@ -18,13 +18,13 @@ function(read_version VERSION_OUTPUT_VAR MAJOR_OUTPUT_VAR MID_OUTPUT_VAR MINOR_O
     endforeach()
 endfunction()
 
-read_version(
-    CONFIGURED_VERSION
-    CONFIGURED_MAJOR_VERSION
-    CONFIGURED_MID_VERSION
-    CONFIGURED_MINOR_VERSION)
+read_ac_version(
+    LIBPARSEBGP_VERSION
+    LIBPARSEBGP_MAJOR_VERSION
+    LIBPARSEBGP_MID_VERSION
+    LIBPARSEBGP_MINOR_VERSION)
 
-project(libparsebgp VERSION ${CONFIGURED_VERSION})
+project(libparsebgp VERSION ${LIBPARSEBGP_VERSION})
 
 option(LIBPARSEBGP_PARSER_DEBUG "Enable parser debug info" OFF)
 
