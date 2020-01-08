@@ -1,0 +1,39 @@
+target_public_headers(parsebgp
+    parsebgp_bgp.h
+    parsebgp_bgp_common.h
+    parsebgp_bgp_notification.h
+    parsebgp_bgp_open.h
+    parsebgp_bgp_opts.h
+    parsebgp_bgp_route_refresh.h
+    parsebgp_bgp_update.h
+    parsebgp_bgp_update_ext_communities.h
+    parsebgp_bgp_update_mp_reach.h
+)
+
+target_sources(parsebgp PRIVATE
+    parsebgp_bgp.c
+    parsebgp_bgp.h
+    parsebgp_bgp_common.c
+    parsebgp_bgp_common.h
+    parsebgp_bgp_notification.c
+    parsebgp_bgp_notification.h
+    parsebgp_bgp_open.c
+    parsebgp_bgp_open.h
+    parsebgp_bgp_opts.c
+    parsebgp_bgp_opts.h
+    parsebgp_bgp_route_refresh.c
+    parsebgp_bgp_route_refresh.h
+    parsebgp_bgp_update.c
+    parsebgp_bgp_update.h
+    parsebgp_bgp_update_ext_communities.c
+    parsebgp_bgp_update_ext_communities.h
+    parsebgp_bgp_update_mp_reach.c
+    parsebgp_bgp_update_mp_reach.h
+    parsebgp_bgp_common_impl.h
+    parsebgp_bgp_notification_impl.h
+    parsebgp_bgp_open_impl.h
+    parsebgp_bgp_route_refresh_impl.h
+    parsebgp_bgp_update_impl.h
+    parsebgp_bgp_update_ext_communities_impl.h
+    parsebgp_bgp_update_mp_reach_impl.h
+)
