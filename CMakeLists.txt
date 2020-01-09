@@ -1,30 +1,16 @@
-# Tested with 3.13, feel free to modify VERSION if you tested it with an older version.
+# Tested with 3.13, feel free to modify if you tested it with an older version.
 cmake_minimum_required(VERSION 3.13)
 
-function(read_ac_version VERSION_OUTPUT_VAR MAJOR_OUTPUT_VAR MID_OUTPUT_VAR MINOR_OUTPUT_VAR)
-    file(READ "${CMAKE_CURRENT_LIST_DIR}/configure.ac" configure)
-    string(REGEX MATCH "m4_define\\(\\[PKG_MAJOR_VERSION\\],[^\\[]+\\[([0-9]+)\\]\\)" _ ${configure})
-    set(${MAJOR_OUTPUT_VAR} ${CMAKE_MATCH_1})
-    string(REGEX MATCH "m4_define\\(\\[PKG_MID_VERSION\\],[^\\[]+\\[([0-9]+)\\]\\)" _ ${configure})
-    set(${MID_OUTPUT_VAR} ${CMAKE_MATCH_1})
-    string(REGEX MATCH "m4_define\\(\\[PKG_MINOR_VERSION\\],[^\\[]+\\[([0-9]+)\\]\\)" _ ${configure})
-    set(${MINOR_OUTPUT_VAR} ${CMAKE_MATCH_1})
-    set(${VERSION_OUTPUT_VAR}
-        "${${MAJOR_OUTPUT_VAR}}.${${MID_OUTPUT_VAR}}.${${MINOR_OUTPUT_VAR}}")
-
-    foreach(var IN ITEMS
-            MAJOR_OUTPUT_VAR MID_OUTPUT_VAR MINOR_OUTPUT_VAR VERSION_OUTPUT_VAR)
-        set(${${var}} ${${${var}}} PARENT_SCOPE)
-    endforeach()
-endfunction()
-
-read_ac_version(
-    LIBPARSEBGP_VERSION
-    LIBPARSEBGP_MAJOR_VERSION
-    LIBPARSEBGP_MID_VERSION
-    LIBPARSEBGP_MINOR_VERSION)
+# Keep these versions in sync with configure.ac
+set(LIBPARSEBGP_VERSION   "1.0.0")
+set(LIBPARSEBGP_SOVERSION "2.0.0")
 
 project(libparsebgp VERSION ${LIBPARSEBGP_VERSION})
+
+# Convert major.minor.patch to major.mid.minor for exporting.
+set(LIBPARSEBGP_MAJOR_VERSION ${PROJECT_VERSION_MAJOR})
+set(LIBPARSEBGP_MID_VERSION   ${PROJECT_VERSION_MINOR})
+set(LIBPARSEBGP_MINOR_VERSION ${PROJECT_VERSION_PATCH})
 
 option(LIBPARSEBGP_PARSER_DEBUG "Enable parser debug info" OFF)
 

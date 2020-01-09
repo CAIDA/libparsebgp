@@ -13,7 +13,10 @@ if(LIBPARSEBGP_PARSER_DEBUG)
     target_compile_definitions(parsebgp PRIVATE PARSER_DEBUG)
 endif()
 
-set_target_properties(parsebgp PROPERTIES C_STANDARD 99)
+set_target_properties(parsebgp PROPERTIES
+  C_STANDARD 99
+  SOVERSION ${LIBPARSEBGP_SOVERSION}
+)
 
 target_include_directories(parsebgp PUBLIC
     $<BUILD_INTERFACE:
@@ -38,7 +41,8 @@ target_sources(parsebgp PRIVATE
     parsebgp_opts.c
     parsebgp_opts.h
     parsebgp_utils.c
-    parsebgp_utils.h)
+    parsebgp_utils.h
+)
 
 add_subdirectory(bgp)
 add_subdirectory(bmp)
