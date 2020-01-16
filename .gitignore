@@ -1,6 +1,3 @@
-# Conventional CMake build directory
-/build
-
 # temp files
 *~
 *.#*
