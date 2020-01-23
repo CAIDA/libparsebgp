@@ -30,6 +30,10 @@
 #include "parsebgp_bgp_common.h"
 #include <inttypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * MP_REACH_NLRI
  */
@@ -86,5 +90,9 @@ typedef struct parsebgp_bgp_update_mp_unreach {
   int withdrawn_nlris_cnt;
 
 } parsebgp_bgp_update_mp_unreach_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_UPDATE_MP_REACH_H */

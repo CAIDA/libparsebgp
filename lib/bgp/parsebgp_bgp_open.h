@@ -29,6 +29,10 @@
 
 #include <inttypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Supported BGP Capabilities
  * http://www.iana.org/assignments/capability-codes/capability-codes.xhtml
@@ -160,5 +164,9 @@ typedef struct parsebgp_bgp_open {
   int capabilities_cnt;
 
 } parsebgp_bgp_open_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_OPEN_H */

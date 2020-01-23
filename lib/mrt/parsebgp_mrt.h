@@ -32,6 +32,10 @@
 #include <inttypes.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * MRT ASN Types (2 or 4 byte)
  */
@@ -503,5 +507,9 @@ void parsebgp_mrt_clear_msg(parsebgp_mrt_msg_t *msg);
  * to get a sense of their data.
  */
 void parsebgp_mrt_dump_msg(const parsebgp_mrt_msg_t *msg, int depth);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_MRT_H */

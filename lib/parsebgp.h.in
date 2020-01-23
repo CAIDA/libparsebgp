@@ -34,6 +34,10 @@
 #include <inttypes.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LIBPARSEBGP_MAJOR_VERSION @LIBPARSEBGP_MAJOR_VERSION@
 #define LIBPARSEBGP_MID_VERSION   @LIBPARSEBGP_MID_VERSION@
 #define LIBPARSEBGP_MINOR_VERSION @LIBPARSEBGP_MINOR_VERSION@
@@ -131,5 +135,9 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg);
  * to get a sense of their data.
  */
 void parsebgp_dump_msg(const parsebgp_msg_t *msg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __PARSEBGP_H

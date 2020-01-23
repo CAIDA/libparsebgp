@@ -27,6 +27,10 @@
 #ifndef __PARSEBGP_ERROR_H
 #define __PARSEBGP_ERROR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Error codes returned by the parser
  *
@@ -65,5 +69,9 @@ typedef enum parsebgp_error {
  * or "Unknown Error" if the code is not recognized.
  */
 const char *parsebgp_strerror(parsebgp_error_t err);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_ERROR_H */

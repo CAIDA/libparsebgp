@@ -29,6 +29,10 @@
 
 #include <inttypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * BGP Parsing Options
  */
@@ -136,5 +140,9 @@ typedef struct parsebgp_bgp_opts {
  * @param opts          pointer to an opts structure to initialize
  */
 void parsebgp_bgp_opts_init(parsebgp_bgp_opts_t *opts);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_OPTS_H */

@@ -30,6 +30,10 @@
 #include "parsebgp_bgp_opts.h"
 #include "parsebgp_bmp_opts.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Parsing Options
  */
@@ -97,5 +101,9 @@ typedef struct parsebgp_opts {
  * @param opts          pointer to an opts structure to initialize
  */
 void parsebgp_opts_init(parsebgp_opts_t *opts);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_OPTS_H */

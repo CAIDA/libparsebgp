@@ -29,6 +29,10 @@
 
 #include <inttypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * BGP NOTIFICATION Error Codes
  */
@@ -198,5 +202,9 @@ typedef struct parsebgp_bgp_notification {
   int data_len;
 
 } parsebgp_bgp_notification_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PARSEBGP_BGP_NOTIFICATION_H */
