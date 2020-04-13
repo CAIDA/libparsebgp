@@ -134,7 +134,9 @@ parsebgp_error_t parsebgp_bgp_decode_ext(parsebgp_opts_t *opts,
   }
   nread += slen;
 
-  assert(msg->len == nread);
+  if (msg->len != nread) {
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+  }
   *len = nread;
   return PARSEBGP_OK;
 }
