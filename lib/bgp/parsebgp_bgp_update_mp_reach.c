@@ -85,10 +85,9 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
 
   *nlris_cnt = 0;
 
-  while ((remain - nread) > 0) {
+  while (remain > nread) {
     PARSEBGP_MAYBE_REALLOC(*nlris, *nlris_alloc_cnt, *nlris_cnt + 1);
     tuple = &(*nlris)[*nlris_cnt];
-    (*nlris_cnt)++;
 
     tuple->type = p_type;
     tuple->afi = afi;
@@ -99,12 +98,19 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
 
     // Prefix
     slen = len - nread;
-    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx);
+    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx, remain - nread);
     if (err != PARSEBGP_OK) {
+      if (err == PARSEBGP_INVALID_MSG) {
+        PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, 0,
+            "%s", "Invalid prefix in MP_(UN)REACH_NLRI");
+        *lenp = remain;
+        return PARSEBGP_OK;
+      }
       return err;
     }
     nread += slen;
     buf += slen;
+    (*nlris_cnt)++; // increment now that we know the last nlri is valid
   }
 
   *lenp = nread;
