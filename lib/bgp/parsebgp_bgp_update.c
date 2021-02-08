@@ -35,25 +35,20 @@
 #include <string.h>
 
 static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
-                                    const uint8_t *buf, size_t *lenp, size_t remain)
+                                    const uint8_t *buf, size_t *lenp)
 {
-  size_t len = *lenp, nread = 0, slen, parsable;
+  size_t len = *lenp, nread = 0, slen;
   parsebgp_bgp_prefix_t *tuple;
   parsebgp_error_t err;
 
   nlris->prefixes_cnt = 0;
 
-  if (nlris->len > len) {
-    // The list is truncated, but we'll parse what we can, ensuring that
-    // the contents of *nlris are valid at any point that might return
-    // PARTIAL_MSG.
-    parsable = len;
-  } else {
-    parsable = nlris->len;
-  }
+  // If the list is truncated, i.e. (nlris->len > len), we still parse what we
+  // can, ensuring that the contents of *nlris are valid at any point that
+  // might return PARTIAL_MSG.
 
   // read until we run out of message
-  while (nread < parsable) {
+  while (nread < nlris->len) {
     PARSEBGP_MAYBE_REALLOC(nlris->prefixes,
                            nlris->_prefixes_alloc_cnt, nlris->prefixes_cnt + 1);
     tuple = &nlris->prefixes[nlris->prefixes_cnt];
@@ -68,22 +63,14 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
 
     // Prefix
-    slen = parsable - nread;
-    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx);
+    slen = len - nread;
+    err = parsebgp_decode_prefix(tuple->len, tuple->addr, buf, &slen, max_pfx, nlris->len - nread);
     if (err != PARSEBGP_OK) {
-      if (err == PARSEBGP_PARTIAL_MSG && nlris->len <= len) {
-        // decode_prefix() reached the end of the nlris, not the buffer
-        PARSEBGP_RETURN_INVALID_MSG_ERR;
-      }
       return err;
     }
     nlris->prefixes_cnt++; // increment now that we have a complete valid nlri
     nread += slen;
     buf += slen;
-  }
-
-  if (nread < nlris->len) {
-    return PARSEBGP_PARTIAL_MSG;
   }
 
   *lenp = nread;
@@ -1091,11 +1078,19 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
 
   // Withdrawn Routes
   slen = len - nread;
-  err = parse_nlris(&msg->withdrawn_nlris, buf, &slen, remain - nread);
-  if (err != PARSEBGP_OK) {
+  if (msg->withdrawn_nlris.len > remain - nread) {
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+  }
+  err = parse_nlris(&msg->withdrawn_nlris, buf, &slen);
+  if (err == PARSEBGP_OK) {
+    assert(slen == msg->withdrawn_nlris.len);
+  } else if (err == PARSEBGP_INVALID_MSG) {
+    PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, 0,
+        "%s", "Invalid prefix in withdrawn NLRI");
+    slen = msg->withdrawn_nlris.len;
+  } else {
     return err;
   }
-  assert(slen == msg->withdrawn_nlris.len);
   nread += slen;
   buf += slen;
 
@@ -1112,11 +1107,16 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
   // NLRIs
   slen = len - nread;
   msg->announced_nlris.len = remain - nread;
-  err = parse_nlris(&msg->announced_nlris, buf, &slen, msg->announced_nlris.len);
-  if (err != PARSEBGP_OK) {
+  err = parse_nlris(&msg->announced_nlris, buf, &slen);
+  if (err == PARSEBGP_OK) {
+    assert(slen == msg->announced_nlris.len);
+  } else if (err == PARSEBGP_INVALID_MSG) {
+    PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, 0,
+        "%s", "Invalid prefix in announced NLRI");
+    slen = msg->announced_nlris.len;
+  } else {
     return err;
   }
-  assert(slen == msg->announced_nlris.len);
   nread += slen;
   buf += slen;
 

@@ -33,10 +33,12 @@
 
 parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
                                         const uint8_t *buf, size_t *buf_len,
-                                        size_t max_pfx_len)
+                                        size_t max_pfx_len, size_t remain)
 {
   uint8_t bytes, junk;
-  PARSEBGP_ASSERT(pfx_len <= max_pfx_len);
+  if (pfx_len > max_pfx_len) {
+    return PARSEBGP_INVALID_MSG;
+  }
   // prefixes are encoded in a compact format the min number of bytes is used,
   // so we first need to figure out how many bytes it takes to represent a
   // prefix of this length.
@@ -45,6 +47,9 @@ parsebgp_error_t parsebgp_decode_prefix(uint8_t pfx_len, uint8_t *dst,
     bytes++;
   }
   // now read the prefix
+  if (remain < bytes) {
+    return PARSEBGP_INVALID_MSG;
+  }
   if (*buf_len < bytes) {
     return PARSEBGP_PARTIAL_MSG;
   }
