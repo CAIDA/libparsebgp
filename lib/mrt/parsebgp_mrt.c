@@ -374,8 +374,14 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
              subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST) ?
               32 : 128;
   err = parsebgp_decode_prefix(msg->prefix_len, msg->prefix, buf, &slen,
-      max_pfx);
+      max_pfx, remain - nread);
   if (err != PARSEBGP_OK) {
+    if (err == PARSEBGP_INVALID_MSG) {
+      PARSEBGP_SKIP_INVALID_MSG(opts, buf, nread, 0,
+          "%s", "Invalid prefix in rib");
+      *lenp = remain;
+      return PARSEBGP_OK;
+    }
     return err;
   }
   nread += slen;
