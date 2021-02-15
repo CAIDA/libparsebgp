@@ -58,6 +58,7 @@ typedef enum {
   PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION = 68,
 
   // TODO: add ADD-PATH capability
+  PARSEBGP_BGP_OPEN_CAPABILITY_ADD_PATH = 69,
 
   /** Enhanced Route Refresh Capability */
   PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED = 70,
@@ -86,6 +87,19 @@ typedef struct parsebgp_bgp_open_capability_mpbgp {
 
 } parsebgp_bgp_open_capability_mpbgp_t;
 
+typedef struct parsebgp_open_capability_addpath {
+
+  /** AFI */
+  uint16_t afi;
+
+  /** SAFI */
+  uint8_t safi;
+
+  uint8_t send_receive;
+
+
+} parsebgp_bgp_open_capability_addpath_t;
+
 /**
  * BGP Capability
  */
@@ -105,6 +119,8 @@ typedef struct parsebgp_bgp_open_capability {
 
     /** AS4 Capability */
     uint32_t asn;
+
+    parsebgp_bgp_open_capability_addpath_t addpath;
 
     /** Raw data; access via BGPSTREAM_OPEN_CAPABILITY_RAW_DATA() */
     uint8_t *datap;

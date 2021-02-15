@@ -717,6 +717,8 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_ADDPATH:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL_ADDPATH:
     // Peer ASN
     PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->peer_asn);
 
@@ -726,8 +728,10 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
 
   // 4-byte ASN subtypes:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_ADDPATH:
   case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH:
     // Peer ASN
     PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, msg->peer_asn);
 
@@ -786,24 +790,34 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
     opts->bgp.asn_4_byte = 1;
-  // FALL THROUGH
-
+    opts->bgp.add_path = 0;
+    break;
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_ADDPATH:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH:
+    opts->bgp.asn_4_byte = 1;
+    opts->bgp.add_path = 1;
+    break;
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_ADDPATH:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL_ADDPATH:
+    opts->bgp.asn_4_byte = 0;
+    opts->bgp.add_path = 1;
+    break;
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
-    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
-    slen = len - nread;
-    err = parsebgp_bgp_decode_ext(opts, msg->data.bgp_msg, buf, &slen, 1);
-    if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
-      return err;
-    }
-    nread += slen;
-    buf += slen;
     break;
 
   default:
     PARSEBGP_RETURN_INVALID_MSG_ERR;
     break;
   }
+  PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
+  slen = len - nread;
+  err = parsebgp_bgp_decode_ext(opts, msg->data.bgp_msg, buf, &slen, 1);
+  if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
+    return err;
+  }
+  nread += slen;
+  buf += slen;
 
   *lenp = nread;
   return err;
@@ -869,9 +883,13 @@ static void dump_bgp4mp(parsebgp_mrt_bgp4mp_subtype_t subtype,
     break;
 
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_ADDPATH:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_ADDPATH:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL_ADDPATH:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH:
     parsebgp_bgp_dump_msg(msg->data.bgp_msg, depth);
     break;
 
