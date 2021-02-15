@@ -67,6 +67,15 @@ typedef struct parsebgp_bgp_opts {
   int asn_4_byte;
 
   /**
+   * Does the BGP message to be parsed carry path identifiers?
+   * 
+   * If set, messages are assumed to be encoded with a 4-byte path
+   * identifier preceeding the update nlri
+   */
+
+  int add_path;
+
+  /**
    * Has the AFI and SAFI been omitted from the MP_REACH attribute?
    *
    * This is used by the MRT parser since TABLE_DUMP_V2 decided to omit the AFI

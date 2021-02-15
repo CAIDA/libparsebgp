@@ -40,6 +40,9 @@ void parsebgp_bgp_prefixes_dump(parsebgp_bgp_prefix_t *prefixes,
     PARSEBGP_DUMP_INT(depth, "Type", tuple->type);
     PARSEBGP_DUMP_INT(depth, "AFI", tuple->afi);
     PARSEBGP_DUMP_INT(depth, "SAFI", tuple->safi);
+    if (tuple->has_addl_path_id == 1){
+      PARSEBGP_DUMP_INT(depth, "Path Identifier", tuple->addl_path_id);
+    }
     PARSEBGP_DUMP_PFX(depth, "Prefix", tuple->afi, tuple->addr, tuple->len);
   }
 }

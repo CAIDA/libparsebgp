@@ -103,6 +103,13 @@ typedef struct parsebgp_bgp_prefix {
   /** Prefix Length (number of bits in the mask) */
   uint8_t len;
 
+  /** Has additional path identifier? */
+  uint8_t has_addl_path_id;
+
+  /** Path Identifier differentiates between additional paths for the same
+      prefix (RFC 7911, 8050) */
+  uint32_t addl_path_id;
+
   /** Prefix Address */
   uint8_t addr[16];
 
