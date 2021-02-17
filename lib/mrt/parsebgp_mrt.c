@@ -274,21 +274,25 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
   opts->bgp.mp_reach_no_afi_safi_reserved = 1;
   switch (subtype) {
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV4;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV4;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST_ADDPATH:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV6;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_UNICAST;
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST_ADDPATH:
     opts->bgp.afi = PARSEBGP_BGP_AFI_IPV6;
     opts->bgp.safi = PARSEBGP_BGP_SAFI_MULTICAST;
     break;
@@ -299,6 +303,12 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
+  uint8_t has_addl_path_id =
+    (subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH ||
+     subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH ||
+     subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST_ADDPATH ||
+     subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST_ADDPATH);
+
   for (i = 0; i < entry_count; i++) {
     entry = &entries[i];
 
@@ -307,6 +317,13 @@ static parsebgp_error_t parse_table_dump_v2_rib_entries(
 
     // Originated Time
     PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, entry->originated_time);
+
+    // Path Identifier (RFC 8050)
+    if ((entry->has_addl_path_id = has_addl_path_id)) {
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, entry->addl_path_id);
+    } else {
+      entry->addl_path_id = 0;
+    }
 
     // Path Attributes
     slen = len - nread;
@@ -371,7 +388,9 @@ parse_table_dump_v2_afi_safi_rib(parsebgp_opts_t *opts,
   // Prefix
   slen = len - nread;
   max_pfx = (subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST ||
-             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST) ?
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH ||
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST ||
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH) ?
               32 : 128;
   err = parsebgp_decode_prefix(msg->prefix_len, msg->prefix, buf, &slen,
       max_pfx, remain - nread);
@@ -439,7 +458,9 @@ dump_table_dump_v2_afi_safi_rib(
   PARSEBGP_DUMP_STRUCT_HDR(parsebgp_mrt_table_dump_v2_afi_safi_rib_t, depth);
 
   int afi = (subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST ||
-             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST)
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH ||
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST ||
+             subtype == PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH)
               ? PARSEBGP_BGP_AFI_IPV4
               : PARSEBGP_BGP_AFI_IPV6;
 
@@ -457,6 +478,8 @@ dump_table_dump_v2_afi_safi_rib(
 
     PARSEBGP_DUMP_INT(depth, "Peer Index", entry->peer_index);
     PARSEBGP_DUMP_INT(depth, "Originated Time", entry->originated_time);
+    if (entry->has_addl_path_id)
+      PARSEBGP_DUMP_INT(depth, "Path Identifier", entry->addl_path_id);
 
     parsebgp_bgp_update_path_attrs_dump(&entry->path_attrs, depth + 1);
   }
@@ -475,14 +498,19 @@ static parsebgp_error_t parse_table_dump_v2(
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST_ADDPATH:
     return parse_table_dump_v2_afi_safi_rib(opts, subtype, &msg->afi_safi_rib,
                                             buf, lenp, remain);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC_ADDPATH:
     // these probably aren't too hard to support, but bgpdump doesn't support
     // them, so it likely means we don't have any actual use for it.
     PARSEBGP_SKIP_NOT_IMPLEMENTED(opts, buf, nread, remain,
@@ -527,13 +555,18 @@ static void clear_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST_ADDPATH:
     clear_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC_ADDPATH:
   default:
     break;
   }
@@ -551,13 +584,18 @@ static void dump_table_dump_v2(parsebgp_mrt_table_dump_v2_subtype_t subtype,
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST_ADDPATH:
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST_ADDPATH:
     dump_table_dump_v2_afi_safi_rib(subtype, &msg->afi_safi_rib, depth + 1);
     break;
 
   case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC:
+  case PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC_ADDPATH:
   default:
     break;
   }

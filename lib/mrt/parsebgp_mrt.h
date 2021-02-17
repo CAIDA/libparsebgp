@@ -145,8 +145,15 @@ typedef struct parsebgp_mrt_table_dump_v2_rib_entry {
       recently parsed peer index table) */
   uint16_t peer_index;
 
+  /** Has additional path identifier? */
+  uint8_t has_addl_path_id;
+
   /** Time prefix was heard (in seconds since the unix epoch) */
   uint32_t originated_time;
+
+  /** Path Identifier differentiates between additional paths for the same
+      prefix (RFC 7911, 8050) */
+  uint32_t addl_path_id;
 
   /** Path Attributes */
   parsebgp_bgp_update_path_attrs_t path_attrs;
@@ -200,6 +207,21 @@ typedef enum parsebgp_mrt_table_dump_v2_subtype {
 
   /** Generic RIB */
   PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC = 6,
+
+  /** IPv4 Unicast RIB with Additional Path Identifier */
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_UNICAST_ADDPATH = 8,
+
+  /** IPv4 Multicast RIB with Additional Path Identifier */
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV4_MULTICAST_ADDPATH = 9,
+
+  /** IPv6 Unicast RIB with Additional Path Identifier */
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_UNICAST_ADDPATH = 10,
+
+  /** IPv6 Multicast RIB with Additional Path Identifier */
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_IPV6_MULTICAST_ADDPATH = 11,
+
+  /** Generic RIB with Additional Path Identifier */
+  PARSEBGP_MRT_TABLE_DUMP_V2_RIB_GENERIC_ADDPATH = 12,
 
 } parsebgp_mrt_table_dump_v2_subtype_t;
 
