@@ -57,7 +57,7 @@ typedef enum {
   /** Multisession BGP Capability */
   PARSEBGP_BGP_OPEN_CAPABILITY_MULTI_SESSION = 68,
 
-  // TODO: add ADD-PATH capability
+  /** ADD-PATH capability */
   PARSEBGP_BGP_OPEN_CAPABILITY_ADD_PATH = 69,
 
   /** Enhanced Route Refresh Capability */
@@ -95,8 +95,8 @@ typedef struct parsebgp_open_capability_addpath {
   /** SAFI */
   uint8_t safi;
 
+  /** Send/Receive */
   uint8_t send_receive;
-
 
 } parsebgp_bgp_open_capability_addpath_t;
 

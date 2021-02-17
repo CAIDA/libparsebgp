@@ -72,7 +72,6 @@ typedef struct parsebgp_bgp_opts {
    * If set, messages are assumed to be encoded with a 4-byte path
    * identifier preceeding the update nlri
    */
-
   int add_path;
 
   /**

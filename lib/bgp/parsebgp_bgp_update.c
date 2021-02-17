@@ -63,8 +63,6 @@ static parsebgp_error_t parse_nlris(parsebgp_opts_t *opts, parsebgp_bgp_update_n
     // Read the path identifier
     if ((tuple->has_addl_path_id = opts->bgp.add_path)){
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, tuple->addl_path_id);
-    } else {
-      tuple->addl_path_id = 0;
     }
 
     // Read the prefix length

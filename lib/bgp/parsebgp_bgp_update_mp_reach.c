@@ -97,6 +97,7 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
     if((tuple->has_addl_path_id = opts->bgp.add_path)){
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, tuple->addl_path_id);
     }
+
     // Read the prefix length
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
 
