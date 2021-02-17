@@ -37,6 +37,10 @@ Makefile
 *.swp
 # http://www.gnu.org/software/autoconf
 
+# ignore vscode dir
+/.vscode
+
+
 /autom4te.cache
 /aclocal.m4
 /compile
