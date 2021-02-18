@@ -774,19 +774,8 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
     DESERIALIZE_IP(msg->afi, buf, len, nread, msg->local_ip);
   }
 
-  // And then the actual data, based on the subtype
-  // the _AS4 subtypes actually only change the common part of the message, so
-  // we can treat them the same as their non-AS4 subtype at this point.
+  //Set opts flags 
   switch (subtype) {
-  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
-  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
-    // Old State
-    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.old_state);
-
-    // New State
-    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.new_state);
-    break;
-
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
     opts->bgp.asn_4_byte = 1;
@@ -804,20 +793,46 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
     break;
   case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
   case PARSEBGP_MRT_BGP4MP_MESSAGE:
+  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
+  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
+    break;
+  }
+
+  // And then the actual data, based on the subtype
+  // the _AS4 subtypes actually only change the common part of the message, so
+  // we can treat them the same as their non-AS4 subtype at this point.
+  switch (subtype) {
+  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE:
+  case PARSEBGP_MRT_BGP4MP_STATE_CHANGE_AS4:
+    // Old State
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.old_state);
+
+    // New State
+    PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->data.state_change.new_state);
+    break;
+  case PARSEBGP_MRT_BGP4MP_MESSAGE:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_ADDPATH:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_LOCAL_ADDPATH:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_ADDPATH:
+  case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
+    slen = len - nread;
+    fprintf(stderr, "entering parsebgp_decode_ext\n");
+    err = parsebgp_bgp_decode_ext(opts, msg->data.bgp_msg, buf, &slen, 1);
+    if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
+      return err;
+    }
+    nread += slen;
+    buf += slen;
     break;
 
   default:
     PARSEBGP_RETURN_INVALID_MSG_ERR;
     break;
   }
-  PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
-  slen = len - nread;
-  err = parsebgp_bgp_decode_ext(opts, msg->data.bgp_msg, buf, &slen, 1);
-  if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
-    return err;
-  }
-  nread += slen;
-  buf += slen;
 
   *lenp = nread;
   return err;
