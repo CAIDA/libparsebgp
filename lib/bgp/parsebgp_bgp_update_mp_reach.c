@@ -42,7 +42,6 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
   uint8_t p_type = 0;
   parsebgp_bgp_prefix_t *tuple;
   parsebgp_error_t err;
-
   switch (afi) {
   case PARSEBGP_BGP_AFI_IPV4:
     max_pfx = 32;
@@ -92,6 +91,12 @@ static parsebgp_error_t parse_afi_ipv4_ipv6_nlri(
     tuple->type = p_type;
     tuple->afi = afi;
     tuple->safi = safi;
+    tuple->addl_path_id = 0;
+
+    //Path Identifier
+    if((tuple->has_addl_path_id = opts->bgp.add_path)){
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, tuple->addl_path_id);
+    }
 
     // Read the prefix length
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);

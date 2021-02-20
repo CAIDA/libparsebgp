@@ -82,6 +82,23 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
       PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, cap->values.asn);
       break;
 
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ADD_PATH:
+      if (cap->len != 4) {
+        PARSEBGP_SKIP_INVALID_MSG(
+          opts, buf, nread, cap->len,
+          "Unexpected ADD-PATH OPEN Capability length (%d), expecting 4 bytes",
+          cap->len);
+      }
+      // AFI
+      PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, cap->values.addpath.afi);
+
+      //SAFI
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, cap->values.addpath.safi);
+
+      //Send/Receive
+      PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, cap->values.addpath.send_receive);
+      break;
+
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_ENHANCED:
     case PARSEBGP_BGP_OPEN_CAPABILITY_ROUTE_REFRESH_OLD:
@@ -279,6 +296,12 @@ void parsebgp_bgp_open_dump(const parsebgp_bgp_open_t *msg, int depth)
 
     case PARSEBGP_BGP_OPEN_CAPABILITY_AS4:
       PARSEBGP_DUMP_INT(depth, "AS4 ASN", cap->values.asn);
+      break;
+
+    case PARSEBGP_BGP_OPEN_CAPABILITY_ADD_PATH:
+      PARSEBGP_DUMP_INT(depth, "ADD-PATH AFI", cap->values.addpath.afi);
+      PARSEBGP_DUMP_INT(depth, "ADD-PATH SAFI", cap->values.addpath.safi);
+      PARSEBGP_DUMP_INT(depth, "ADD-PATH SEND/RECEIVE", cap->values.addpath.send_receive);
       break;
 
     default:

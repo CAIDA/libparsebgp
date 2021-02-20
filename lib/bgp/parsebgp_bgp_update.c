@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
+static parsebgp_error_t parse_nlris(parsebgp_opts_t *opts, parsebgp_bgp_update_nlris_t *nlris,
                                     const uint8_t *buf, size_t *lenp)
 {
   size_t len = *lenp, nread = 0, slen;
@@ -57,7 +57,13 @@ static parsebgp_error_t parse_nlris(parsebgp_bgp_update_nlris_t *nlris,
     tuple->type = PARSEBGP_BGP_PREFIX_UNICAST_IPV4;
     tuple->afi = PARSEBGP_BGP_AFI_IPV4;
     tuple->safi = PARSEBGP_BGP_SAFI_UNICAST;
+    tuple->addl_path_id = 0;
     size_t max_pfx = 32;
+
+    // Read the path identifier
+    if ((tuple->has_addl_path_id = opts->bgp.add_path)){
+      PARSEBGP_DESERIALIZE_UINT32(buf, len, nread, tuple->addl_path_id);
+    }
 
     // Read the prefix length
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, tuple->len);
@@ -1081,7 +1087,7 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
   if (msg->withdrawn_nlris.len > remain - nread) {
     PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
-  err = parse_nlris(&msg->withdrawn_nlris, buf, &slen);
+  err = parse_nlris(opts, &msg->withdrawn_nlris, buf, &slen);
   if (err == PARSEBGP_OK) {
     assert(slen == msg->withdrawn_nlris.len);
   } else if (err == PARSEBGP_INVALID_MSG) {
@@ -1107,7 +1113,7 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
   // NLRIs
   slen = len - nread;
   msg->announced_nlris.len = remain - nread;
-  err = parse_nlris(&msg->announced_nlris, buf, &slen);
+  err = parse_nlris(opts, &msg->announced_nlris, buf, &slen);
   if (err == PARSEBGP_OK) {
     assert(slen == msg->announced_nlris.len);
   } else if (err == PARSEBGP_INVALID_MSG) {
