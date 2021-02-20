@@ -820,7 +820,6 @@ static parsebgp_error_t parse_bgp4mp(parsebgp_opts_t *opts,
   case PARSEBGP_MRT_BGP4MP_MESSAGE_AS4_LOCAL_ADDPATH:
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->data.bgp_msg);
     slen = len - nread;
-    fprintf(stderr, "entering parsebgp_decode_ext\n");
     err = parsebgp_bgp_decode_ext(opts, msg->data.bgp_msg, buf, &slen, 1);
     if (err != PARSEBGP_OK && err != PARSEBGP_TRUNCATED_MSG) {
       return err;
