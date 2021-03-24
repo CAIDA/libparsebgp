@@ -88,6 +88,7 @@ AC_CONFIG_FILES([Makefile
                 lib/bgp/Makefile
                 lib/bmp/Makefile
                 lib/mrt/Makefile
-		tools/Makefile
+                lib/openbmp/Makefile
+                tools/Makefile
 		])
 AC_OUTPUT

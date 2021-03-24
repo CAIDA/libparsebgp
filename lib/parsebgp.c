@@ -28,6 +28,7 @@
 #include "parsebgp_bgp.h"
 #include "parsebgp_bmp.h"
 #include "parsebgp_mrt.h"
+#include "parsebgp_openbmp.h"
 #include "parsebgp_utils.h"
 #include <assert.h>
 #include <stdio.h>
@@ -52,6 +53,11 @@ parsebgp_error_t parsebgp_decode(parsebgp_opts_t opts, parsebgp_msg_type_t type,
   case PARSEBGP_MSG_TYPE_BGP:
     PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.bgp);
     return parsebgp_bgp_decode(&opts, msg->types.bgp, buffer, len);
+    break;
+
+  case PARSEBGP_MSG_TYPE_OPENBMP:
+    PARSEBGP_MAYBE_MALLOC_ZERO(msg->types.openbmp);
+    return parsebgp_openbmp_decode(&opts, msg->types.openbmp, buffer, len);
     break;
 
   default:
@@ -90,6 +96,10 @@ void parsebgp_clear_msg(parsebgp_msg_t *msg)
     parsebgp_bgp_clear_msg(msg->types.bgp);
     break;
 
+  case PARSEBGP_MSG_TYPE_OPENBMP:
+    parsebgp_openbmp_clear_msg(msg->types.openbmp);
+    break;
+
   default:
     // invalid message, give up
     break;
@@ -105,6 +115,7 @@ void parsebgp_destroy_msg(parsebgp_msg_t *msg)
   parsebgp_mrt_destroy_msg(msg->types.mrt);
   parsebgp_bmp_destroy_msg(msg->types.bmp);
   parsebgp_bgp_destroy_msg(msg->types.bgp);
+  parsebgp_openbmp_destroy_msg(msg->types.openbmp);
 
   free(msg);
 }
@@ -125,6 +136,10 @@ void parsebgp_dump_msg(const parsebgp_msg_t *msg)
 
   case PARSEBGP_MSG_TYPE_BGP:
     parsebgp_bgp_dump_msg(msg->types.bgp, 1);
+    break;
+
+  case PARSEBGP_MSG_TYPE_OPENBMP:
+    parsebgp_openbmp_dump_msg(msg->types.openbmp, 1);
     break;
 
   default:

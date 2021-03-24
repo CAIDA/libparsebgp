@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 The Regents of the University of California.
+# Copyright (C) 2019 The Regents of the University of California.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -30,18 +30,18 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/	\
 	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/bgp \
-	-I$(top_srcdir)/lib/openbmp
+	-I$(top_srcdir)/lib/bmp
 
 include_HEADERS = 		\
-	parsebgp_bmp.h		\
-	parsebgp_bmp_opts.h
+	parsebgp_openbmp.h		\
+	parsebgp_openbmp_opts.h
 
-noinst_LTLIBRARIES = libparsebgp_bmp.la
+noinst_LTLIBRARIES = libparsebgp_openbmp.la
 
-libparsebgp_bmp_la_SOURCES = 		\
-	parsebgp_bmp.c			\
-	parsebgp_bmp.h			\
-	parsebgp_bmp_opts.c		\
-	parsebgp_bmp_opts.h
+libparsebgp_openbmp_la_SOURCES = 		\
+	parsebgp_openbmp.c			\
+	parsebgp_openbmp.h			\
+	parsebgp_openbmp_opts.c		\
+	parsebgp_openbmp_opts.h
 
 CLEANFILES = *~
