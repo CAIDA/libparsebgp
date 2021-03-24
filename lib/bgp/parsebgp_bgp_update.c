@@ -1079,6 +1079,11 @@ parsebgp_error_t parsebgp_bgp_update_decode(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0, slen = 0;
   parsebgp_error_t err;
 
+  if (remain == 0) {
+      // Cannot have an UPDATE message type with no length
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+  }
+
   // Withdrawn Routes Length
   PARSEBGP_DESERIALIZE_UINT16(buf, len, nread, msg->withdrawn_nlris.len);
 
