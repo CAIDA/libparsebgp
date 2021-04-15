@@ -39,8 +39,7 @@ static parsebgp_error_t parse_capabilities(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0;
   parsebgp_bgp_open_capability_t *cap;
 
-  while ((remain - nread) > 0) {
-
+  while (nread < remain) {
     PARSEBGP_MAYBE_REALLOC(msg->capabilities,
       msg->_capabilities_alloc_cnt, msg->capabilities_cnt + 1);
     cap = &msg->capabilities[msg->capabilities_cnt++];
@@ -150,7 +149,7 @@ static parsebgp_error_t parse_params(parsebgp_opts_t *opts,
 
   msg->capabilities_cnt = 0;
 
-  while ((remain - nread) > 0) {
+  while (nread < remain) {
     // Ensure this is a capabilities parameter
     PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, u8);
     if (u8 != 2) {
@@ -185,6 +184,11 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
   size_t len = *lenp, nread = 0, slen;
   parsebgp_error_t err;
 
+  if (remain == 0) {
+    // Cannot have an OPEN message type with no length
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
+  }
+
   // Version
   PARSEBGP_DESERIALIZE_UINT8(buf, len, nread, msg->version);
 
@@ -204,6 +208,15 @@ parsebgp_error_t parsebgp_bgp_open_decode(parsebgp_opts_t *opts,
   if (msg->param_len == 0) {
     *lenp = nread;
     return PARSEBGP_OK;
+  }
+
+  if (len <= nread) {
+    // nothing left in the buffer
+    return PARSEBGP_PARTIAL_MSG;
+  }
+  if (remain <= nread) {
+    // reported message length is too short
+    PARSEBGP_RETURN_INVALID_MSG_ERR;
   }
 
   // Parse the capabilities
