@@ -24,7 +24,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.71])
 
 
 # libparsebgp package version
@@ -32,7 +32,7 @@ m4_define([PKG_MAJOR_VERSION], [1])
 m4_define([PKG_MID_VERSION],   [0])
 m4_define([PKG_MINOR_VERSION], [0])
 
-AC_INIT([libparsebgp], PKG_MAJOR_VERSION.PKG_MID_VERSION.PKG_MINOR_VERSION, [bgpstream-info@caida.org])
+AC_INIT([libparsebgp],[PKG_MAJOR_VERSION.PKG_MID_VERSION.PKG_MINOR_VERSION],[bgpstream-info@caida.org])
 
 # libparsebgp shared library version
 # (no relation to pkg version)
@@ -56,8 +56,7 @@ AC_CONFIG_SRCDIR([lib/parsebgp.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-AC_PROG_LIBTOOL
-AC_PROG_CC_C99
+AC_PROG_CC
 
 # Should we dump information about where parser errors were encountered?
 # This is useful when debugging whether an invalid message is really invalid, or
