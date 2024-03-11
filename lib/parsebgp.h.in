@@ -30,6 +30,7 @@
 #include "parsebgp_bgp.h"
 #include "parsebgp_bmp.h"
 #include "parsebgp_mrt.h"
+#include "parsebgp_openbmp.h"
 #include "parsebgp_opts.h"
 #include <inttypes.h>
 #include <stddef.h>
@@ -50,11 +51,12 @@ typedef enum parsebgp_msg_type {
   PARSEBGP_MSG_TYPE_BGP = 1,
   PARSEBGP_MSG_TYPE_BMP = 2,
   PARSEBGP_MSG_TYPE_MRT = 3,
+  PARSEBGP_MSG_TYPE_OPENBMP = 4,
 } parsebgp_msg_type_t;
 
 /** Convenience macro to allow iterating over all valid message types */
 #define PARSEBGP_FOREACH_MSG_TYPE(iter)                                        \
-  for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_MRT;        \
+  for ((iter) = PARSEBGP_MSG_TYPE_BGP; (iter) <= PARSEBGP_MSG_TYPE_OPENBMP;        \
        (iter)++)
 
 /** Structure into which a message is parsed */
@@ -74,6 +76,9 @@ typedef struct parsebgp_msg {
 
     /** Parsed MRT message */
     parsebgp_mrt_msg_t *mrt;
+
+    /** Parsed OpenBMP message */
+    parsebgp_openbmp_msg_t *openbmp;
 
   } types;
 

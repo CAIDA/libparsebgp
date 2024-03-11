@@ -44,6 +44,7 @@ static const char *type_strs[] = {
   "bgp", // PARSEBGP_MSG_TYPE_BGP
   "bmp", // PARSEBGP_MSG_TYPE_BMP
   "mrt", // PARSEBGP_MSG_TYPE_MRT
+  "openbmp", // PARSEBGP_MSG_TYPE_OPENBMP
 };
 
 // should messages NOT be dumped to stdout after parsing
@@ -182,7 +183,7 @@ static void usage(void)
   fprintf(
     stderr,
     "usage: %s [options] [type:]file [[type:]file...]\n"
-    "         where 'type' is one of 'bmp', 'bgp', or 'mrt'\n"
+    "         where 'type' is one of 'bmp', 'bgp', 'mrt', or 'openbmp'\n"
     "         (only required if using non-standard file extensions)\n"
     "       -4                 Force 4-byte ASN parsing\n"
     "       -b                 Perform shallow BMP parsing\n"

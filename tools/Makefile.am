@@ -27,7 +27,8 @@
 AM_CPPFLAGS =	-I$(top_srcdir)/lib	\
 		-I$(top_srcdir)/lib/bgp	\
 		-I$(top_srcdir)/lib/bmp	\
-		-I$(top_srcdir)/lib/mrt
+		-I$(top_srcdir)/lib/mrt \
+		-I$(top_srcdir)/lib/openbmp
 
 dist_bin_SCRIPTS =
 

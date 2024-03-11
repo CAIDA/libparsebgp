@@ -29,6 +29,7 @@
 
 #include "parsebgp_bgp_opts.h"
 #include "parsebgp_bmp_opts.h"
+#include "parsebgp_openbmp_opts.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,6 +93,9 @@ typedef struct parsebgp_opts {
 
   /** BMP-specific parsing options */
   parsebgp_bmp_opts_t bmp;
+
+  /** OpenBMP-specific parsing options */
+  parsebgp_openbmp_opts_t openbmp;
 
 } parsebgp_opts_t;
 
